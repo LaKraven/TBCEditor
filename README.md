@@ -2,7 +2,7 @@ Beta testing has begun. Use the Issues page to report bugs or send them directly
 
 <h3>Downloads</h3>
 
-TBCEditor Component Version 1.0b - Property Demo
+TBCEditor Control Version 1.0b - Property Demo
 
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
@@ -11,7 +11,7 @@ The latest update: 12.03.2015 16:50, UTC+02:00
 
 <h3>Source</h3>
 
-The source code is not published until the !EditBone v. 10.0.0 is released.
+The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 

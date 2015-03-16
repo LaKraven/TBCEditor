@@ -1,4 +1,4 @@
-Beta testing has begun. Use the Issues tab to report bugs or send them directly to lasse@bonecode.com.
+Beta testing has begun. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
 <h3>Downloads</h3>
 

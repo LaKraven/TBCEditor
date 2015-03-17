@@ -15,10 +15,4 @@ The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 
-![Screenshot1](http://www.bonecode.com/images/BCEditor0.png)
-![Screenshot2](http://www.bonecode.com/images/BCEditor1.png)
-![Screenshot3](http://www.bonecode.com/images/BCEditor2.png)
-![Screenshot4](http://www.bonecode.com/images/BCEditor3.png)
-![Screenshot5](http://www.bonecode.com/images/BCEditor4.png)
-![Screenshot6](http://www.bonecode.com/images/BCEditor5.png)
-![Screenshot7](http://www.bonecode.com/images/BCEditor6.png)
+![Screenshot1](BCEditorImages.php)

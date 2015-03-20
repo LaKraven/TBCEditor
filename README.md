@@ -15,7 +15,7 @@ The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 
-![](http://www.bonecode.com/images/BCEditor0.png)
+![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6762215/ccb27898-cf64-11e4-9af0-9294556210b8.png)
 ![](http://www.bonecode.com/images/BCEditor1.png)
 ![](http://www.bonecode.com/images/BCEditor2.png)
 ![](http://www.bonecode.com/images/BCEditor3.png)

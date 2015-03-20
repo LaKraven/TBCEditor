@@ -7,7 +7,7 @@ TBCEditor Control Version 1.0b - Property Demo
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 17.03.2015 20:49, UTC+02:00
+The latest update: 21.03.2015 00:31, UTC+02:00
 
 <h3>Source</h3>
 

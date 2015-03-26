@@ -7,7 +7,7 @@ TBCEditor Control Demo v1.0b
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 25.03.2015 18:59, UTC+02:00
+The latest update: 26.03.2015 19:17, UTC+02:00
 
 <h3>Source</h3>
 
@@ -15,7 +15,7 @@ The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 
-![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6830296/85ac69f2-d321-11e4-8e50-9e4e799f53f6.png)
+![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6852440/4d283882-d3ed-11e4-8a0e-cfc2c99931b8.png)
 ![bceditor1](https://cloud.githubusercontent.com/assets/11475177/6768862/98ca6532-d08a-11e4-9651-deccf27f3375.png)
 ![bceditor2](https://cloud.githubusercontent.com/assets/11475177/6768863/9a597654-d08a-11e4-8c97-80e8b100a4bf.png)
 ![bceditor3](https://cloud.githubusercontent.com/assets/11475177/6768864/9be03f08-d08a-11e4-8add-fd31a63a67c3.png)

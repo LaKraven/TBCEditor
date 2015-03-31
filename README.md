@@ -15,7 +15,7 @@ The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 
-![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6874194/1ce4e04a-d4be-11e4-9c78-9bfdbaa132f2.png)
+![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6925194/80fdb90a-d7e6-11e4-9be4-3f2235124d7c.png)
 ![bceditor1](https://cloud.githubusercontent.com/assets/11475177/6874195/1ce812a6-d4be-11e4-8214-21c87d37d6ec.png)
 ![bceditor2](https://cloud.githubusercontent.com/assets/11475177/6874196/1cec2df0-d4be-11e4-9a4c-f72472813318.png)
 ![bceditor3](https://cloud.githubusercontent.com/assets/11475177/6874197/1cef15ce-d4be-11e4-945e-72cdc5881cf5.png)

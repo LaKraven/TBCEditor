@@ -7,7 +7,7 @@ TBCEditor Control Demo v1.0b
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 02.04.2015 16:30, UTC+02:00
+The latest update: 01.05.2015 16:30, UTC+02:00
 
 <h3>Source</h3>
 
@@ -15,13 +15,14 @@ The source code is not published until the EditBone v. 10.0.0 is released.
 
 <h3>Screenshots</h3>
 
-![bceditor0](https://cloud.githubusercontent.com/assets/11475177/6941562/a07d71be-d889-11e4-9690-3768db2cdcf9.png)
-![bceditor1](https://cloud.githubusercontent.com/assets/11475177/6874195/1ce812a6-d4be-11e4-8214-21c87d37d6ec.png)
-![bceditor2](https://cloud.githubusercontent.com/assets/11475177/6874196/1cec2df0-d4be-11e4-9a4c-f72472813318.png)
-![bceditor3](https://cloud.githubusercontent.com/assets/11475177/6874197/1cef15ce-d4be-11e4-945e-72cdc5881cf5.png)
-![bceditor4](https://cloud.githubusercontent.com/assets/11475177/6874198/1cf3c07e-d4be-11e4-9c3f-1926eff987c7.png)
-![bceditor5](https://cloud.githubusercontent.com/assets/11475177/6874192/1ccd69b0-d4be-11e4-89f0-32b3bfe7f48a.png)
-![bceditor6](https://cloud.githubusercontent.com/assets/11475177/6874193/1cddcdf0-d4be-11e4-8156-89f9719b5b25.png)
+![bceditor0](https://cloud.githubusercontent.com/assets/11475177/7427348/174542e4-efe2-11e4-9913-14500cc787e5.png)
+![bceditor1](https://cloud.githubusercontent.com/assets/11475177/7427349/1766adc6-efe2-11e4-8a2f-a59ec668d217.png)
+![bceditor2](https://cloud.githubusercontent.com/assets/11475177/7427350/177ba3c0-efe2-11e4-92dc-946b026cbfab.png)
+![bceditor3](https://cloud.githubusercontent.com/assets/11475177/7427351/177f5f4c-efe2-11e4-8388-179a0947eb5f.png)
+![bceditor4](https://cloud.githubusercontent.com/assets/11475177/7427352/17843c06-efe2-11e4-8c03-7a3daa4639be.png)
+![bceditor5](https://cloud.githubusercontent.com/assets/11475177/7427346/173de47c-efe2-11e4-9b68-ce2ae7ffb1a2.png)
+![bceditor6](https://cloud.githubusercontent.com/assets/11475177/7427347/1743c07c-efe2-11e4-9c90-318cdc2b09a0.png)
+
 
 
 

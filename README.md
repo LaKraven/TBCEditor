@@ -11,7 +11,7 @@ The latest update: 01.05.2015 16:30, UTC+02:00
 
 <h3>Source</h3>
 
-The source code is not published until the EditBone v. 10.0.0 is released.
+The source code will be published at some point in May 2015.
 
 <h3>Screenshots</h3>
 

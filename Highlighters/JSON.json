@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "5.5.2015",
+                "Date": "6.5.2015",
                 "Sample": "{\r\n  \"firstName\": \"John\",\r\n  \"lastName\": \"Smith\",\r\n  \"age\": 25,\r\n  \"address\":\r\n  {\r\n    \"streetAddress\": \"21 2nd Street\",\r\n    \"city\": \"New York\",\r\n    \"state\": \"NY\",\r\n    \"postalCode\": \"10021\"\r\n  },\r\n  \"phoneNumber\":\r\n  [\r\n    {\r\n      \"type\": \"home\",\r\n      \"number\": \"212 555-1234\"\r\n    },\r\n    {\r\n      \"type\": \"fax\",\r\n      \"number\": \"646 555-4567\"\r\n    }\r\n  ]\r\n}"
             },
             "Author": {
@@ -127,13 +127,6 @@
         }
     },
     "CodeFolding": {
-        "SkipRegion": [
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            }
-        ],
         "FoldRegion": [
             {
                 "OpenToken": "{",

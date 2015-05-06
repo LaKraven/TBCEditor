@@ -1,5 +1,9 @@
 Version 1.0 beta released. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
+<h3>Build requires</h3>
+
+  * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
+
 <h3>Conditional compilation</h3>
 
 Define | Description 

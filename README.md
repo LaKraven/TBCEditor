@@ -9,10 +9,6 @@ TBCEditor Control Demo v1.0b
 
 The latest update: 05.05.2015 23:09, UTC+02:00
 
-<h3>Source</h3>
-
-The source code will be published at some point in May 2015.
-
 <h3>Screenshots</h3>
 
 ![bceditor0](https://cloud.githubusercontent.com/assets/11475177/7427348/174542e4-efe2-11e4-9913-14500cc787e5.png)

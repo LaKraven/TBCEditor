@@ -1,6 +1,6 @@
 Beta testing has begun. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
-<h3>Downloads</h3>
+<h3>Demo</h3>
 
 TBCEditor Control Demo v1.0b 
 

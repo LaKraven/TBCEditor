@@ -1,0 +1,304 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "MultiHighlighter": "True",
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "<!DOCTYPE HTML>\r\n<!-- Hello World in HTML -->\r\n<html>\r\n    <head>\r\n        <title>Hello world example</title>\r\n    </head>\r\n    <body>\r\n        <span>Hello, world!</span>\r\n    </body>\r\n</html>"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "<!--",
+                            "Close": "-->"
+                        }
+                    },
+                    {
+                        "File": "PHP.json",
+                        "IncludeRange": "PHP"
+                    },
+                    {
+                        "Type": "Directive",
+                        "Attributes": {
+                            "Element": "Directive"
+                        },
+                        "TokenRange": {
+                            "Open": "<!",
+                            "Close": ">"
+                        }
+                    },
+                    {
+                        "Name": "HTML",
+                        "Type": "Tag",
+                        "Attributes": {
+                            "Element": "Editor"
+                        },
+                        "TokenRange": {
+                            "Open": "<",
+                            "Close": ">"
+                        },
+                        "SubRules": {
+                            "Range": [
+                                {
+                                    "Type": "Comment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "<!--",
+                                        "Close": "-->"
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\"",
+                                        "Close": "\""
+                                    },
+                                    "SubRules": {
+                                        "Range": [
+                                            {
+                                                "File": "PHP.json",
+                                                "IncludeRange": "PHP"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "'",
+                                        "Close": "'"
+                                    }
+                                },
+                                {
+                                    "Type": "Character",
+                                    "Attributes": {
+                                        "Element": "Character",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnTerm": "True",
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "$",
+                                        "Close": " "
+                                    }
+                                },
+                                {
+                                    "Name": "JavaScript",
+                                    "Type": "Tag",
+                                    "Attributes": {
+                                        "Element": "Editor"
+                                    },
+                                    "Properties": {
+                                        "AlternativeClose": "/>"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "script",
+                                        "Close": "/script"
+                                    },
+                                    "SubRules": {
+                                        "Range": [
+                                            {
+                                                "File": "JavaScript.json",
+                                                "IncludeRange": "JavaScript"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Name": "Style",
+                                    "Type": "Tag",
+                                    "Attributes": {
+                                        "Element": "Editor"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "style",
+                                        "Close": "/style"
+                                    },
+                                    "SubRules": {
+                                        "Range": [
+                                            {
+                                                "File": "PHP.json",
+                                                "IncludeRange": "PHP"
+                                            },
+                                            {
+                                                "File": "CSS.json",
+                                                "IncludeRange": "CSS"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "KeyList": [
+                                {
+                                    "Name": "HTML Keywords",
+                                    "Type": "ReservedWord",
+                                    "Words": "!doctype\r\na\r\nabbr\r\naddress\r\narea\r\narticle\r\naside\r\naudio\r\nb\r\nbase\r\nbdi\r\nbdo\r\nblockquote\r\nbody\r\nbr\r\nbutton\r\ncanvas\r\ncaption\r\ncite\r\ncode\r\ncol\r\ncolgroup\r\ncommand\r\ndatalist\r\ndd\r\ndel\r\ndetails\r\ndfn\r\ndir\r\ndiv\r\ndl\r\ndt\r\nem\r\nembed\r\nfieldset\r\nfigcaption\r\nfigure\r\nfooter\r\nform\r\nh1\r\nh2\r\nh3\r\nh4\r\nh5\r\nh6\r\nhead\r\nheader\r\nhgroup\r\nhr\r\nhtml\r\ni\r\niframe\r\nimg\r\ninput\r\nins\r\nkbd\r\nkeygen\r\nlabel\r\nlegend\r\nli\r\nlink\r\nmap\r\nmark\r\nmenu\r\nmeta\r\nmeter\r\nnav\r\nnoscript\r\nobject\r\nol\r\noptgroup\r\noption\r\noutput\r\np\r\nparam\r\npre\r\nprogress\r\nq\r\nrp\r\nrt\r\nruby\r\ns\r\nsamp\r\nscript\r\nsection\r\nselect\r\nsmall\r\nsource\r\nspan\r\nstrong\r\nstyle\r\nsub\r\nsummary\r\nsup\r\ntable\r\ntbody\r\ntd\r\ntextarea\r\ntfoot\r\nth\r\nthead\r\ntime\r\ntitle\r\ntr\r\ntrack\r\nu\r\nul\r\nvar\r\nvideo\r\nwbr",
+                                    "Attributes": {
+                                        "Element": "ReservedWord",
+                                        "ParentBackground": "True"
+                                    }
+                                },
+                                {
+                                    "Name": "HTML Attributes",
+                                    "Type": "Attribute",
+                                    "Words": "abbr\r\naccept\r\naccept-charset\r\naccesskey\r\naction\r\nasync\r\nautocomplete\r\nalt\r\nautofocus\r\nautoplay\r\nchallenge\r\ncharset\r\nchecked\r\ncite=\r\nclass\r\ncols\r\ncolspan\r\ncommand\r\ncontent\r\ncontenteditable\r\ncontextmenu\r\ncontrols\r\ncoords\r\ncrossorigin\r\ndata-\r\ndatetime\r\ndefault\r\ndefer\r\ndir=\r\ndisabled\r\ndownload\r\ndraggable\r\ndropzone\r\nenctype\r\nfor\r\nform=\r\nformaction\r\nformenctype\r\nformmethod\r\nformnovalidate\r\nformtarget\r\nheaders\r\nheight\r\nhidden\r\nhigh\r\nhref\r\nhreflang\r\nhttp-equiv\r\nicon\r\nid\r\nismap\r\nkeytype\r\nkind\r\nlabel=\r\nlang\r\nlist\r\nloop\r\nlow\r\nmanifest\r\nmax\r\nmaxlength\r\nmedia\r\nmethod\r\nmin\r\nmuted\r\nmultiple\r\nname\r\nnovalidate\r\nopen\r\noptimum\r\npattern\r\nplaceholder\r\nposter\r\npreload\r\nradiogroup\r\nreadonly\r\nrel\r\nrequired\r\nreversed\r\nrows\r\nsandbox\r\nscope\r\nscoped\r\nseamless\r\nselected\r\nshape\r\nsize\r\nsizes\r\nsortable\r\nsorted\r\nspan=\r\nspellcheck\r\nsrc\r\nsrcdoc\r\nstart\r\nstep\r\nstyle=\r\ntabindex\r\ntarget\r\ntitle=\r\ntranslate\r\ntype\r\nusemap\r\nvalue\r\nwidth\r\nwrap\r\nxmlns",
+                                    "Attributes": {
+                                        "Element": "Attribute",
+                                        "ParentBackground": "True"
+                                    }
+                                },
+                                {
+                                    "Type": "Symbol",
+                                    "Words": "/",
+                                    "Attributes": {
+                                        "Element": "ReservedWord",
+                                        "ParentBackground": "True"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "Options": {
+            "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "/'/",
+                "CloseToken": ",",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "/\"/",
+                "CloseToken": ",",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "=/",
+                "CloseToken": "/;",
+                "RegionType": "String",
+                "SkipEmptyChars": "True"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "#",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            },
+            {
+                "OpenToken": "IF",
+                "CloseToken": "ENDIF",
+                "Properties": {
+                    "BreakIfNotFoundBeforeNextRegion": "):"
+                }
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            },
+            {
+                "OpenToken": "<",
+                "CloseToken": ">"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            },
+            {
+                "OpenToken": "<!--",
+                "CloseToken": "-->",
+                "RegionType": "MultiLine"
+            }
+        ]
+    }
+}

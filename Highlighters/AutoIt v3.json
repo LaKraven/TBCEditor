@@ -1,0 +1,184 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "MsgBox(64, \"Tutorial\", \"Hello World!\")"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": ";"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"",
+                            "Close": "\""
+                        }
+                    },
+                    {
+                        "Type": "Attribute",
+                        "Attributes": {
+                            "Element": "Attribute",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "@"
+                        }
+                    },
+                    {
+                        "Type": "Attribute",
+                        "Attributes": {
+                            "Element": "Attribute",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "$"
+                        }
+                    },
+                    {
+                        "Type": "Directive",
+                        "Attributes": {
+                            "Element": "Directive",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "#"
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "case\r\nconst\r\ncontinuecase\r\ncontinueloop\r\ndefault\r\ndim\r\ndo\r\nelse\r\nelseif\r\nendfunc\r\nendif\r\nendselect\r\nendswitch\r\nendwith\r\nenum\r\nexit\r\nexitloop\r\nfalse\r\nfor\r\nfor\r\nfunc\r\nglobal\r\nif\r\nin\r\nlocal\r\nnext\r\nnull\r\nredim\r\nreturn\r\nselect\r\nstatic\r\nstep\r\nswitch\r\nthen\r\nto\r\ntrue\r\nuntil\r\nwend\r\nwhile\r\nwith\r\nvolatile",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "abs\r\nacos\r\nadlibregister\r\nadlibunregister\r\nasc\r\nascw\r\nasin\r\nassign\r\natan\r\nautoitsetoption\r\nautoitwingettitle\r\nautoitwinsettitle\r\nbeep\r\nbinary\r\nbinarylen\r\nbinarymid\r\nbinarytostring\r\nbitand\r\nbitnot\r\nbitor\r\nbitrotate\r\nbitshift\r\nbitxor\r\nblockinput\r\nbreak\r\ncall\r\ncdtray\r\nceiling\r\nchr\r\nchrw\r\nclipget\r\nclipput\r\nconsoleread\r\nconsolewrite\r\nconsolewriteerror\r\ncontrolclick\r\ncontrolcommand\r\ncontroldisable\r\ncontrolenable\r\ncontrolfocus\r\ncontrolgetfocus\r\ncontrolgethandle\r\ncontrolgetpos\r\ncontrolgettext\r\ncontrolhide\r\ncontrollistview\r\ncontrolmove\r\ncontrolsend\r\ncontrolsettext\r\ncontrolshow\r\ncontroltreeview\r\ncos\r\ndec\r\ndircopy\r\ndircreate\r\ndirgetsize\r\ndirmove\r\ndirremove\r\ndllcall\r\ndllcalladdress\r\ndllcallbackfree\r\ndllcallbackgetptr\r\ndllcallbackregister\r\ndllclose\r\ndllopen\r\ndllstructcreate\r\ndllstructgetdata\r\ndllstructgetptr\r\ndllstructgetsize\r\ndllstructsetdata\r\ndrivegetdrive\r\ndrivegetfilesystem\r\ndrivegetlabel\r\ndrivegetserial\r\ndrivegettype\r\ndrivemapadd\r\ndrivemapdel\r\ndrivemapget\r\ndrivesetlabel\r\ndrivespacefree\r\ndrivespacetotal\r\ndrivestatus\r\nenvget\r\nenvset\r\nenvupdate\r\neval\r\nexecute\r\nexp\r\nfilechangedir\r\nfileclose\r\nfilecopy\r\nfilecreatentfslink\r\nfilecreateshortcut\r\nfiledelete\r\nfileexists\r\nfilefindfirstfile\r\nfilefindnextfile\r\nfileflush\r\nfilegetattrib\r\nfilegetencoding\r\nfilegetlongname\r\nfilegetpos\r\nfilegetshortcut\r\nfilegetshortname\r\nfilegetsize\r\nfilegettime\r\nfilegetversion\r\nfileinstall\r\nfilemove\r\nfileopen\r\nfileopendialog\r\nfileread\r\nfilereadline\r\nfilereadtoarray\r\nfilerecycle\r\nfilerecycleempty\r\nfilesavedialog\r\nfileselectfolder\r\nfilesetattrib\r\nfilesetpos\r\nfilesettime\r\nfilewrite\r\nfilewriteline\r\nfloor\r\nftpsetproxy\r\nfuncname\r\nguicreate\r\nguictrlcreateavi\r\nguictrlcreatebutton\r\nguictrlcreatecheckbox\r\nguictrlcreatecombo\r\nguictrlcreatecontextmenu\r\nguictrlcreatedate\r\nguictrlcreatedummy\r\nguictrlcreateedit\r\nguictrlcreategraphic\r\nguictrlcreategroup\r\nguictrlcreateicon\r\nguictrlcreateinput\r\nguictrlcreatelabel\r\nguictrlcreatelist\r\nguictrlcreatelistview\r\nguictrlcreatelistviewitem\r\nguictrlcreatemenu\r\nguictrlcreatemenuitem\r\nguictrlcreatemonthcal\r\nguictrlcreateobj\r\nguictrlcreatepic\r\nguictrlcreateprogress\r\nguictrlcreateradio\r\nguictrlcreateslider\r\nguictrlcreatetab\r\nguictrlcreatetabitem\r\nguictrlcreatetreeview\r\nguictrlcreatetreeviewitem\r\nguictrlcreateupdown\r\nguictrldelete\r\nguictrlgethandle\r\nguictrlgetstate\r\nguictrlread\r\nguictrlrecvmsg\r\nguictrlregisterlistviewsort\r\nguictrlsendmsg\r\nguictrlsendtodummy\r\nguictrlsetbkcolor\r\nguictrlsetcolor\r\nguictrlsetcursor\r\nguictrlsetdata\r\nguictrlsetdefbkcolor\r\nguictrlsetdefcolor\r\nguictrlsetfont\r\nguictrlsetgraphic\r\nguictrlsetimage\r\nguictrlsetlimit\r\nguictrlsetonevent\r\nguictrlsetpos\r\nguictrlsetresizing\r\nguictrlsetstate\r\nguictrlsetstyle\r\nguictrlsettip\r\nguidelete\r\nguigetcursorinfo\r\nguigetmsg\r\nguigetstyle\r\nguiregistermsg\r\nguisetaccelerators\r\nguisetbkcolor\r\nguisetcoord\r\nguisetcursor\r\nguisetfont\r\nguisethelp\r\nguiseticon\r\nguisetonevent\r\nguisetstate\r\nguisetstyle\r\nguistartgroup\r\nguiswitch\r\nhex\r\nhotkeyset\r\nhttpsetproxy\r\nhttpsetuseragent\r\nhwnd\r\ninetclose\r\ninetget\r\ninetgetinfo\r\ninetgetsize\r\ninetread\r\ninidelete\r\niniread\r\ninireadsection\r\ninireadsectionnames\r\ninirenamesection\r\niniwrite\r\niniwritesection\r\ninputbox\r\nint\r\nisadmin\r\nisarray\r\nisbinary\r\nisbool\r\nisdeclared\r\nisdllstruct\r\nisfloat\r\nisfunc\r\nishwnd\r\nisint\r\niskeyword\r\nisnumber\r\nisobj\r\nisptr\r\nisstring\r\nlog\r\nmemgetstats\r\nmod\r\nmouseclick\r\nmouseclickdrag\r\nmousedown\r\nmousegetcursor\r\nmousegetpos\r\nmousemove\r\nmouseup\r\nmousewheel\r\nmsgbox\r\nnumber\r\nobjcreate\r\nobjcreateinterface\r\nobjevent\r\nobjget\r\nobjname\r\nonautoitexitregister\r\nonautoitexitunregister\r\nping\r\npixelchecksum\r\npixelgetcolor\r\npixelsearch\r\nprocessclose\r\nprocessexists\r\nprocessgetstats\r\nprocesslist\r\nprocesssetpriority\r\nprocesswait\r\nprocesswaitclose\r\nprogressoff\r\nprogresson\r\nprogressset\r\nptr\r\nrandom\r\nregdelete\r\nregenumkey\r\nregenumval\r\nregread\r\nregwrite\r\nreturns\r\nround\r\nrun\r\nrunas\r\nrunaswait\r\nrunwait\r\nsend\r\nsendkeepactive\r\nseterror\r\nsetextended\r\nshellexecute\r\nshellexecutewait\r\nshutdown\r\nsin\r\nsleep\r\nsoundplay\r\nsoundsetwavevolume\r\nsplashimageon\r\nsplashoff\r\nsplashtexton\r\nsqrt\r\nsrandom\r\nstatusbargettext\r\nstderrread\r\nstdinwrite\r\nstdioclose\r\nstdoutread\r\nstring\r\nstringaddcr\r\nstringcompare\r\nstringformat\r\nstringfromasciiarray\r\nstringinstr\r\nstringisalnum\r\nstringisalpha\r\nstringisascii\r\nstringisdigit\r\nstringisfloat\r\nstringisint\r\nstringislower\r\nstringisspace\r\nstringisupper\r\nstringisxdigit\r\nstringleft\r\nstringlen\r\nstringlower\r\nstringmid\r\nstringregexp\r\nstringregexpreplace\r\nstringreplace\r\nstringreverse\r\nstringright\r\nstringsplit\r\nstringstripcr\r\nstringstripws\r\nstringtoasciiarray\r\nstringtobinary\r\nstringtrimleft\r\nstringtrimright\r\nstringupper\r\ntan\r\ntcpaccept\r\ntcpclosesocket\r\ntcpconnect\r\ntcplisten\r\ntcpnametoip\r\ntcprecv\r\ntcpsend\r\ntcpshutdown\r\ntcpstartup\r\ntimerdiff\r\ntimerinit\r\ntooltip\r\ntraycreateitem\r\ntraycreatemenu\r\ntraygetmsg\r\ntrayitemdelete\r\ntrayitemgethandle\r\ntrayitemgetstate\r\ntrayitemgettext\r\ntrayitemsetonevent\r\ntrayitemsetstate\r\ntrayitemsettext\r\ntraysetclick\r\ntrayseticon\r\ntraysetonevent\r\ntraysetpauseicon\r\ntraysetstate\r\ntraysettooltip\r\ntraytip\r\nubound\r\nudpbind\r\nudpclosesocket\r\nudpopen\r\nudprecv\r\nudpsend\r\nudpshutdown\r\nudpstartup\r\nvargettype\r\nwinactivate\r\nwinactive\r\nwinclose\r\nwinexists\r\nwinflash\r\nwingetcaretpos\r\nwingetclasslist\r\nwingetclientsize\r\nwingethandle\r\nwingetpos\r\nwingetprocess\r\nwingetstate\r\nwingettext\r\nwingettitle\r\nwinkill\r\nwinlist\r\nwinmenuselectitem\r\nwinminimizeall\r\nwinminimizeallundo\r\nwinmove\r\nwinsetontop\r\nwinsetstate\r\nwinsettitle\r\nwinsettrans\r\nwinwait\r\nwinwaitactive\r\nwinwaitclose\r\nwinwaitnotactive",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}\r\n&",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": ";",
+                "RegionType": "SingleLine"
+            }
+        ]
+    }
+}

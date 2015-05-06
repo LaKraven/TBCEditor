@@ -1,0 +1,176 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "select \"Hello world!\" from RDB$DATABASE;"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "/*",
+                            "Close": "*/"
+                        }
+                    },
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "--"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"",
+                            "Close": "\""
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "abs\r\naccent\r\nacos\r\naction\r\nactive\r\nadd\r\nadmin\r\nafter\r\nall\r\nalter\r\nalways\r\nand\r\nany\r\nas\r\nasc\r\nascending\r\nascii_char\r\nascii_val\r\nasin\r\nat\r\natan\r\natan2\r\nauto\r\nautonomous\r\navg\r\nbackup\r\nbefore\r\nbegin\r\nbetween\r\nbigint\r\nbin_and\r\nbin_not\r\nbin_or\r\nbin_shl\r\nbin_shr\r\nbin_xor\r\nbit_length\r\nblob\r\nblock\r\nboth\r\nbreak\r\nby\r\ncaller\r\ncascade\r\ncase\r\ncast\r\nceil\r\nceiling\r\nchar\r\nchar_length\r\nchar_to_uuid\r\ncharacter\r\ncharacter_length\r\ncheck\r\nclose\r\ncoalesce\r\ncollate\r\ncollation\r\ncolumn\r\ncomment\r\ncommit\r\ncommitted\r\ncommon\r\ncomputed\r\nconditional\r\nconnect\r\nconstraint\r\ncontaining\r\ncos\r\ncosh\r\ncot\r\ncount\r\ncreate\r\ncross\r\ncstring\r\ncurrent\r\ncurrent_connection\r\ncurrent_date\r\ncurrent_role\r\ncurrent_time\r\ncurrent_timestamp\r\ncurrent_transaction\r\ncurrent_user\r\ncursor\r\ndata\r\ndatabase\r\ndate\r\ndateadd\r\ndatediff\r\nday\r\ndec\r\ndecimal\r\ndeclare\r\ndecode\r\ndefault\r\ndelete\r\ndeleting\r\ndesc\r\ndescending\r\ndescriptor\r\ndifference\r\ndisconnect\r\ndistinct\r\ndo\r\ndomain\r\ndouble\r\ndrop\r\nelse\r\nend\r\nentry_point\r\nescape\r\nexception\r\nexecute\r\nexists\r\nexit\r\nexp\r\nexternal\r\nextract\r\nfetch\r\nfile\r\nfilter\r\nfirst\r\nfirstname\r\nfloat\r\nfloor\r\nfor\r\nforeign\r\nfree_it\r\nfrom\r\nfull\r\nfunction\r\ngdscode\r\ngen_id\r\ngen_uuid\r\ngenerated\r\ngenerator\r\nglobal\r\ngrant\r\ngranted\r\ngroup\r\nhash\r\nhaving\r\nhour\r\nif\r\nignore\r\niif\r\nin\r\ninactive\r\nindex\r\ninner\r\ninput_type\r\ninsensitive\r\ninsert\r\ninserting\r\nint\r\ninteger\r\ninto\r\nis\r\nisolation\r\njoin\r\nkey\r\nlast\r\nlastname\r\nleading\r\nleave\r\nleft\r\nlength\r\nlevel\r\nlike\r\nlimbo\r\nlist\r\nln\r\nlock\r\nlog\r\nlog10\r\nlong\r\nlower\r\nlpad\r\nmanual\r\nmapping\r\nmatched\r\nmatching\r\nmax\r\nmaximum_segment\r\nmaxvalue\r\nmerge\r\nmiddlename\r\nmillisecond\r\nmin\r\nminute\r\nminvalue\r\nmod\r\nmodule_name\r\nmonth\r\nnames\r\nnational\r\nnatural\r\nnchar\r\nnext\r\nno\r\nnot\r\nnull\r\nnullif\r\nnulls\r\nnumeric\r\noctet_length\r\nof\r\non\r\nonly\r\nopen\r\noption\r\nor\r\norder\r\nos_name\r\nouter\r\noutput_type\r\noverflow\r\noverlay\r\npad\r\npage\r\npage_size\r\npages\r\nparameter\r\npassword\r\npi\r\nplacing\r\nplan\r\nposition\r\npost_event\r\npower\r\nprecision\r\npreserve\r\nprimary\r\nprivileges\r\nprocedure\r\nprotected\r\nrand\r\nrdb$db_key\r\nread\r\nreal\r\nrecord_version\r\nrecreate\r\nrecursive\r\nreferences\r\nrelease\r\nreplace\r\nrequests\r\nreserv\r\nreserving\r\nrestart\r\nrestrict\r\nretain\r\nreturning\r\nreturning_values\r\nreturns\r\nreverse\r\nrevoke\r\nright\r\nrole\r\nrollback\r\nround\r\nrow_count\r\nrows\r\nrpad\r\nsavepoint\r\nscalar_array\r\nschema\r\nsecond\r\nsegment\r\nselect\r\nsensitive\r\nsequence\r\nset\r\nshadow\r\nshared\r\nsign\r\nsimilar\r\nsin\r\nsingular\r\nsinh\r\nsize\r\nskip\r\nsmallint\r\nsnapshot\r\nsome\r\nsort\r\nsource\r\nspace\r\nsqlcode\r\nsqlstate\r\nsqrt\r\nstability\r\nstart\r\nstarting\r\nstarts\r\nstatement\r\nstatistics\r\nsub_type\r\nsubstring\r\nsum\r\nsuspend\r\ntable\r\ntan\r\ntanh\r\ntemporary\r\nthen\r\ntime\r\ntimeout\r\ntimestamp\r\nto\r\ntrailing\r\ntransaction\r\ntrigger\r\ntrim\r\ntrunc\r\ntwo_phase\r\ntype\r\nuncommitted\r\nundo\r\nunion\r\nunique\r\nupdate\r\nupdating\r\nupper\r\nuser\r\nusing\r\nuuid_to_char\r\nvalue\r\nvalues\r\nvarchar\r\nvariable\r\nvarying\r\nview\r\nwait\r\nweek\r\nweekday\r\nwhen\r\nwhere\r\nwhile\r\nwith\r\nwork\r\nwrite\r\nyear\r\nyearday",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}\r\n|",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "--",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "BEGIN",
+                "CloseToken": "END;"
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "--",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ]
+    }
+}

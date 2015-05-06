@@ -1,0 +1,219 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "Simple text file with Universal Resource Identifier highlighting and opener (with Ctrl key).\r\n\r\nhttp://www.bonecode.com\r\nwww.bonecode.com\r\nmailto:lasse@bonecode.com\r\nnews:comp.lang.pascal.borland"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "Editor": {
+            "URIOpener": "True"
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "WebLink",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "http://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "WebLink",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "https://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "News",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "news://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "News",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "news:",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Gopher",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "gopher://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Prospero",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "prospero://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Nntp",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "nntp://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Ftp",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "ftp://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Wais",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "wais://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Telnet",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "telnet://",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "MailtoLink",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "mailto:",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "WWW",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "!#%&'*,:;<>@[\\]^`{|}~",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "www",
+                            "Close": " "
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

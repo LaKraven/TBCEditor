@@ -1,0 +1,176 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "CREATE TABLE DUAL\r\n(\r\n  DUMMY VARCHAR(1)\r\n);\r\n\r\nINSERT INTO DUAL (DUMMY) VALUES ('X');\r\n\r\nSELECT \"Hello world!\" FROM DUAL;"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "/*",
+                            "Close": "*/"
+                        }
+                    },
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "--"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"",
+                            "Close": "\""
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "absolute\r\naction\r\nadd\r\nafter\r\nall\r\nallocate\r\nalter\r\nand\r\nany\r\nare\r\narray\r\nas\r\nasc\r\nasensitive\r\nassertion\r\nasymmetric\r\nat\r\natomic\r\nauthorization\r\navg\r\nbefore\r\nbegin\r\nbetween\r\nbigint\r\nbinary\r\nbitit\r\nbit_length\r\nblob\r\nboolean\r\nboth\r\nbreadth\r\nby\r\ncall\r\ncalled\r\ncascade\r\ncascaded\r\ncase\r\ncast\r\ncatalog\r\nchar\r\nchar_length\r\ncharacter\r\ncharacter_length\r\ncheck\r\nclob\r\nclose\r\ncoalesce\r\ncollate\r\ncollation\r\ncolumn\r\ncommit\r\ncondition\r\nconnect\r\nconnection\r\nconstraint\r\nconstraints\r\nconstructor\r\ncontains\r\ncontinue\r\nconvert\r\ncorresponding\r\ncount\r\ncreate\r\ncross\r\ncube\r\ncurrent\r\ncurrent_date\r\ncurrent_default_transform_group\r\ncurrent_path\r\ncurrent_role\r\ncurrent_time\r\ncurrent_timestamp\r\ncurrent_transform_group_for_type\r\ncurrent_user\r\ncursor\r\ncycle\r\ndata\r\ndate\r\nday\r\ndeallocate\r\ndec\r\ndecimal\r\ndeclare\r\ndefault\r\ndeferrable\r\ndeferred\r\ndelete\r\ndepth\r\nderef\r\ndesc\r\ndescribe\r\ndescriptor\r\ndeterministic\r\ndiagnostics\r\ndisconnect\r\ndistinct\r\ndo\r\ndomain\r\ndouble\r\ndrop\r\ndynamic\r\neach\r\nelement\r\nelse\r\nelseif\r\nend\r\nequals\r\nescape\r\nexcept\r\nexception\r\nexec\r\nexecute\r\nexists\r\nexit\r\nexternal\r\nextract\r\nfalse\r\nfetch\r\nfilter\r\nfirst\r\nfloat\r\nfor\r\nforeign\r\nfound\r\nfree\r\nfrom\r\nfull\r\nfunction\r\ngeneral\r\nget\r\nglobal\r\ngo\r\ngoto\r\ngrant\r\ngroup\r\ngrouping\r\nhandler\r\nhaving\r\nhold\r\nhour\r\nidentity\r\nif\r\nimmediate\r\nin\r\nindicator\r\ninitially\r\ninner\r\ninout\r\ninput\r\ninsensitive\r\ninsert\r\nint\r\ninteger\r\nintersect\r\ninterval\r\ninto\r\nis\r\nisolation\r\niterate\r\njoin\r\nkey\r\nlanguage\r\nlarge\r\nlast\r\nlateral\r\nleading\r\nleave\r\nleft\r\nlevel\r\nlike\r\nlocal\r\nlocaltime\r\nlocaltimestamp\r\nlocator\r\nloop\r\nlower\r\nmap\r\nmatch\r\nmax\r\nmember\r\nmerge\r\nmethod\r\nmin\r\nminute\r\nmodifies\r\nmodule\r\nmonth\r\nmultiset\r\nnames\r\nnational\r\nnatural\r\nnchar\r\nnclob\r\nnew\r\nnext\r\nno\r\nnone\r\nnot\r\nnull\r\nnullif\r\nnumeric\r\nobject\r\noctet_length\r\nof\r\nold\r\non\r\nonly\r\nopen\r\noption\r\nor\r\norder\r\nordinality\r\nout\r\nouter\r\noutput\r\nover\r\noverlaps\r\npad\r\nparameter\r\npartial\r\npartition\r\npath\r\nposition\r\nprecision\r\nprepare\r\npreserve\r\nprimary\r\nprior\r\nprivileges\r\nprocedure\r\npublic\r\nrange\r\nread\r\nreads\r\nreal\r\nrecursive\r\nref\r\nreferences\r\nreferencing\r\nrelative\r\nrelease\r\nrepeat\r\nresignal\r\nrestrict\r\nresult\r\nreturn\r\nreturns\r\nrevoke\r\nright\r\nrole\r\nrollback\r\nrollup\r\nroutine\r\nrow\r\nrows\r\nsavepoint\r\nschema\r\nscope\r\nscroll\r\nsearch\r\nsecond\r\nsection\r\nselect\r\nsensitive\r\nsession\r\nsession_user\r\nset\r\nsets\r\nsignal\r\nsimilar\r\nsize\r\nsmallint\r\nsome\r\nspace\r\nspecific\r\nspecifictype\r\nsql\r\nsqlcode\r\nsqlerror\r\nsqlexception\r\nsqlstate\r\nsqlwarning\r\nstart\r\nstate\r\nstatic\r\nsubmultiset\r\nsubstring\r\nsum\r\nsymmetric\r\nsystem\r\nsystem_user\r\ntable\r\ntablesample\r\ntemporary\r\nthen\r\ntime\r\ntimestamp\r\ntimezone_hour\r\ntimezone_minute\r\nto\r\ntrailing\r\ntransaction\r\ntranslate\r\ntranslation\r\ntreat\r\ntrigger\r\ntrim\r\ntrue\r\nunder\r\nundo\r\nunion\r\nunique\r\nunknown\r\nunnest\r\nuntil\r\nupdate\r\nupper\r\nusage\r\nuser\r\nusing\r\nvalue\r\nvalues\r\nvarchar\r\nvarying\r\nview\r\nwhen\r\nwhenever\r\nwhere\r\nwhile\r\nwindow\r\nwith\r\nwithin\r\nwithout\r\nwork\r\nwrite\r\nyear\r\nzone",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}\r\n|",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "--",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "BEGIN",
+                "CloseToken": "END;"
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "--",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ]
+    }
+}

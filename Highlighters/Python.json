@@ -1,0 +1,168 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "#!/path/to/python\r\n\r\nprint (\"Hello, world!\")"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"\"\"",
+                            "Close": "\"\"\""
+                        }
+                    },
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "#"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"",
+                            "Close": "\""
+                        }
+                    },
+                    {
+                        "Type": "Hex",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "$"
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "and\r\nas\r\nassert\r\nbreak\r\nclass\r\ncontinue\r\ndef\r\ndel\r\nelif\r\nelse\r\nexcept\r\nexec\r\nfinally\r\nfor\r\nfrom\r\nglobal\r\nif\r\nimport\r\nin\r\nis\r\nlambda\r\nnot\r\nor\r\npass\r\nprint\r\nraise\r\nreturn\r\ntry\r\nwith\r\nwhile\r\nyield",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "arithmeticerror\r\nassertionerror\r\nattributeerror\r\nbaseexception\r\ndeprecationwarning\r\neoferror\r\nellipsis\r\nenvironmenterror\r\nexception\r\nfalse\r\nfloatingpointerror\r\nfuturewarning\r\ngeneratorexit\r\nioerror\r\nimporterror\r\nimportwarning\r\nindentationerror\r\nindexerror\r\nkeyerror\r\nkeyboardinterrupt\r\nlookuperror\r\nmemoryerror\r\nnameerror\r\nnone\r\nnotimplemented\r\nnotimplementederror\r\noserror\r\noverflowerror\r\npendingdeprecationwarning\r\nreferenceerror\r\nruntimeerror\r\nruntimewarning\r\nstandarderror\r\nstopiteration\r\nsyntaxerror\r\nsyntaxwarning\r\nsystemerror\r\nsystemexit\r\ntaberror\r\ntrue\r\ntypeerror\r\nunboundlocalerror\r\nunicodedecodeerror\r\nunicodeencodeerror\r\nunicodeerror\r\nunicodetranslateerror\r\nunicodewarning\r\nuserwarning\r\nvalueerror\r\nwarning\r\nwindowserror\r\nzerodivisionerror\r\n_\r\n__debug__\r\n__doc__\r\n__future__\r\n__import__\r\n__name__\r\nabs\r\nall\r\nany\r\napply\r\nbasestring\r\nbool\r\nbuffer\r\ncallable\r\nchr\r\nclassmethod\r\ncmp\r\ncoerce\r\ncompile\r\ncomplex\r\ncopyright\r\ncredits\r\ndelattr\r\ndict\r\ndir\r\ndivmod\r\nenumerate\r\neval\r\nexecfile\r\nexit\r\nfile\r\nfilter\r\nfloat\r\nfrozenset\r\ngetattr\r\nglobals\r\nhasattr\r\nhash\r\nhelp\r\nhex\r\nid\r\ninput\r\nint\r\nintern\r\nisinstance\r\nissubclass\r\niter\r\nlen\r\nlicense\r\nlist\r\nlocals\r\nlong\r\nmap\r\nmax\r\nmin\r\nobject\r\noct\r\nopen\r\nord\r\npow\r\nproperty\r\nquit\r\nrange\r\nraw_input\r\nreduce\r\nreload\r\nrepr\r\nreversed\r\nround\r\nself\r\nset\r\nsetattr\r\nslice\r\nsorted\r\nstaticmethod\r\nstr\r\nsum\r\nsuper\r\ntuple\r\ntype\r\nunichr\r\nunicode\r\nvars\r\nxrange\r\nzip",
+                        "Attributes": {
+                            "Element": "Attribute",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}\r\n%",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "#",
+                "RegionType": "SingleLine"
+            }
+        ]
+    }
+}

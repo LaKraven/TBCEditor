@@ -1,0 +1,331 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "<?php\r\n  echo \"Hello World!\";\r\n?>"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Name": "PHP",
+                        "Type": "Tag",
+                        "Attributes": {
+                            "Element": "HighlightedBlock"
+                        },
+                        "TokenRange": {
+                            "Open": "<?",
+                            "Close": "?>"
+                        },
+                        "SubRules": {
+                            "Range": [
+                                {
+                                    "Type": "Comment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "/*",
+                                        "Close": "*/"
+                                    }
+                                },
+                                {
+                                    "Type": "Comment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "//"
+                                    }
+                                },
+                                {
+                                    "Type": "Comment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "#"
+                                    }
+                                },
+                                {
+                                    "Type": "BinaryNumber",
+                                    "CaseSensitive": "True",
+                                    "Attributes": {
+                                        "Element": "Number",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnTerm": "True",
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "0b",
+                                        "Close": " "
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\"",
+                                        "Close": "\""
+                                    },
+                                    "SubRules": {
+                                        "Range": [
+                                            {
+                                                "Type": "String",
+                                                "Attributes": {
+                                                    "Element": "String",
+                                                    "ParentBackground": "True"
+                                                },
+                                                "Properties": {
+                                                    "CloseOnEol": "True",
+                                                    "CloseOnTerm": "True"
+                                                },
+                                                "TokenRange": {
+                                                    "Open": "\\\"",
+                                                    "Close": ""
+                                                }
+                                            },
+                                            {
+                                                "Type": "String",
+                                                "Attributes": {
+                                                    "Element": "String",
+                                                    "ParentBackground": "True"
+                                                },
+                                                "Properties": {
+                                                    "CloseOnEol": "True",
+                                                    "CloseOnTerm": "True"
+                                                },
+                                                "TokenRange": {
+                                                    "Open": "\\\\",
+                                                    "Close": ""
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "'",
+                                        "Close": "'"
+                                    },
+                                    "SubRules": {
+                                        "Range": [
+                                            {
+                                                "Type": "String",
+                                                "Attributes": {
+                                                    "Element": "String",
+                                                    "ParentBackground": "True"
+                                                },
+                                                "Properties": {
+                                                    "CloseOnEol": "True",
+                                                    "CloseOnTerm": "True"
+                                                },
+                                                "TokenRange": {
+                                                    "Open": "\\'",
+                                                    "Close": ""
+                                                }
+                                            },
+                                            {
+                                                "Type": "String",
+                                                "Attributes": {
+                                                    "Element": "String",
+                                                    "ParentBackground": "True"
+                                                },
+                                                "Properties": {
+                                                    "CloseOnEol": "True",
+                                                    "CloseOnTerm": "True"
+                                                },
+                                                "TokenRange": {
+                                                    "Open": "\\\\",
+                                                    "Close": ""
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "Type": "Character",
+                                    "Attributes": {
+                                        "Element": "Character",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnTerm": "True",
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "$",
+                                        "Close": " "
+                                    }
+                                },
+                                {
+                                    "Type": "Hex",
+                                    "Attributes": {
+                                        "Element": "Number",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
+                                    "Properties": {
+                                        "CloseOnTerm": "True",
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "0"
+                                    }
+                                }
+                            ],
+                            "KeyList": [
+                                {
+                                    "Name": "PHP",
+                                    "Type": "ReservedWord",
+                                    "Words": "__halt_compiler\r\nabstract\r\nand\r\narray\r\nas\r\nbreak\r\ncallable\r\ncase\r\ncatch\r\nclass\r\nclone\r\nconst\r\ncontinue\r\ndeclare\r\ndefault\r\ndie\r\ndo\r\necho\r\nelse\r\nelseif\r\nempty\r\nenddeclare\r\nendfor\r\nendforeach\r\nendif\r\nendswitch\r\nendwhile\r\neval\r\nexit\r\nextends\r\nfinal\r\nfor\r\nforeach\r\nfunction\r\nglobal\r\ngoto\r\nif\r\nimplements\r\ninclude\r\ninclude_once\r\ninstanceof\r\ninsteadof\r\ninterface\r\nisset\r\nlist\r\nnamespace\r\nnew\r\nor\r\nphp\r\nprint\r\nprivate\r\nprotected\r\npublic\r\nrequire\r\nrequire_once\r\nreturn\r\nstatic\r\nswitch\r\nthrow\r\ntrait\r\ntry\r\nunset\r\nuse\r\nvar\r\nwhile\r\nxor",
+                                    "Attributes": {
+                                        "Element": "ReservedWord",
+                                        "ParentBackground": "True"
+                                    }
+                                },
+                                {
+                                    "Type": "Symbol",
+                                    "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
+                                    "Attributes": {
+                                        "Element": "Symbol",
+                                        "ParentBackground": "True"
+                                    }
+                                }
+                            ],
+                            "Set": [
+                                {
+                                    "Type": "Number",
+                                    "Symbols": "0123456789",
+                                    "Attributes": {
+                                        "Element": "Number",
+                                        "ParentBackground": "True"
+                                    }
+                                },
+                                {
+                                    "Type": "Float",
+                                    "Symbols": ".0123456789",
+                                    "Attributes": {
+                                        "Element": "Number",
+                                        "ParentBackground": "True"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "Options": {
+            "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "#",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            },
+            {
+                "OpenToken": "IF",
+                "CloseToken": "ENDIF",
+                "Properties": {
+                    "BreakIfNotFoundBeforeNextRegion": "):"
+                }
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "/*",
+                "CloseToken": "*/",
+                "RegionType": "MultiLine"
+            }
+        ]
+    }
+}

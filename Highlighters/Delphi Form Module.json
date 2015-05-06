@@ -1,0 +1,145 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "object Form1: TForm1\r\n  Left = 0\r\n  Top = 0\r\n  Caption = 'Form1'\r\n  object Label1: TLabel\r\n    Left = 30\r\n    Top = 20\r\n    Width = 55\r\n    Height = 13\r\n    Caption = 'Hello world!'\r\n  end\r\nend"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "HexNumber",
+                        "Attributes": {
+                            "Element": "HexNumber",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "$",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Character",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "#",
+                            "Close": " "
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "end\r\ninherited\r\ninline\r\nnil\r\nobject",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Number",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "FoldRegion": [
+            {
+                "OpenToken": "OBJECT",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            },
+            {
+                "OpenToken": "INLINE",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            },
+            {
+                "OpenToken": "INHERITED",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "object",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "inline",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "inherited",
+                "CloseToken": "end"
+            }
+        ]
+    }
+}

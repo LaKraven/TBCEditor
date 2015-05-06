@@ -1,0 +1,206 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "#!/usr/bin/perl -w\r\n\r\n# Hello World in Perl\r\n\r\nuse strict;\r\n\r\nprint \"Hello, world!\\n\";"
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "#"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "\"",
+                            "Close": "\""
+                        }
+                    },
+                    {
+                        "Type": "Character",
+                        "Attributes": {
+                            "Element": "Character",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "{}",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "$",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Character",
+                        "Attributes": {
+                            "Element": "Character",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "*/+-=\\|&()[]{}`~@,$%?:;'\".><#'",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "%",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Character",
+                        "Attributes": {
+                            "Element": "Character",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#'",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "@",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Hex",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        },
+                        "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "0"
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "-a\r\nabs\r\naccept\r\nalarm\r\natan2\r\nautoload\r\n-b\r\nbegin\r\nbind\r\nbinmode\r\nbless\r\nbreak\r\n-c\r\ncaller\r\nchdir\r\ncheck\r\nchmod\r\nchomp\r\nchop\r\nchown\r\nchr\r\nchroot\r\nclose\r\nclosedir\r\nconnect\r\ncos\r\ncrypt\r\n-d\r\ndbmclose\r\ndbmopen\r\ndefined\r\ndelete\r\ndestroy\r\ndie\r\ndump\r\n-e\r\neach\r\nend\r\nendgrent\r\nendhostent\r\nendnetent\r\nendprotoent\r\nendpwent\r\nendservent\r\neof\r\neval\r\nexec\r\nexists\r\nexit\r\n-f\r\nfcntl\r\nfileno\r\nflock\r\nfork\r\nformat\r\nformline\r\n-g\r\ngetc\r\ngetgrent\r\ngetgrgid\r\ngetgrnam\r\ngethostbyaddr\r\ngethostbyname\r\ngethostent\r\ngetlogin\r\ngetnetbyaddr\r\ngetnetbyname\r\ngetnetent\r\ngetpeername\r\ngetpgrp\r\ngetppid\r\ngetpriority\r\ngetprotobyname\r\ngetprotobynumber\r\ngetprotoent\r\ngetpwent\r\ngetpwnam\r\ngetpwuid\r\ngetservbyname\r\ngetservbyport\r\ngetservent\r\ngetsockname\r\ngetsockopt\r\nglob\r\ngmtime\r\ngoto\r\ngrep\r\nhex\r\nindex\r\ninit\r\nint\r\nioctl\r\njoin\r\n-k\r\nkeys\r\nkill\r\n-l\r\nlast\r\nlc\r\nlcfirst\r\nlength\r\nlink\r\nlisten\r\nlocal\r\nlocaltime\r\nlog\r\nlstat\r\n-m\r\nmap\r\nmkdir\r\nmsgctl\r\nmsgget\r\nmsgrcv\r\nmsgsnd\r\nmy\r\nnext\r\nnot\r\n-o\r\noct\r\nopen\r\nopendir\r\nord\r\nour\r\n-p\r\npack\r\npipe\r\npop\r\npos\r\nprint\r\nprintf\r\nprototype\r\npush\r\nquotemeta\r\n-r\r\nrand\r\nread\r\nreaddir\r\nreadline\r\nreadlink\r\nreadpipe\r\nrecv\r\nredo\r\nref\r\nrename\r\nrequire\r\nreset\r\nreturn\r\nreverse\r\nrewinddir\r\nrindex\r\nrmdir\r\n-s\r\nsay\r\nscalar\r\nseek\r\nseekdir\r\nselect\r\nsemctl\r\nsemget\r\nsemop\r\nsend\r\nsetgrent\r\nsethostent\r\nsetnetent\r\nsetpgrp\r\nsetpriority\r\nsetprotoent\r\nsetpwent\r\nsetservent\r\nsetsockopt\r\nshift\r\nshmctl\r\nshmget\r\nshmread\r\nshmwrite\r\nshutdown\r\nsin\r\nsleep\r\nsocket\r\nsocketpair\r\nsort\r\nsplice\r\nsplit\r\nsprintf\r\nsqrt\r\nsrand\r\nstat\r\nstate\r\nstudy\r\nsubstr\r\nsymlink\r\nsyscall\r\nsysopen\r\nsysread\r\nsysseek\r\nsystem\r\nsyswrite\r\n-t\r\ntell\r\ntelldir\r\ntie\r\ntied\r\ntime\r\ntimes\r\ntruncate\r\n-u\r\nuc\r\nucfirst\r\numask\r\nundef\r\nunitcheck\r\nunlink\r\nunpack\r\nunshift\r\nuntie\r\nuse\r\nutime\r\n-w\r\nwait\r\nwaitpid\r\nvalues\r\nwantarray\r\nwarn\r\nvec\r\nwrite\r\n-x\r\n-z",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "__DATA__\r\n__END__\r\n__FILE__\r\n__LINE__\r\n__PACKAGE__\r\nand\r\nargv\r\nargvout\r\ncmp\r\ncontinue\r\nCORE\r\ndo\r\nelse\r\nelsif\r\neq\r\nexp\r\nfor\r\nforeach\r\nge\r\ngt\r\nif\r\nle\r\nlock\r\nlt\r\nm\r\nne\r\nno\r\nor\r\npackage\r\nq\r\nqq\r\nqr\r\nqw\r\nqx\r\ns\r\nstderr\r\nstdin\r\nstdout\r\nsub\r\ntr\r\nunless\r\nuntil\r\nwhile\r\nxor\r\ny",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "#",
+                "RegionType": "SingleLine"
+            }
+        ]
+    }
+}

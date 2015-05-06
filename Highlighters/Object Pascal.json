@@ -1,0 +1,422 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "1.5.2015",
+                "Sample": "// Hello World in Pascal\r\n\r\nprogram HelloWorld;\r\nbegin\r\n    writeln('Hello, world!');\r\nend."
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "{",
+                            "Close": "}"
+                        }
+                    },
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "(*",
+                            "Close": "*)"
+                        }
+                    },
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "//"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "'",
+                            "Close": "'"
+                        }
+                    },
+                    {
+                        "Type": "Directive",
+                        "Attributes": {
+                            "Element": "Directive"
+                        },
+                        "TokenRange": {
+                            "Open": "{$",
+                            "Close": "}"
+                        }
+                    },
+                    {
+                        "Type": "ReservedWord",
+                        "Attributes": {
+                            "Element": "HighlightedBlock"
+                        },
+                        "TokenRange": {
+                            "Open": "asm",
+                            "Close": "end"
+                        },
+                        "SubRules": {
+                            "Range": [
+                                {
+                                    "Type": "AssemblerComment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "{",
+                                        "Close": "}"
+                                    }
+                                },
+                                {
+                                    "Type": "AssemblerComment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "(*",
+                                        "Close": "*)"
+                                    }
+                                },
+                                {
+                                    "Type": "AssemblerComment",
+                                    "Attributes": {
+                                        "Element": "Comment",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "//"
+                                    }
+                                },
+                                {
+                                    "Type": "Directive",
+                                    "Attributes": {
+                                        "Element": "Directive",
+                                        "ParentBackground": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "{$",
+                                        "Close": "}"
+                                    }
+                                }
+                            ],
+                            "KeyList": [
+                                {
+                                    "Type": "AssemblerReservedWord",
+                                    "Words": "end",
+                                    "Attributes": {
+                                        "Element": "ReservedWord",
+                                        "ParentBackground": "True"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "Type": "HexNumber",
+                        "Attributes": {
+                            "Element": "HexNumber",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "$",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Character",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True",
+                            "CloseOnEol": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "#",
+                            "Close": " "
+                        }
+                    },
+                    {
+                        "Type": "Address",
+                        "Attributes": {
+                            "Element": "Character",
+                            "ParentBackground": "True"
+                        },
+                        "Properties": {
+                            "CloseOnTerm": "True"
+                        },
+                        "TokenRange": {
+                            "Open": "@"
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "ReservedWord",
+                        "Words": "absolute\r\nabstract\r\nand\r\nas\r\nassembler\r\nautomated\r\nbegin\r\ncase\r\ncdecl\r\nclass\r\nconst\r\nconstructor\r\ncontains\r\ndefault\r\ndeprecated\r\ndestructor\r\ndispid\r\ndispinterface\r\ndiv\r\ndo\r\ndownto\r\ndynamic\r\nelse\r\nend\r\nexcept\r\nexport\r\nexports\r\nexternal\r\nfar\r\nfile\r\nfinalization\r\nfinally\r\nfor\r\nforward\r\nfunction\r\ngoto\r\nif\r\nimplementation\r\nimplements\r\nin\r\nindex\r\ninherited\r\ninitialization\r\ninline\r\ninterface\r\nis\r\nlabel\r\nlibrary\r\nmessage\r\nmod\r\nnear\r\nnil\r\nnodefault\r\nnot\r\nobject\r\nof\r\non\r\nor\r\nout\r\noverload\r\noverride\r\npackage\r\npacked\r\npascal\r\nplatform\r\nprivate\r\nprocedure\r\nprogram\r\nproperty\r\nprotected\r\npublic\r\npublished\r\nraise\r\nread\r\nrecord\r\nregister\r\nreintroduce\r\nrepeat\r\nrequires\r\nresourcestring\r\nsafecall\r\nshl\r\nshr\r\nstdcall\r\nstored\r\nstrict\r\nstring\r\nstringresource\r\nthen\r\nthreadvar\r\nto\r\ntry\r\ntype\r\nunit\r\nuntil\r\nuses\r\nvar\r\nwhile\r\nvirtual\r\nwith\r\nwrite\r\nwriteonly\r\nxor",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "AssemblerReservedWord",
+                        "Words": "asm",
+                        "Attributes": {
+                            "Element": "AssemblerReservedWord"
+                        }
+                    },
+                    {
+                        "Type": "Symbol",
+                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": "True"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "{$",
+                "CloseToken": "}",
+                "RegionType": "MultiLine"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}",
+                "RegionType": "MultiLine"
+            },
+            {
+                "OpenToken": "(*",
+                "CloseToken": "*)",
+                "RegionType": "MultiLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "BEGIN",
+                "CloseToken": "END"
+            },
+            {
+                "OpenToken": "REPEAT",
+                "CloseToken": "UNTIL"
+            },
+            {
+                "OpenToken": "TRY",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            },
+            {
+                "OpenToken": "CASE",
+                "CloseToken": "END"
+            },
+            {
+                "OpenToken": "ASM",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            },
+            {
+                "OpenToken": "CLASS",
+                "CloseToken": "END",
+                "Properties": {
+                    "NoSubs": "True",
+                    "SkipIfFoundAfterOpenToken": ";"
+                }
+            },
+            {
+                "OpenToken": "RECORD",
+                "CloseToken": "END",
+                "Properties": {
+                    "NoSubs": "True"
+                }
+            },
+            {
+                "OpenToken": "INTERFACE",
+                "CloseToken": "IMPLEMENTATION",
+                "Properties": {
+                    "BeginningOfLine": "True"
+                }
+            },
+            {
+                "OpenToken": "INTERFACE",
+                "CloseToken": "END",
+                "Properties": {
+                    "NoSubs": "True",
+                    "SkipIfFoundAfterOpenToken": ";"
+                }
+            },
+            {
+                "OpenToken": "IMPLEMENTATION",
+                "CloseToken": "END.",
+                "Properties": {
+                    "BeginningOfLine": "True",
+                    "OpenIsClose": "True",
+                    "SharedClose": "True"
+                }
+            },
+            {
+                "OpenToken": "UNIT",
+                "CloseToken": "END.",
+                "Properties": {
+                    "BeginningOfLine": "True",
+                    "SharedClose": "True"
+                }
+            },
+            {
+                "OpenToken": "PROGRAM",
+                "CloseToken": "END",
+                "Properties": {
+                    "BeginningOfLine": "True",
+                    "SharedClose": "True"
+                }
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "(",
+                "CloseToken": ")"
+            },
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            },
+            {
+                "OpenToken": "begin",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "case",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "asm",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "try",
+                "CloseToken": "end"
+            },
+            {
+                "OpenToken": "for",
+                "CloseToken": "do"
+            },
+            {
+                "OpenToken": "repeat",
+                "CloseToken": "until"
+            },
+            {
+                "OpenToken": "while",
+                "CloseToken": "do"
+            },
+            {
+                "OpenToken": "if",
+                "CloseToken": "then"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "//",
+                "RegionType": "SingleLine"
+            },
+            {
+                "OpenToken": "{$",
+                "CloseToken": "}",
+                "RegionType": "MultiLine"
+            },
+            {
+                "OpenToken": "{",
+                "CloseToken": "}",
+                "RegionType": "MultiLine"
+            },
+            {
+                "OpenToken": "(*",
+                "CloseToken": "*)",
+                "RegionType": "MultiLine"
+            }
+        ]
+    }
+}

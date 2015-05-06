@@ -1,5 +1,12 @@
 Version 1.0 beta released. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
+<h3>Conditional compilation</h3>
+
+Define | Description 
+--- | --- 
+USE_ALPHASKINS | Use AlphaSkins. AlphaSkins are most powerful theming solutions for apps developed in Delphi.
+USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look and feel of a VCL application.
+
 <h3>Demo</h3>
 
 TBCEditor Control Demo v1.0b 

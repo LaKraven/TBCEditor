@@ -11,6 +11,25 @@ Define | Description
 USE_ALPHASKINS | Use <a href="http://www.alphaskins.com/">AlphaSkins</a>. AlphaSkins are most powerful theming solutions for apps developed in Delphi.
 USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look and feel of a VCL application.
 
+<h3>Usage example</h3>
+
+```
+TYourForm = class(TForm)
+  Editor: TBCEditor;
+...
+var
+  LFilePath: string;
+begin
+  LFilePath := ExtractFilePath(Application.ExeName); 
+  with Editor do 
+  begin
+    Highlighter.LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Highlighter }
+    Highlighter.LoadColorsFromFile(Format('%sColors\%s.json', [LFilePath, 'Default']); { Color }
+    LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Editor file } 
+  end;
+end;
+```
+
 <h3>Demo</h3>
 
 TBCEditor Control Demo v1.0b. 

@@ -7000,6 +7000,8 @@ var
   X, LHeight: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
+  if CodeFolding.Padding > 0 then
+    InflateRect(AClipRect, -CodeFolding.Padding, 0);
   Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
   Canvas.Pen.Style := psSolid;
   if CodeFoldingTreeLineForLine(RowToLine(ALine)) then

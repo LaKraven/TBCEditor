@@ -14,6 +14,7 @@ type
     FMarkStyle: TBCEditorCodeFoldingMarkStyle;
     FOnChange: TBCEditorCodeFoldingChangeEvent;
     FOptions: TBCEditorCodeFoldingOptions;
+    FPadding: Integer;
     FWidth: Integer;
     FVisible: Boolean;
     procedure DoChange;
@@ -22,6 +23,7 @@ type
     procedure SetMarkStyle(const Value: TBCEditorCodeFoldingMarkStyle);
     procedure SetOnChange(Value: TBCEditorCodeFoldingChangeEvent);
     procedure SetOptions(Value: TBCEditorCodeFoldingOptions);
+    procedure SetPadding(const Value: Integer);
     procedure SetWidth(Value: Integer);
     procedure SetVisible(const Value: Boolean);
   public
@@ -35,6 +37,7 @@ type
     property MarkStyle: TBCEditorCodeFoldingMarkStyle read FMarkStyle write SetMarkStyle default msSquare;
     property OnChange: TBCEditorCodeFoldingChangeEvent read FOnChange write SetOnChange;
     property Options: TBCEditorCodeFoldingOptions read FOptions write SetOptions default [cfoShowCollapsedCodeHint, cfoHighlightIndentGuides, cfoHighlightMatchingPair, cfoShowIndentGuides, cfoUncollapseByHintClick];
+    property Padding: Integer read FPadding write SetPadding default 0;
     property Width: Integer read FWidth write SetWidth default 10;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
@@ -55,6 +58,7 @@ begin
   FMarkStyle := msSquare;
   FColors := TBCEditorCodeFoldingColors.Create;
   FHint := TBCEditorCodeFoldingHint.Create;
+  FPadding := 0;
   FWidth := 10;
 end;
 
@@ -128,6 +132,15 @@ end;
 procedure TBCEditorCodeFolding.SetHint(Value: TBCEditorCodeFoldingHint);
 begin
   FHint.Assign(Value);
+end;
+
+procedure TBCEditorCodeFolding.SetPadding(const Value: Integer);
+begin
+  if Value <> FPadding then
+  begin
+    FPadding := Value;
+    DoChange;
+  end;
 end;
 
 function TBCEditorCodeFolding.GetWidth: Integer;

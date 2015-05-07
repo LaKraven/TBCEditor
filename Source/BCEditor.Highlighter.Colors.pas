@@ -57,7 +57,7 @@ var
   i: Integer;
 begin
   for i := FElements.Count - 1 downto 0 do
-    Dispose(FElements.Items[i]);
+    Dispose(PBCEditorHighlighterElement(FElements.Items[i]));
   FElements.Clear;
 end;
 

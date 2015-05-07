@@ -350,7 +350,7 @@ begin
   FInfo.Clear;
   FCompletionProposalSkipRegions.Clear;
   for i := FMatchingPairs.Count - 1 downto 0 do
-    Dispose(FMatchingPairs.Items[i]);
+    Dispose(PBCEditorMatchingPairToken(FMatchingPairs.Items[i]));
   FMatchingPairs.Clear;
   FCodeFoldingRegions.SkipRegions.Clear;
   FCodeFoldingRegions.Clear;

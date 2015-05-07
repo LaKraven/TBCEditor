@@ -33,8 +33,7 @@ requires
   vcl,
   vcldb,
   vclx,
-  rtl,
-  vclimg;
+  rtl;
 
 contains
   BCEditor.Consts in '..\Source\BCEditor.Consts.pas',
@@ -125,3 +124,7 @@ contains
   JsonDataObjects in '..\Source\JsonDataObjects.pas';
 
 end.
+
+
+
+

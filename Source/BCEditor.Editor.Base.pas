@@ -6469,7 +6469,7 @@ begin
 
   LWasSelected := False;
   LStartDrag := False;
-  if (Button = mbLeft) {and NotOverMinimap} then
+  if Button = mbLeft then
     if SelectionAvailable then
     begin
       LWasSelected := True;
@@ -6633,7 +6633,7 @@ var
   LHintWindow: THintWindow;
   S: string;
 begin
-  if LeftMargin.Bookmarks.Visible and (X < LeftMargin.Bookmarks.Panel.Width) then
+  if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
     Exit;
 
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then

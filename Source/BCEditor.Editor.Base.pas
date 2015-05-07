@@ -213,6 +213,7 @@ type
     procedure AssignSearchEngine;
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
+    procedure ClearSearchLines;
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
@@ -804,6 +805,7 @@ begin
   FActiveLine.Free;
   FRightMargin.Free;
   FScroll.Free;
+  ClearSearchLines;
   FSearchLines.Free;
   FSearch.Free;
   FSearchHighlighterBitmap.Free;
@@ -3126,6 +3128,15 @@ begin
   end;
 end;
 
+procedure TBCBaseEditor.ClearSearchLines;
+var
+  i: Integer;
+begin
+  for i := FSearchLines.Count - 1 downto 0 do
+    Dispose(PBCEditorTextPosition(FSearchLines.Items[i]));
+  FSearchLines.Clear;
+end;
+
 procedure TBCBaseEditor.FindAll;
 var
   i: Integer;
@@ -3133,7 +3144,7 @@ var
   LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
   LPTextPosition: PBCEditorTextPosition;
 begin
-  FSearchLines.Clear;
+  ClearSearchLines;
   LKeyword := FSearch.SearchText;
   if LKeyword = '' then
     Exit;

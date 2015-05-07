@@ -10126,7 +10126,7 @@ end;
 
 procedure TBCBaseEditor.ClearBookmark(ABookmark: Integer);
 begin
-  if (ABookmark in [0 .. 9]) and Assigned(FBookmarks[ABookmark]) then
+  if (ABookmark in [0 .. 8]) and Assigned(FBookmarks[ABookmark]) then
   begin
     DoOnClearBookmark(FBookmarks[ABookmark]);
     FMarkList.Remove(FBookmarks[ABookmark]);
@@ -11645,7 +11645,7 @@ procedure TBCBaseEditor.GotoBookmark(ABookmark: Integer);
 var
   LTextPosition: TBCEditorTextPosition;
 begin
-  if (ABookmark in [0 .. 9]) and Assigned(FBookmarks[ABookmark]) and (FBookmarks[ABookmark].Line <= FLines.Count) then
+  if (ABookmark in [0 .. 8]) and Assigned(FBookmarks[ABookmark]) and (FBookmarks[ABookmark].Line <= FLines.Count) then
   begin
     LTextPosition.Char := FBookmarks[ABookmark].Char;
     LTextPosition.Line := FBookmarks[ABookmark].Line;
@@ -12353,7 +12353,7 @@ begin
       Line := Y;
       Char := X;
       ImageIndex := Index;
-      BookmarkNumber := Index + 1;
+      BookmarkNumber := Index;
       Visible := True;
       InternalImage := not Assigned(FLeftMargin.Bookmarks.Images);
     end;

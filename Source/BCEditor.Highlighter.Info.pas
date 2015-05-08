@@ -10,8 +10,6 @@ type
   end;
 
   TBCEditorGeneralInfo = record
-    //Name: string;
-    // TODO: extension?
     Version: string;
     Date: string;
     Sample: string;

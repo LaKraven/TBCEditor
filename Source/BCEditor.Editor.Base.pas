@@ -9642,7 +9642,7 @@ var
   LIsPrompt: Boolean;
   LIsReplaceAll, LIsDeleteLine: Boolean;
   LIsEndUndoBlock: Boolean;
-  LReplaceAction: TBCEditorReplaceAction;
+  LActionReplace: TBCEditorReplaceAction;
   LResultOffset: Integer;
 
   function InValidSearchRange(First, Last: Integer): Boolean;
@@ -9754,17 +9754,17 @@ begin
 
         if LIsPrompt and Assigned(FOnReplaceText) then
         begin
-          LReplaceAction := DoOnReplaceText(ASearchText, AReplaceText, LCurrentTextPosition.Line, LFound, LIsDeleteLine);
-          if LReplaceAction = raCancel then
+          LActionReplace := DoOnReplaceText(ASearchText, AReplaceText, LCurrentTextPosition.Line, LFound, LIsDeleteLine);
+          if LActionReplace = raCancel then
             Exit;
         end
         else
-          LReplaceAction := raReplace;
-        if LReplaceAction = raSkip then
+          LActionReplace := raReplace;
+        if LActionReplace = raSkip then
           Dec(Result)
         else
         begin
-          if LReplaceAction = raReplaceAll then
+          if LActionReplace = raReplaceAll then
           begin
             if not LIsReplaceAll or LIsPrompt then
             begin
@@ -9790,7 +9790,7 @@ begin
         if not LIsBackward then
         begin
           InternalCaretX := LFound + LReplaceLength;
-          if (LSearchLength <> LReplaceLength) and (LReplaceAction <> raSkip) then
+          if (LSearchLength <> LReplaceLength) and (LActionReplace <> raSkip) then
           begin
             Inc(LResultOffset, LReplaceLength - LSearchLength);
             if (FSelection.ActiveMode <> smColumn) and (CaretY = LEndTextPosition.Line) then

@@ -41,21 +41,21 @@ type
   protected
     FEdit: TCustomControl;
     FOnChange: TNotifyEvent;
-    function GetItem(Index: Integer): TBCEditorBookmark;
+    function GetItem(AIndex: Integer): TBCEditorBookmark;
     procedure Notify(Ptr: Pointer; Action: TListNotification); override;
-    procedure SetItem(Index: Integer; Item: TBCEditorBookmark);
+    procedure SetItem(AIndex: Integer; AItem: TBCEditorBookmark);
     property OwnsObjects;
   public
     constructor Create(AOwner: TCustomControl);
 
-    function Extract(Item: TBCEditorBookmark): TBCEditorBookmark;
+    function Extract(AItem: TBCEditorBookmark): TBCEditorBookmark;
     function First: TBCEditorBookmark;
     function Last: TBCEditorBookmark;
-    procedure ClearLine(Line: Integer);
-    procedure GetMarksForLine(Line: Integer; var Marks: TBCEditorBookmarks);
-    procedure Place(Mark: TBCEditorBookmark);
+    procedure ClearLine(ALine: Integer);
+    procedure GetMarksForLine(ALine: Integer; var AMarks: TBCEditorBookmarks);
+    procedure Place(AMark: TBCEditorBookmark);
   public
-    property Items[Index: Integer]: TBCEditorBookmark read GetItem write SetItem; default;
+    property Items[AIndex: Integer]: TBCEditorBookmark read GetItem write SetItem; default;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
@@ -133,14 +133,14 @@ begin
     FOnChange(Self);
 end;
 
-function TBCEditorBookmarkList.GetItem(Index: Integer): TBCEditorBookmark;
+function TBCEditorBookmarkList.GetItem(AIndex: Integer): TBCEditorBookmark;
 begin
-  Result := TBCEditorBookmark(inherited GetItem(index));
+  Result := TBCEditorBookmark(inherited GetItem(AIndex));
 end;
 
-procedure TBCEditorBookmarkList.SetItem(Index: Integer; Item: TBCEditorBookmark);
+procedure TBCEditorBookmarkList.SetItem(AIndex: Integer; AItem: TBCEditorBookmark);
 begin
-  inherited SetItem(index, Item);
+  inherited SetItem(AIndex, AItem);
 end;
 
 constructor TBCEditorBookmarkList.Create(AOwner: TCustomControl);
@@ -159,45 +159,45 @@ begin
   Result := TBCEditorBookmark(inherited Last);
 end;
 
-function TBCEditorBookmarkList.Extract(Item: TBCEditorBookmark): TBCEditorBookmark;
+function TBCEditorBookmarkList.Extract(AItem: TBCEditorBookmark): TBCEditorBookmark;
 begin
-  Result := TBCEditorBookmark(inherited Extract(Item));
+  Result := TBCEditorBookmark(inherited Extract(AItem));
 end;
 
-procedure TBCEditorBookmarkList.ClearLine(Line: Integer);
+procedure TBCEditorBookmarkList.ClearLine(ALine: Integer);
 var
   i: Integer;
 begin
   for i := Count - 1 downto 0 do
-    if not Items[i].IsBookmark and (Items[i].Line = Line) then
+    if not Items[i].IsBookmark and (Items[i].Line = ALine) then
       Delete(i);
 end;
 
-procedure TBCEditorBookmarkList.GetMarksForLine(Line: Integer; var Marks: TBCEditorBookmarks);
+procedure TBCEditorBookmarkList.GetMarksForLine(ALine: Integer; var AMarks: TBCEditorBookmarks);
 var
   i, j: Integer;
 begin
-  FillChar(Marks, sizeof(Marks), 0);
+  FillChar(AMarks, SizeOf(AMarks), 0);
   j := 0;
   for i := 0 to Count - 1 do
   begin
-    if Items[i].Line = Line then
+    if Items[i].Line = ALine then
     begin
       Inc(j);
-      Marks[j] := Items[i];
+      AMarks[j] := Items[i];
       if j = BCEDITOR_MAX_BOOKMARKS then
         Break;
     end;
   end;
 end;
 
-procedure TBCEditorBookmarkList.Place(Mark: TBCEditorBookmark);
+procedure TBCEditorBookmarkList.Place(AMark: TBCEditorBookmark);
 begin
   if Assigned(FEdit) and (FEdit is TBCBaseEditor) then
     if Assigned((FEdit as TBCBaseEditor).OnPlaceBookmark) then
-      (FEdit as TBCBaseEditor).OnPlaceBookmark(FEdit, Mark);
-  if Assigned(Mark) then
-    Add(Mark);
+      (FEdit as TBCBaseEditor).OnPlaceBookmark(FEdit, AMark);
+  if Assigned(AMark) then
+    Add(AMark);
 end;
 
 end.

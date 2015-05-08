@@ -16,8 +16,8 @@ type
 
   TBCEditorReplaceAction = (raCancel, raSkip, raReplace, raReplaceAll);
 
-  TBCEditorReplaceTextEvent = procedure(Sender: TObject; const ASearch, AReplace: string; Line, Column: Integer;
-    DeleteLine: Boolean; var Action: TBCEditorReplaceAction) of object;
+  TBCEditorReplaceTextEvent = procedure(Sender: TObject; const ASearch, AReplace: string; ALine, AColumn: Integer;
+    ADeleteLine: Boolean; var AAction: TBCEditorReplaceAction) of object;
 
   TBCEditorStateFlag = (sfCaretChanged, sfScrollbarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
     sfPossibleLeftMarginClick, sfWaitForDragging, sfInsideRedo, sfLeftMarginDragging, sfJustIndented, sfCodeFoldingInfoClicked);

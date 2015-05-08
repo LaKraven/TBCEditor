@@ -748,6 +748,7 @@ begin
   FSearchLines := TList.Create;
   FSearch := TBCEditorSearch.Create;
   FSearch.OnChange := SearchChanged;
+  AssignSearchEngine;
   FReplace := TBCEditorReplace.Create;
   { Scroll }
   FScroll := TBCEditorScroll.Create;
@@ -6451,7 +6452,6 @@ begin
   inherited Loaded;
   LeftMarginChanged(Self);
   MinimapChanged(Self);
-  SearchChanged(scEngineUpdate);
   UpdateScrollBars;
 end;
 

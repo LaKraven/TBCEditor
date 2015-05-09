@@ -6055,37 +6055,14 @@ end;
 
 procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
-  LNewLine, LPreviousLine: Integer;
+  LNewLine: Integer;
 begin
-  LPreviousLine := -1;
   LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
 
   if (LNewLine > TopLine) and (LNewLine < TopLine + VisibleLines) then
-    FMinimap.Clicked := True
+    CaretY := LNewLine
   else
-  begin
-    LNewLine := LNewLine - VisibleLines div 2;
-    if LNewLine < TopLine then
-      while LNewLine < TopLine do
-      begin
-        TopLine := TopLine - 2;
-        if TopLine <> LPreviousLine then
-          LPreviousLine := TopLine
-        else
-          Break;
-        Application.ProcessMessages;
-      end
-    else
-      while LNewLine > TopLine do
-      begin
-        TopLine := TopLine + 2;
-        if TopLine <> LPreviousLine then
-          LPreviousLine := TopLine
-        else
-          Break;
-        Application.ProcessMessages;
-      end;
-  end;
+    TopLine := LNewLine - VisibleLines div 2;
 end;
 
 procedure TBCBaseEditor.DoOnPaint;
@@ -6639,7 +6616,7 @@ var
   LDisplayPosition: TBCEditorDisplayPosition;
   LFoldRange: TBCEditorCodeFoldingRange;
   LPoint: TPoint;
-  i, j, k, LScrolledXBy, LScrolledYBy: Integer;
+  i, j, LScrolledXBy: Integer;
   LRect: TRect;
   LHintWindow: THintWindow;
   S: string;
@@ -6652,31 +6629,10 @@ begin
     SetCursor(Screen.Cursors[crArrow]);
     if FMinimap.Moving then
     begin
-      i := PixelsToMinimapRowColumn(X, Y).Row;
-      j := TopLine + VisibleLines div 2;
-      k := Abs(i - j);
-      LScrolledYBy := 1;
-      if k > VisibleLines div 4 then
-        LScrolledYBy := 2
-      else
-      if k > VisibleLines div 2 then
-        LScrolledYBy := 5;
-      if i < j then
-      begin
-        TopLine := Max(TopLine - LScrolledYBy, 1);
-        if moShowMoveDirectionCursors in FMinimap.Options then
-          SetCursor(Screen.Cursors[crArrowUp])
-      end
-      else
-      if i > j then
-      begin
-        TopLine := Min(TopLine + LScrolledYBy, Lines.Count);
-        if moShowMoveDirectionCursors in FMinimap.Options then
-          SetCursor(Screen.Cursors[crArrowDown])
-      end;
+      TopLine := PixelsToMinimapRowColumn(X, Y).Row - VisibleLines div 2;
       Paint;
     end;
-    if FMinimap.Clicked and not FMinimap.Moving then
+    if {FMinimap.Clicked and} not FMinimap.Moving then
       if (ssLeft in Shift) and MouseCapture then
         FMinimap.Moving := True;
     Exit;
@@ -6816,7 +6772,7 @@ var
   LCursorPoint: TPoint;
   LTextPosition: TBCEditorTextPosition;
 begin
-  FMinimap.Clicked := False;
+  //FMinimap.Clicked := False;
   FMinimap.Moving := False;
 
   inherited MouseUp(Button, Shift, X, Y);
@@ -12117,10 +12073,10 @@ begin
         else
         begin
           if LAutoComplete then
-            LKeepGoing := (FRedoList.LastChangeReason <> crAutoCompleteEnd)
+            LKeepGoing := FRedoList.LastChangeReason <> crAutoCompleteEnd
           else
           if LPasteAction then
-            LKeepGoing := (FRedoList.LastChangeReason <> crPasteEnd)
+            LKeepGoing := FRedoList.LastChangeReason <> crPasteEnd
           else
           if LUndoItem.ChangeNumber = LOldChangeNumber then
             LKeepGoing := True

@@ -518,13 +518,17 @@ begin
 end;
 
 procedure ImportHighlighter(Highlighter: TBCEditorHighlighter; JSONObject: TJsonObject);
+var
+  Editor: TBCBaseEditor;
 begin
+  Editor := Highlighter.Editor as TBCBaseEditor;
+
   Highlighter.Clear;
 
   ImportInfo(Highlighter.Info, JSONObject['Highlighter']['Info'].ObjectValue);
-  ImportEditorProperties(Highlighter.Editor as TBCBaseEditor, JSONObject['Highlighter']['Editor'].ObjectValue);
+  ImportEditorProperties(Editor, JSONObject['Highlighter']['Editor'].ObjectValue);
   ImportRange(Highlighter.MainRules, JSONObject['Highlighter']['MainRules'].ObjectValue);
-  ImportCodeFolding(Highlighter.Editor as TBCBaseEditor, Highlighter.CodeFoldingRegions, JSONObject['CodeFolding'].ObjectValue);
+  ImportCodeFolding(Editor, Highlighter.CodeFoldingRegions, JSONObject['CodeFolding'].ObjectValue);
   ImportMatchingPair(Highlighter.MatchingPairs, JSONObject['MatchingPair'].ObjectValue);
   ImportCompletionProposal(Highlighter.CompletionProposalSkipRegions, JSONObject['CompletionProposal'].ObjectValue);
 end;

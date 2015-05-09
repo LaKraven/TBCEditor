@@ -26,6 +26,10 @@ begin
     Highlighter.LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Highlighter }
     Highlighter.LoadColorsFromFile(Format('%sColors\%s.json', [LFilePath, 'Default']); { Color }
     LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Editor file } 
+    ...
+    ClearCodeFolding;
+    Lines.Text := Highlighter.Info.General.Sample; { Set text }
+    InitCodeFolding;
   end;
 end;
 ```

@@ -3,14 +3,13 @@ unit TBCEditorDemo.Forms.Main;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, BCCommon.Forms.Base, 
-  Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Types,
-  BCEditor.Highlighter, BCEditor.Editor.Base, BCCommon.Frames.Search, Vcl.Buttons, Vcl.AppEvnts,
-  System.Actions, Vcl.ActnList, BCEditor.Print, BCCommon.Images, BCComponents.SkinProvider, BCComponents.SkinManager, BCControls.Panel,
-  BCControls.StatusBar, sComboBox, sToolBar, BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls,
-  EhLibVCL, DBAxisGridsEh, ObjectInspectorEh, BCControls.Splitter, GridsEh, Vcl.ToolWin, BCCommon.Frames.Base, sPanel,
-  BCComponents.MultiStringHolder, sSkinManager, sStatusBar, sSplitter, acTitleBar, sSkinProvider,
-  System.Win.TaskbarCore, Vcl.Taskbar, sDialogs;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
+  BCCommon.Forms.Base, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Highlighter,
+  BCEditor.Editor.Base, BCCommon.Frames.Search, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
+  BCCommon.Images, BCComponents.SkinProvider, BCComponents.SkinManager, BCControls.Panel, BCControls.StatusBar,
+  BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
+  BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
+  sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs;
 
 const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.0b';
@@ -152,8 +151,7 @@ begin
   EditorPrint.Header.Clear;
   EditorPrint.Footer.Clear;
 
-  SetHeaderFooter(0, Format(LanguageDataModule.GetConstant('PrintedBy'),
-    [Application.Title]));
+  SetHeaderFooter(0, Format(LanguageDataModule.GetConstant('PrintedBy'), [Application.Title]));
   SetHeaderFooter(1, LanguageDataModule.GetConstant('PreviewDocumentPage'));
   SetHeaderFooter(2, Editor.DocumentName);
   SetHeaderFooter(3, '$DATE$ $TIME$');
@@ -269,9 +267,6 @@ begin
       LMenuItem.Action := LAction;
       LMenuItem.RadioItem := True;
       LMenuItem.AutoCheck := True;
-      //if i mod 20 = 0 then
-      //  LMenuItem.Break := mbBreak;
-      //Inc(i);
       PopupMenuHighlighters.Items.Add(LMenuItem);
       if LAction.Caption = 'Object Pascal' then
       begin

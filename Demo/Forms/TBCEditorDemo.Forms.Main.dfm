@@ -178,7 +178,6 @@ inherited MainForm: TMainForm
           Height = 27
           inherited LabelSearchCount: TBCLabelFX
             Left = 388
-            Height = 27
           end
         end
         inherited PanelToolBar: TBCPanel

@@ -12538,15 +12538,10 @@ initialization
   ClipboardFormatBorland := RegisterClipboardFormat(BCEDITOR_CLIPBOARD_FORMAT_BORLAND);
   ClipboardFormatMSDev := RegisterClipboardFormat(BCEDITOR_CLIPBOARD_FORMAT_MSDEV);
 
-  Screen.Cursors[crArrowUp] := LoadCursor(hInstance, BCEDITOR_CURSOR_ARROWUP);
-  Screen.Cursors[crArrowDown] := LoadCursor(hInstance, BCEDITOR_CURSOR_ARROWDOWN);
-
 finalization
   {$IFDEF USE_VCL_STYLES}
   TCustomStyleEngine.UnregisterStyleHook(TBCBaseEditor, TBCEditorStyleHook);
   {$ENDIF}
-  DestroyIcon(Screen.Cursors[crArrowUp]);
-  DestroyIcon(Screen.Cursors[crArrowDown]);
 
 end.
 

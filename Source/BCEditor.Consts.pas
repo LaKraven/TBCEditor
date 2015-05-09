@@ -66,11 +66,6 @@ const
   clLeftMarginFontForeground = $00CC9999;
   clLeftMarginBookmarkBackground = $00F4F4F4;
   clIndentHighlight = $00CC9999;
-  { Cursors }
-  crArrowUp = 1;
-  crArrowDown = 2;
-  BCEDITOR_CURSOR_ARROWDOWN = 'ARROWDOWN';
-  BCEDITOR_CURSOR_ARROWUP = 'ARROWUP';
 
 implementation
 

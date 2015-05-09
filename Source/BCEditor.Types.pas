@@ -196,7 +196,7 @@ type
   TBCEditorMatchingPairOption = (mpoHighlightAfterToken, mpoHighlightUnmatched);
   TBCEditorMatchingPairOptions = set of TBCEditorMatchingPairOption;
 
-  TBCEditorMinimapOption = (moShowMoveDirectionCursors);
+  TBCEditorMinimapOption = (moShowIndentGuides);
   TBCEditorMinimapOptions = set of TBCEditorMinimapOption;
 
   TBCEditorUndoOption = (uoGroupUndo);

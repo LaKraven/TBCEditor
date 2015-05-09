@@ -7096,7 +7096,8 @@ begin
   LOldColor := Canvas.Pen.Color;
   LDeepestLevel := 0;
 
-  if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) then
+  if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
+    ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
     for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
       if (FAllCodeFoldingRanges[i].IndentLevel > LDeepestLevel) and (CaretY >= FAllCodeFoldingRanges[i].FromLine) and
@@ -7545,12 +7546,6 @@ begin
     LTextHeight := Max(FTextHeight - 8, 0) shr 4;
     with ALineRect do
       X := Top + (Bottom - Top) shr 1;
-
-    {with LCharRect do
-    begin
-      Top := X - LTextHeight;
-      Bottom := X + 2 + LTextHeight;
-    end;  }
 
     LCharPosition := 1;
     while LPLine^ <> #0 do
@@ -8319,7 +8314,6 @@ var
         end;
         PaintHighlightToken(True);
         PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy);
-
         PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);

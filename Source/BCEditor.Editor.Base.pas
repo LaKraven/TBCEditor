@@ -243,7 +243,6 @@ type
     procedure OpenLink(AURI: string; ALinkType: Integer);
     procedure ProperSetLine(ALine: Integer; const ALineText: string);
     procedure RightMarginChanged(Sender: TObject);
-    procedure ScanCodeFoldingRanges(var ATopFoldRanges: TBCEditorAllCodeFoldingRanges; AStrings: TStrings);
     procedure ScrollChanged(Sender: TObject);
     procedure ScrollTimerHandler(Sender: TObject);
     procedure SearchChanged(AEvent: TBCEditorSearchChanges);
@@ -394,6 +393,7 @@ type
     procedure RedoItem;
     procedure RepaintGuides;
     procedure ResetCaret(DoUpdate: Boolean = True);
+    procedure ScanCodeFoldingRanges(var ATopFoldRanges: TBCEditorAllCodeFoldingRanges; AStrings: TStrings); virtual;
     procedure ScanMatchingPair;
     procedure SetAlwaysShowCaret(const Value: Boolean);
     procedure SetBreakWhitespace(Value: Boolean);

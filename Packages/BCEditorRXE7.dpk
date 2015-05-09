@@ -30,11 +30,10 @@ package BCEditorRXE7;
 {$IMPLICITBUILD ON}
 
 requires
-  vcl,
-  vcldb,
-  vclx,
   rtl,
-  vclimg;
+  vcl,
+  dbrtl,
+  vcldb;
 
 contains
   BCEditor.Consts in '..\Source\BCEditor.Consts.pas',

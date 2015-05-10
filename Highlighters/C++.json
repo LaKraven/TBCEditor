@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "1.5.2015",
+                "Date": "10.5.2015",
                 "Sample": "// Hello World in C++\r\n\r\n#include <iostream>\r\n\r\nint main()\r\n{\r\n    std::cout << \"Hello, world!\" << std::endl;\r\n    return 0;\r\n}"
             },
             "Author": {
@@ -53,6 +53,40 @@
                         "TokenRange": {
                             "Open": "'",
                             "Close": "'"
+                        },
+                        "SubRules": {
+                            "Range": [
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True",
+                                        "CloseOnTerm": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\\'",
+                                        "Close": ""
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True",
+                                        "CloseOnTerm": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\\\\",
+                                        "Close": ""
+                                    }
+                                }
+                            ]
                         }
                     },
                     {
@@ -67,6 +101,40 @@
                         "TokenRange": {
                             "Open": "\"",
                             "Close": "\""
+                        },
+                        "SubRules": {
+                            "Range": [
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True",
+                                        "CloseOnTerm": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\\\"",
+                                        "Close": ""
+                                    }
+                                },
+                                {
+                                    "Type": "String",
+                                    "Attributes": {
+                                        "Element": "String",
+                                        "ParentBackground": "True"
+                                    },
+                                    "Properties": {
+                                        "CloseOnEol": "True",
+                                        "CloseOnTerm": "True"
+                                    },
+                                    "TokenRange": {
+                                        "Open": "\\\\",
+                                        "Close": ""
+                                    }
+                                }
+                            ]
                         }
                     },
                     {

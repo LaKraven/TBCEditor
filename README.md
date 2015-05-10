@@ -2,7 +2,9 @@ Version 1.0 beta released. Use the Issues page to report bugs or send them direc
 
 <h3>Build requires</h3>
 
-  * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
+<a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
+
+I support Delphi versions from XE4 to XE8. 
 
 <h3>Conditional compilation</h3>
 

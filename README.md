@@ -4,7 +4,7 @@ Version 1.0 beta released. Use the Issues page to report bugs or send them direc
 
 <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
 
-I support Delphi versions from XE4 to XE8. 
+I support Delphi versions from XE4 to XE8. Eric Grange has made a Delphi XE backport: https://bitbucket.org/egrange/tbceditorxe
 
 <h3>Conditional compilation</h3>
 

@@ -3538,6 +3538,13 @@ var
       Result := (TextPtr - 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
   end;
 
+  function IsNextCharStringEscape(TextPtr: PChar): Boolean;
+  begin
+    Result := False;
+    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
+      Result := (TextPtr + 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+  end;
+
   function SkipRegionsOpen: Boolean;
   var
     i, j: Integer;
@@ -3549,7 +3556,7 @@ var
         j := Highlighter.CodeFoldingRegions.SkipRegions.Count - 1;
         for i := 0 to j do
         if (LTextPtr^ = PChar(Highlighter.CodeFoldingRegions.SkipRegions[i].OpenToken)^) and
-          not IsPreviousCharStringEscape(LTextPtr) then { if the first character is a match and previous is not a string escape char }
+          not IsPreviousCharStringEscape(LTextPtr) and not IsNextCharStringEscape(LTextPtr) then { if the first character is a match and previous is not a string escape char }
         begin
           LKeyWordPtr := PChar(Highlighter.CodeFoldingRegions.SkipRegions[i].OpenToken);
           LBookmarkTextPtr := LTextPtr;
@@ -7450,6 +7457,8 @@ begin
   else
     Exit;
 
+  if Assigned(FCurrentMatchingPairMatch.TokenAttribute) then
+    FTextDrawer.SetStyle(FCurrentMatchingPairMatch.TokenAttribute.Style);
   FTextDrawer.SetForegroundColor(Font.Color);
 
   LCurrentCaret := CaretPosition;
@@ -12328,15 +12337,16 @@ end;
 
 procedure TBCBaseEditor.SelectAll;
 var
-  LLastTextPosition: TBCEditorTextPosition;
+  LOldCaretPosition, LLastTextPosition: TBCEditorTextPosition;
 begin
+  LOldCaretPosition := CaretPosition;
   LLastTextPosition.Char := 1;
   LLastTextPosition.Line := Lines.Count;
   if LLastTextPosition.Line > 0 then
     Inc(LLastTextPosition.Char, Length(Lines[LLastTextPosition.Line - 1]))
   else
     LLastTextPosition.Line := 1;
-  SetCaretAndSelection(LLastTextPosition, GetTextPosition(1, 1), LLastTextPosition);
+  SetCaretAndSelection(LOldCaretPosition, GetTextPosition(1, 1), LLastTextPosition);
 end;
 
 procedure TBCBaseEditor.SetBookmark(Index: Integer; X: Integer; Y: Integer);

@@ -425,6 +425,8 @@ type
 
     function CaretInView: Boolean;
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
+    function FindPrevious: Boolean;
+    function FindNext: Boolean;
     function GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
     function GetWordAtPixels(X, Y: Integer): string;
@@ -473,8 +475,6 @@ type
     procedure EnsureCursorPositionVisible; overload;
     procedure EnsureCursorPositionVisible(ForceToMiddle: Boolean; EvenIfVisible: Boolean = False); overload;
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer); virtual;
-    procedure FindPrevious;
-    procedure FindNext;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ALine: Integer);
     procedure HookTextBuffer(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
@@ -9577,6 +9577,51 @@ begin
   end;
 end;
 
+function TBCBaseEditor.FindPrevious: Boolean;
+begin
+  Result := False;
+  if Trim(FSearch.SearchText) = '' then
+    Exit;
+  FSearch.Options := FSearch.Options + [soBackwards];
+  if SearchText(FSearch.SearchText) = 0 then
+  begin
+    if soBeepIfStringNotFound in FSearch.Options then
+      Beep;
+    SelectionEndPosition := SelectionBeginPosition;
+    CaretPosition := SelectionBeginPosition;
+  end
+  else
+    Result := True;
+end;
+
+function TBCBaseEditor.FindNext: Boolean;
+begin
+  Result := False;
+  if Trim(FSearch.SearchText) = '' then
+    Exit;
+  FSearch.Options := FSearch.Options - [soBackwards];
+  if SearchText(FSearch.SearchText) = 0 then
+  begin
+    if soBeepIfStringNotFound in FSearch.Options then
+      Beep;
+    SelectionBeginPosition := SelectionEndPosition;
+    CaretPosition := SelectionBeginPosition;
+    if (CaretX = 1) and (CaretY = 1) then
+    begin
+      if soShowStringNotFound in FSearch.Options then
+        MessageDialog(Format(SBCEditorSearchStringNotFound, [FSearch.SearchText]), mtInformation, [mbOK]);
+    end
+    else
+    if MessageDialog(SBCEditorSearchMatchNotFound, mtConfirmation, [mbYes, mbNo]) = MrYes then
+    begin
+      CaretZero;
+      Result := FindNext;
+    end;
+  end
+  else
+    Result := True;
+end;
+
 function TBCBaseEditor.GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
 var
   i: Integer;
@@ -11653,45 +11698,6 @@ begin
     end;
   finally
     DecPaintLock;
-  end;
-end;
-
-procedure TBCBaseEditor.FindPrevious;
-begin
-  if Trim(FSearch.SearchText) = '' then
-    Exit;
-  FSearch.Options := FSearch.Options + [soBackwards];
-  if SearchText(FSearch.SearchText) = 0 then
-  begin
-    if soBeepIfStringNotFound in FSearch.Options then
-      Beep;
-    SelectionEndPosition := SelectionBeginPosition;
-    CaretPosition := SelectionBeginPosition;
-  end;
-end;
-
-procedure TBCBaseEditor.FindNext;
-begin
-  if Trim(FSearch.SearchText) = '' then
-    Exit;
-  FSearch.Options := FSearch.Options - [soBackwards];
-  if SearchText(FSearch.SearchText) = 0 then
-  begin
-    if soBeepIfStringNotFound in FSearch.Options then
-      Beep;
-    SelectionBeginPosition := SelectionEndPosition;
-    CaretPosition := SelectionBeginPosition;
-    if (CaretX = 1) and (CaretY = 1) then
-    begin
-      if soShowStringNotFound in FSearch.Options then
-        MessageDialog(Format(SBCEditorSearchStringNotFound, [FSearch.SearchText]), mtInformation, [mbOK]);
-    end
-    else
-    if MessageDialog(SBCEditorSearchMatchNotFound, mtConfirmation, [mbYes, mbNo]) = MrYes then
-    begin
-      CaretZero;
-      FindNext;
-    end;
   end;
 end;
 

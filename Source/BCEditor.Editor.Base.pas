@@ -1836,17 +1836,8 @@ begin
 end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
-var
-  LBeginTextPosition: TBCEditorTextPosition;
-  LEndTextPosition: TBCEditorTextPosition;
 begin
-  LBeginTextPosition := GetSelectionBeginPosition;
-  LEndTextPosition := GetSelectionEndPosition;
-  SetSelectionBeginPosition(WordStart);
-  SetSelectionEndPosition(WordEnd);
-  Result := SelectedText;
-  SetSelectionBeginPosition(LBeginTextPosition);
-  SetSelectionEndPosition(LEndTextPosition);
+  Result := GetWordAtRowColumn(GetTextPosition(CaretX, CaretY));
 end;
 
 function TBCBaseEditor.GetWordAtMouse: string;

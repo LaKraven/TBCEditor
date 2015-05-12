@@ -25,9 +25,9 @@ type
     FAltEnabled: Boolean;
     FAlwaysShowCaret: Boolean;
     FBackgroundColor: TColor;
-    FBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint;
-    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint;
-    FBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaint;
+    FBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent;
+    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent;
+    FBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent;
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
     FBreakWhitespace: Boolean;
@@ -96,6 +96,7 @@ type
     FOnClearMark: TBCEditorBookmarkEvent;
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
     FOnContextHelp: TBCEditorContextHelpEvent;
+    FOnCustomLineColors: TBCEditorCustomLineColorsEvent;
     FOnDropFiles: TBCEditorDropFilesEvent;
     FOnKeyPressW: TBCEditorKeyPressWEvent;
     FOnLeftMarginClick: TLeftMarginClickEvent;
@@ -153,6 +154,7 @@ type
     function CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingTreeEndForLine(ALine: Integer): Boolean;
     function CodeFoldingTreeLineForLine(ALine: Integer): Boolean;
+    function DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
     function DoOnCodeFoldingHintClick(X, Y: Integer): Boolean;
     function DoTrimTrailingSpaces(ALine: Integer): Integer; overload;
     function ExtraLineSpacing: Integer;
@@ -553,13 +555,14 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
-    property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
-    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
-    property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaint read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
+    property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
+    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
+    property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnClearBookmark: TBCEditorBookmarkEvent read FOnClearMark write FOnClearMark;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
     property OnContextHelp: TBCEditorContextHelpEvent read FOnContextHelp write FOnContextHelp;
+    property OnCustomLineColors: TBCEditorCustomLineColorsEvent read FOnCustomLineColors write FOnCustomLineColors;
     property OnDropFiles: TBCEditorDropFilesEvent read FOnDropFiles write FOnDropFiles;
     property OnKeyPress: TBCEditorKeyPressWEvent read FOnKeyPressW write FOnKeyPressW;
     property OnLeftMarginClick: TLeftMarginClickEvent read FOnLeftMarginClick write FOnLeftMarginClick;
@@ -924,6 +927,15 @@ begin
     Result := True;
     Break;
   end;
+end;
+
+function TBCBaseEditor.DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
+begin
+  Result := False;
+  AForeground := clNone;
+  ABackground := clNone;
+  if Assigned(FOnCustomLineColors) then
+    FOnCustomLineColors(Self, ALine, Result, AForeground, ABackground);
 end;
 
 function TBCBaseEditor.DoOnCodeFoldingHintClick(X, Y: Integer): Boolean;
@@ -7744,6 +7756,9 @@ var
   LSelectionForegroundColor, LSelectionBackgroundColor: TColor;
   LSelectionStartPosition: TBCEditorDisplayPosition;
   LTokenHelper: TBCEditorTokenHelper;
+  LCustomLineColors: Boolean;
+  LCustomForegroundColor: TColor;
+  LCustomBackgroundColor: TColor;
 
   function GetBackgroundColor: TColor;
   var
@@ -8018,6 +8033,11 @@ var
         if (LCurrentLine >= RowToLine(TopLine)) and (LCurrentLine < RowToLine(TopLine + VisibleLines)) then
           LBackgroundColor := FActiveLine.Color;
 
+      if LCustomLineColors and (LCustomForegroundColor <> clNone) then
+        LForegroundColor := LCustomForegroundColor;
+      if LCustomLineColors and (LCustomBackgroundColor <> clNone) then
+        LBackgroundColor := LCustomBackgroundColor;
+
       if LIsTokenSelected then
       begin
         if LFirstUnselectedPartOfToken then
@@ -8058,6 +8078,12 @@ var
       if AMinimap then
         if (LCurrentLine >= RowToLine(TopLine)) and (LCurrentLine < RowToLine(TopLine + VisibleLines)) then
           LBackgroundColor := FActiveLine.Color;
+
+      if LCustomLineColors and (LCustomForegroundColor <> clNone) then
+        LForegroundColor := LCustomForegroundColor;
+      if LCustomLineColors and (LCustomBackgroundColor <> clNone) then
+        LBackgroundColor := LCustomBackgroundColor;
+
       if LIsComplexLine then
       begin
         X1 := ColumnToXValue(LLineSelectionStart, AMinimap);
@@ -8254,6 +8280,8 @@ var
 
       for LCurrentRow := LStartRow to LEndRow do
       begin
+        LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
+
         if GetWordWrap then
         begin
           LDisplayPosition.Row := LCurrentRow;

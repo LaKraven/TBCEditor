@@ -54,6 +54,7 @@ type
     property OnClick;
     property OnCommandProcessed;
     property OnContextHelp;
+    property OnCustomLineColors;
     property OnDblClick;
     property OnDragDrop;
     property OnDragOver;

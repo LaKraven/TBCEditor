@@ -3,14 +3,12 @@ unit BCEditor.Editor.Scroll;
 interface
 
 uses
-  System.Classes, System.UITypes, Vcl.Forms, BCEditor.Types, BCEditor.Editor.Scroll.Hint;
+  System.Classes, System.UITypes, BCEditor.Types, BCEditor.Editor.Scroll.Hint;
 
 const
   BCEDITOR_DEFAULT_SCROLL_OPTIONS = [soAutosizeMaxWidth, soPastEndOfLine, soShowHint];
 
 type
-  TScrollEvent = procedure(Sender: TObject; ScrollBar: TScrollBarKind) of object;
-
   TBCEditorScroll = class(TPersistent)
   strict private
     FBars: System.UITypes.TScrollStyle;

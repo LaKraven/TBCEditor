@@ -81,6 +81,7 @@ type
     FMatchingPairOpenDuplicate, FMatchingPairCloseDuplicate: array of Integer;
     FMatchingPairMatchStack: array of TBCEditorMatchingPairTokenMatch;
     FMinimap: TBCEditorMinimap;
+    FMinimapClickOffsetY: Integer;
     FModified: Boolean;
     FMouseDownX: Integer;
     FMouseDownY: Integer;
@@ -104,7 +105,7 @@ type
     FOnProcessUserCommand: TBCEditorProcessCommandEvent;
     FOnReplaceText: TBCEditorReplaceTextEvent;
     FOnRightMarginMouseUp: TNotifyEvent;
-    FOnScroll: TScrollEvent;
+    FOnScroll: TBCEditorScrollEvent;
     FOptions: TBCEditorOptions;
     FOriginalLines: TBCEditorLines;
     FOriginalRedoList: TBCEditorUndoList;
@@ -179,7 +180,7 @@ type
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
     function GetSelectionAvailable: Boolean;
     function GetSelectedText: string;
-    function GetSearchCount: Integer;
+    function GetSearchResultCount: Integer;
     function GetSelectionBeginPosition: TBCEditorTextPosition;
     function GetSelectionEndPosition: TBCEditorTextPosition;
     function GetText: string;
@@ -196,6 +197,7 @@ type
     function MinPoint(const APoint1, APoint2: TPoint): TPoint;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
+    function PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
@@ -563,7 +565,7 @@ type
     property OnProcessUserCommand: TBCEditorProcessCommandEvent read FOnProcessUserCommand write FOnProcessUserCommand;
     property OnReplaceText: TBCEditorReplaceTextEvent read FOnReplaceText write FOnReplaceText;
     property OnRightMarginMouseUp: TNotifyEvent read FOnRightMarginMouseUp write FOnRightMarginMouseUp;
-    property OnScroll: TScrollEvent read FOnScroll write FOnScroll;
+    property OnScroll: TBCEditorScrollEvent read FOnScroll write FOnScroll;
     property Options: TBCEditorOptions read FOptions write SetOptions default BCEDITOR_DEFAULT_OPTIONS;
     property PaintLock: Integer read FPaintLock;
     property ParentColor default False;
@@ -574,7 +576,7 @@ type
     property RightMargin: TBCEditorRightMargin read FRightMargin write SetRightMargin;
     property Scroll: TBCEditorScroll read FScroll write SetScroll;
     property Search: TBCEditorSearch read FSearch write SetSearch;
-    property SearchCount: Integer read GetSearchCount;
+    property SearchResultCount: Integer read GetSearchResultCount;
     property Selection: TBCEditorSelection read FSelection write SetSelection;
     property SelectionAvailable: Boolean read GetSelectionAvailable;
     property SelectionBeginPosition: TBCEditorTextPosition read GetSelectionBeginPosition write SetSelectionBeginPosition;
@@ -1773,7 +1775,7 @@ begin
     Result := DoGetSelectedText;
 end;
 
-function TBCBaseEditor.GetSearchCount: Integer;
+function TBCBaseEditor.GetSearchResultCount: Integer;
 begin
   Result := FSearchLines.Count;
 end;
@@ -2143,6 +2145,12 @@ function TBCBaseEditor.PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplay
 begin
   Result.Column := Max(1, LeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FMinimap.CharWidth));
   Result.Row := Max(1, FMinimap.TopLine + (Y div FMinimap.CharHeight));
+end;
+
+function TBCBaseEditor.PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+begin
+  Result.Column := Max(1, LeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FMinimap.CharWidth));
+  Result.Row := Max(1, RoundCorrect(DisplayLineCount * ((Y / FMinimap.CharHeight) / Min(DisplayLineCount, FMinimap.VisibleLines))) );
 end;
 
 function TBCBaseEditor.PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
@@ -6055,14 +6063,30 @@ end;
 
 procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
-  LNewLine: Integer;
+  LNewLine, LPreviousLine: Integer;
 begin
+  LPreviousLine := -1;
   LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
 
-  if (LNewLine > TopLine) and (LNewLine < TopLine + VisibleLines) then
+  if (LNewLine >= TopLine) and (LNewLine <= TopLine + VisibleLines) then
     CaretY := LNewLine
   else
-    TopLine := LNewLine - VisibleLines div 2;
+  begin
+    LNewLine := LNewLine - VisibleLines div 2;
+    if LNewLine < TopLine then
+    while LNewLine < TopLine do
+    begin
+      TopLine := TopLine - 4;
+      Paint;
+    end
+    else
+    while LNewLine > TopLine do
+    begin
+      TopLine := TopLine + 4;
+      Paint;
+    end;
+  end;
+  FMinimapClickOffsetY := LNewLine - TopLine;
 end;
 
 procedure TBCBaseEditor.DoOnPaint;
@@ -6449,21 +6473,20 @@ begin
   LEndPosition := FSelectionEndPosition;
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
-  if not FMinimap.Moving and FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  LWasSelected := False;
+  LStartDrag := False;
+  if Button = mbLeft then
+  begin
+    LWasSelected := SelectionAvailable;
+    FMouseDownX := X;
+    FMouseDownY := Y;
+  end;
+
+  if not FMinimap.Dragging and FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     DoOnMinimapClick(Button, X, Y);
     Exit;
   end;
-
-  LWasSelected := False;
-  LStartDrag := False;
-  if Button = mbLeft then
-    if SelectionAvailable then
-    begin
-      LWasSelected := True;
-      FMouseDownX := X;
-      FMouseDownY := Y;
-    end;
 
   inherited MouseDown(Button, Shift, X, Y);
 
@@ -6620,6 +6643,7 @@ var
   LRect: TRect;
   LHintWindow: THintWindow;
   S: string;
+  LTopLine: Integer;
 begin
   if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
     Exit;
@@ -6627,14 +6651,20 @@ begin
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     SetCursor(Screen.Cursors[crArrow]);
-    if FMinimap.Moving then
+    if FMinimap.Dragging then
     begin
-      TopLine := PixelsToMinimapRowColumn(X, Y).Row - VisibleLines div 2;
-      Paint;
+      LTopLine := PixelsToMinimapMouseMoveRowColumn(X, Y).Row - FMinimapClickOffsetY;
+      if TopLine <> LTopLine then
+      begin
+        TopLine := LTopLine;
+        OutputDebugString(PChar(Format('Y = %d, TopLine = %d, Row = %d, Offset = %d', [Y, TopLine,
+          PixelsToMinimapMouseMoveRowColumn(X, Y).Row, FMinimapClickOffsetY])));
+        Paint;
+      end;
     end;
-    if {FMinimap.Clicked and} not FMinimap.Moving then
-      if (ssLeft in Shift) and MouseCapture then
-        FMinimap.Moving := True;
+    if not FMinimap.Dragging then
+      if (ssLeft in Shift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
+        FMinimap.Dragging := True;
     Exit;
   end;
 
@@ -6773,7 +6803,7 @@ var
   LTextPosition: TBCEditorTextPosition;
 begin
   //FMinimap.Clicked := False;
-  FMinimap.Moving := False;
+  FMinimap.Dragging := False;
 
   inherited MouseUp(Button, Shift, X, Y);
 

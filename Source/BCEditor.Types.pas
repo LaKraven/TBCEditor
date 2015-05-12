@@ -3,7 +3,7 @@ unit BCEditor.Types;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Vcl.Graphics, Vcl.Controls, BCEditor.Highlighter.Attributes, System.SysUtils;
+  Winapi.Windows, System.Classes, Vcl.Forms, Vcl.Graphics, Vcl.Controls, BCEditor.Highlighter.Attributes, System.SysUtils;
 
 type
   TBCEditorCharMethod = function(AChar: Char): Boolean of object;
@@ -19,7 +19,9 @@ type
   TBCEditorReplaceTextEvent = procedure(Sender: TObject; const ASearch, AReplace: string; ALine, AColumn: Integer;
     ADeleteLine: Boolean; var AAction: TBCEditorReplaceAction) of object;
 
-  TBCEditorStateFlag = (sfCaretChanged, sfScrollbarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
+  TBCEditorScrollEvent = procedure(Sender: TObject; ScrollBar: TScrollBarKind) of object;
+
+  TBCEditorStateFlag = (sfCaretChanged, sfScrollBarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
     sfPossibleLeftMarginClick, sfWaitForDragging, sfInsideRedo, sfLeftMarginDragging, sfJustIndented, sfCodeFoldingInfoClicked);
   TBCEditorStateFlags = set of TBCEditorStateFlag;
 

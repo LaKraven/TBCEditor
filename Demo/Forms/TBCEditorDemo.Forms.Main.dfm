@@ -131,6 +131,8 @@ inherited MainForm: TMainForm
       Minimap.Font.Height = -4
       Minimap.Font.Name = 'Courier New'
       Minimap.Font.Style = []
+      Minimap.Visible = True
+      Minimap.Width = 140
       RightMargin.Position = 80
       RightMargin.Visible = True
       Search.Enabled = False
@@ -176,8 +178,9 @@ inherited MainForm: TMainForm
         inherited PanelRight: TBCPanel
           Width = 400
           Height = 27
-          inherited LabelSearchCount: TBCLabelFX
+          inherited LabelSearchResultCount: TBCLabelFX
             Left = 388
+            Height = 27
           end
         end
         inherited PanelToolBar: TBCPanel

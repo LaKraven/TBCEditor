@@ -50,9 +50,10 @@ type
     property Anchors;
     property BackgroundColor;
     property BorderStyle;
+    property OnBookmarkPanelBeforePaint;
+    property OnBookmarkPanelAfterPaint;
     property Caret;
     property CodeFolding;
-    //property Color;
     property CompletionProposal;
     property Constraints;
     property Ctl3D;

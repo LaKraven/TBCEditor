@@ -30,7 +30,6 @@ type
     property BorderStyle;
     property Caret;
     property CodeFolding;
-    //property Color;
     property CompletionProposal;
     property Constraints;
     property Ctl3D;
@@ -47,6 +46,8 @@ type
     property MatchingPair;
     property Minimap;
     property Name;
+    property OnBookmarkPanelBeforePaint;
+    property OnBookmarkPanelAfterPaint;
     property OnChange;
     property OnClearBookmark;
     property OnClick;

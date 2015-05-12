@@ -25,6 +25,8 @@ type
     FAltEnabled: Boolean;
     FAlwaysShowCaret: Boolean;
     FBackgroundColor: TColor;
+    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint;
+    FBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint;
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
     FBreakWhitespace: Boolean;
@@ -550,6 +552,8 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
+    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
+    property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnClearBookmark: TBCEditorBookmarkEvent read FOnClearMark write FOnClearMark;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
@@ -7211,7 +7215,7 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
         else
           Y := 0;
         with FLeftMargin.Bookmarks do
-          Images.Draw(Canvas, Panel.LeftMargin + ALeftMarginOffset, (aMarkRow - TopLine) * LineHeight + Y,
+          Images.Draw(Canvas, Panel.LeftMargin + ALeftMarginOffset, (AMarkRow - TopLine) * LineHeight + Y,
             ABookMark.ImageIndex);
         Inc(ALeftMarginOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
       end;
@@ -7246,7 +7250,8 @@ var
   LTextSize: TSize;
   LLeftMarginWidth: Integer;
   LOldColor: TColor;
-  LineStateRect: TRect;
+  LLineStateRect: TRect;
+  LPanelRect: TRect;
   LPEditorLineAttribute: PBCEditorLineAttribute;
   LCodeFoldingRect: TRect;
 begin
@@ -7332,11 +7337,16 @@ begin
     Canvas.FillRect(AClipRect);
   { Bookmark panel }
   if FLeftMargin.Bookmarks.Panel.Visible then
+  begin
+    LPanelRect := System.Types.Rect(0, 0, FLeftMargin.Bookmarks.Panel.Width, ClientHeight);
     if FLeftMargin.Bookmarks.Panel.Color <> clNone then
     begin
       Canvas.Brush.Color := FLeftMargin.Bookmarks.Panel.Color;
-      Canvas.FillRect(System.Types.Rect(0, 0, FLeftMargin.Bookmarks.Panel.Width, ClientHeight));
+      Canvas.FillRect(LPanelRect);
     end;
+    if Assigned(FBookmarkPanelBeforePaint) then
+      FBookmarkPanelBeforePaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+  end;
   { Code folding }
   if FCodeFolding.Visible then
   begin
@@ -7415,8 +7425,8 @@ begin
   { Line state }
   if FLeftMargin.LineState.Enabled then
   begin
-    LineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
-    LineStateRect.Right := LineStateRect.Left + FLeftMargin.LineState.Width;
+    LLineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
+    LLineStateRect.Right := LLineStateRect.Left + FLeftMargin.LineState.Width;
     for LLine := aFirstRow to aLastRow do
     begin
       i := RowToLine(LLine) - 1;
@@ -7424,16 +7434,19 @@ begin
 
       if (i < Lines.Count) and (LPEditorLineAttribute.LineState <> lsNone) then
       begin
-        LineStateRect.Top := (LLine - TopLine) * LineHeight;
-        LineStateRect.Bottom := LineStateRect.Top + LineHeight;
+        LLineStateRect.Top := (LLine - TopLine) * LineHeight;
+        LLineStateRect.Bottom := LLineStateRect.Top + LineHeight;
         if LPEditorLineAttribute.LineState = lsNormal then
           Canvas.Brush.Color := FLeftMargin.LineState.Colors.Normal
         else
           Canvas.Brush.Color := FLeftMargin.LineState.Colors.Modified;
-        Canvas.FillRect(LineStateRect);
+        Canvas.FillRect(LLineStateRect);
       end;
     end;
   end;
+  if FLeftMargin.Bookmarks.Panel.Visible then
+    if Assigned(FBookmarkPanelAfterPaint) then
+      FBookmarkPanelAfterPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
 end;
 
 procedure TBCBaseEditor.PaintMatchingPair;

@@ -3,7 +3,7 @@ unit BCEditor.Editor.LeftMargin.Bookmarks.Panel;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, BCEditor.Consts;
+  System.Classes, Vcl.Graphics, BCEditor.Types, BCEditor.Consts;
 
 type
   TBCEditorLeftMarginBookMarkPanel = class(TPersistent)
@@ -11,6 +11,7 @@ type
     FColor: TColor;
     FLeftMargin: Integer;
     FOnChange: TNotifyEvent;
+    FOptions: TBCEditorLeftMarginBookMarkPanelOptions;
     FOtherMarkXOffset: Integer;
     FVisible: Boolean;
     FWidth: Integer;
@@ -27,6 +28,7 @@ type
     property Color: TColor read FColor write SetColor default clLeftMarginBookmarkBackground;
     property LeftMargin: Integer read FLeftMargin write SetLeftMargin default 2;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Options: TBCEditorLeftMarginBookMarkPanelOptions read FOptions write FOptions default [bpoToggleBookmarkByClick];
     property OtherMarkXOffset: Integer read FOtherMarkXOffset write SetOtherMarkXOffset default 12;
     property Visible: Boolean read FVisible write SetVisible default True;
     property Width: Integer read FWidth write SetWidth default 20;
@@ -44,6 +46,7 @@ begin
   FColor := clLeftMarginBookmarkbackground;
   FWidth := 20;
   FLeftMargin := 2;
+  FOptions := [bpoToggleBookmarkByClick];
   FVisible := True;
   FOtherMarkXOffset := 12;
 end;

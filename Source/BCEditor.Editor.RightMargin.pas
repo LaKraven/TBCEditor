@@ -29,7 +29,7 @@ type
   published
     property Colors: TBCEditorRightMarginColors read FColors write SetColors;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
-    property Options: TBCEditorRightMarginOptions read FOptions write FOptions default [reoMouseMove, reoShowMovingHint];
+    property Options: TBCEditorRightMarginOptions read FOptions write FOptions default [rmoMouseMove, rmoShowMovingHint];
     property Position: Integer read FPosition write SetPosition;
     property Visible: Boolean read FVisible write SetVisible;
   end;
@@ -45,7 +45,7 @@ begin
   FVisible := True;
   FPosition := 80;
   FColors := TBCEditorRightMarginColors.Create;
-  FOptions := [reoMouseMove, reoShowMovingHint];
+  FOptions := [rmoMouseMove, rmoShowMovingHint];
   FMoving := False;
   FMouseOver := False;
 end;

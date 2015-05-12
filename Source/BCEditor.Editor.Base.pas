@@ -6025,8 +6025,8 @@ var
   i: Integer;
   LOffset: Integer;
   LLine: Integer;
-  LBookmarks: TBCEditorBookmarks;
-  LBookMark: TBCEditorBookmark;
+  LMarks: TBCEditorBookmarks;
+  LMark: TBCEditorBookmark;
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
 begin
@@ -6051,22 +6051,22 @@ begin
     LLine := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
     if LLine <= Lines.Count then
     begin
-      Marks.GetMarksForLine(LLine, LBookmarks);
+      Marks.GetMarksForLine(LLine, LMarks);
       LOffset := 0;
-      LBookMark := nil;
+      LMark := nil;
       for i := 1 to BCEDITOR_MAX_BOOKMARKS do
       begin
-        if Assigned(LBookmarks[i]) then
+        if Assigned(LMarks[i]) then
         begin
           Inc(LOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
           if X < LOffset then
           begin
-            LBookMark := LBookmarks[i];
+            LMark := LMarks[i];
             Break;
           end;
         end;
       end;
-      FOnLeftMarginClick(Self, Button, X, Y, LLine, LBookMark);
+      FOnLeftMarginClick(Self, Button, X, Y, LLine, LMark);
     end;
   end;
 end;
@@ -6500,7 +6500,7 @@ begin
   inherited MouseDown(Button, Shift, X, Y);
 
   { Can move right edge? }
-  if (reoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
+  if (rmoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
     if (Button = mbLeft) and (Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3) then
     begin
       FRightMargin.Moving := True;
@@ -6623,7 +6623,8 @@ begin
   begin
     CaretX := 0;
     CaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
-    if LeftMargin.Bookmarks.Visible and (X < LeftMargin.Bookmarks.Panel.Width) then
+    if (X < LeftMargin.Bookmarks.Panel.Width) and LeftMargin.Bookmarks.Visible and
+      (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
       ToggleBookmark;
     Include(FStateFlags, sfPossibleLeftMarginClick);
   end;
@@ -6682,7 +6683,7 @@ begin
   if FMouseOverURI and not (ssCtrl in Shift) then
     FMouseOverURI := False;
 
-  if (reoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
+  if (rmoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
   begin
     FRightMargin.MouseOver := (Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3);
     if FRightMargin.Moving or FRightMargin.MouseOver then
@@ -6694,7 +6695,7 @@ begin
     if FRightMargin.Moving and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) then
     begin
       FRightMarginMovePosition := X;
-      if reoShowMovingHint in FRightMargin.Options then
+      if rmoShowMovingHint in FRightMargin.Options then
       begin
         LHintWindow := GetRightMarginHint;
 
@@ -6831,11 +6832,11 @@ begin
     Exit;
   end;
 
-  if (reoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
+  if (rmoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
     if FRightMargin.Moving then
     begin
       FRightMargin.Moving := False;
-      if reoShowMovingHint in FRightMargin.Options then
+      if rmoShowMovingHint in FRightMargin.Options then
         ShowWindow(GetRightMarginHint.Handle, SW_HIDE);
       with PixelsToRowColumn(FRightMarginMovePosition, Y) do
         FRightMargin.Position := Column;

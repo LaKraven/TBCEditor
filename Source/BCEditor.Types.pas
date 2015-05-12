@@ -111,9 +111,14 @@ type
   );
   TBCEditorCompletionProposalOptions = set of TBCEditorCompletionProposalOption;
 
+  TBCEditorLeftMarginBookMarkPanelOption = (
+    bpoToggleBookmarkByClick
+  );
+  TBCEditorLeftMarginBookMarkPanelOptions = set of TBCEditorLeftMarginBookMarkPanelOption;
+
   TBCEditorRightMarginOption = (
-    reoMouseMove,
-    reoShowMovingHint
+    rmoMouseMove,
+    rmoShowMovingHint
   );
   TBCEditorRightMarginOptions = set of TBCEditorRightMarginOption;
 

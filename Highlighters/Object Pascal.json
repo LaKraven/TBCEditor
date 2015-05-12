@@ -1,9 +1,9 @@
-{
+{   
     "Highlighter": {
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "1.5.2015",
+                "Date": "12.5.2015",
                 "Sample": "// Hello World in Pascal\r\n\r\nprogram HelloWorld;\r\nbegin\r\n    writeln('Hello, world!');\r\nend."
             },
             "Author": {
@@ -237,6 +237,9 @@
         }
     },
     "CodeFolding": {
+        "Options":{
+          "StringEscapeChar":"$"
+        },
         "SkipRegion": [
             {
                 "OpenToken": "'",
@@ -246,11 +249,6 @@
             {
                 "OpenToken": "//",
                 "RegionType": "SingleLine"
-            },
-            {
-                "OpenToken": "{$",
-                "CloseToken": "}",
-                "RegionType": "MultiLine"
             },
             {
                 "OpenToken": "{",
@@ -344,6 +342,10 @@
                     "BeginningOfLine": "True",
                     "SharedClose": "True"
                 }
+            },
+            {
+                "OpenToken": "$REGION",
+                "CloseToken": "$ENDREGION"
             }
         ]
     },

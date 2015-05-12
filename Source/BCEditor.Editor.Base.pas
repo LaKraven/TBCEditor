@@ -25,8 +25,9 @@ type
     FAltEnabled: Boolean;
     FAlwaysShowCaret: Boolean;
     FBackgroundColor: TColor;
-    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint;
     FBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint;
+    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint;
+    FBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaint;
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
     FBreakWhitespace: Boolean;
@@ -552,8 +553,9 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
-    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
     property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
+    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaint read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
+    property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaint read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnClearBookmark: TBCEditorBookmarkEvent read FOnClearMark write FOnClearMark;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
@@ -7427,7 +7429,7 @@ begin
   begin
     LLineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
     LLineStateRect.Right := LLineStateRect.Left + FLeftMargin.LineState.Width;
-    for LLine := aFirstRow to aLastRow do
+    for LLine := AFirstRow to ALastRow do
     begin
       i := RowToLine(LLine) - 1;
       LPEditorLineAttribute := Lines.Attributes[i];
@@ -7445,8 +7447,22 @@ begin
     end;
   end;
   if FLeftMargin.Bookmarks.Panel.Visible then
+  begin
+    if Assigned(FBookmarkPanelLinePaint) then
+    begin
+      for LLine := AFirstRow to ALastRow do
+      begin
+        i := RowToLine(LLine) - 1;
+        LLineRect.Left := LPanelRect.Left;
+        LLineRect.Right := LPanelRect.Right;
+        LLineRect.Top := (LLine - TopLine) * LineHeight;
+        LLineRect.Bottom := LLineRect.Top + LineHeight;
+        FBookmarkPanelLinePaint(Self, Canvas, LLineRect, i);
+      end;
+    end;
     if Assigned(FBookmarkPanelAfterPaint) then
       FBookmarkPanelAfterPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+  end;
 end;
 
 procedure TBCBaseEditor.PaintMatchingPair;

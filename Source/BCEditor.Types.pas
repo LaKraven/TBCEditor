@@ -22,6 +22,7 @@ type
   TBCEditorScrollEvent = procedure(Sender: TObject; ScrollBar: TScrollBarKind) of object;
 
   TBCEditorBookmarkPanelPaint = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; AFirstLine: Integer; ALastLine: Integer) of object;
+  TBCEditorBookmarkPanelLinePaint = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; ALineNumber: Integer) of object;
 
   TBCEditorStateFlag = (sfCaretChanged, sfScrollBarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
     sfPossibleLeftMarginClick, sfWaitForDragging, sfInsideRedo, sfLeftMarginDragging, sfJustIndented, sfCodeFoldingInfoClicked);

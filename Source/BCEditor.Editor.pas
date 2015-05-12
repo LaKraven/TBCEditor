@@ -46,8 +46,9 @@ type
     property MatchingPair;
     property Minimap;
     property Name;
-    property OnBookmarkPanelBeforePaint;
     property OnBookmarkPanelAfterPaint;
+    property OnBookmarkPanelBeforePaint;
+    property OnBookmarkPanelLinePaint;
     property OnChange;
     property OnClearBookmark;
     property OnClick;

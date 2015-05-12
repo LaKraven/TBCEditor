@@ -197,15 +197,10 @@ type
     function MinPoint(const APoint1, APoint2: TPoint): TPoint;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
-    function PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-    function PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-    function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-    function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PreviousWordPosition: TBCEditorTextPosition; overload;
     function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function RescanHighlighterRangesFrom(Index: Integer): Integer;
     function RowColumnToCharIndex(ATextPosition: TBCEditorTextPosition): Integer;
-    function RowColumnToPixels(const ADisplayPosition: TBCEditorDisplayPosition): TPoint;
     function RowToLine(ARow: Integer): Integer;
     function SearchText(const ASearchText: string): Integer;
     function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
@@ -329,6 +324,11 @@ type
     function DoOnReplaceText(const ASearch, AReplace: string; ALine, AColumn: Integer; DeleteLine: Boolean): TBCEditorReplaceAction;
     function GetReadOnly: Boolean; virtual;
     function GetSelectedLength: Integer;
+    function PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+    function PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+    function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+    function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+    function RowColumnToPixels(const ADisplayPosition: TBCEditorDisplayPosition): TPoint;
     function TranslateKeyCode(ACode: Word; AShift: TShiftState; var AData: pointer): TBCEditorCommand;
     procedure ChainLinesChanged(Sender: TObject);
     procedure ChainLinesChanging(Sender: TObject);
@@ -422,6 +422,7 @@ type
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
     function GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
+    function GetWordAtPixels(X, Y: Integer): string;
     function IsBookmark(ABookmark: Integer): Boolean;
     function IsIdentChar(AChar: Char): Boolean;
     function IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
@@ -9549,6 +9550,11 @@ begin
   end;
   ATextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));
   Result := True;
+end;
+
+function TBCBaseEditor.GetWordAtPixels(X, Y: Integer): string;
+begin
+  Result := GetWordAtRowColumn(DisplayToTextPosition(PixelsToRowColumn(X, Y)));
 end;
 
 function TBCBaseEditor.IsBookmark(ABookmark: Integer): Boolean;

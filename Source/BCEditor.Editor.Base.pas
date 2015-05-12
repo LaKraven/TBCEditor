@@ -1333,12 +1333,14 @@ var
     Result := True;
     for i := 0 to LOpenDuplicateLength - 1 do
     if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[FMatchingPairOpenDuplicate[i]])^.OpenToken then
-    begin
+      Exit;
+   { TODO: Check what I was trying to fix with this hack...
+     begin
       LPLine := PChar(UpperCase(FLines[APoint.Line]));
       Inc(LPLine, FHighlighter.GetTokenPosition - 1);
       if (Length(LToken) > 2) and ((LPLine^ = #0) or (LPLine^ = BCEDITOR_SPACE_CHAR) or (LPLine^ = BCEDITOR_TAB_CHAR)) then
         Exit;
-    end;
+    end; }
     Result := False
   end;
 
@@ -6063,9 +6065,8 @@ end;
 
 procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
-  LNewLine, LPreviousLine: Integer;
+  LNewLine: Integer;
 begin
-  LPreviousLine := -1;
   LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
 
   if (LNewLine >= TopLine) and (LNewLine <= TopLine + VisibleLines) then

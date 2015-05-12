@@ -6664,8 +6664,6 @@ begin
       if TopLine <> LTopLine then
       begin
         TopLine := LTopLine;
-        OutputDebugString(PChar(Format('Y = %d, TopLine = %d, Row = %d, Offset = %d', [Y, TopLine,
-          PixelsToMinimapMouseMoveRowColumn(X, Y).Row, FMinimapClickOffsetY])));
         Paint;
       end;
     end;

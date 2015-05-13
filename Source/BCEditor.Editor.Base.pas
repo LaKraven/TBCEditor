@@ -6082,8 +6082,9 @@ end;
 
 procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
-  LNewLine: Integer;
+  LNewLine, LPreviousLine: Integer;
 begin
+  LPreviousLine := -1;
   LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
 
   if (LNewLine >= TopLine) and (LNewLine <= TopLine + VisibleLines) then
@@ -6095,12 +6096,20 @@ begin
     while LNewLine < TopLine do
     begin
       TopLine := TopLine - 4;
+      if TopLine <> LPreviousLine then
+        LPreviousLine := TopLine
+      else
+        Break; 
       Paint;
     end
     else
     while LNewLine > TopLine do
     begin
       TopLine := TopLine + 4;
+      if TopLine <> LPreviousLine then
+        LPreviousLine := TopLine
+      else
+        Break;
       Paint;
     end;
   end;

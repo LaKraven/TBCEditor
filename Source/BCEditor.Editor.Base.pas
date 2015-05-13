@@ -6084,6 +6084,7 @@ procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
   LNewLine, LPreviousLine: Integer;
 begin
+  FMinimap.Clicked := True;
   LPreviousLine := -1;
   LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
 
@@ -6099,7 +6100,7 @@ begin
       if TopLine <> LPreviousLine then
         LPreviousLine := TopLine
       else
-        Break; 
+        Break;
       Paint;
     end
     else
@@ -6691,6 +6692,9 @@ begin
     Exit;
   end;
 
+  if FMinimap.Clicked then
+    Exit;
+
   inherited MouseMove(Shift, X, Y);
 
   if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
@@ -6829,7 +6833,7 @@ var
   LCursorPoint: TPoint;
   LTextPosition: TBCEditorTextPosition;
 begin
-  //FMinimap.Clicked := False;
+  FMinimap.Clicked := False;
   FMinimap.Dragging := False;
 
   inherited MouseUp(Button, Shift, X, Y);

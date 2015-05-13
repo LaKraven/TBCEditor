@@ -219,7 +219,7 @@ type
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
-    procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
+ //   procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
     procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CompletionProposalTimerHandler(Sender: TObject);
@@ -2605,6 +2605,8 @@ begin
   UpdateWordWrapHiddenOffsets;
 end;
 
+{
+TODO: Needed?
 procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
 var
   i: Integer;
@@ -2630,7 +2632,7 @@ begin
       UpdateFoldRanges(AFirstLine, -ACount);
     LeftMarginChanged(Self);
   end;
-end;
+end;  }
 
 procedure TBCBaseEditor.CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
 begin
@@ -2893,8 +2895,8 @@ begin
     if Marks[i].Line > AFirstLine then
       Marks[i].Line := AFirstLine;
 
-  if FCodeFolding.Visible then
-    CodeFoldingLinesDeleted(AFirstLine + 1, ACount);
+  //if FCodeFolding.Visible then
+  //  CodeFoldingLinesDeleted(AFirstLine + 1, ACount);
 
   if Assigned(FOnLinesDeleted) then
     FOnLinesDeleted(Self, AFirstLine, ACount);
@@ -3632,8 +3634,8 @@ var
             { Check if any shared close }
             if LOpenTokenFoldRangeList.Count > 0 then
             begin
-              j := LOpenTokenFoldRangeList.Count - 1;
-              for i := 0 to j do
+              i := 0;
+              while i < LOpenTokenFoldRangeList.Count do
               begin
                 LCodeFoldingRange := LOpenTokenFoldRangeList.Items[i];
                 if Assigned(LCodeFoldingRange.FoldRegion) then
@@ -3644,7 +3646,9 @@ var
                     LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
                     LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
                     Dec(LFoldCount);
+                    Continue;
                   end;
+                Inc(i);
               end;
             end;
             { Check if the close token is one of the open tokens }
@@ -12303,6 +12307,7 @@ begin
       if not Collapsed and not ParentCollapsed and not FoundFromUndoOrRedoList(FAllCodeFoldingRanges[i]) then
       begin
         TBCEditorCodeFoldingRanges(FAllCodeFoldingRanges[i]).Free;
+        FAllCodeFoldingRanges[i] := nil;
         FAllCodeFoldingRanges.AllRanges.Delete(i);
       end;
 

@@ -21,7 +21,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "<!--",
@@ -33,10 +33,10 @@
                         "Type": "Tag",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "UseParentElementForTokens": "True"
+                            "UseParentElementForTokens": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "<",
@@ -48,7 +48,7 @@
                                     "Type": "Comment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "<!--",
@@ -59,7 +59,7 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "\"",
@@ -70,10 +70,10 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "'",
@@ -84,10 +84,10 @@
                                     "Type": "Attribute",
                                     "Attributes": {
                                         "Element": "Attribute",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True",
+                                        "CloseOnEol": true,
                                         "AlternativeClose": "?>"
                                     },
                                     "TokenRange": {
@@ -105,7 +105,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -113,7 +113,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

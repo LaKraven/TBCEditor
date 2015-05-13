@@ -21,10 +21,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -35,11 +35,11 @@
                         "Type": "HexNumber",
                         "Attributes": {
                             "Element": "HexNumber",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "$",
@@ -50,11 +50,11 @@
                         "Type": "Character",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "#",
@@ -68,7 +68,7 @@
                         "Words": "end\r\ninherited\r\ninline\r\nnil\r\nobject",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -76,7 +76,7 @@
                         "Words": "..\r\n:\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -86,7 +86,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -94,7 +94,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]
@@ -107,21 +107,21 @@
                 "OpenToken": "OBJECT",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "INLINE",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "INHERITED",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             }
         ]

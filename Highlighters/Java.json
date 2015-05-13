@@ -21,7 +21,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "/*",
@@ -32,10 +32,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "//"
@@ -45,10 +45,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -59,10 +59,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -73,10 +73,10 @@
                         "Type": "Directive",
                         "Attributes": {
                             "Element": "Directive",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "#"
@@ -86,12 +86,12 @@
                         "Type": "Hex",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "0"
@@ -104,7 +104,7 @@
                         "Words": "abstract\r\nassert\r\nboolean\r\nbreak\r\nbyte\r\ncase\r\ncatch\r\nchar\r\nclass\r\nconst\r\nconst\r\ncontinue\r\ndefault\r\ndo\r\ndouble\r\nelse\r\nenum\r\nextends\r\nfalse\r\nfinal\r\nfinally\r\nfloat\r\nfor\r\ngoto\r\ngoto\r\nif\r\nimplements\r\nimport\r\ninstanceof\r\nint\r\ninterface\r\nlong\r\nnative\r\nnew\r\nnull\r\npackage\r\nprivate\r\nprotected\r\npublic\r\nreturn\r\nshort\r\nstatic\r\nstrictfp\r\nsuper\r\nswitch\r\nsynchronized\r\nthis\r\nthrow\r\nthrows\r\ntransient\r\ntrue\r\ntry\r\nwhile\r\nvoid\r\nvolatile",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -112,7 +112,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -122,7 +122,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -130,7 +130,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

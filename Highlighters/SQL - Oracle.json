@@ -21,7 +21,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "/*",
@@ -32,10 +32,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "--"
@@ -45,10 +45,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -59,10 +59,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -77,7 +77,7 @@
                         "Words": "access\r\nadd\r\nall\r\nalter\r\nand\r\nany\r\narraylen\r\nas\r\nasc\r\naudit\r\nbetween\r\nby\r\nchar\r\ncheck\r\ncluster\r\ncolumn\r\ncomment\r\ncompress\r\nconnect\r\ncreate\r\ncurrent\r\ndate\r\ndecimal\r\ndefault\r\ndelete\r\ndesc\r\ndistinct\r\ndrop\r\nelse\r\nexclusive\r\nexists\r\nfile\r\nfloat\r\nfor\r\nfrom\r\ngrant\r\ngroup\r\nhaving\r\nidentified\r\nimmediate\r\nin\r\nincrement\r\nindex\r\ninitial\r\ninsert\r\ninteger\r\nintersect\r\ninto\r\nis\r\nlevel\r\nlike\r\nlock\r\nlong\r\nmaxextents\r\nminus\r\nmode\r\nmodify\r\nnoaudit\r\nnocompress\r\nnot\r\nnotfound\r\nnowait\r\nnull\r\nnumber\r\nof\r\noffline\r\non\r\nonline\r\noption\r\nor\r\norder\r\npctfree\r\nprior\r\nprivileges\r\npublic\r\nraw\r\nrename\r\nresource\r\nrevoke\r\nrow\r\nrowid\r\nrowlabel\r\nrownum\r\nrows\r\nselect\r\nsession\r\nset\r\nshare\r\nsize\r\nsmallint\r\nsqlbuf\r\nstart\r\nsuccessful\r\nsynonym\r\nsysdate\r\ntable\r\nthen\r\nto\r\ntrigger\r\nuid\r\nunion\r\nunique\r\nupdate\r\nuser\r\nvalidate\r\nvalues\r\nvarchar\r\nvarchar2\r\nwhenever\r\nwhere\r\nview\r\nwith",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -86,7 +86,7 @@
                         "Words": "admin\r\nafter\r\nallocate\r\nanalyze\r\narchive\r\narchivelog\r\nauthorization\r\navg\r\nbackup\r\nbecome\r\nbefore\r\nbegin\r\nblock\r\nbody\r\ncache\r\ncancel\r\ncascade\r\nchange\r\ncharacter\r\ncheckpoint\r\nclose\r\ncobol\r\ncommit\r\ncompile\r\nconstraint\r\nconstraints\r\ncontents\r\ncontinue\r\ncontrolfile\r\ncount\r\ncursor\r\ncycle\r\ndatabase\r\ndatafile\r\ndba\r\ndec\r\ndeclare\r\ndisable\r\ndismount\r\ndouble\r\ndump\r\neach\r\nenable\r\nend\r\nescape\r\nevents\r\nexcept\r\nexceptions\r\nexec\r\nexecute\r\nexplain\r\nextent\r\nexternally\r\nfetch\r\nflush\r\nforce\r\nforeign\r\nfortran\r\nfound\r\nfreelist\r\nfreelists\r\nfunction\r\ngo\r\ngoto\r\ngroups\r\nincluding\r\nindicator\r\ninitrans\r\ninstance\r\nint\r\nkey\r\nlanguage\r\nlayer\r\nlink\r\nlists\r\nlogfile\r\nmanage\r\nmanual\r\nmax\r\nmaxdatafiles\r\nmaxinstances\r\nmaxlogfiles\r\nmaxloghistory\r\nmaxlogmembers\r\nmaxtrans\r\nmaxvalue\r\nmin\r\nminextents\r\nminvalue\r\nmodule\r\nmount\r\nnew\r\nnext\r\nnoarchivelog\r\nnocache\r\nnocycle\r\nnomaxvalue\r\nnominvalue\r\nnone\r\nnoorder\r\nnoresetlogs\r\nnormal\r\nnosort\r\nnumeric\r\noff\r\nold\r\nonly\r\nopen\r\noptimal\r\nown\r\npackage\r\nparallel\r\npctincrease\r\npctused\r\nplan\r\npli\r\nprecision\r\nprimary\r\nprivate\r\nprocedure\r\nprofile\r\nquota\r\nread\r\nreal\r\nrecover\r\nreferences\r\nreferencing\r\nresetlogs\r\nrestricted\r\nreuse\r\nrole\r\nroles\r\nrollback\r\nsavepoint\r\nschema\r\nscn\r\nsection\r\nsegment\r\nsequence\r\nshared\r\nsnapshot\r\nsome\r\nsort\r\nsql\r\nsqlcode\r\nsqlerror\r\nsqlstate\r\nstatement_id\r\nstatistics\r\nstop\r\nstorage\r\nsum\r\nswitch\r\nsystem\r\ntables\r\ntablespace\r\ntemporary\r\nthread\r\ntime\r\ntracing\r\ntransaction\r\ntriggers\r\ntruncate\r\nunder\r\nunlimited\r\nuntil\r\nuse\r\nusing\r\nwhen\r\nwork\r\nwrite",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -95,7 +95,7 @@
                         "Words": "abort\r\naccept\r\naccess\r\nadd\r\nallby\r\naltercase\r\nandchar\r\nany\r\narray\r\narraylen\r\nas\r\nasc\r\nassert\r\nassign\r\nat\r\nauthorization\r\navg\r\nbase_table\r\nbegin\r\nbetween\r\nbinary_integer\r\nbody\r\nboolean\r\nchar_base\r\ncheck\r\nclose\r\ncluster\r\nclusters\r\ncolauth\r\ncolumns\r\ncommit\r\ncompress\r\nconnect\r\nconstant\r\ncount\r\ncrash\r\ncreate\r\ncurrent\r\ncurrval\r\ncursor\r\ndata_base\r\ndatabase\r\ndate\r\ndba\r\ndebugoff\r\ndebugon\r\ndecimal\r\ndeclare\r\ndefault\r\ndefinition\r\ndelay\r\ndelete\r\ndelta\r\ndesc\r\ndigits\r\ndispose\r\ndistinct\r\ndo\r\ndrop\r\nelse\r\nelsif\r\nend\r\nentry\r\nexception\r\nexception_init\r\nexists\r\nexit\r\nfalse\r\nfetch\r\nfloat\r\nfor\r\nform\r\nfrom\r\nfunction\r\ngeneric\r\ngoto\r\ngrant\r\ngroup\r\nhaving\r\nidentified\r\nif\r\nin\r\nindex\r\nindexes\r\nindicator\r\ninsert\r\ninteger\r\nintersect\r\ninto\r\nis\r\nlevel\r\nlike\r\nlimited\r\nloop\r\nmax\r\nmin\r\nminus\r\nmlslabel\r\nmodrange\r\nmode\r\nnatural\r\nnew\r\nnextval\r\nnocompress\r\nnot\r\nnull\r\nnumber\r\nnumber_base\r\nof\r\non\r\nopen\r\noption\r\nor\r\norder\r\nothers\r\nout\r\npackage\r\npartition\r\npctfree\r\npositive\r\npragma\r\nprior\r\nprivate\r\nprocedure\r\npublic\r\nraise\r\nreal\r\nrecord\r\nrelease\r\nremr\r\nrename\r\nresource\r\nreturn\r\nreverse\r\nrevoke\r\nrollback\r\nrowid\r\nrowlabel\r\nrownum\r\nrowtype\r\nrun\r\nsavepoint\r\nschema\r\nselect\r\nseparate\r\nset\r\nsize\r\nsmallint\r\nspace\r\nsql\r\nsqlcode\r\nsqlerrm\r\nstart\r\nstatement\r\nstddev\r\nsubtyp\r\nsum\r\ntabauth\r\ntable\r\ntables\r\ntask\r\nterminate\r\nthen\r\nto\r\ntrue\r\ntype\r\nunion\r\nunique\r\nupdate\r\nuse\r\nvalues\r\nvarchar\r\nvarchar2\r\nvariance\r\nwhen\r\nwhere\r\nwhile\r\nview\r\nviews\r\nwith\r\nwork\r\nxore",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -103,7 +103,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}\r\n|",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -113,7 +113,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -121,7 +121,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

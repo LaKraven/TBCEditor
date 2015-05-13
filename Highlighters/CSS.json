@@ -22,7 +22,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "/*",
@@ -33,7 +33,7 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -44,7 +44,7 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -55,11 +55,11 @@
                         "Type": "HexNumber",
                         "Attributes": {
                             "Element": "HexNumber",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "#",
@@ -74,7 +74,7 @@
                         "Words": "/style",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -83,7 +83,7 @@
                         "Words": "accelerator\r\nazimuth\r\nbackground\r\nbackground-attachment\r\nbackground-color\r\nbackground-image\r\nbackground-position\r\nbackground-position-x\r\nbackground-position-y\r\nbackground-repeat\r\nbehavior\r\nborder\r\nborder-bottom\r\nborder-bottom-color\r\nborder-bottom-style\r\nborder-bottom-width\r\nborder-collapse\r\nborder-color\r\nborder-left\r\nborder-left-color\r\nborder-left-style\r\nborder-left-width\r\nborder-right\r\nborder-right-color\r\nborder-right-style\r\nborder-right-width\r\nborder-spacing\r\nborder-style\r\nborder-top\r\nborder-top-color\r\nborder-top-style\r\nborder-top-width\r\nborder-width\r\nbottom\r\ncaption-side\r\nclear\r\nclip\r\ncolor\r\ncontent\r\ncounter-increment\r\ncounter-reset\r\ncue\r\ncue-after\r\ncue-before\r\ncursor\r\ndirection\r\ndisplay\r\nelevation\r\nempty-cells\r\nfilter\r\nfloat\r\nfont\r\nfont-family\r\nfont-size\r\nfont-size-adjust\r\nfont-stretch\r\nfont-style\r\nfont-variant\r\nfont-weight\r\nheight\r\nime-mode\r\ninclude-source\r\nlayer-background-color\r\nlayer-background-image\r\nlayout-flow\r\nlayout-grid\r\nlayout-grid-char\r\nlayout-grid-char-spacing\r\nlayout-grid-line\r\nlayout-grid-mode\r\nlayout-grid-type\r\nleft\r\nletter-spacing\r\nline-break\r\nline-height\r\nlist-style\r\nlist-style-image\r\nlist-style-position\r\nlist-style-type\r\nmargin\r\nmargin-bottom\r\nmargin-left\r\nmargin-right\r\nmargin-top\r\nmarker-offset\r\nmarks\r\nmax-height\r\nmax-width\r\nmin-height\r\nmin-width\r\n-moz-binding\r\n-moz-border-radius\r\n-moz-border-radius-topleft\r\n-moz-border-radius-topright\r\n-moz-border-radius-bottomright\r\n-moz-border-radius-bottomleft\r\n-moz-border-top-colors\r\n-moz-border-right-colors\r\n-moz-border-bottom-colors\r\n-moz-border-left-colors\r\n-moz-opacity\r\n-moz-outline\r\n-moz-outline-color\r\n-moz-outline-style\r\n-moz-outline-width\r\n-moz-user-focus\r\n-moz-user-input\r\n-moz-user-modify\r\n-moz-user-select\r\norphans\r\noutline\r\noutline-color\r\noutline-style\r\noutline-width\r\noverflow\r\noverflow-X\r\noverflow-Y\r\npadding\r\npadding-bottom\r\npadding-left\r\npadding-right\r\npadding-top\r\npage\r\npage-break-after\r\npage-break-before\r\npage-break-inside\r\npause\r\npause-after\r\npause-before\r\npitch\r\npitch-range\r\nplay-during\r\nposition\r\nquotes\r\n-replace\r\nrichness\r\nright\r\nruby-align\r\nruby-overhang\r\nruby-position\r\n-set-link-source\r\nsize\r\nspeak\r\nspeak-header\r\nspeak-numeral\r\nspeak-punctuation\r\nspeech-rate\r\nstress\r\nscrollbar-arrow-color\r\nscrollbar-base-color\r\nscrollbar-dark-shadow-color\r\nscrollbar-face-color\r\nscrollbar-highlight-color\r\nscrollbar-shadow-color\r\nscrollbar-3d-light-color\r\nscrollbar-track-color\r\ntable-layout\r\ntext-align\r\ntext-align-last\r\ntext-decoration\r\ntext-indent\r\ntext-justify\r\ntext-overflow\r\ntext-shadow\r\ntext-transform\r\ntext-autospace\r\ntext-kashida-space\r\ntext-underline-position\r\ntop\r\nunicode-bidi\r\n-use-link-source\r\nvertical-align\r\nvisibility\r\nvoice-family\r\nvolume\r\nwhite-space\r\nwidows\r\nwidth\r\nword-break\r\nword-spacing\r\nword-wrap\r\nwriting-mode",
                         "Attributes": {
                             "Element": "Attribute",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -91,7 +91,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -101,7 +101,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -109,7 +109,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

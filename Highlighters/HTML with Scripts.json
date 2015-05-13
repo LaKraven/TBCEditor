@@ -2,7 +2,7 @@
     "Highlighter": {
         "Info": {
             "General": {
-                "MultiHighlighter": "True",
+                "MultiHighlighter": true,
                 "Version": "1.0",
                 "Date": "1.5.2015",
                 "Sample": "<!DOCTYPE HTML>\r\n<!-- Hello World in HTML -->\r\n<html>\r\n    <head>\r\n        <title>Hello world example</title>\r\n    </head>\r\n    <body>\r\n        <span>Hello, world!</span>\r\n    </body>\r\n</html>"
@@ -22,7 +22,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "<!--",
@@ -59,7 +59,7 @@
                                     "Type": "Comment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "<!--",
@@ -70,7 +70,7 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "\"",
@@ -89,10 +89,10 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "'",
@@ -103,11 +103,11 @@
                                     "Type": "Character",
                                     "Attributes": {
                                         "Element": "Character",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnTerm": "True",
-                                        "CloseOnEol": "True"
+                                        "CloseOnTerm": true,
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "$",
@@ -167,7 +167,7 @@
                                     "Words": "!doctype\r\na\r\nabbr\r\naddress\r\narea\r\narticle\r\naside\r\naudio\r\nb\r\nbase\r\nbdi\r\nbdo\r\nblockquote\r\nbody\r\nbr\r\nbutton\r\ncanvas\r\ncaption\r\ncite\r\ncode\r\ncol\r\ncolgroup\r\ncommand\r\ndatalist\r\ndd\r\ndel\r\ndetails\r\ndfn\r\ndir\r\ndiv\r\ndl\r\ndt\r\nem\r\nembed\r\nfieldset\r\nfigcaption\r\nfigure\r\nfooter\r\nform\r\nh1\r\nh2\r\nh3\r\nh4\r\nh5\r\nh6\r\nhead\r\nheader\r\nhgroup\r\nhr\r\nhtml\r\ni\r\niframe\r\nimg\r\ninput\r\nins\r\nkbd\r\nkeygen\r\nlabel\r\nlegend\r\nli\r\nlink\r\nmap\r\nmark\r\nmenu\r\nmeta\r\nmeter\r\nnav\r\nnoscript\r\nobject\r\nol\r\noptgroup\r\noption\r\noutput\r\np\r\nparam\r\npre\r\nprogress\r\nq\r\nrp\r\nrt\r\nruby\r\ns\r\nsamp\r\nscript\r\nsection\r\nselect\r\nsmall\r\nsource\r\nspan\r\nstrong\r\nstyle\r\nsub\r\nsummary\r\nsup\r\ntable\r\ntbody\r\ntd\r\ntextarea\r\ntfoot\r\nth\r\nthead\r\ntime\r\ntitle\r\ntr\r\ntrack\r\nu\r\nul\r\nvar\r\nvideo\r\nwbr",
                                     "Attributes": {
                                         "Element": "ReservedWord",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 },
                                 {
@@ -176,7 +176,7 @@
                                     "Words": "abbr\r\naccept\r\naccept-charset\r\naccesskey\r\naction\r\nasync\r\nautocomplete\r\nalt\r\nautofocus\r\nautoplay\r\nchallenge\r\ncharset\r\nchecked\r\ncite=\r\nclass\r\ncols\r\ncolspan\r\ncommand\r\ncontent\r\ncontenteditable\r\ncontextmenu\r\ncontrols\r\ncoords\r\ncrossorigin\r\ndata-\r\ndatetime\r\ndefault\r\ndefer\r\ndir=\r\ndisabled\r\ndownload\r\ndraggable\r\ndropzone\r\nenctype\r\nfor\r\nform=\r\nformaction\r\nformenctype\r\nformmethod\r\nformnovalidate\r\nformtarget\r\nheaders\r\nheight\r\nhidden\r\nhigh\r\nhref\r\nhreflang\r\nhttp-equiv\r\nicon\r\nid\r\nismap\r\nkeytype\r\nkind\r\nlabel=\r\nlang\r\nlist\r\nloop\r\nlow\r\nmanifest\r\nmax\r\nmaxlength\r\nmedia\r\nmethod\r\nmin\r\nmuted\r\nmultiple\r\nname\r\nnovalidate\r\nopen\r\noptimum\r\npattern\r\nplaceholder\r\nposter\r\npreload\r\nradiogroup\r\nreadonly\r\nrel\r\nrequired\r\nreversed\r\nrows\r\nsandbox\r\nscope\r\nscoped\r\nseamless\r\nselected\r\nshape\r\nsize\r\nsizes\r\nsortable\r\nsorted\r\nspan=\r\nspellcheck\r\nsrc\r\nsrcdoc\r\nstart\r\nstep\r\nstyle=\r\ntabindex\r\ntarget\r\ntitle=\r\ntranslate\r\ntype\r\nusemap\r\nvalue\r\nwidth\r\nwrap\r\nxmlns",
                                     "Attributes": {
                                         "Element": "Attribute",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 },
                                 {
@@ -184,7 +184,7 @@
                                     "Words": "/",
                                     "Attributes": {
                                         "Element": "ReservedWord",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 }
                             ]
@@ -223,7 +223,7 @@
                 "OpenToken": "=/",
                 "CloseToken": "/;",
                 "RegionType": "String",
-                "SkipEmptyChars": "True"
+                "SkipEmptyChars": true
             },
             {
                 "OpenToken": "//",

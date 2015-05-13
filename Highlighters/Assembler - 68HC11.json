@@ -21,10 +21,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "*"
@@ -34,10 +34,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": ";"
@@ -47,10 +47,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -61,10 +61,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -75,11 +75,11 @@
                         "Type": "Number",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "#"
@@ -89,11 +89,11 @@
                         "Type": "Hex",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "$"
@@ -103,11 +103,11 @@
                         "Type": "Number",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "%"
@@ -120,7 +120,7 @@
                         "Words": "aba\r\nabx\r\naby\r\nadca\r\nadca_\r\nadcb\r\nadcb_\r\nadctl\r\nadda\r\nadda_\r\naddb\r\naddb_\r\naddd\r\naddd_\r\nadr1\r\nadr2\r\nadr3\r\nadr4\r\nanda\r\nanda_\r\nandb\r\nandb_\r\nandcc\r\nasl\r\nasl_\r\nasla\r\naslb\r\nasld\r\nasr\r\nasr_\r\nasra\r\nasrb\r\nbadopint\r\nbase\r\nbaud\r\nbcc\r\nbcc_\r\nbclr\r\nbclr_\r\nbcs\r\nbcs_\r\nbeq\r\nbeq_\r\nbge\r\nbge_\r\nbgt\r\nbgt_\r\nbhi\r\nbhi_\r\nbhs\r\nbhs_\r\nbita\r\nbita_\r\nbitb\r\nbitb_\r\nble\r\nble_\r\nblo\r\nblo_\r\nbls\r\nbls_\r\nblt\r\nblt_\r\nbmi\r\nbmi_\r\nbne\r\nbne_\r\nbpl\r\nbpl_\r\nbprot\r\nbra\r\nbra_\r\nbrclr\r\nbrclr_\r\nbrn\r\nbrn_\r\nbrset_\r\nbset\r\nbset_\r\nbsr\r\nbsr_\r\nbsz_\r\nbvc\r\nbvc_\r\nbvs\r\nbvs_\r\ncba\r\ncforc\r\nclc\r\ncli\r\nclr\r\nclr_\r\nclra\r\nclrb\r\nclv\r\ncmeint\r\ncmpa\r\ncmpa_\r\ncmpb\r\ncmpb_\r\ncmpd\r\ncmps\r\ncmpu\r\ncmpx\r\ncmpy\r\ncom\r\ncom_\r\ncoma\r\ncomb\r\nconfig\r\ncoprst\r\ncpd\r\ncpd_\r\ncpx\r\ncpx_\r\ncpy\r\ncpy_\r\ncwai\r\ndaa\r\nddra\r\nddrb\r\nddrc\r\nddrd\r\nddre\r\ndec\r\ndec_\r\ndeca\r\ndecb\r\ndes\r\ndex\r\ndey\r\neora\r\neora_\r\neorb\r\neorb_\r\nexg\r\nfcb_\r\nfcc_\r\nfdb_\r\nfdiv\r\nhprio\r\nidiv\r\ninc\r\ninc_\r\ninca\r\nincb\r\ninit\r\nins\r\ninx\r\niny\r\nirqint\r\njmp\r\njmp_\r\njsr\r\njsr_\r\nlbcc\r\nlbcs\r\nlbeq\r\nlbge\r\nlbgt\r\nlbhi\r\nlbhs\r\nlble\r\nlblo\r\nlbls\r\nlblt\r\nlbmi\r\nlbne\r\nlbpl\r\nlbra\r\nlbrn\r\nlbsr\r\nlbvc\r\nlbvs\r\nlda\r\nldaa\r\nldaa_\r\nldab\r\nldab_\r\nldb\r\nldd\r\nldd_\r\nlds\r\nlds_\r\nldu\r\nldx\r\nldx_\r\nldy\r\nldy_\r\nleas\r\nleau\r\nleax\r\nleay\r\nlsl\r\nlsl_\r\nlsla\r\nlslb\r\nlsld\r\nlsr\r\nlsr_\r\nlsra\r\nlsrb\r\nlsrd\r\nmul\r\nneg\r\nneg_\r\nnega\r\nnegb\r\nnocopint\r\nnop\r\noc1d\r\noc1m\r\noption\r\nora\r\noraa\r\noraa_\r\norab\r\norab_\r\norb\r\norcc\r\npacnt\r\npactl\r\npaiint\r\npaovint\r\npioc\r\nporta\r\nportb\r\nportc\r\nportcl\r\nportd\r\nporte\r\npprog\r\npsha\r\npshb\r\npshs\r\npshu\r\npshx\r\npshy\r\npula\r\npulb\r\npuls\r\npulu\r\npulx\r\npuly\r\nresetint\r\nresv1\r\nresv2\r\nresv3\r\nresv4\r\nrol\r\nrol_\r\nrola\r\nrolb\r\nror\r\nror_\r\nrora\r\nrorb\r\nrti\r\nrtiint\r\nrts\r\nsba\r\nsbca\r\nsbca_\r\nsbcb\r\nsbcb_\r\nsccr1\r\nsccr2\r\nscdr\r\nsciint\r\nscsr\r\nsec\r\nsei\r\nsev\r\nsex\r\nspcr\r\nspdr\r\nspiint\r\nspsr\r\nsta\r\nstaa\r\nstaa_\r\nstab\r\nstab_\r\nstb\r\nstd\r\nstd_\r\nstop\r\nsts\r\nsts_\r\nstu\r\nstx\r\nstx_\r\nsty\r\nsty_\r\nsuba\r\nsuba_\r\nsubb\r\nsubb_\r\nsubd\r\nsubd_\r\nswi\r\nswi2\r\nswi3\r\nswiint\r\nsync\r\ntab\r\ntap\r\ntba\r\ntcnt\r\ntctl1\r\ntctl2\r\ntest\r\ntest1\r\ntflg1\r\ntflg2\r\ntfr\r\nti4o5\r\ntic1\r\ntic1int\r\ntic2\r\ntic2int\r\ntic3\r\ntic3int\r\ntmsk1\r\ntmsk2\r\ntoc1\r\ntoc1int\r\ntoc2\r\ntoc2int\r\ntoc3\r\ntoc3int\r\ntoc4\r\ntoc4int\r\ntoc5int\r\ntoint\r\ntpa\r\ntst\r\ntst_\r\ntsta\r\ntstb\r\ntsx\r\ntsy\r\ntxs\r\ntys\r\nwai\r\nxgdx\r\nxgdy\r\nxirqint",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -128,7 +128,7 @@
                         "Words": "equ_\r\nopt_\r\npage\r\norg_\r\nrmb_\r\nend",
                         "Attributes": {
                             "Element": "Directive",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -138,7 +138,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -146,7 +146,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

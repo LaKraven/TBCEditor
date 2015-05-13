@@ -22,10 +22,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "Attribute",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -36,10 +36,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": ":"
@@ -50,7 +50,7 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "\"",
@@ -62,11 +62,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\\"",
@@ -77,11 +77,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\\\",
@@ -101,7 +101,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -111,7 +111,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -119,7 +119,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

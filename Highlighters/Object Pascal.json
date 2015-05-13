@@ -21,7 +21,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "{",
@@ -32,7 +32,7 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "TokenRange": {
                             "Open": "(*",
@@ -43,10 +43,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "//"
@@ -56,10 +56,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -91,7 +91,7 @@
                                     "Type": "AssemblerComment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "{",
@@ -102,7 +102,7 @@
                                     "Type": "AssemblerComment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "(*",
@@ -113,10 +113,10 @@
                                     "Type": "AssemblerComment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "//"
@@ -126,7 +126,7 @@
                                     "Type": "Directive",
                                     "Attributes": {
                                         "Element": "Directive",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "{$",
@@ -140,7 +140,7 @@
                                     "Words": "end",
                                     "Attributes": {
                                         "Element": "ReservedWord",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 }
                             ]
@@ -150,11 +150,11 @@
                         "Type": "HexNumber",
                         "Attributes": {
                             "Element": "HexNumber",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "$",
@@ -165,11 +165,11 @@
                         "Type": "Character",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True",
-                            "CloseOnEol": "True"
+                            "CloseOnTerm": true,
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "#",
@@ -180,10 +180,10 @@
                         "Type": "Address",
                         "Attributes": {
                             "Element": "Character",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnTerm": "True"
+                            "CloseOnTerm": true
                         },
                         "TokenRange": {
                             "Open": "@"
@@ -196,7 +196,7 @@
                         "Words": "absolute\r\nabstract\r\nand\r\nas\r\nassembler\r\nautomated\r\nbegin\r\ncase\r\ncdecl\r\nclass\r\nconst\r\nconstructor\r\ncontains\r\ndefault\r\ndeprecated\r\ndestructor\r\ndispid\r\ndispinterface\r\ndiv\r\ndo\r\ndownto\r\ndynamic\r\nelse\r\nend\r\nexcept\r\nexport\r\nexports\r\nexternal\r\nfar\r\nfile\r\nfinalization\r\nfinally\r\nfor\r\nforward\r\nfunction\r\ngoto\r\nif\r\nimplementation\r\nimplements\r\nin\r\nindex\r\ninherited\r\ninitialization\r\ninline\r\ninterface\r\nis\r\nlabel\r\nlibrary\r\nmessage\r\nmod\r\nnear\r\nnil\r\nnodefault\r\nnot\r\nobject\r\nof\r\non\r\nor\r\nout\r\noverload\r\noverride\r\npackage\r\npacked\r\npascal\r\nplatform\r\nprivate\r\nprocedure\r\nprogram\r\nproperty\r\nprotected\r\npublic\r\npublished\r\nraise\r\nread\r\nrecord\r\nregister\r\nreintroduce\r\nrepeat\r\nrequires\r\nresourcestring\r\nsafecall\r\nshl\r\nshr\r\nstdcall\r\nstored\r\nstrict\r\nstring\r\nstringresource\r\nthen\r\nthreadvar\r\nto\r\ntry\r\ntype\r\nunit\r\nuntil\r\nuses\r\nvar\r\nwhile\r\nvirtual\r\nwith\r\nwrite\r\nwriteonly\r\nxor",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -211,7 +211,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -221,7 +221,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -229,7 +229,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]
@@ -274,7 +274,7 @@
                 "OpenToken": "TRY",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             },
             {
@@ -285,14 +285,14 @@
                 "OpenToken": "ASM",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "CLASS",
                 "CloseToken": "END",
                 "Properties": {
-                    "NoSubs": "True",
+                    "NoSubs": true,
                     "SkipIfFoundAfterOpenToken": ";"
                 }
             },
@@ -300,21 +300,21 @@
                 "OpenToken": "RECORD",
                 "CloseToken": "END",
                 "Properties": {
-                    "NoSubs": "True"
+                    "NoSubs": true
                 }
             },
             {
                 "OpenToken": "INTERFACE",
                 "CloseToken": "IMPLEMENTATION",
                 "Properties": {
-                    "BeginningOfLine": "True"
+                    "BeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "INTERFACE",
                 "CloseToken": "END",
                 "Properties": {
-                    "NoSubs": "True",
+                    "NoSubs": true,
                     "SkipIfFoundAfterOpenToken": ";"
                 }
             },
@@ -322,25 +322,25 @@
                 "OpenToken": "IMPLEMENTATION",
                 "CloseToken": "END.",
                 "Properties": {
-                    "BeginningOfLine": "True",
-                    "OpenIsClose": "True",
-                    "SharedClose": "True"
+                    "BeginningOfLine": true,
+                    "OpenIsClose": true,
+                    "SharedClose": true
                 }
             },
             {
                 "OpenToken": "UNIT",
                 "CloseToken": "END.",
                 "Properties": {
-                    "BeginningOfLine": "True",
-                    "SharedClose": "True"
+                    "BeginningOfLine": true,
+                    "SharedClose": true
                 }
             },
             {
                 "OpenToken": "PROGRAM",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": "True",
-                    "SharedClose": "True"
+                    "BeginningOfLine": true,
+                    "SharedClose": true
                 }
             },
             {

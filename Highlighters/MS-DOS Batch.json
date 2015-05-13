@@ -21,10 +21,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "rem"
@@ -34,10 +34,10 @@
                         "Type": "Comment",
                         "Attributes": {
                             "Element": "Comment",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "::"
@@ -47,11 +47,11 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True",
-                            "CloseOnTerm": "True"
+                            "CloseOnEol": true,
+                            "CloseOnTerm": true
                         },
                         "TokenRange": {
                             "Open": ":"
@@ -61,11 +61,11 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True",
-                            "CloseOnTerm": "True"
+                            "CloseOnEol": true,
+                            "CloseOnTerm": true
                         },
                         "TokenRange": {
                             "Open": "%"
@@ -75,10 +75,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -89,10 +89,10 @@
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -103,10 +103,10 @@
                         "Type": "Directive",
                         "Attributes": {
                             "Element": "Directive",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "@"
@@ -116,10 +116,10 @@
                         "Type": "ReservedWord",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": "True"
+                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "echo"
@@ -130,10 +130,10 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "Editor",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": " "
@@ -144,11 +144,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CLoseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CLoseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "%"
@@ -167,7 +167,7 @@
                         "Words": "ansi\r\nappend\r\nassign\r\nattrib\r\nautofail\r\nbackup\r\nbasedev\r\nBeep\r\nboot\r\nbreak\r\nbuffers\r\ncache\r\ncall\r\ncd\r\nchcp\r\nchdir\r\nchkdsk\r\nchoice\r\ncls\r\ncmd\r\ncodepage\r\ncommand\r\ncomp\r\ncompact\r\nconvert\r\ncopy\r\ncountry\r\ndate\r\nddinstal\r\ndebug\r\ndel\r\nDelete\r\ndeltree\r\ndetach\r\ndevice\r\ndevicehigh\r\ndevinfo\r\ndir\r\ndiskcoache\r\ndiskcomp\r\ndiskcopy\r\ndo\r\ndoskey\r\ndpath\r\ndumpprocess\r\neautil\r\nedit\r\nedlin\r\nelse\r\nend\r\nendlocal\r\nErase\r\nError\r\nerrorlevel\r\nexist\r\nexit\r\nexit_vdm\r\nexpand\r\nextproc\r\nfc\r\nfcbs\r\nfdisk\r\nfdiskpm\r\nFileAttr\r\nFileDateTime\r\nfiles\r\nfind\r\nfor\r\nformat\r\nfsaccess\r\nfsfilter\r\nftp\r\ngoto\r\ngraftabl\r\ngraphics\r\nhelp\r\nif\r\nIIf\r\nin\r\ninterlnk\r\nintersvr\r\niopl\r\njoin\r\nkeyb\r\nkeys\r\nlabel\r\nlastdrive\r\nlh\r\nlibpath\r\nloadfix\r\nloadhigh\r\nmakeini\r\nmaxwait\r\nmd\r\nmem\r\nmemman\r\nmkdir\r\nmode\r\nmore\r\nmove\r\nmsav\r\nmsbackup\r\nmsd\r\nnet\r\nnot\r\nnslfunc\r\noff\r\non\r\npatch\r\npath\r\npause\r\npauseonerror\r\npicview\r\npmrexx\r\nprint\r\nprintmonbufsize\r\npriority\r\npriority_disk_io\r\nprompt\r\nprotectonly\r\nprotshell\r\npstat\r\nqbasic\r\nrd\r\nrecover\r\nreipl\r\nRen\r\nRename\r\nreplace\r\nrestore\r\nreturn\r\nrmdir\r\nrmsize\r\nrun\r\nsayselect\r\nscandisk\r\nset\r\nsetboot\r\nsetlocal\r\nsetver\r\nshare\r\nshell\r\nshift\r\nsmartdrv\r\nsort\r\nspool\r\nstart\r\nsubst\r\nsuppresspopups\r\nswappath\r\nsys\r\nsyslevel\r\nsyslog\r\nthen\r\nthreads\r\ntime\r\ntimeslice\r\ntitle\r\ntrace\r\ntracebuf\r\ntracefmt\r\ntrapdump\r\ntree\r\ntype\r\nundelete\r\nunformat\r\nunpack\r\nuse\r\nver\r\nverify\r\nwhen\r\nview\r\nvmdisk\r\nvol\r\nvsafe\r\nxcopy\r\nxcopy32\r\nxdfcopy",
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -175,7 +175,7 @@
                         "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
                         "Attributes": {
                             "Element": "Symbol",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ],
@@ -185,7 +185,7 @@
                         "Symbols": "0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     },
                     {
@@ -193,7 +193,7 @@
                         "Symbols": ".0123456789",
                         "Attributes": {
                             "Element": "Number",
-                            "ParentBackground": "True"
+                            "ParentBackground": true
                         }
                     }
                 ]

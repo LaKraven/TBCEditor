@@ -33,7 +33,7 @@
                                     "Type": "Comment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "/*",
@@ -44,10 +44,10 @@
                                     "Type": "Comment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "//"
@@ -57,10 +57,10 @@
                                     "Type": "Comment",
                                     "Attributes": {
                                         "Element": "Comment",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnEol": "True"
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "#"
@@ -68,14 +68,14 @@
                                 },
                                 {
                                     "Type": "BinaryNumber",
-                                    "CaseSensitive": "True",
+                                    "CaseSensitive": true,
                                     "Attributes": {
                                         "Element": "Number",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnTerm": "True",
-                                        "CloseOnEol": "True"
+                                        "CloseOnTerm": true,
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "0b",
@@ -86,7 +86,7 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "\"",
@@ -98,11 +98,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\\"",
@@ -113,11 +113,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\\\",
@@ -131,7 +131,7 @@
                                     "Type": "String",
                                     "Attributes": {
                                         "Element": "String",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "TokenRange": {
                                         "Open": "'",
@@ -143,11 +143,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\'",
@@ -158,11 +158,11 @@
                                                 "Type": "String",
                                                 "Attributes": {
                                                     "Element": "String",
-                                                    "ParentBackground": "True"
+                                                    "ParentBackground": true
                                                 },
                                                 "Properties": {
-                                                    "CloseOnEol": "True",
-                                                    "CloseOnTerm": "True"
+                                                    "CloseOnEol": true,
+                                                    "CloseOnTerm": true
                                                 },
                                                 "TokenRange": {
                                                     "Open": "\\\\",
@@ -176,11 +176,11 @@
                                     "Type": "Character",
                                     "Attributes": {
                                         "Element": "Character",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Properties": {
-                                        "CloseOnTerm": "True",
-                                        "CloseOnEol": "True"
+                                        "CloseOnTerm": true,
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "$",
@@ -191,12 +191,12 @@
                                     "Type": "Hex",
                                     "Attributes": {
                                         "Element": "Number",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     },
                                     "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
                                     "Properties": {
-                                        "CloseOnTerm": "True",
-                                        "CloseOnEol": "True"
+                                        "CloseOnTerm": true,
+                                        "CloseOnEol": true
                                     },
                                     "TokenRange": {
                                         "Open": "0"
@@ -210,7 +210,7 @@
                                     "Words": "__halt_compiler\r\nabstract\r\nand\r\narray\r\nas\r\nbreak\r\ncallable\r\ncase\r\ncatch\r\nclass\r\nclone\r\nconst\r\ncontinue\r\ndeclare\r\ndefault\r\ndie\r\ndo\r\necho\r\nelse\r\nelseif\r\nempty\r\nenddeclare\r\nendfor\r\nendforeach\r\nendif\r\nendswitch\r\nendwhile\r\neval\r\nexit\r\nextends\r\nfinal\r\nfor\r\nforeach\r\nfunction\r\nglobal\r\ngoto\r\nif\r\nimplements\r\ninclude\r\ninclude_once\r\ninstanceof\r\ninsteadof\r\ninterface\r\nisset\r\nlist\r\nnamespace\r\nnew\r\nor\r\nphp\r\nprint\r\nprivate\r\nprotected\r\npublic\r\nrequire\r\nrequire_once\r\nreturn\r\nstatic\r\nswitch\r\nthrow\r\ntrait\r\ntry\r\nunset\r\nuse\r\nvar\r\nwhile\r\nxor",
                                     "Attributes": {
                                         "Element": "ReservedWord",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 },
                                 {
@@ -218,7 +218,7 @@
                                     "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
                                     "Attributes": {
                                         "Element": "Symbol",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 }
                             ],
@@ -228,7 +228,7 @@
                                     "Symbols": "0123456789",
                                     "Attributes": {
                                         "Element": "Number",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 },
                                 {
@@ -236,7 +236,7 @@
                                     "Symbols": ".0123456789",
                                     "Attributes": {
                                         "Element": "Number",
-                                        "ParentBackground": "True"
+                                        "ParentBackground": true
                                     }
                                 }
                             ]

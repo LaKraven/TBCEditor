@@ -334,7 +334,6 @@ type
     function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function RowColumnToPixels(const ADisplayPosition: TBCEditorDisplayPosition): TPoint;
-    function TranslateKeyCode(ACode: Word; AShift: TShiftState; var AData: pointer): TBCEditorCommand;
     procedure ChainLinesChanged(Sender: TObject);
     procedure ChainLinesChanging(Sender: TObject);
     procedure ChainListCleared(Sender: TObject);
@@ -438,6 +437,7 @@ type
     function ReplaceText(const ASearchText: string; const AReplaceText: string): Integer;
     function SplitTextIntoWords(AStringList: TStrings; CaseSensitive: Boolean): string;
     function TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True): TBCEditorDisplayPosition;
+    function TranslateKeyCode(ACode: Word; AShift: TShiftState; var AData: pointer): TBCEditorCommand;
     function WordEnd: TBCEditorTextPosition; overload;
     function WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function WordStart: TBCEditorTextPosition; overload;
@@ -6756,7 +6756,6 @@ begin
           if not Assigned(FCodeFoldingHintForm) then
           begin
             FCodeFoldingHintForm := TBCEditorCompletionProposalForm.Create(Self);
-
             with FCodeFoldingHintForm do
             begin
               BackgroundColor := FCodeFolding.Hint.Colors.Background;

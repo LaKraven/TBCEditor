@@ -102,7 +102,7 @@ type
 
     function GetCurrentInput: string;
     procedure CancelCompletion;
-    procedure Execute(ACurrentString: string; x, y: Integer; ADisplayType: TBCEditorCompletionType = ctNone);
+    procedure Execute(ACurrentString: string; X, Y: Integer; ADisplayType: TBCEditorCompletionType = ctNone);
 
     property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor default clWindow;
     property BorderColor: TColor read FBorderColor write FBorderColor default clBtnFace;
@@ -285,99 +285,111 @@ end;
 procedure TBCEditorCompletionProposalForm.KeyDown(var Key: Word; Shift: TShiftState);
 var
   LChar: Char;
+  LData: Pointer;
+  LEditorCommand: TBCEditorCommand;
 begin
-  if FDisplayType = ctCode then
-  begin
-    case Key of
-      VK_RETURN, VK_TAB:
-        if Assigned(OnValidate) then
-          OnValidate(Self, Shift, BCEDITOR_NONE_CHAR);
-      VK_ESCAPE:
-        begin
-          if Assigned(OnCancel) then
-            OnCancel(Self);
-        end;
-      VK_LEFT:
-        begin
-          if Length(FCurrentString) > 0 then
-          begin
-            CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
-            if Assigned(Owner) then
-              (Owner as TBCBaseEditor).CommandProcessor(ecLeft, BCEDITOR_NONE_CHAR, nil);
-          end
-          else
-          begin
-            // Since we have control, we need to re-send the key to
-            // the editor so that the cursor behaves properly
-            if Assigned(Owner) then
-              (Owner as TBCBaseEditor).CommandProcessor(ecLeft, BCEDITOR_NONE_CHAR, nil);
-
-            if Assigned(OnCancel) then
-              OnCancel(Self);
-          end;
-        end;
-      VK_RIGHT:
-        begin
-          if Assigned(Owner) then
-            with Owner as TBCBaseEditor do
+  case FDisplayType of
+    ctCode:
+      begin
+        case Key of
+          VK_RETURN, VK_TAB:
+            if Assigned(OnValidate) then
+              OnValidate(Self, Shift, BCEDITOR_NONE_CHAR);
+          VK_ESCAPE:
             begin
-              if CaretX <= Length(LineText) then
-                LChar := LineText[CaretX]
-              else
-                LChar := BCEDITOR_SPACE_CHAR;
-
-              if Self.IsWordBreakChar(LChar) then
+              if Assigned(OnCancel) then
+                OnCancel(Self);
+            end;
+          VK_LEFT:
+            begin
+              if Length(FCurrentString) > 0 then
               begin
-                if Assigned(OnCancel) then
-                  OnCancel(Self)
+                CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
+                if Assigned(Owner) then
+                  (Owner as TBCBaseEditor).CommandProcessor(ecLeft, BCEDITOR_NONE_CHAR, nil);
               end
               else
-                CurrentString := CurrentString + LChar;
+              begin
+                // Since we have control, we need to re-send the key to
+                // the editor so that the cursor behaves properly
+                if Assigned(Owner) then
+                  (Owner as TBCBaseEditor).CommandProcessor(ecLeft, BCEDITOR_NONE_CHAR, nil);
 
-              CommandProcessor(ecRight, BCEDITOR_NONE_CHAR, nil);
+                if Assigned(OnCancel) then
+                  OnCancel(Self);
+              end;
             end;
-        end;
-      VK_PRIOR:
-        MoveLine(-FVisibleLines);
-      VK_NEXT:
-        MoveLine(FVisibleLines);
-      VK_END:
-        Position := FAssignedList.Count - 1;
-      VK_HOME:
-        Position := 0;
-      VK_UP:
-        if ssCtrl in Shift then
-          Position := 0
-        else
-          MoveLine(-1);
-      VK_DOWN:
-        if ssCtrl in Shift then
-          Position := FAssignedList.Count - 1
-        else
-          MoveLine(1);
-      VK_BACK:
-        if Shift = [] then
-        begin
-          if Length(FCurrentString) > 0 then
-          begin
-            CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
+          VK_RIGHT:
+            begin
+              if Assigned(Owner) then
+                with Owner as TBCBaseEditor do
+                begin
+                  if CaretX <= Length(LineText) then
+                    LChar := LineText[CaretX]
+                  else
+                    LChar := BCEDITOR_SPACE_CHAR;
 
-            if Assigned(Owner) then
-              (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
-          end
-          else
-          begin
-            if Assigned(Owner) then
-              (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
+                  if Self.IsWordBreakChar(LChar) then
+                  begin
+                    if Assigned(OnCancel) then
+                      OnCancel(Self)
+                  end
+                  else
+                    CurrentString := CurrentString + LChar;
 
-            if Assigned(OnCancel) then
-              OnCancel(Self);
-          end;
+                  CommandProcessor(ecRight, BCEDITOR_NONE_CHAR, nil);
+                end;
+            end;
+          VK_PRIOR:
+            MoveLine(-FVisibleLines);
+          VK_NEXT:
+            MoveLine(FVisibleLines);
+          VK_END:
+            Position := FAssignedList.Count - 1;
+          VK_HOME:
+            Position := 0;
+          VK_UP:
+            if ssCtrl in Shift then
+              Position := 0
+            else
+              MoveLine(-1);
+          VK_DOWN:
+            if ssCtrl in Shift then
+              Position := FAssignedList.Count - 1
+            else
+              MoveLine(1);
+          VK_BACK:
+            if Shift = [] then
+            begin
+              if Length(FCurrentString) > 0 then
+              begin
+                CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
+
+                if Assigned(Owner) then
+                  (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
+              end
+              else
+              begin
+                if Assigned(Owner) then
+                  (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
+
+                if Assigned(OnCancel) then
+                  OnCancel(Self);
+              end;
+            end;
+          VK_DELETE:
+            if Assigned(Owner) then
+              (Owner as TBCBaseEditor).CommandProcessor(ecDeleteChar, BCEDITOR_NONE_CHAR, nil);
         end;
-      VK_DELETE:
-        if Assigned(Owner) then
-          (Owner as TBCBaseEditor).CommandProcessor(ecDeleteChar, BCEDITOR_NONE_CHAR, nil);
-    end;
+      end;
+    ctHint:
+      with Owner as TBCBaseEditor do
+      begin
+        LData := nil;
+        LChar := BCEDITOR_NONE_CHAR;
+        LEditorCommand := TranslateKeyCode(Key, Shift, LData);
+        CommandProcessor(LEditorCommand, LChar, LData);
+      end;
   end;
   Invalidate;
 end;
@@ -390,36 +402,41 @@ end;
 
 procedure TBCEditorCompletionProposalForm.KeyPressW(var Key: Char);
 begin
-  if FDisplayType = ctCode then
-  begin
-    case Key of
-      BCEDITOR_CARRIAGE_RETURN, BCEDITOR_ESCAPE:
-        ;
-      BCEDITOR_SPACE_CHAR .. high(Char):
-        begin
-          if IsWordBreakChar(Key) and Assigned(OnValidate) then
-          begin
-            if Key = BCEDITOR_SPACE_CHAR then
-              OnValidate(Self, [], BCEDITOR_NONE_CHAR)
-            else
-              OnValidate(Self, [], Key);
-          end;
+  case FDisplayType of
+    ctCode:
+      begin
+        case Key of
+          BCEDITOR_CARRIAGE_RETURN, BCEDITOR_ESCAPE:
+            ;
+          BCEDITOR_SPACE_CHAR .. high(Char):
+            begin
+              if IsWordBreakChar(Key) and Assigned(OnValidate) then
+              begin
+                if Key = BCEDITOR_SPACE_CHAR then
+                  OnValidate(Self, [], BCEDITOR_NONE_CHAR)
+                else
+                  OnValidate(Self, [], Key);
+              end;
 
-          CurrentString := CurrentString + Key;
+              CurrentString := CurrentString + Key;
 
-          if Assigned(OnKeyPress) then
-            OnKeyPress(Self, Key);
+              if Assigned(OnKeyPress) then
+                OnKeyPress(Self, Key);
+            end;
+          BCEDITOR_F11_CHAR:
+            if Assigned(OnKeyPress) then
+              OnKeyPress(Self, Key);
+        else
+          with Owner as TBCBaseEditor do
+          CommandProcessor(ecChar, Key, nil);
+
+          if Assigned(OnCancel) then
+            OnCancel(Self);
         end;
-      BCEDITOR_F11_CHAR:
-        if Assigned(OnKeyPress) then
-          OnKeyPress(Self, Key);
-    else
-      with Owner as TBCBaseEditor do
-        CommandProcessor(ecChar, Key, nil);
-
-      if Assigned(OnCancel) then
-        OnCancel(Self);
-    end;
+      end;
+    ctHint:
+      if Assigned(OnKeyPress) then
+        OnKeyPress(Self, Key);
   end;
   Invalidate;
 end;
@@ -760,7 +777,7 @@ begin
   else
     Delta := FVisibleLines;
 
-  inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
+  Inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
   WheelClicks := FMouseWheelAccumulator div WHEEL_DELTA;
   FMouseWheelAccumulator := FMouseWheelAccumulator mod WHEEL_DELTA;
   if (Delta = Integer(WHEEL_PAGESCROLL)) or (Delta > FVisibleLines) then

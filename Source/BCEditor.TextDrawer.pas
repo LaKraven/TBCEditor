@@ -209,16 +209,16 @@ begin
   New(Result);
   FillChar(Result^, SizeOf(TBCEditorSharedFontsInfo), 0);
   with Result^ do
-    try
-      BaseFont := TFont.Create;
-      BaseFont.Assign(ABaseFont);
-      BaseLogFont := LogFont;
-      IsTrueType := (0 <> (TRUETYPE_FONTTYPE and LogFont.lfPitchAndFamily));
-    except
-      Result^.BaseFont.Free;
-      Dispose(Result);
-      raise;
-    end;
+  try
+    BaseFont := TFont.Create;
+    BaseFont.Assign(ABaseFont);
+    BaseLogFont := LogFont;
+    IsTrueType := (0 <> (TRUETYPE_FONTTYPE and LogFont.lfPitchAndFamily));
+  except
+    Result^.BaseFont.Free;
+    Dispose(Result);
+    raise;
+  end;
 end;
 
 procedure TBCEditorFontsInfoManager.UnLockFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);

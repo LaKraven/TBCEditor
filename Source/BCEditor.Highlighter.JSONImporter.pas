@@ -38,14 +38,6 @@ begin
     Result := Result + [AString[i]];
 end;
 
-function StrToBoolean(const AString: string): Boolean;
-begin
-  if AString = '' then
-    Result := False
-  else
-    Result := StrToBool(AString);
-end;
-
 function StrToStrDef(const AString: string; const AStringDef: string): string;
 begin
   if Trim(AString) = '' then
@@ -178,14 +170,19 @@ begin
 end;
 
 procedure ImportInfo(AInfo: TBCEditorHighlighterInfo; InfoObject: TJsonObject);
+var
+  i: Integer;
+  LSampleArray: TJsonArray;
 begin
   if Assigned(InfoObject) then
   begin
     { General }
-    GMultiHighlighter := StrToBoolean(InfoObject['General']['MultiHighlighter'].Value);
+    GMultiHighlighter := InfoObject['General'].B['MultiHighlighter'];
     AInfo.General.Version := InfoObject['General']['Version'].Value;
     AInfo.General.Date := InfoObject['General']['Date'].Value;
-    AInfo.General.Sample := InfoObject['General']['Sample'].Value;
+    LSampleArray := InfoObject['General'].A['Sample'];
+    for i := 0 to LSampleArray.Count - 1 do
+      AInfo.General.Sample := AInfo.General.Sample + LSampleArray.S[i];
     { Author }
     AInfo.Author.Name := InfoObject['Author']['Name'].Value;
     AInfo.Author.Email := InfoObject['Author']['Email'].Value;
@@ -279,18 +276,23 @@ begin
   if Assigned(AttributesObject) then
   begin
     AHighlighterAttribute.Element := AttributesObject['Element'].Value;
-    AHighlighterAttribute.ParentForeground := StrToBoolean(AttributesObject['ParentForeground'].Value);
-    AHighlighterAttribute.ParentBackground := StrToBoolean(AttributesObject['ParentBackground'].Value);
-    AHighlighterAttribute.UseParentElementForTokens := StrToBoolean(AttributesObject['UseParentElementForTokens'].Value);
+    AHighlighterAttribute.ParentForeground := AttributesObject.B['ParentForeground'];
+    AHighlighterAttribute.ParentBackground := AttributesObject.B['ParentBackground'];
+    AHighlighterAttribute.UseParentElementForTokens := AttributesObject.B['UseParentElementForTokens'];
   end;
 end;
 
 procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
+var
+  i: Integer;
+  LWordArray: TJsonArray;
 begin
   if Assigned(KeyListObject) then
   begin
     AKeyList.TokenType := StrToRangeType(KeyListObject['Type'].Value);
-    AKeyList.KeyList.Text := KeyListObject['Words'].Value;
+    LWordArray := KeyListObject.A['Words'];
+    for i := 0 to LWordArray.Count - 1 do
+      AKeyList.KeyList.Add(LWordArray.S[i]);
     ImportAttributes(AKeyList.Attribute, KeyListObject['Attributes'].ObjectValue);
   end;
 end;
@@ -351,7 +353,7 @@ begin
       if not ASkipBeforeSubRules then
       begin
         ARange.Clear;
-        ARange.CaseSensitive := StrToBoolean(RangeObject['CaseSensitive'].Value);
+        ARange.CaseSensitive := RangeObject.B['CaseSensitive'];
         ImportAttributes(ARange.Attribute, RangeObject['Attributes'].ObjectValue);
         if RangeObject['Delimiters'].Value <> '' then
           ARange.Delimiters := StrToSet(RangeObject['Delimiters'].Value);
@@ -360,8 +362,8 @@ begin
         PropertiesObject := RangeObject['Properties'].ObjectValue;
         if Assigned(PropertiesObject) then
         begin
-          ARange.CloseOnEol := StrToBoolean(PropertiesObject['CloseOnEol'].Value);
-          ARange.CloseOnTerm := StrToBoolean(PropertiesObject['CloseOnTerm'].Value);
+          ARange.CloseOnEol := PropertiesObject.B['CloseOnEol'];
+          ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
           ARange.AlternativeClose := PropertiesObject['AlternativeClose'].Value;
         end;
 
@@ -423,7 +425,7 @@ begin
     SkipRegionItem := ASkipRegions.Add(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
       CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
     SkipRegionItem.RegionType := StrToRegionType(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['RegionType'].Value);
-    SkipRegionItem.SkipEmptyChars := StrToBoolean(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['SkipEmptyChars'].Value);
+    SkipRegionItem.SkipEmptyChars := CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
   end;
 end;
 
@@ -457,7 +459,7 @@ begin
       SkipRegionItem := AFoldRegions.SkipRegions.Add(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
         CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
       SkipRegionItem.RegionType := SkipRegionType;
-      SkipRegionItem.SkipEmptyChars := StrToBoolean(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['SkipEmptyChars'].Value);
+      SkipRegionItem.SkipEmptyChars := CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
     end;
   end;
   { Fold regions }
@@ -471,10 +473,10 @@ begin
     if Assigned(MemberObject) then
     begin
       { Options }
-      FoldRegionItem.BeginningOfLine := StrToBoolean(MemberObject['BeginningOfLine'].Value);
-      FoldRegionItem.SharedClose := StrToBoolean(MemberObject['SharedClose'].Value);
-      FoldRegionItem.OpenIsClose := StrToBoolean(MemberObject['OpenIsClose'].Value);
-      FoldRegionItem.NoSubs := StrToBoolean(MemberObject['NoSubs'].Value);
+      FoldRegionItem.BeginningOfLine := MemberObject.B['BeginningOfLine'];
+      FoldRegionItem.SharedClose := MemberObject.B['SharedClose'];
+      FoldRegionItem.OpenIsClose := MemberObject.B['OpenIsClose'];
+      FoldRegionItem.NoSubs := MemberObject.B['NoSubs'];
       FoldRegionItem.SkipIfFoundAfterOpenToken := MemberObject['SkipIfFoundAfterOpenToken'].Value;
       FoldRegionItem.BreakIfNotFoundBeforeNextRegion := MemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
     end;

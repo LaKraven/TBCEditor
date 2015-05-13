@@ -3,8 +3,18 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "10.5.2015",
-                "Sample": "// Hello World in C++\r\n\r\n#include <iostream>\r\n\r\nint main()\r\n{\r\n    std::cout << \"Hello, world!\" << std::endl;\r\n    return 0;\r\n}"
+                "Date": "14.5.2015",
+                "Sample": [
+                    "// Hello World in C++\r\n",
+                    "\r\n",
+                    "#include <iostream>\r\n",
+                    "\r\n",
+                    "int main()\r\n",
+                    "{\r\n",
+                    "    std::cout << \"Hello, world!\" << std::endl;\r\n",
+                    "    return 0;\r\n",
+                    "}"
+                ]
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -169,7 +179,55 @@
                 "KeyList": [
                     {
                         "Type": "ReservedWord",
-                        "Words": "auto\r\nbreak\r\ncase\r\ncatch\r\nchar\r\nclass\r\nconst\r\ncontinue\r\ndefault\r\ndelete\r\ndo\r\ndouble\r\nelse\r\nenum\r\nextern\r\nfloat\r\nfor\r\nfriend\r\ngoto\r\nif\r\ninline\r\nint\r\nlong\r\nnew\r\noperator\r\nprivate\r\nprotected\r\npublic\r\nregister\r\nreturn\r\nshort\r\nsigned\r\nsizeof\r\nstatic\r\nstruct\r\nswitch\r\ntemplate\r\nthis\r\nthrow\r\ntry\r\ntypedef\r\nunion\r\nunsigned\r\nvirtual\r\nvoid\r\nvolatile\r\nwhile",
+                        "Words": [
+                            "auto",
+                            "break",
+                            "case",
+                            "catch",
+                            "char",
+                            "class",
+                            "const",
+                            "continue",
+                            "default",
+                            "delete",
+                            "do",
+                            "double",
+                            "else",
+                            "enum",
+                            "extern",
+                            "float",
+                            "for",
+                            "friend",
+                            "goto",
+                            "if",
+                            "inline",
+                            "int",
+                            "long",
+                            "new",
+                            "operator",
+                            "private",
+                            "protected",
+                            "public",
+                            "register",
+                            "return",
+                            "short",
+                            "signed",
+                            "sizeof",
+                            "static",
+                            "struct",
+                            "switch",
+                            "template",
+                            "this",
+                            "throw",
+                            "try",
+                            "typedef",
+                            "union",
+                            "unsigned",
+                            "virtual",
+                            "void",
+                            "volatile",
+                            "while"
+                        ],
                         "Attributes": {
                             "Element": "ReservedWord",
                             "ParentBackground": true
@@ -177,7 +235,26 @@
                     },
                     {
                         "Type": "Symbol",
-                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
+                        "Words": [
+                            "..",
+                            ":",
+                            ";",
+                            "<",
+                            ">",
+                            "=",
+                            "/",
+                            "*",
+                            ".",
+                            ",",
+                            "-",
+                            "+",
+                            "(",
+                            ")",
+                            "[",
+                            "]",
+                            "{",
+                            "}"
+                        ],
                         "Attributes": {
                             "Element": "Symbol",
                             "ParentBackground": true

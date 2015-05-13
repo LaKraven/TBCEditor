@@ -3,8 +3,14 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "10.5.2015",
-                "Sample": "#!/usr/bin/ruby -w\r\n\r\n# This is a single line comment.\r\n\r\nputs \"Hello, Ruby!\""
+                "Date": "14.5.2015",
+                "Sample": [
+                    "#!/usr/bin/ruby -w\r\n",
+                    "\r\n",
+                    "# This is a single line comment.\r\n",
+                    "\r\n",
+                    "puts \"Hello, Ruby!\""
+                ]
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -169,7 +175,46 @@
                 "KeyList": [
                     {
                         "Type": "ReservedWord",
-                        "Words": "__encoding__\r\n__line__\r\n__file__\r\nalias\r\nand\r\nbreak\r\ncase\r\nclass\r\ndef\r\ndefined?\r\ndo\r\nelse\r\nelseif\r\nend\r\nensure\r\nfalse\r\nfor\r\nif\r\nin\r\nmodule\r\nnext\r\nnil\r\nnot\r\nor\r\nredo\r\nrescue\r\nretry\r\nreturn\r\nself\r\nsuper\r\nthen\r\ntrue\r\nundef\r\nunless\r\nuntil\r\nwhen\r\nwhilte\r\nyield",
+                        "Words": [
+                            "__encoding__",
+                            "__line__",
+                            "__file__",
+                            "alias",
+                            "and",
+                            "break",
+                            "case",
+                            "class",
+                            "def",
+                            "defined?",
+                            "do",
+                            "else",
+                            "elseif",
+                            "end",
+                            "ensure",
+                            "false",
+                            "for",
+                            "if",
+                            "in",
+                            "module",
+                            "next",
+                            "nil",
+                            "not",
+                            "or",
+                            "redo",
+                            "rescue",
+                            "retry",
+                            "return",
+                            "self",
+                            "super",
+                            "then",
+                            "true",
+                            "undef",
+                            "unless",
+                            "until",
+                            "when",
+                            "whilte",
+                            "yield"
+                        ],
                         "Attributes": {
                             "Element": "ReservedWord",
                             "ParentBackground": true
@@ -177,7 +222,26 @@
                     },
                     {
                         "Type": "Symbol",
-                        "Words": "..\r\n:\r\n;\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]\r\n{\r\n}",
+                        "Words": [
+                            "..",
+                            ":",
+                            ";",
+                            "<",
+                            ">",
+                            "=",
+                            "/",
+                            "*",
+                            ".",
+                            ",",
+                            "-",
+                            "+",
+                            "(",
+                            ")",
+                            "[",
+                            "]",
+                            "{",
+                            "}"
+                        ],
                         "Attributes": {
                             "Element": "Symbol",
                             "ParentBackground": true

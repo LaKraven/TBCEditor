@@ -3,8 +3,21 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "1.5.2015",
-                "Sample": "object Form1: TForm1\r\n  Left = 0\r\n  Top = 0\r\n  Caption = 'Form1'\r\n  object Label1: TLabel\r\n    Left = 30\r\n    Top = 20\r\n    Width = 55\r\n    Height = 13\r\n    Caption = 'Hello world!'\r\n  end\r\nend"
+                "Date": "14.5.2015",
+                "Sample": [
+                    "object Form1: TForm1\r\n",
+                    "  Left = 0\r\n",
+                    "  Top = 0\r\n",
+                    "  Caption = 'Form1'\r\n",
+                    "  object Label1: TLabel\r\n",
+                    "    Left = 30\r\n",
+                    "    Top = 20\r\n",
+                    "    Width = 55\r\n",
+                    "    Height = 13\r\n",
+                    "    Caption = 'Hello world!'\r\n",
+                    "  end\r\n",
+                    "end"
+                ]
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -65,7 +78,13 @@
                 "KeyList": [
                     {
                         "Type": "ReservedWord",
-                        "Words": "end\r\ninherited\r\ninline\r\nnil\r\nobject",
+                        "Words": [
+                            "end",
+                            "inherited",
+                            "inline",
+                            "nil",
+                            "object"
+                        ],
                         "Attributes": {
                             "Element": "ReservedWord",
                             "ParentBackground": true
@@ -73,7 +92,23 @@
                     },
                     {
                         "Type": "Symbol",
-                        "Words": "..\r\n:\r\n<\r\n>\r\n=\r\n/\r\n*\r\n.\r\n,\r\n-\r\n+\r\n(\r\n)\r\n[\r\n]",
+                        "Words": [
+                            "..",
+                            ":",
+                            "<",
+                            ">",
+                            "=",
+                            "/",
+                            "*",
+                            ".",
+                            ",",
+                            "-",
+                            "+",
+                            "(",
+                            ")",
+                            "[",
+                            "]"
+                        ],
                         "Attributes": {
                             "Element": "Symbol",
                             "ParentBackground": true

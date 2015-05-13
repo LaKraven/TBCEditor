@@ -3,8 +3,13 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "1.5.2015",
-                "Sample": "Simple text file with Universal Resource Identifier highlighting and opener (with Ctrl key).\r\n\r\nhttp://www.bonecode.com\r\nwww.bonecode.com\r\nmailto:lasse@bonecode.com\r\nnews:comp.lang.pascal.borland"
+                "Date": "14.5.2015",
+                "Sample": ["Simple text file with Universal Resource Identifier highlighting and opener (with Ctrl key).\r\n",
+                           "\r\n",
+                           "http://www.bonecode.com\r\n",
+                           "www.bonecode.com\r\n",
+                           "mailto:lasse@bonecode.com\r\n",
+                           "news:comp.lang.pascal.borland"]
             },
             "Author": {
                 "Name": "Lasse Rautiainen",

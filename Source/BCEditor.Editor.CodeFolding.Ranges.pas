@@ -110,7 +110,7 @@ end;
 
 procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
 
-  procedure RecursiveAssign(FoldRanges, SrcFoldRanges: TBCEditorCodeFoldingRanges);
+  procedure RecursiveAssign(FoldRanges: TBCEditorCodeFoldingRanges; SrcFoldRanges: TBCEditorCodeFoldingRanges);
   var
     i: Integer;
     LFoldRange: TBCEditorCodeFoldingRange;
@@ -220,6 +220,7 @@ end;
 
 destructor TBCEditorCodeFoldingRanges.Destroy;
 begin
+  FRanges.Clear;
   FRanges.Free;
   FRanges := nil;
 
@@ -277,6 +278,7 @@ end;
 
 destructor TBCEditorCodeFoldingRange.Destroy;
 begin;
+  FSubFoldRanges.Clear;
   FSubFoldRanges.Free;
   FSubFoldRanges := nil;
   FCollapsedLines.Free;

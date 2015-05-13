@@ -12300,8 +12300,11 @@ begin
   { Delete all uncollapsed folds, if not in redo list }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
     with FAllCodeFoldingRanges[i] do
-      if (not Collapsed) and (not ParentCollapsed) and not FoundFromUndoOrRedoList(FAllCodeFoldingRanges[i]) then
+      if not Collapsed and not ParentCollapsed and not FoundFromUndoOrRedoList(FAllCodeFoldingRanges[i]) then
+      begin
+        TBCEditorCodeFoldingRanges(FAllCodeFoldingRanges[i]).Free;
         FAllCodeFoldingRanges.AllRanges.Delete(i);
+      end;
 
   SetLength(LFoldRangeLookup, Lines.Count + 1);
   LCount := FAllCodeFoldingRanges.AllCount - 1;

@@ -6673,9 +6673,6 @@ var
   S: string;
   LTopLine: Integer;
 begin
-  if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
-    Exit;
-
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     SetCursor(Screen.Cursors[crArrow]);
@@ -6696,18 +6693,23 @@ begin
 
   inherited MouseMove(Shift, X, Y);
 
+  if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
+    SetCursor(Screen.Cursors[crArrow]);
+
   if FMouseOverURI and not (ssCtrl in Shift) then
     FMouseOverURI := False;
 
   if (rmoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
   begin
     FRightMargin.MouseOver := (Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3);
+
     if FRightMargin.Moving or FRightMargin.MouseOver then
       SetCursor(Screen.Cursors[crHSplit])
     else
-    if not FMouseOverURI then
-      if Cursor <> FCodeFolding.Hint.Cursor then { avoid cursor flickering when code folding hint is shown }
-        SetCursor(Screen.Cursors[crIBeam]);
+    if X > FLeftMargin.Width + FCodeFolding.Width then
+      if not FMouseOverURI then
+        if Cursor <> FCodeFolding.Hint.Cursor then { avoid cursor flickering when code folding hint is shown }
+          SetCursor(Screen.Cursors[crIBeam]);
     if FRightMargin.Moving and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) then
     begin
       FRightMarginMovePosition := X;
@@ -12370,7 +12372,9 @@ begin
     end;
   finally
     Finalize(LFoldRangeLookup);
+    LFoldRangeLookup := nil;
     Finalize(LUncollapsedLinenumbersLookup);
+    LUncollapsedLinenumbersLookup := nil;
     LTemporaryLines.Free;
   end;
   Invalidate;

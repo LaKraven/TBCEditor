@@ -33,6 +33,7 @@ type
     property CompletionProposal;
     property Constraints;
     property Ctl3D;
+    property Directories;
     property Enabled;
     property Font;
     property Height;

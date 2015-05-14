@@ -3,20 +3,43 @@ unit BCEditor.Highlighter.JSONImporter;
 interface
 
 uses
-  System.Classes, BCEditor.Highlighter, BCEditor.Highlighter.Colors;
+  System.Classes, BCEditor.Editor.Base, BCEditor.Highlighter, BCEditor.Highlighter.Colors, BCEditor.Highlighter.Info,
+  BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Rules, BCEditor.Editor.SkipRegions,
+  BCEditor.Editor.CodeFolding.FoldRegions, JsonDataObjects;
 
-procedure ImportFromFile(Highlighter: TBCEditorHighlighter; AFileName: string);
-procedure ImportFromStream(Highlighter: TBCEditorHighlighter; AStream: TStream);
-procedure ImportColorsFromFile(Highlighter: TBCEditorHighlighter; AFileName: string);
-procedure ImportColorsFromStream(Highlighter: TBCEditorHighlighter; AStream: TStream);
+type
+  TBCEditorHighlighterJSONImporter = class(TObject)
+  private
+    FHighlighter: TBCEditorHighlighter;
+    procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject);
+    procedure ImportCodeFolding(ACodeFoldingObject: TJsonObject);
+    procedure ImportColors(AJSONObject: TJsonObject);
+    procedure ImportColorsEditorProperties(AEditorObject: TJsonObject);
+    procedure ImportColorsInfo(AInfoObject: TJsonObject);
+    procedure ImportCompletionProposal(ACodeFoldingObject: TJsonObject);
+    procedure ImportEditorProperties(AEditorObject: TJsonObject);
+    procedure ImportElements(AColorsObject: TJsonObject);
+    procedure ImportHighlighter(AJSONObject: TJsonObject);
+    procedure ImportInfo(AInfoObject: TJsonObject);
+    procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
+    procedure ImportMatchingPair(AMatchingPairObject: TJsonObject);
+    procedure ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil;
+      ASkipBeforeSubRules: Boolean = False);
+    procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
+  public
+    constructor Create(AHighlighter: TBCEditorHighlighter); overload;
+    procedure ImportFromFile(AFileName: string);
+    procedure ImportFromStream(AStream: TStream);
+    procedure ImportColorsFromFile(AFileName: string);
+    procedure ImportColorsFromStream(AStream: TStream);
+  end;
 
 implementation
 
 uses
-  JsonDataObjects, System.SysUtils, Vcl.Graphics, Vcl.Forms, BCEditor.Consts, BCEditor.Editor.Base, BCEditor.Utils,
-  BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Rules, BCEditor.Types, Vcl.Dialogs,
-  BCEditor.Highlighter.Token, BCEditor.Editor.CodeFolding.FoldRegions, BCEditor.Language,
-  BCEditor.Editor.SkipRegions, BCEditor.Highlighter.Info, BCEditor.Editor.CodeFolding.Types;
+  System.SysUtils, Vcl.Graphics, Vcl.Forms, BCEditor.Consts, BCEditor.Utils, BCEditor.Types, Vcl.Dialogs,
+  BCEditor.Highlighter.Token, BCEditor.Language,
+   BCEditor.Editor.CodeFolding.Types;
 
 var
   GMultiHighlighter: Boolean;
@@ -169,120 +192,135 @@ begin
     Result := Integer(ttUnspecified);
 end;
 
-procedure ImportInfo(AInfo: TBCEditorHighlighterInfo; InfoObject: TJsonObject);
+{ TBCEditorHighlighterJSONImporter }
+
+constructor TBCEditorHighlighterJSONImporter.Create(AHighlighter: TBCEditorHighlighter);
+begin
+  inherited Create;
+  FHighlighter := AHighlighter;
+end;
+
+procedure TBCEditorHighlighterJSONImporter.ImportInfo(AInfoObject: TJsonObject);
 var
   i: Integer;
   LSampleArray: TJsonArray;
+  LHighlighterInfo: TBCEditorHighlighterInfo;
 begin
-  if Assigned(InfoObject) then
+  if Assigned(AInfoObject) then
   begin
+    LHighlighterInfo := TBCBaseEditor(FHighlighter.Editor).Highlighter.Info;
     { General }
-    GMultiHighlighter := InfoObject['General'].B['MultiHighlighter'];
-    AInfo.General.Version := InfoObject['General']['Version'].Value;
-    AInfo.General.Date := InfoObject['General']['Date'].Value;
-    LSampleArray := InfoObject['General'].A['Sample'];
+    GMultiHighlighter := AInfoObject['General'].B['MultiHighlighter'];
+    LHighlighterInfo.General.Version := AInfoObject['General']['Version'].Value;
+    LHighlighterInfo.General.Date := AInfoObject['General']['Date'].Value;
+    LSampleArray := AInfoObject['General'].A['Sample'];
     for i := 0 to LSampleArray.Count - 1 do
-      AInfo.General.Sample := AInfo.General.Sample + LSampleArray.S[i];
+      LHighlighterInfo.General.Sample := LHighlighterInfo.General.Sample + LSampleArray.S[i];
     { Author }
-    AInfo.Author.Name := InfoObject['Author']['Name'].Value;
-    AInfo.Author.Email := InfoObject['Author']['Email'].Value;
-    AInfo.Author.Comments := InfoObject['Author']['Comments'].Value;
+    LHighlighterInfo.Author.Name := AInfoObject['Author']['Name'].Value;
+    LHighlighterInfo.Author.Email := AInfoObject['Author']['Email'].Value;
+    LHighlighterInfo.Author.Comments := AInfoObject['Author']['Comments'].Value;
   end;
 end;
 
-procedure ImportColorsInfo(AInfo: TBCEditorHighlighterInfo; InfoObject: TJsonObject);
-begin
-  if Assigned(InfoObject) then
-  begin
-    { General }
-    AInfo.General.Version := InfoObject['General']['Version'].Value;
-    AInfo.General.Date := InfoObject['General']['Date'].Value;
-    { Author }
-    AInfo.Author.Name := InfoObject['Author']['Name'].Value;
-    AInfo.Author.Email := InfoObject['Author']['Email'].Value;
-    AInfo.Author.Comments := InfoObject['Author']['Comments'].Value;
-  end;
-end;
-
-procedure ImportEditorProperties(AEditor: TBCBaseEditor; EditorObject: TJsonObject);
-begin
-  if Assigned(EditorObject) then
-    AEditor.URIOpener := StrToBoolDef(EditorObject['URIOpener'].Value, False);
-end;
-
-procedure ImportColorsEditorProperties(AEditor: TBCBaseEditor; EditorObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportColorsInfo(AInfoObject: TJsonObject);
 var
-  ColorsObject, FontsObject, FontSizesObject: TJsonObject;
+  LHighlighterInfo: TBCEditorHighlighterInfo;
 begin
-  if Assigned(EditorObject) then
+  if Assigned(AInfoObject) then
   begin
-    ColorsObject := EditorObject['Colors'].ObjectValue;
-    if Assigned(ColorsObject) then
+    LHighlighterInfo := TBCBaseEditor(FHighlighter.Editor).Highlighter.Colors.Info;
+    { General }
+    LHighlighterInfo.General.Version := AInfoObject['General']['Version'].Value;
+    LHighlighterInfo.General.Date := AInfoObject['General']['Date'].Value;
+    { Author }
+    LHighlighterInfo.Author.Name := AInfoObject['Author']['Name'].Value;
+    LHighlighterInfo.Author.Email := AInfoObject['Author']['Email'].Value;
+    LHighlighterInfo.Author.Comments := AInfoObject['Author']['Comments'].Value;
+  end;
+end;
+
+procedure TBCEditorHighlighterJSONImporter.ImportEditorProperties(AEditorObject: TJsonObject);
+begin
+  if Assigned(AEditorObject) then
+    TBCBaseEditor(FHighlighter.Editor).URIOpener := StrToBoolDef(AEditorObject['URIOpener'].Value, False);
+end;
+
+procedure TBCEditorHighlighterJSONImporter.ImportColorsEditorProperties(AEditorObject: TJsonObject);
+var
+  LColorsObject, LFontsObject, LFontSizesObject: TJsonObject;
+  LEditor: TBCBaseEditor;
+begin
+  if Assigned(AEditorObject) then
+  begin
+    LEditor := FHighlighter.Editor as TBCBaseEditor;
+    LColorsObject := AEditorObject['Colors'].ObjectValue;
+    if Assigned(LColorsObject) then
     begin
-      AEditor.BackgroundColor := StringToColorDef(ColorsObject['Background'].Value, AEditor.BackgroundColor);
-      AEditor.ActiveLine.Color := StringToColorDef(ColorsObject['ActiveLine'].Value, AEditor.ActiveLine.Color);
-      AEditor.CodeFolding.Colors.Background := StringToColorDef(ColorsObject['CodeFoldingBackground'].Value, AEditor.CodeFolding.Colors.Background);
-      AEditor.CodeFolding.Colors.CollapsedLine := StringToColorDef(ColorsObject['CodeFoldingCollapsedLine'].Value, AEditor.CodeFolding.Colors.CollapsedLine);
-      AEditor.CodeFolding.Colors.FoldingLine := StringToColorDef(ColorsObject['CodeFoldingFoldingLine'].Value, AEditor.CodeFolding.Colors.FoldingLine);
-      AEditor.CodeFolding.Colors.IndentHighlight := StringToColorDef(ColorsObject['CodeFoldingIndentHighlight'].Value, AEditor.CodeFolding.Colors.IndentHighlight);
-      AEditor.CodeFolding.Hint.Colors.Background := StringToColorDef(ColorsObject['CodeFoldingHintBackground'].Value, AEditor.CodeFolding.Hint.Colors.Background);
-      AEditor.CodeFolding.Hint.Colors.Border := StringToColorDef(ColorsObject['CodeFoldingHintBorder'].Value, AEditor.CodeFolding.Hint.Colors.Border);
-      AEditor.CodeFolding.Hint.Font.Color := StringToColorDef(ColorsObject['CodeFoldingHintText'].Value, AEditor.CodeFolding.Hint.Font.Color);
-      AEditor.CompletionProposal.Colors.Background := StringToColorDef(ColorsObject['CompletionProposalBackground'].Value, AEditor.CompletionProposal.Colors.Background);
-      AEditor.CompletionProposal.Font.Color := StringToColorDef(ColorsObject['CompletionProposalForeground'].Value, AEditor.CompletionProposal.Font.Color);
-      AEditor.CompletionProposal.Colors.Border := StringToColorDef(ColorsObject['CompletionProposalBorder'].Value, AEditor.CompletionProposal.Colors.Border);
-      AEditor.CompletionProposal.Colors.SelectedBackground := StringToColorDef(ColorsObject['CompletionProposalSelectedBackground'].Value, AEditor.CompletionProposal.Colors.SelectedBackground);
-      AEditor.CompletionProposal.Colors.SelectedText := StringToColorDef(ColorsObject['CompletionProposalSelectedText'].Value, AEditor.CompletionProposal.Colors.SelectedText);
-      AEditor.LeftMargin.Color := StringToColorDef(ColorsObject['LeftMarginBackground'].Value, AEditor.LeftMargin.Color);
-      AEditor.LeftMargin.Font.Color := StringToColorDef(ColorsObject['LeftMarginLineNumbers'].Value, AEditor.LeftMargin.Font.Color);
-      AEditor.LeftMargin.Bookmarks.Panel.Color := StringToColorDef(ColorsObject['LeftMarginBookmarkPanel'].Value, AEditor.LeftMargin.Bookmarks.Panel.Color);
-      AEditor.LeftMargin.LineState.Colors.Modified := StringToColorDef(ColorsObject['LeftMarginLineStateModified'].Value, AEditor.LeftMargin.LineState.Colors.Modified);
-      AEditor.LeftMargin.LineState.Colors.Normal := StringToColorDef(ColorsObject['LeftMarginLineStateNormal'].Value, AEditor.LeftMargin.LineState.Colors.Normal);
-      AEditor.MatchingPair.Colors.Matched := StringToColorDef(ColorsObject['MatchingPairMatched'].Value, AEditor.MatchingPair.Colors.Matched);
-      AEditor.MatchingPair.Colors.Unmatched := StringToColorDef(ColorsObject['MatchingPairUnmatched'].Value, AEditor.MatchingPair.Colors.Unmatched);
-      AEditor.RightMargin.Colors.Edge := StringToColorDef(ColorsObject['RightEdge'].Value, AEditor.RightMargin.Colors.Edge);
-      AEditor.RightMargin.Colors.MovingEdge := StringToColorDef(ColorsObject['RightMovingEdge'].Value, AEditor.RightMargin.Colors.MovingEdge);
-      AEditor.Search.Highlighter.Colors.Background := StringToColorDef(ColorsObject['SearchHighlighterBackground'].Value, AEditor.Search.Highlighter.Colors.Background);
-      AEditor.Search.Highlighter.Colors.Foreground := StringToColorDef(ColorsObject['SearchHighlighterForeground'].Value, AEditor.Search.Highlighter.Colors.Foreground);
-      AEditor.Search.Map.Colors.ActiveLine := StringToColorDef(ColorsObject['SearchMapActiveLine'].Value, AEditor.Search.Map.Colors.ActiveLine);
-      AEditor.Search.Map.Colors.Background := StringToColorDef(ColorsObject['SearchMapBackground'].Value, AEditor.Search.Map.Colors.Background);
-      AEditor.Search.Map.Colors.Foreground := StringToColorDef(ColorsObject['SearchMapForeground'].Value, AEditor.Search.Map.Colors.Foreground);
-      AEditor.Selection.Colors.Background := StringToColorDef(ColorsObject['SelectionBackground'].Value, AEditor.Selection.Colors.Background);
-      AEditor.Selection.Colors.Foreground := StringToColorDef(ColorsObject['SelectionForeground'].Value, AEditor.Selection.Colors.Foreground);
+      LEditor.BackgroundColor := StringToColorDef(LColorsObject['Background'].Value, LEditor.BackgroundColor);
+      LEditor.ActiveLine.Color := StringToColorDef(LColorsObject['ActiveLine'].Value, LEditor.ActiveLine.Color);
+      LEditor.CodeFolding.Colors.Background := StringToColorDef(LColorsObject['CodeFoldingBackground'].Value, LEditor.CodeFolding.Colors.Background);
+      LEditor.CodeFolding.Colors.CollapsedLine := StringToColorDef(LColorsObject['CodeFoldingCollapsedLine'].Value, LEditor.CodeFolding.Colors.CollapsedLine);
+      LEditor.CodeFolding.Colors.FoldingLine := StringToColorDef(LColorsObject['CodeFoldingFoldingLine'].Value, LEditor.CodeFolding.Colors.FoldingLine);
+      LEditor.CodeFolding.Colors.IndentHighlight := StringToColorDef(LColorsObject['CodeFoldingIndentHighlight'].Value, LEditor.CodeFolding.Colors.IndentHighlight);
+      LEditor.CodeFolding.Hint.Colors.Background := StringToColorDef(LColorsObject['CodeFoldingHintBackground'].Value, LEditor.CodeFolding.Hint.Colors.Background);
+      LEditor.CodeFolding.Hint.Colors.Border := StringToColorDef(LColorsObject['CodeFoldingHintBorder'].Value, LEditor.CodeFolding.Hint.Colors.Border);
+      LEditor.CodeFolding.Hint.Font.Color := StringToColorDef(LColorsObject['CodeFoldingHintText'].Value, LEditor.CodeFolding.Hint.Font.Color);
+      LEditor.CompletionProposal.Colors.Background := StringToColorDef(LColorsObject['CompletionProposalBackground'].Value, LEditor.CompletionProposal.Colors.Background);
+      LEditor.CompletionProposal.Font.Color := StringToColorDef(LColorsObject['CompletionProposalForeground'].Value, LEditor.CompletionProposal.Font.Color);
+      LEditor.CompletionProposal.Colors.Border := StringToColorDef(LColorsObject['CompletionProposalBorder'].Value, LEditor.CompletionProposal.Colors.Border);
+      LEditor.CompletionProposal.Colors.SelectedBackground := StringToColorDef(LColorsObject['CompletionProposalSelectedBackground'].Value, LEditor.CompletionProposal.Colors.SelectedBackground);
+      LEditor.CompletionProposal.Colors.SelectedText := StringToColorDef(LColorsObject['CompletionProposalSelectedText'].Value, LEditor.CompletionProposal.Colors.SelectedText);
+      LEditor.LeftMargin.Color := StringToColorDef(LColorsObject['LeftMarginBackground'].Value, LEditor.LeftMargin.Color);
+      LEditor.LeftMargin.Font.Color := StringToColorDef(LColorsObject['LeftMarginLineNumbers'].Value, LEditor.LeftMargin.Font.Color);
+      LEditor.LeftMargin.Bookmarks.Panel.Color := StringToColorDef(LColorsObject['LeftMarginBookmarkPanel'].Value, LEditor.LeftMargin.Bookmarks.Panel.Color);
+      LEditor.LeftMargin.LineState.Colors.Modified := StringToColorDef(LColorsObject['LeftMarginLineStateModified'].Value, LEditor.LeftMargin.LineState.Colors.Modified);
+      LEditor.LeftMargin.LineState.Colors.Normal := StringToColorDef(LColorsObject['LeftMarginLineStateNormal'].Value, LEditor.LeftMargin.LineState.Colors.Normal);
+      LEditor.MatchingPair.Colors.Matched := StringToColorDef(LColorsObject['MatchingPairMatched'].Value, LEditor.MatchingPair.Colors.Matched);
+      LEditor.MatchingPair.Colors.Unmatched := StringToColorDef(LColorsObject['MatchingPairUnmatched'].Value, LEditor.MatchingPair.Colors.Unmatched);
+      LEditor.RightMargin.Colors.Edge := StringToColorDef(LColorsObject['RightEdge'].Value, LEditor.RightMargin.Colors.Edge);
+      LEditor.RightMargin.Colors.MovingEdge := StringToColorDef(LColorsObject['RightMovingEdge'].Value, LEditor.RightMargin.Colors.MovingEdge);
+      LEditor.Search.Highlighter.Colors.Background := StringToColorDef(LColorsObject['SearchHighlighterBackground'].Value, LEditor.Search.Highlighter.Colors.Background);
+      LEditor.Search.Highlighter.Colors.Foreground := StringToColorDef(LColorsObject['SearchHighlighterForeground'].Value, LEditor.Search.Highlighter.Colors.Foreground);
+      LEditor.Search.Map.Colors.ActiveLine := StringToColorDef(LColorsObject['SearchMapActiveLine'].Value, LEditor.Search.Map.Colors.ActiveLine);
+      LEditor.Search.Map.Colors.Background := StringToColorDef(LColorsObject['SearchMapBackground'].Value, LEditor.Search.Map.Colors.Background);
+      LEditor.Search.Map.Colors.Foreground := StringToColorDef(LColorsObject['SearchMapForeground'].Value, LEditor.Search.Map.Colors.Foreground);
+      LEditor.Selection.Colors.Background := StringToColorDef(LColorsObject['SelectionBackground'].Value, LEditor.Selection.Colors.Background);
+      LEditor.Selection.Colors.Foreground := StringToColorDef(LColorsObject['SelectionForeground'].Value, LEditor.Selection.Colors.Foreground);
     end;
-    FontsObject := EditorObject['Fonts'].ObjectValue;
-    if Assigned(FontsObject) then
+    LFontsObject := AEditorObject['Fonts'].ObjectValue;
+    if Assigned(LFontsObject) then
     begin
-      AEditor.LeftMargin.Font.Name := StrToStrDef(FontsObject['LineNumbers'].Value, AEditor.LeftMargin.Font.Name);
-      AEditor.Font.Name := StrToStrDef(FontsObject['Text'].Value, AEditor.Font.Name);
-      AEditor.Minimap.Font.Name := StrToStrDef(FontsObject['Minimap'].Value, AEditor.Minimap.Font.Name);
-      AEditor.CodeFolding.Hint.Font.Name := StrToStrDef(FontsObject['CodeFoldingHint'].Value, AEditor.CodeFolding.Hint.Font.Name);
-      AEditor.CompletionProposal.Font.Name := StrToStrDef(FontsObject['CompletionProposal'].Value, AEditor.CompletionProposal.Font.Name);
+      LEditor.LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Name);
+      LEditor.Font.Name := StrToStrDef(LFontsObject['Text'].Value, LEditor.Font.Name);
+      LEditor.Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, LEditor.Minimap.Font.Name);
+      LEditor.CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Name);
+      LEditor.CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Name);
     end;
-    FontSizesObject := EditorObject['FontSizes'].ObjectValue;
-    if Assigned(FontSizesObject) then
+    LFontSizesObject := AEditorObject['FontSizes'].ObjectValue;
+    if Assigned(LFontSizesObject) then
     begin
-      AEditor.LeftMargin.Font.Size := StrToIntDef(FontSizesObject['LineNumbers'].Value, AEditor.LeftMargin.Font.Size);
-      AEditor.Font.Size := StrToIntDef(FontSizesObject['Text'].Value, AEditor.Font.Size);
-      AEditor.Minimap.Font.Size := StrToIntDef(FontSizesObject['Minimap'].Value, AEditor.Minimap.Font.Size);
-      AEditor.CodeFolding.Hint.Font.Size := StrToIntDef(FontSizesObject['CodeFoldingHint'].Value, AEditor.CodeFolding.Hint.Font.Size);
-      AEditor.CompletionProposal.Font.Size := StrToIntDef(FontSizesObject['CompletionProposal'].Value, AEditor.CompletionProposal.Font.Size);
+      LEditor.LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Size);
+      LEditor.Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, LEditor.Font.Size);
+      LEditor.Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, LEditor.Minimap.Font.Size);
+      LEditor.CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Size);
+      LEditor.CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Size);
     end;
   end;
 end;
 
-procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AttributesObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject);
 begin
-  if Assigned(AttributesObject) then
+  if Assigned(AAttributesObject) then
   begin
-    AHighlighterAttribute.Element := AttributesObject['Element'].Value;
-    AHighlighterAttribute.ParentForeground := AttributesObject.B['ParentForeground'];
-    AHighlighterAttribute.ParentBackground := AttributesObject.B['ParentBackground'];
-    AHighlighterAttribute.UseParentElementForTokens := AttributesObject.B['UseParentElementForTokens'];
+    AHighlighterAttribute.Element := AAttributesObject['Element'].Value;
+    AHighlighterAttribute.ParentForeground := AAttributesObject.B['ParentForeground'];
+    AHighlighterAttribute.ParentBackground := AAttributesObject.B['ParentBackground'];
+    AHighlighterAttribute.UseParentElementForTokens := AAttributesObject.B['UseParentElementForTokens'];
   end;
 end;
 
-procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
 var
   i: Integer;
   LWordArray: TJsonArray;
@@ -297,7 +335,7 @@ begin
   end;
 end;
 
-procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
 begin
   if Assigned(SetObject) then
   begin
@@ -306,7 +344,7 @@ begin
   end;
 end;
 
-procedure ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False); { Recursive method }
+procedure TBCEditorHighlighterJSONImporter.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False); { Recursive method }
 var
   i, j: Integer;
   LFileName: string;
@@ -315,13 +353,15 @@ var
   NewSet: TBCEditorSet;
   SubRulesObject, PropertiesObject, TokenRangeObject: TJsonObject;
   JSONObject: TJsonObject;
+  LFileStream: TStream;
 begin
   if Assigned(RangeObject) then
   begin
     LFileName := RangeObject['File'].Value;
     if GMultiHighlighter and (LFileName <> '') then
     begin
-      JSONObject := TJsonObject.ParseFromFile(Format('%sHighlighters\%s', [ExtractFilePath(Application.ExeName), LFileName])) as TJsonObject;
+      LFileStream := TBCBaseEditor(FHighlighter.Editor).CreateHighlighterIncludeFileStream(LFileName);
+      JSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
       if Assigned(JSONObject) then
       try
         TokenRangeObject := JSONObject['Highlighter']['MainRules'].ObjectValue;
@@ -346,6 +386,7 @@ begin
         end;
       finally
         JSONObject.Free;
+        LFileStream.Free;
       end;
     end
     else
@@ -412,64 +453,67 @@ begin
   end;
 end;
 
-procedure ImportCompletionProposal(ASkipRegions: TBCEditorSkipRegions; CodeFoldingObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportCompletionProposal(ACodeFoldingObject: TJsonObject);
 var
   i: Integer;
   SkipRegionItem: TBCEditorSkipRegionItem;
 begin
-  if not Assigned(CodeFoldingObject) then
+  if not Assigned(ACodeFoldingObject) then
     Exit;
   { Skip regions }
-  for i := 0 to CodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
+  for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
   begin
-    SkipRegionItem := ASkipRegions.Add(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
-      CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
-    SkipRegionItem.RegionType := StrToRegionType(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['RegionType'].Value);
-    SkipRegionItem.SkipEmptyChars := CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
+    SkipRegionItem := FHighlighter.CompletionProposalSkipRegions.Add(ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
+      ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
+    SkipRegionItem.RegionType := StrToRegionType(ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['RegionType'].Value);
+    SkipRegionItem.SkipEmptyChars := ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
   end;
 end;
 
-procedure ImportCodeFolding(AEditor: TBCBaseEditor; AFoldRegions: TBCEditorCodeFoldingRegions; CodeFoldingObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportCodeFolding(ACodeFoldingObject: TJsonObject);
 var
   i: Integer;
   SkipRegionType: TBCEditorSkipRegionItemType;
   MemberObject: TJsonObject;
   FoldRegionItem: TBCEditorFoldRegionItem;
   SkipRegionItem: TBCEditorSkipRegionItem;
+  LFoldRegions: TBCEditorCodeFoldingRegions;
 begin
-  if not Assigned(CodeFoldingObject) then
+  LFoldRegions := FHighlighter.CodeFoldingRegions;
+
+  if not Assigned(ACodeFoldingObject) then
     Exit;
-  if CodeFoldingObject.Contains('Options') then
-    AFoldRegions.StringEscapeChar := CodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1]
+  if ACodeFoldingObject.Contains('Options') then
+    LFoldRegions.StringEscapeChar := ACodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1]
   else
-    AFoldRegions.StringEscapeChar := #0;
+    LFoldRegions.StringEscapeChar := #0;
   { Skip regions }
-  if CodeFoldingObject.Contains('SkipRegion') then
-  for i := 0 to CodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
+  if ACodeFoldingObject.Contains('SkipRegion') then
+  for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
   begin
-    SkipRegionType := StrToRegionType(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['RegionType'].Value);
-    if (SkipRegionType = ritMultiLineComment) and (cfoFoldMultilineComments in AEditor.CodeFolding.Options) then
+    SkipRegionType := StrToRegionType(ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['RegionType'].Value);
+    if (SkipRegionType = ritMultiLineComment) and (cfoFoldMultilineComments in TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options) then
     begin
-      FoldRegionItem := AFoldRegions.Add(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
-        CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
+      FoldRegionItem := LFoldRegions.Add(ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
+        ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
       FoldRegionItem.NoSubs := True;
     end
     else
     begin
-      SkipRegionItem := AFoldRegions.SkipRegions.Add(CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
-        CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
+      SkipRegionItem := LFoldRegions.SkipRegions.Add(ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
+        ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
       SkipRegionItem.RegionType := SkipRegionType;
-      SkipRegionItem.SkipEmptyChars := CodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
+      SkipRegionItem.SkipEmptyChars := ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i].ObjectValue.B['SkipEmptyChars'];
     end;
   end;
   { Fold regions }
-  if CodeFoldingObject.Contains('FoldRegion') then
-  for i := 0 to CodeFoldingObject['FoldRegion'].ArrayValue.Count - 1 do
+  if ACodeFoldingObject.Contains('FoldRegion') then
+  for i := 0 to ACodeFoldingObject['FoldRegion'].ArrayValue.Count - 1 do
   begin
-    FoldRegionItem := AFoldRegions.Add(CodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
-      CodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
+    FoldRegionItem := LFoldRegions.Add(ACodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value,
+      ACodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value);
 
-    MemberObject := CodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['Properties'].ObjectValue;
+    MemberObject := ACodeFoldingObject['FoldRegion'].ArrayValue.Items[i].ObjectValue['Properties'].ObjectValue;
     if Assigned(MemberObject) then
     begin
       { Options }
@@ -483,81 +527,77 @@ begin
   end;
 end;
 
-procedure ImportMatchingPair(AMatchingPairs: TList; MatchingPairObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportMatchingPair(AMatchingPairObject: TJsonObject);
 var
   i: Integer;
   TokenMatch: PBCEditorMatchingPairToken;
 begin
-  if not Assigned(MatchingPairObject) then
+  if not Assigned(AMatchingPairObject) then
     Exit;
   { Matching token pairs }
-  for i := 0 to MatchingPairObject['Pairs'].ArrayValue.Count - 1 do
+  for i := 0 to AMatchingPairObject['Pairs'].ArrayValue.Count - 1 do
   begin
     { Add element }
     New(TokenMatch);
-    TokenMatch.OpenToken := MatchingPairObject['Pairs'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value;
-    TokenMatch.CloseToken := MatchingPairObject['Pairs'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value;
-    AMatchingPairs.Add(TokenMatch)
+    TokenMatch.OpenToken := AMatchingPairObject['Pairs'].ArrayValue.Items[i].ObjectValue['OpenToken'].Value;
+    TokenMatch.CloseToken := AMatchingPairObject['Pairs'].ArrayValue.Items[i].ObjectValue['CloseToken'].Value;
+    FHighlighter.MatchingPairs.Add(TokenMatch)
   end;
 end;
 
-procedure ImportElements(AStyles: TList; ColorsObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportElements(AColorsObject: TJsonObject);
 var
   i: Integer;
   Element: PBCEditorHighlighterElement;
 begin
-  if not Assigned(ColorsObject) then
+  if not Assigned(AColorsObject) then
     Exit;
-  for i := 0 to ColorsObject['Elements'].ArrayValue.Count - 1 do
+  for i := 0 to AColorsObject['Elements'].ArrayValue.Count - 1 do
   begin
     New(Element);
-    Element.Background := StringToColorDef(ColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Background'].Value, clWindow);
-    Element.Foreground := StringToColorDef(ColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Foreground'].Value, clWindowText);
-    Element.Name := ColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Name'].Value;
-    Element.Style := StrToFontStyle(ColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Style'].Value);
-    AStyles.Add(Element)
+    Element.Background := StringToColorDef(AColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Background'].Value, clWindow);
+    Element.Foreground := StringToColorDef(AColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Foreground'].Value, clWindowText);
+    Element.Name := AColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Name'].Value;
+    Element.Style := StrToFontStyle(AColorsObject['Elements'].ArrayValue.Items[i].ObjectValue['Style'].Value);
+    FHighlighter.Colors.Styles.Add(Element)
   end;
 end;
 
-procedure ImportHighlighter(Highlighter: TBCEditorHighlighter; JSONObject: TJsonObject);
-var
-  Editor: TBCBaseEditor;
+procedure TBCEditorHighlighterJSONImporter.ImportHighlighter(AJSONObject: TJsonObject);
 begin
-  Editor := Highlighter.Editor as TBCBaseEditor;
+  FHighlighter.Clear;
 
-  Highlighter.Clear;
-
-  ImportInfo(Highlighter.Info, JSONObject['Highlighter']['Info'].ObjectValue);
-  ImportEditorProperties(Editor, JSONObject['Highlighter']['Editor'].ObjectValue);
-  ImportRange(Highlighter.MainRules, JSONObject['Highlighter']['MainRules'].ObjectValue);
-  ImportCodeFolding(Editor, Highlighter.CodeFoldingRegions, JSONObject['CodeFolding'].ObjectValue);
-  ImportMatchingPair(Highlighter.MatchingPairs, JSONObject['MatchingPair'].ObjectValue);
-  ImportCompletionProposal(Highlighter.CompletionProposalSkipRegions, JSONObject['CompletionProposal'].ObjectValue);
+  ImportInfo(AJSONObject['Highlighter']['Info'].ObjectValue);
+  ImportEditorProperties(AJSONObject['Highlighter']['Editor'].ObjectValue);
+  ImportRange(FHighlighter.MainRules, AJSONObject['Highlighter']['MainRules'].ObjectValue);
+  ImportCodeFolding(AJSONObject['CodeFolding'].ObjectValue);
+  ImportMatchingPair(AJSONObject['MatchingPair'].ObjectValue);
+  ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
 end;
 
-procedure ImportColors(Highlighter: TBCEditorHighlighter; JSONObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportColors(AJSONObject: TJsonObject);
 begin
-  Highlighter.Colors.Clear;
+  FHighlighter.Colors.Clear;
 
-  ImportColorsInfo(Highlighter.Colors.Info, JSONObject['Colors']['Info'].ObjectValue);
-  ImportColorsEditorProperties(Highlighter.Editor as TBCBaseEditor, JSONObject['Colors']['Editor'].ObjectValue);
-  ImportElements(Highlighter.Colors.Styles, JSONObject['Colors'].ObjectValue);
+  ImportColorsInfo(AJSONObject['Colors']['Info'].ObjectValue);
+  ImportColorsEditorProperties(AJSONObject['Colors']['Editor'].ObjectValue);
+  ImportElements(AJSONObject['Colors'].ObjectValue);
 end;
 
-procedure ImportFromStream(Highlighter: TBCEditorHighlighter; AStream: TStream);
+procedure TBCEditorHighlighterJSONImporter.ImportFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
 begin
   JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
   if Assigned(JSONObject) then
   try
-    ImportHighlighter(Highlighter, JSONObject);
+    ImportHighlighter(JSONObject);
   finally
     JSONObject.Free;
   end;
 end;
 
-procedure ImportFromFile(Highlighter: TBCEditorHighlighter; AFileName: string);
+procedure TBCEditorHighlighterJSONImporter.ImportFromFile(AFileName: string);
 var
   JSONObject: TJsonObject;
 begin
@@ -566,7 +606,7 @@ begin
     JSONObject := TJsonObject.ParseFromFile(AFileName) as TJsonObject;
     try
       if Assigned(JSONObject) then
-        ImportHighlighter(Highlighter, JSONObject);
+        ImportHighlighter(JSONObject);
     finally
       JSONObject.Free
     end;
@@ -575,20 +615,20 @@ begin
     MessageDialog(Format(SBCEditorImporterFileNotFound, [AFileName]), mtError, [mbOK]);
 end;
 
-procedure ImportColorsFromStream(Highlighter: TBCEditorHighlighter; AStream: TStream);
+procedure TBCEditorHighlighterJSONImporter.ImportColorsFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
 begin
   JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
   if Assigned(JSONObject) then
   try
-    ImportColors(Highlighter, JSONObject);
+    ImportColors(JSONObject);
   finally
     JSONObject.Free;
   end;
 end;
 
-procedure ImportColorsFromFile(Highlighter: TBCEditorHighlighter; AFileName: string);
+procedure TBCEditorHighlighterJSONImporter.ImportColorsFromFile(AFileName: string);
 var
   JSONObject: TJsonObject;
 begin
@@ -597,7 +637,7 @@ begin
     JSONObject := TJsonObject.ParseFromFile(AFileName) as TJsonObject;
     if Assigned(JSONObject) then
     try
-      ImportColors(Highlighter, JSONObject);
+      ImportColors(JSONObject);
     finally
       JSONObject.Free;
     end;

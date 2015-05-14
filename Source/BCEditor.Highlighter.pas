@@ -402,13 +402,23 @@ begin
   FName := ExtractFileName(AFileName);
   FName := Copy(FName, 1, Pos('.', FName) - 1);
 
-  ImportFromFile(Self, AFileName);
+  with TBCEditorHighlighterJSONImporter.Create(Self) do
+  try
+    ImportFromFile(TBCBaseEditor(FEditor).GetHighlighterFileName(AFileName));
+  finally
+    Free;
+  end;
   UpdateColors;
 end;
 
 procedure TBCEditorHighlighter.LoadFromStream(AStream: TStream);
 begin
-  ImportFromStream(Self, AStream);
+  with TBCEditorHighlighterJSONImporter.Create(Self) do
+  try
+    ImportFromStream(AStream);
+  finally
+    Free;
+  end;
   UpdateColors;
 end;
 
@@ -418,13 +428,23 @@ begin
   FColors.Name := ExtractFileName(AFileName);
   FColors.Name := Copy(Colors.Name, 1, Pos('.', Colors.Name) - 1);
 
-  ImportColorsFromFile(Self, AFileName);
+  with TBCEditorHighlighterJSONImporter.Create(Self) do
+  try
+    ImportColorsFromFile(TBCBaseEditor(FEditor).GetColorsFileName(AFileName));
+  finally
+    Free;
+  end;
   UpdateColors;
 end;
 
 procedure TBCEditorHighlighter.LoadColorsFromStream(AStream: TStream);
 begin
-  ImportColorsFromStream(Self, AStream);
+  with TBCEditorHighlighterJSONImporter.Create(Self) do
+  try
+    ImportColorsFromStream(AStream);
+  finally
+    Free;
+  end;
   UpdateColors;
 end;
 

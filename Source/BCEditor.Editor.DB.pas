@@ -60,6 +60,7 @@ type
     property Ctl3D;
     property DataField;
     property DataSource;
+    property Directories;
     property Enabled;
     property Field;
     property Font;

@@ -10,7 +10,7 @@ uses
   BCEditor.Editor.CodeFolding.Types, BCEditor.Editor.CompletionProposal, BCEditor.Editor.CompletionProposal.Form,
   BCEditor.Editor.Glyph, BCEditor.Editor.InternalImage, BCEditor.Editor.KeyCommands, BCEditor.Editor.LeftMargin,
   BCEditor.Editor.LineSpacing, BCEditor.Editor.MatchingPair, BCEditor.Editor.Minimap, BCEditor.Editor.Replace,
-  BCEditor.Editor.RightMargin, BCEditor.Editor.Scroll, BCEditor.Editor.Search,
+  BCEditor.Editor.RightMargin, BCEditor.Editor.Scroll, BCEditor.Editor.Search, BCEditor.Editor.Directories,
   BCEditor.Editor.Selection, BCEditor.Editor.SkipRegions, BCEditor.Editor.SpecialChars, BCEditor.Editor.Tabs,
   BCEditor.Editor.Undo, BCEditor.Editor.Undo.List, BCEditor.Editor.WordWrap, BCEditor.Editor.WordWrap.Helper,
   BCEditor.Highlighter, BCEditor.Highlighter.Attributes, BCEditor.KeyboardHandler, BCEditor.Lines, BCEditor.Search,
@@ -55,6 +55,7 @@ type
     FCompletionProposalTimer: TTimer;
     FCurrentMatchingPair: TBCEditorMatchingTokenResult;
     FCurrentMatchingPairMatch: TBCEditorMatchingPairMatch;
+    FDirectories: TBCEditorDirectories;
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
     FFocusList: TList;
@@ -422,7 +423,10 @@ type
     destructor Destroy; override;
 
     function CaretInView: Boolean;
+    function CreateHighlighterIncludeFileStream(AFileName: string): TStream; virtual;
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
+    function GetColorsFileName(AFileName: string): string;
+    function GetHighlighterFileName(AFileName: string): string;
     function FindPrevious: Boolean;
     function FindNext: Boolean;
     function GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
@@ -534,6 +538,7 @@ type
     property CodeFolding: TBCEditorCodeFolding read FCodeFolding write SetCodeFolding;
     property CompletionProposal: TBCEditorCompletionProposal read FCompletionProposal write FCompletionProposal;
     property Cursor default crIBeam;
+    property Directories: TBCEditorDirectories read FDirectories write FDirectories;
     property DisplayLineCount: Integer read GetDisplayLineCount;
     property DisplayX: Integer read GetDisplayX;
     property DisplayPosition: TBCEditorDisplayPosition read GetDisplayPosition;
@@ -664,6 +669,8 @@ begin
   FPlugins := TList.Create;
   FCodeFolding := TBCEditorCodeFolding.Create;
   FCodeFolding.OnChange := CodeFoldingOnChange;
+  { Directory }
+  FDirectories := TBCEditorDirectories.Create;
   { Matching pair }
   FMatchingPair := TBCEditorMatchingPair.Create;
   { Line spacing }
@@ -786,6 +793,7 @@ destructor TBCBaseEditor.Destroy;
 begin
   ClearCodeFolding;
   FCodeFolding.Free;
+  FDirectories.Free;
   FAllCodeFoldingRanges.Free;
   FHighlighter.Free;
   FHighlighter := nil;
@@ -9564,6 +9572,11 @@ begin
     (LDisplayPosition.Row >= TopLine) and (LDisplayPosition.Row <= TopLine + VisibleLines);
 end;
 
+function TBCBaseEditor.CreateHighlighterIncludeFileStream(AFileName: string): TStream;
+begin
+  Result := TFileStream.Create(GetHighlighterFileName(AFileName), fmOpenRead);
+end;
+
 function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
 var
   s: string;
@@ -9598,6 +9611,26 @@ begin
     end;
     Result.Char := i;
   end;
+end;
+
+function TBCBaseEditor.GetColorsFileName(AFileName: string): string;
+begin
+  Result := Trim(ExtractFilePath(AFileName));
+  if Result = '' then
+    Result := FDirectories.Colors;
+  if Result = '' then
+    Result := ExtractFilePath(Application.ExeName);
+  Result := Format('%s\%s', [Result, ExtractFileName(AFileName)]);
+end;
+
+function TBCBaseEditor.GetHighlighterFileName(AFileName: string): string;
+begin
+  Result := Trim(ExtractFilePath(AFileName));
+  if Result = '' then
+    Result := FDirectories.Highlighters;
+  if Result = '' then
+    Result := ExtractFilePath(Application.ExeName);
+  Result := Format('%s\%s', [Result, ExtractFileName(AFileName)]);
 end;
 
 function TBCBaseEditor.FindPrevious: Boolean;

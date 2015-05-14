@@ -12,6 +12,7 @@ type
     FColors: TBCEditorCodeFoldingColors;
     FHint: TBCEditorCodeFoldingHint;
     FMarkStyle: TBCEditorCodeFoldingMarkStyle;
+    FMouseOverHint: Boolean;
     FOnChange: TBCEditorCodeFoldingChangeEvent;
     FOptions: TBCEditorCodeFoldingOptions;
     FPadding: Integer;
@@ -31,6 +32,7 @@ type
     destructor Destroy; override;
     function GetWidth: Integer;
     procedure Assign(Source: TPersistent); override;
+    property MouseOverHint: Boolean read FMouseOverHint write FMouseOverHint;
   published
     property Colors: TBCEditorCodeFoldingColors read FColors write SetColors;
     property Hint: TBCEditorCodeFoldingHint read FHint write SetHint;
@@ -60,6 +62,8 @@ begin
   FHint := TBCEditorCodeFoldingHint.Create;
   FPadding := 0;
   FWidth := 10;
+
+  FMouseOverHint := False;
 end;
 
 destructor TBCEditorCodeFolding.Destroy;

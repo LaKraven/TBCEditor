@@ -220,7 +220,6 @@ type
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
- //   procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
     procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CompletionProposalTimerHandler(Sender: TObject);
@@ -330,8 +329,6 @@ type
     function DoOnReplaceText(const ASearch, AReplace: string; ALine, AColumn: Integer; DeleteLine: Boolean): TBCEditorReplaceAction;
     function GetReadOnly: Boolean; virtual;
     function GetSelectedLength: Integer;
-    function PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-    function PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function RowColumnToPixels(const ADisplayPosition: TBCEditorDisplayPosition): TPoint;
@@ -2157,18 +2154,6 @@ begin
   Result.Line := Y;
 end;
 
-function TBCBaseEditor.PixelsToMinimapRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-begin
-  Result.Column := Max(1, LeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FMinimap.CharWidth));
-  Result.Row := Max(1, FMinimap.TopLine + (Y div FMinimap.CharHeight));
-end;
-
-function TBCBaseEditor.PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
-begin
-  Result.Column := Max(1, LeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FMinimap.CharWidth));
-  Result.Row := Max(1, RoundCorrect(DisplayLineCount * ((Y div FMinimap.CharHeight) / Min(DisplayLineCount, FMinimap.VisibleLines))) );
-end;
-
 function TBCBaseEditor.PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
 var
   LLinesY: Integer;
@@ -3223,8 +3208,6 @@ end;
 
 procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
 begin
-  if DisplayLineCount > 0 then
-    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - VisibleLines) * (FTopLine / DisplayLineCount))), 1);
   SizeOrFontChanged(True);
   Invalidate;
   if not (csLoading in ComponentState) then
@@ -4487,7 +4470,7 @@ begin
   if LDisplayLineCount = 0 then
     LDisplayLineCount := 1;
 
-  if soPastEndOfFileMarker in FScroll.Options then
+  if (soPastEndOfFileMarker in FScroll.Options) then
     Value := Min(Value, LDisplayLineCount)
   else
     Value := Min(Value, LDisplayLineCount - FVisibleLines + 1);
@@ -4497,9 +4480,8 @@ begin
   begin
     LDelta := TopLine - Value;
     FTopLine := Value;
-    if FMinimap.Visible then
-      FMinimap.TopLine :=
-        Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / LDisplayLineCount))), 1);
+    if FMinimap.Visible and not FMinimap.Dragging then
+      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / LDisplayLineCount))), 1);
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
     if Abs(LDelta) < FVisibleLines then
@@ -6094,7 +6076,7 @@ var
 begin
   FMinimap.Clicked := True;
   LPreviousLine := -1;
-  LNewLine := PixelsToMinimapRowColumn(X, Y).Row;
+  LNewLine := Max(1, FMinimap.TopLine + Y div FMinimap.CharHeight); // PixelsToMinimapRowColumn(X, Y).Row;
 
   if (LNewLine >= TopLine) and (LNewLine <= TopLine + VisibleLines) then
     CaretY := LNewLine
@@ -6215,10 +6197,6 @@ begin
     LPoint := Point(Mouse.CursorPos.X, Mouse.CursorPos.Y);
     LRect := GetCodeFoldingCollapseMarkRect(LFoldRange, LDisplayPosition.Row);
   end;
-
-  if Cursor <> crIBeam then
-    if not PtInRect(LRect, LPoint) then
-      SetCursor(Screen.Cursors[crIBeam]);
 
   if Assigned(AForm) then
   begin
@@ -6684,31 +6662,31 @@ var
   S: string;
   LTopLine: Integer;
 begin
-  if FMinimap.Clicked and FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
-    SetCursor(Screen.Cursors[crArrow]);
-    if FMinimap.Dragging then
+    if FMinimap.Clicked then
     begin
-      LTopLine := PixelsToMinimapMouseMoveRowColumn(X, Y).Row - FMinimapClickOffsetY;
-      if TopLine <> LTopLine then
+      if FMinimap.Dragging then
       begin
-        TopLine := LTopLine;
-        Paint;
+        FMinimap.TopLine := Max(TopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (TopLine / GetDisplayLineCount))), 1);
+        LTopLine := Max(1, FMinimap.TopLine + Y div FMinimap.CharHeight - FMinimapClickOffsetY);
+        if TopLine <> LTopLine then
+        begin
+          TopLine := LTopLine;
+          Paint;
+        end;
       end;
+      if not FMinimap.Dragging then
+        if (ssLeft in Shift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
+          FMinimap.Dragging := True;
+      Exit;
     end;
-    if not FMinimap.Dragging then
-      if (ssLeft in Shift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
-        FMinimap.Dragging := True;
-    Exit;
   end;
 
   if FMinimap.Clicked then
     Exit;
 
   inherited MouseMove(Shift, X, Y);
-
-  if LeftMargin.Bookmarks.Visible and (X < FLeftMargin.Width + FCodeFolding.Width) then
-    SetCursor(Screen.Cursors[crArrow]);
 
   if FMouseOverURI and not (ssCtrl in Shift) then
     FMouseOverURI := False;
@@ -6717,13 +6695,6 @@ begin
   begin
     FRightMargin.MouseOver := (Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3);
 
-    if FRightMargin.Moving or FRightMargin.MouseOver then
-      SetCursor(Screen.Cursors[crHSplit])
-    else
-    if X > FLeftMargin.Width + FCodeFolding.Width then
-      if not FMouseOverURI then
-        if Cursor <> FCodeFolding.Hint.Cursor then { avoid cursor flickering when code folding hint is shown }
-          SetCursor(Screen.Cursors[crIBeam]);
     if FRightMargin.Moving and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) then
     begin
       FRightMarginMovePosition := X;
@@ -6760,11 +6731,11 @@ begin
       if LRect.Right - LScrolledXBy > 0 then
       begin
         OffsetRect(LRect, -LScrolledXBy, 0);
-
+        FCodeFolding.MouseOverHint := False;
         if PtInRect(LRect, LPoint) then
         begin
-          if Cursor <> FCodeFolding.Hint.Cursor then
-            SetCursor(Screen.Cursors[FCodeFolding.Hint.Cursor]);
+          FCodeFolding.MouseOverHint := True;
+
           LPoint := RowColumnToPixels(GetDisplayPosition(0, LDisplayPosition.Row + 1));
           LPoint.X := Mouse.CursorPos.X - X + LPoint.X + 4 + LScrolledXBy;
           LPoint.Y := Mouse.CursorPos.Y - Y + LPoint.Y + 2;
@@ -6805,8 +6776,7 @@ begin
   { Drag & Drop }
   if MouseCapture and (sfWaitForDragging in FStateFlags) then
   begin
-    if (Abs(FMouseDownX - X) >= GetSystemMetrics(SM_CXDRAG)) or (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG))
-    then
+    if (Abs(FMouseDownX - X) >= GetSystemMetrics(SM_CXDRAG)) or (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
     begin
       Exclude(FStateFlags, sfWaitForDragging);
       BeginDrag(False);
@@ -9542,13 +9512,22 @@ begin
   if LCursorPoint.X < FLeftMargin.GetWidth + FCodeFolding.GetWidth then
     SetCursor(Screen.Cursors[FLeftMargin.Cursor])
   else
+  if FMinimap.Visible and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+    SetCursor(Screen.Cursors[crArrow])  // TODO: Option?
+  else
   begin
     LTextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));
     if (eoDragDropEditing in FOptions) and not MouseCapture and IsPointInSelection(LTextPosition) then
       LNewCursor := crArrow
     else
+    if FRightMargin.Moving or FRightMargin.MouseOver then
+      LNewCursor := crHSplit
+    else
     if FMouseOverURI then
       LNewCursor := crHandPoint
+    else
+    if FCodeFolding.MouseOverHint then
+      LNewCursor := FCodeFolding.Hint.Cursor
     else
       LNewCursor := Cursor;
     FKeyboardHandler.ExecuteMouseCursor(Self, LTextPosition, LNewCursor);

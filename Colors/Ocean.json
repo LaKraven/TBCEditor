@@ -1,134 +1,134 @@
 {
-    "Colors": {
-        "Info": {
-            "General": {
-                "Version": "1.0",
-                "Date": "1.5.2015"
-            },
-            "Author": {
-                "Name": "Lasse Rautiainen",
-                "Email": "lasse@bonecode.com"
-            }
-        },
-        "Editor": {
-            "Colors": {
-                "Background": "clAqua",
-                "ActiveLine": "$00CCFFCC",
-                "CodeFoldingBackground": "clAqua",
-                "CodeFoldingCollapsedLine": "clTeal",
-                "CodeFoldingFoldingLine": "clTeal",
-                "CodeFoldingIndentHighlight": "clTeal",
-                "CodeFoldingHintBackground": "clAqua",
-                "CodeFoldingHintBorder": "clTeal",
-                "CodeFoldingHintText": "clBlack",
-                "CompletionProposalBackground": "clAqua",
-                "CompletionProposalForeground": "clBlack",
-                "CompletionProposalBorder": "clTeal",
-                "CompletionProposalSelectedBackground": "clBlue",
-                "CompletionProposalSelectedText": "clAqua",
-                "LeftMarginBackground": "clAqua",
-                "LeftMarginLineNumbers": "clTeal",
-                "LeftMarginLineStateModified": "clYellow",
-                "LeftMarginLineStateNormal": "clLime",
-                "LeftMarginBookmarkPanel": "clAqua",
-                "MatchingPairMatched": "clWhite",
-                "MatchingPairUnmatched": "clYellow",
-                "RightMargin": "clSilver",
-                "RightMovingEdge": "clSilver",
-                "SearchHighlighterBackground": "$00FCFDCD",
-                "SearchHighlighterForeground": "clBlack",
-                "SearchMapActiveLine": "$00F0F0F0",
-                "SearchMapBackground": "$00F4F400",
-                "SearchMapForeground": "clYellow",
-                "SelectionBackground": "clBlue",
-                "SelectionForeground": "clAqua"
-            },
-            "Fonts": {
-                "LineNumbers": "Courier New",
-                "Text": "Courier New",
-                "Minimap": "Courier New",
-                "CodeFoldingHint": "Courier New",
-                "CompletionProposal": "Courier New"
-            },
-            "FontSizes": {
-                "LineNumbers": "8",
-                "Text": "9",
-                "Minimap": "3",
-                "CodeFoldingHint": "8",
-                "CompletionProposal": "8"
-            }
-        },
-        "Elements": [
-            {
-                "Name": "Editor",
-                "Foreground": "clBlue",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "Comment",
-                "Foreground": "clTeal",
-                "Background": "clAqua",
-                "Style": "Italic"
-            },
-            {
-                "Name": "String",
-                "Foreground": "clPurple",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "Directive",
-                "Foreground": "clBlack",
-                "Background": "clAqua",
-                "Style": "Italic"
-            },
-            {
-                "Name": "Character",
-                "Foreground": "clBlack",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "ReservedWord",
-                "Foreground": "clBlack",
-                "Background": "clAqua",
-                "Style": "Bold"
-            },
-            {
-                "Name": "Symbol",
-                "Foreground": "clBlack",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "Number",
-                "Foreground": "clOlive",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "HexNumber",
-                "Foreground": "clOlive",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "HighlightedBlock",
-                "Foreground": "clBlue",
-                "Background": "clAqua"
-            },
-            {
-                "Name": "AssemblerComment",
-                "Foreground": "clTeal",
-                "Background": "clAqua",
-                "Style": "Italic"
-            },
-            {
-                "Name": "AssemblerReservedWord",
-                "Foreground": "clBlack",
-                "Background": "clAqua",
-                "Style": "Bold"
-            },
-            {
-                "Name": "Attribute",
-                "Foreground": "clBlue",
-                "Background": "clWindow"
-            }
-        ]
-    }
+  "Colors":{
+    "Info":{
+      "General":{
+        "Version":"1.0",
+        "Date":"14.5.2015"
+      },
+      "Author":{
+        "Name":"Lasse Rautiainen",
+        "Mail":"lasse@bonecode.com"
+      }
+    },
+    "Editor":{
+      "Colors":{
+        "Background":"clAqua",
+        "ActiveLine":"$00CCFFCC",
+        "CodeFoldingBackground":"clAqua",
+        "CodeFoldingCollapsedLine":"clTeal",
+        "CodeFoldingFoldingLine":"clTeal",
+        "CodeFoldingIndentHighlight":"clTeal",
+        "CodeFoldingHintBackground":"clAqua",
+        "CodeFoldingHintBorder":"clTeal",
+        "CodeFoldingHintText":"clBlack",
+        "CompletionProposalBackground":"clAqua",
+        "CompletionProposalForeground":"clBlack",
+        "CompletionProposalBorder":"clTeal",
+        "CompletionProposalSelectedBackground":"clBlue",
+        "CompletionProposalSelectedText":"clAqua",
+        "LeftMarginBackground":"clAqua",
+        "LeftMarginLineNumbers":"clTeal",
+        "LeftMarginLineStateModified":"clYellow",
+        "LeftMarginLineStateNormal":"clLime",
+        "LeftMarginBookmarkPanel":"clAqua",
+        "MatchingPairMatched":"clWhite",
+        "MatchingPairUnmatched":"clYellow",
+        "RightMargin":"clSilver",
+        "RightMovingEdge":"clSilver",
+        "SearchHighlighterBackground":"$00FCFDCD",
+        "SearchHighlighterForeground":"clBlack",
+        "SearchMapActiveLine":"$00F0F0F0",
+        "SearchMapBackground":"$00F4F400",
+        "SearchMapForeground":"clYellow",
+        "SelectionBackground":"clBlue",
+        "SelectionForeground":"clAqua"
+      },
+      "Fonts":{
+        "LineNumbers":"Courier New",
+        "Text":"Courier New",
+        "Minimap":"Courier New",
+        "CodeFoldingHint":"Courier New",
+        "CompletionProposal":"Courier New"
+      },
+      "FontSizes":{
+        "LineNumbers":"8",
+        "Text":"9",
+        "Minimap":"1",
+        "CodeFoldingHint":"8",
+        "CompletionProposal":"8"
+      }
+    },
+    "Elements":[
+      {
+         "Name":"Editor",
+      	 "Foreground":"clBlue",
+         "Background":"clAqua"
+      },
+      {
+        "Name":"Comment",
+        "Foreground":"clTeal",
+        "Background":"clAqua",
+        "Style":"Italic"
+      },
+      {
+         "Name":"String",
+ 	       "Foreground":"clPurple",
+         "Background":"clAqua"
+      },
+      {
+         "Name":"Directive",
+         "Foreground":"clBlack",
+         "Background":"clAqua",
+         "Style":"Italic"
+      },
+      {
+         "Name":"Character",
+         "Foreground":"clBlack",
+         "Background":"clAqua"
+      },
+      {
+         "Name":"ReservedWord",
+         "Foreground":"clBlack",
+         "Background":"clAqua",
+         "Style":"Bold"
+      },
+      {
+         "Name":"Symbol",
+         "Foreground":"clBlack",
+         "Background":"clAqua"
+      },
+      {
+         "Name":"Number",
+         "Foreground":"clOlive",
+         "Background":"clAqua"
+      },
+      { 
+         "Name":"HexNumber",
+         "Foreground":"clOlive",
+         "Background":"clAqua"
+      },
+      {
+         "Name":"HighlightedBlock",
+         "Foreground":"clBlue",
+         "Background":"clAqua"
+      },
+      {
+         "Name":"AssemblerComment",
+      	 "Foreground":"clTeal",
+         "Background":"clAqua",
+         "Style":"Italic"
+      },
+      {
+         "Name":"AssemblerReservedWord", 
+         "Foreground":"clBlack",
+         "Background":"clAqua",
+         "Style":"Bold"
+      },
+      {
+         "Name":"Attribute", 
+         "Foreground":"clBlue",
+         "Background":"clWindow"
+      }
+    ]
+  }
 }

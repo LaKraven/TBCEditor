@@ -6684,7 +6684,7 @@ var
   S: string;
   LTopLine: Integer;
 begin
-  if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  if FMinimap.Clicked and FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     SetCursor(Screen.Cursors[crArrow]);
     if FMinimap.Dragging then

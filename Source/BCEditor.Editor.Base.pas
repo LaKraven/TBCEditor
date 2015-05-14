@@ -4494,7 +4494,7 @@ begin
   if LDisplayLineCount = 0 then
     LDisplayLineCount := 1;
 
-  if (soPastEndOfFileMarker in FScroll.Options) then
+  if (soPastEndOfFileMarker in FScroll.Options) and not (sfInSelection in FStateFlags) then
     Value := Min(Value, LDisplayLineCount)
   else
     Value := Min(Value, LDisplayLineCount - FVisibleLines + 1);
@@ -6686,6 +6686,8 @@ var
   S: string;
   LTopLine: Integer;
 begin
+  Exclude(FStateFlags, sfInSelection);
+
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     if FMinimap.Clicked then
@@ -6823,6 +6825,7 @@ begin
       InternalCaretPosition := DisplayToTextPosition(LDisplayPosition);
       SelectionEndPosition := CaretPosition;
     end;
+    Include(FStateFlags, sfInSelection);
     Exclude(FStateFlags, sfCodeFoldingInfoClicked);
   end;
 end;
@@ -9615,9 +9618,9 @@ begin
   Result := Trim(ExtractFilePath(AFileName));
   if Result = '' then
     Result := FDirectories.Colors;
-  if Result = '' then
-    Result := ExtractFilePath(Application.ExeName);
-  Result := Format('%s\%s', [Result, ExtractFileName(AFileName)]);
+  if Trim(ExtractFilePath(Result)) = '' then
+    Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
+  Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
 end;
 
 function TBCBaseEditor.GetHighlighterFileName(AFileName: string): string;
@@ -9625,9 +9628,9 @@ begin
   Result := Trim(ExtractFilePath(AFileName));
   if Result = '' then
     Result := FDirectories.Highlighters;
-  if Result = '' then
-    Result := ExtractFilePath(Application.ExeName);
-  Result := Format('%s\%s', [Result, ExtractFileName(AFileName)]);
+  if Trim(ExtractFilePath(Result)) = '' then
+    Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
+  Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
 end;
 
 function TBCBaseEditor.FindPrevious: Boolean;

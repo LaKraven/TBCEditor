@@ -190,6 +190,7 @@ type
     function GetSelectionEndPosition: TBCEditorTextPosition;
     function GetText: string;
     function GetUncollapsedLineNumber(ALine: Integer): Integer;
+    function GetUncollapsedLineNumberDifference(ALine: Integer): Integer;
     function GetWordAtCursor: string;
     function GetWordAtMouse: string;
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
@@ -1826,26 +1827,28 @@ begin
 end;
 
 function TBCBaseEditor.GetUncollapsedLineNumber(ALine: Integer): Integer;
+begin
+  Result := ALine;
+  Inc(Result, GetUncollapsedLineNumberDifference(ALine));
+end;
+
+function TBCBaseEditor.GetUncollapsedLineNumberDifference(ALine: Integer): Integer;
 var
   i: Integer;
-  LDifference: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
-  LDifference := 0;
   LFoldRange := CodeFoldingRangeForLine(ALine);
-  Result := ALine;
+  Result := 0;
 
   for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   with FAllCodeFoldingRanges[i] do
   if FromLine < ALine then
   begin
     if (FAllCodeFoldingRanges[i] <> LFoldRange) and Collapsed and not ParentCollapsed then
-      Inc(LDifference, Max(CollapsedLines.Count - 1, 0))
+      Inc(Result, Max(CollapsedLines.Count - 1, 0))
   end
   else
     Break;
-
-  Inc(Result, LDifference);
 end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
@@ -11741,8 +11744,13 @@ begin
 end;
 
 procedure TBCBaseEditor.GotoLineAndCenter(ALine: Integer);
+var
+  LLine: Integer;
 begin
-  SetCaretPosition(False, GetTextPosition(1, ALine));
+  LLine := ALine;
+  if FCodeFolding.Visible then
+    Dec(LLine, GetUncollapsedLineNumberDifference(ALine));
+  SetCaretPosition(False, GetTextPosition(1, LLine));
   if SelectionAvailable then
     InvalidateSelection;
   FSelectionBeginPosition.Char := FCaretX;

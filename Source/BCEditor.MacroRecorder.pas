@@ -373,12 +373,12 @@ begin
     Result := 0;
 end;
 
-procedure TBCBaseEditorMacroRecorder.Notification(aComponent: TComponent; aOperation: TOperation);
+procedure TBCBaseEditorMacroRecorder.Notification(AComponent: TComponent; AOperation: TOperation);
 begin
   inherited;
-  if aOperation = opRemove then
-    if (aComponent = Editor) or (aComponent is TBCBaseEditor) then
-      RemoveEditor(TBCBaseEditor(aComponent));
+  if AOperation = opRemove then
+    if (AComponent = Editor) or (AComponent is TBCBaseEditor) then
+      RemoveEditor(TBCBaseEditor(AComponent));
 end;
 
 procedure TBCBaseEditorMacroRecorder.DoAddEditor(AEditor: TBCBaseEditor);
@@ -758,9 +758,12 @@ var
   Index: Integer;
 begin
   AEditor.UnregisterCommandHandler(OnCommand);
-  Index := TBCBaseEditor(AEditor).KeyCommands.FindShortcut(AShortCut);
-  if (Index >= 0) and (TBCBaseEditor(AEditor).KeyCommands[Index].Command = ACommandID) then
-    TBCBaseEditor(AEditor).KeyCommands[Index].Free;
+  if Assigned(AEditor) and Assigned(AEditor.KeyCommands) then
+  begin
+    Index := AEditor.KeyCommands.FindShortcut(AShortCut);
+    if (Index >= 0) and (AEditor.KeyCommands[Index].Command = ACommandID) then
+      AEditor.KeyCommands[Index].Free;
+  end;
 end;
 
 { TBCEditorBasicEvent }

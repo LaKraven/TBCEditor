@@ -801,6 +801,7 @@ begin
   FPlugins := nil;
   FMarkList.Free;
   FKeyCommands.Free;
+  FKeyCommands := nil;
   FKeyboardHandler.Free;
   FFocusList.Free;
   FSelection.Free;

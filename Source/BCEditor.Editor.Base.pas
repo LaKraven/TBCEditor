@@ -7477,7 +7477,9 @@ begin
     begin
       for LLine := AFirstRow to ALastRow do
       begin
-        i := RowToLine(LLine) - 1;
+        i := RowToLine(LLine);
+        if FCodeFolding.Visible then
+          i := GetUncollapsedLineNumber(i);
         LLineRect.Left := LPanelRect.Left;
         LLineRect.Right := LPanelRect.Right;
         LLineRect.Top := (LLine - TopLine) * LineHeight;

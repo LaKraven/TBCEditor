@@ -6824,8 +6824,6 @@ begin
       SelectionEndPosition := CaretPosition;
     end;
     Exclude(FStateFlags, sfCodeFoldingInfoClicked);
-    if (sfPossibleLeftMarginClick in FStateFlags) and (FSelectionBeginPosition.Line <> CaretPosition.Line) then
-      Include(FStateFlags, sfLeftMarginDragging);
   end;
 end;
 
@@ -6891,7 +6889,6 @@ begin
   end;
   Exclude(FStateFlags, sfDblClicked);
   Exclude(FStateFlags, sfPossibleLeftMarginClick);
-  Exclude(FStateFlags, sfLeftMarginDragging);
 end;
 
 procedure TBCBaseEditor.NotifyHookedCommandHandlers(AfterProcessing: Boolean; var ACommand: TBCEditorCommand;
@@ -10685,11 +10682,7 @@ begin
         (ACommand = ecTab) or (ACommand = ecShiftTab) or (ACommand = ecString) then
         Exit;
   end;
-  { Drop indentation flag }
-  LIsJustIndented := sfJustIndented in FStateFlags;
-  Exclude(FStateFlags, sfJustIndented);
-
-  { Process a comand }
+{ Process a comand }
   LHelper := EmptyStr;
   IncPaintLock;
   try
@@ -11551,9 +11544,6 @@ begin
               end
               else
               begin
-                if LIsJustIndented then
-                  FUndoList.AddGroupBreak;
-
                 FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, FCaretY), '', smNormal);
                 FLines.Attributes[FCaretY - 1].LineState := lsModified;
 

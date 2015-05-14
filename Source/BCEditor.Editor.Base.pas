@@ -196,6 +196,7 @@ type
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
     function GetWordWrap: Boolean;
     function GetWrapAtColumn: Integer;
+    function IsLineInsideCollapsedCodeFolding(ALine: Integer): Boolean;
     function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil): Boolean;
     function IsKeywordAtCurrentLine: Boolean;
     function IsStringAllWhite(const ALine: string): Boolean;
@@ -852,7 +853,7 @@ begin
 
   for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   with FAllCodeFoldingRanges[i] do
-  if not ParentCollapsed and ((FromLine = ALine) {or (ToLine = ALine)}) and Collapsable then
+  if not ParentCollapsed and (FromLine = ALine) and Collapsable then
   begin
     Result := FAllCodeFoldingRanges[i];
     Break;
@@ -1902,6 +1903,21 @@ begin
     wwsSpecified:
       Result := FWordWrap.Position;
   end
+end;
+
+function TBCBaseEditor.IsLineInsideCollapsedCodeFolding(ALine: Integer): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+  with FAllCodeFoldingRanges[i] do
+  if FromLine > ALine then
+    Break
+  else
+  if (FromLine <= ALine) and (ALine <= ToLine) then
+    if Collapsed or ParentCollapsed then
+      Exit(True);
 end;
 
 function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean): Boolean;
@@ -7201,7 +7217,7 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
   var
     Y: Integer;
   begin
-    if (not ABookMark.InternalImage) and Assigned(FLeftMargin.Bookmarks.Images) then
+    if not ABookMark.InternalImage and Assigned(FLeftMargin.Bookmarks.Images) then
     begin
       if ABookMark.ImageIndex <= FLeftMargin.Bookmarks.Images.Count then
       begin
@@ -7397,8 +7413,9 @@ begin
             else
             begin
               LMarkRow := LineToRow(Line);
-              if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
+              if not FCodeFolding.Visible or FCodeFolding.Visible and not IsLineInsideCollapsedCodeFolding(LMarkRow) then
+                if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
+                  DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
             end
           end;
       if LHasOtherMarks then
@@ -7408,8 +7425,9 @@ begin
             if Visible and not IsBookmark and (Line >= LFirstLine) and (Line <= LLastLine) then
             begin
               LMarkRow := LineToRow(Line);
-              if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
+              if not FCodeFolding.Visible or FCodeFolding.Visible and not IsLineInsideCollapsedCodeFolding(LMarkRow) then
+                if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
+                  DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
             end;
           end;
     finally

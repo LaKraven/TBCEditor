@@ -220,7 +220,7 @@ end;
 
 constructor TBCEditorToken.Create;
 begin
-  inherited;
+  inherited Create;
 
   Symbol := '';
   FTemporary := False;
@@ -228,7 +228,7 @@ end;
 
 constructor TBCEditorToken.Create(AHighlighterAttribute: TBCEditorHighlighterAttribute);
 begin
-  inherited;
+  inherited Create(AHighlighterAttribute);
   Symbol := '';
 end;
 

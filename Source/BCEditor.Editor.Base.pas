@@ -2162,7 +2162,7 @@ end;
 function TBCBaseEditor.PixelsToMinimapMouseMoveRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
 begin
   Result.Column := Max(1, LeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FMinimap.CharWidth));
-  Result.Row := Max(1, RoundCorrect(DisplayLineCount * ((Y / FMinimap.CharHeight) / Min(DisplayLineCount, FMinimap.VisibleLines))) );
+  Result.Row := Max(1, RoundCorrect(DisplayLineCount * ((Y div FMinimap.CharHeight) / Min(DisplayLineCount, FMinimap.VisibleLines))) );
 end;
 
 function TBCBaseEditor.PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
@@ -6086,7 +6086,7 @@ end;
 
 procedure TBCBaseEditor.DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
 var
-  LNewLine, LPreviousLine: Integer;
+  LNewLine, LPreviousLine, LStep: Integer;
 begin
   FMinimap.Clicked := True;
   LPreviousLine := -1;
@@ -6097,10 +6097,11 @@ begin
   else
   begin
     LNewLine := LNewLine - VisibleLines div 2;
+    LStep :=  Abs(LNewLine - TopLine) div 5;
     if LNewLine < TopLine then
-    while LNewLine < TopLine do
+    while LNewLine < TopLine - LStep do
     begin
-      TopLine := TopLine - 4;
+      TopLine := TopLine - LStep;
       if TopLine <> LPreviousLine then
         LPreviousLine := TopLine
       else
@@ -6108,15 +6109,16 @@ begin
       Paint;
     end
     else
-    while LNewLine > TopLine do
+    while LNewLine > TopLine + LStep do
     begin
-      TopLine := TopLine + 4;
+      TopLine := TopLine + LStep;
       if TopLine <> LPreviousLine then
         LPreviousLine := TopLine
       else
         Break;
       Paint;
     end;
+    TopLine := LNewLine;
   end;
   FMinimapClickOffsetY := LNewLine - TopLine;
 end;
@@ -6994,7 +6996,7 @@ begin
         FTextDrawer.SetBaseFont(FMinimap.Font);
         FTextDrawer.Style := FMinimap.Font.Style;
         FMinimap.CharWidth := FTextDrawer.CharWidth;
-        FMinimap.CharHeight := FTextDrawer.CharHeight;
+        FMinimap.CharHeight := FTextDrawer.CharHeight - 1;
         FMinimap.VisibleLines := ClientHeight div FMinimap.CharHeight;
 
         LLine1 := Max(FMinimap.TopLine, 1);

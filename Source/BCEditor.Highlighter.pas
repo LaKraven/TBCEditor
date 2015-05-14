@@ -83,7 +83,7 @@ type
 implementation
 
 uses
-  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Consts, BCEditor.Editor.Base;
+  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Utils, BCEditor.Consts, BCEditor.Editor.Base;
 
 { TBCEditorHighlighter }
 
@@ -118,22 +118,11 @@ end;
 destructor TBCEditorHighlighter.Destroy;
 begin
   Clear;
-  {if Assigned(FCurrentToken) and FCurrentToken.Temporary then
-  begin
-    FCurrentToken.Free;
-    FCurrentToken := nil;
-    //FreeAndNil(FCurrentToken);
-  end;     }
-  //FreeAndNil(FMainRules);
+
   FMainRules.Free;
   FMainRules := nil;
   FInfo.Free;
   FInfo := nil;
-  while FAttributes.Count > 0 do
-  begin
-    TBCEditorHighlighterAttribute(FAttributes.Objects[0]).Free;
-    FAttributes.Objects[0] := nil;
-  end;
   FAttributes.Free;
   FAttributes := nil;
   FCodeFoldingRegions.Free;
@@ -144,6 +133,7 @@ begin
   FMatchingPairs := nil;
   FColors.Free;
   FColors := nil;
+
   inherited;
 end;
 

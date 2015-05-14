@@ -53,7 +53,7 @@ The latest update: 14.05.2015 17:44, UTC+02:00
 ![bceditor1](https://cloud.githubusercontent.com/assets/11475177/7427349/1766adc6-efe2-11e4-8a2f-a59ec668d217.png)
 ![bceditor2](https://cloud.githubusercontent.com/assets/11475177/7427350/177ba3c0-efe2-11e4-92dc-946b026cbfab.png)
 ![bceditor3](https://cloud.githubusercontent.com/assets/11475177/7427351/177f5f4c-efe2-11e4-8388-179a0947eb5f.png)
-![bceditor4](https://cloud.githubusercontent.com/assets/11475177/7427352/17843c06-efe2-11e4-8c03-7a3daa4639be.png)
+![bceditor4](https://cloud.githubusercontent.com/assets/11475177/7634267/6af88362-fa62-11e4-86fe-6dc06114791e.png)
 ![bceditor5](https://cloud.githubusercontent.com/assets/11475177/7427346/173de47c-efe2-11e4-9b68-ce2ae7ffb1a2.png)
 ![bceditor6](https://cloud.githubusercontent.com/assets/11475177/7427347/1743c07c-efe2-11e4-9c90-318cdc2b09a0.png)
 

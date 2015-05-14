@@ -21,15 +21,12 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
 TYourForm = class(TForm)
   Editor: TBCEditor;
 ...
-var
-  LFilePath: string;
 begin
-  LFilePath := ExtractFilePath(Application.ExeName); 
   with Editor do 
   begin
-    Highlighter.LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Highlighter }
-    Highlighter.LoadColorsFromFile(Format('%sColors\%s.json', [LFilePath, 'Default']); { Color }
-    LoadFromFile(Format('%sHighlighters\%s.json', [LFilePath, 'JSON']); { Editor file } 
+    Highlighter.LoadFromFile('JSON.json'); { Highlighter }
+    Highlighter.LoadColorsFromFile('Default.json'); { Color }
+    LoadFromFile(GetHighlighterFileName('JSON.json')); { Editor file } 
     ...
     ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample; { Set text }

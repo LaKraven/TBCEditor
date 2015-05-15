@@ -3,8 +3,7 @@ Version 1.0 beta released. Use the Issues page to report bugs or send them direc
 <h3>Build requirements</h3>
 
 * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
-
-Delphi versions from XE4 to XE8 supported. 
+* Delphi versions from XE4 to XE8 are supported. 
 
 Eric Grange has made a Delphi XE backport: https://bitbucket.org/egrange/tbceditorxe
 

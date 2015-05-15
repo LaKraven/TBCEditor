@@ -6673,8 +6673,8 @@ begin
 
   if X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth then
   begin
-    CaretX := 0;
     CaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
+    CaretX := 0;
     if (X < LeftMargin.Bookmarks.Panel.Width) and LeftMargin.Bookmarks.Visible and
       (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
       ToggleBookmark;
@@ -6859,6 +6859,7 @@ var
 begin
   FMinimap.Clicked := False;
   FMinimap.Dragging := False;
+
   Exclude(FStateFlags, sfInSelection);
 
   inherited MouseUp(Button, Shift, X, Y);

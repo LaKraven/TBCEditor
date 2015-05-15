@@ -21,6 +21,8 @@ type
 
   TBCEditorScrollEvent = procedure(Sender: TObject; ScrollBar: TScrollBarKind) of object;
 
+  TBCEditorCaretChangedEvent = procedure(Sender: TObject; X, Y: Integer) of object;
+
   TBCEditorBookmarkPanelPaintEvent = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; AFirstLine: Integer; ALastLine: Integer) of object;
   TBCEditorBookmarkPanelLinePaintEvent = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; ALineNumber: Integer) of object;
 

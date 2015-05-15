@@ -50,9 +50,6 @@ type
     property Anchors;
     property BackgroundColor;
     property BorderStyle;
-    property OnBookmarkPanelAfterPaint;
-    property OnBookmarkPanelBeforePaint;
-    property OnBookmarkPanelLinePaint;
     property Caret;
     property CodeFolding;
     property CompletionProposal;
@@ -74,6 +71,10 @@ type
     property MatchingPair;
     property Minimap;
     property Name;
+    property OnBookmarkPanelAfterPaint;
+    property OnBookmarkPanelBeforePaint;
+    property OnBookmarkPanelLinePaint;
+    property OnCaretChanged;
     property OnChange;
     property OnClearBookmark;
     property OnClick;
@@ -106,6 +107,7 @@ type
     property OnReplaceText;
     property OnRightMarginMouseUp;
     property OnScroll;
+    property OnSelectionChanged;
     property OnStartDock;
     property OnStartDrag;
     property Options;
@@ -120,8 +122,8 @@ type
     property Scroll;
     property Search;
     property Selection;
-    property SpecialChars;
     property ShowHint;
+    property SpecialChars;
     property TabOrder;
     property Tabs;
     property TabStop;

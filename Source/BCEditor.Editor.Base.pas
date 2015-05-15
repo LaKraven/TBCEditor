@@ -93,6 +93,7 @@ type
     FMouseWheelAccumulator: Integer;
     FNeedToRescanCodeFolding: Boolean;
     FOldMouseMovePoint: TPoint;
+    FOnCaretChanged: TBCEditorCaretChangedEvent;
     FOnChange: TNotifyEvent;
     FOnClearMark: TBCEditorBookmarkEvent;
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
@@ -111,6 +112,7 @@ type
     FOnReplaceText: TBCEditorReplaceTextEvent;
     FOnRightMarginMouseUp: TNotifyEvent;
     FOnScroll: TBCEditorScrollEvent;
+    FOnSelectionChanged: TNotifyEvent;
     FOptions: TBCEditorOptions;
     FOriginalLines: TBCEditorLines;
     FOriginalRedoList: TBCEditorUndoList;
@@ -562,6 +564,7 @@ type
     property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
     property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
     property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
+    property OnCaretChanged: TBCEditorCaretChangedEvent read FOnCaretChanged write FOnCaretChanged;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnClearBookmark: TBCEditorBookmarkEvent read FOnClearMark write FOnClearMark;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
@@ -579,6 +582,7 @@ type
     property OnProcessUserCommand: TBCEditorProcessCommandEvent read FOnProcessUserCommand write FOnProcessUserCommand;
     property OnReplaceText: TBCEditorReplaceTextEvent read FOnReplaceText write FOnReplaceText;
     property OnRightMarginMouseUp: TNotifyEvent read FOnRightMarginMouseUp write FOnRightMarginMouseUp;
+    property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write FOnSelectionChanged;
     property OnScroll: TBCEditorScrollEvent read FOnScroll write FOnScroll;
     property Options: TBCEditorOptions read FOptions write SetOptions default BCEDITOR_DEFAULT_OPTIONS;
     property PaintLock: Integer read FPaintLock;
@@ -4476,6 +4480,8 @@ begin
     end;
     if soHighlightSimilarTerms in FSelection.Options then
       FindAll(SelectedText);
+    if Assigned(FOnSelectionChanged) then
+      FOnSelectionChanged(Self);
   end;
 end;
 
@@ -7596,8 +7602,8 @@ begin
     Exit;
   if not Assigned(FSearchEngine) then
     Exit;
-  //if (FSearchEngine.ResultCount = 0) and
-  //  Exit;
+  if (FSearchEngine.ResultCount = 0) and not (soHighlightSimilarTerms in FSelection.Options) then
+    Exit;
   { draw lines }
   if FSearch.Map.Colors.Foreground <> clNone then
     Canvas.Pen.Color := FSearch.Map.Colors.Foreground
@@ -12666,13 +12672,11 @@ begin
     LCompositionForm.dwStyle := CFS_POINT;
     LCompositionForm.ptCurrentPos := Point(X, Y);
     ImmSetCompositionWindow(ImmGetContext(Handle), @LCompositionForm);
+
+    if Assigned(FOnCaretChanged) then
+      FOnCaretChanged(Self, CaretX, CaretY);
   end;
 end;
-
-(*procedure TBCBaseEditor.UpdateLongestLine;
-begin
-  FLines.GetLengthOfLongestLine{(RowToLine(FTopLine), RowToLine(FTopLine + FVisibleLines))};
-end; *)
 
 function IsTextMessage(Msg: Cardinal): Boolean;
 begin

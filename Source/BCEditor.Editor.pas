@@ -50,6 +50,7 @@ type
     property OnBookmarkPanelAfterPaint;
     property OnBookmarkPanelBeforePaint;
     property OnBookmarkPanelLinePaint;
+    property OnCaretChanged;
     property OnChange;
     property OnClearBookmark;
     property OnClick;
@@ -81,6 +82,7 @@ type
     property OnReplaceText;
     property OnRightMarginMouseUp;
     property OnScroll;
+    property OnSelectionChanged;
     property OnStartDock;
     property OnStartDrag;
     property Options;
@@ -95,8 +97,8 @@ type
     property Scroll;
     property Search;
     property Selection;
-    property SpecialChars;
     property ShowHint;
+    property SpecialChars;
     property TabOrder;
     property Tabs;
     property TabStop;

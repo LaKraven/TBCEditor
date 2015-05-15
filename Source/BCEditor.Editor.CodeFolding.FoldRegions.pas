@@ -18,6 +18,7 @@ type
     FNoSubs: Boolean;
     FOpenIsClose: Boolean;
     FOpenToken: string;
+    FOpenTokenEnd: string;
     FOpenTokenLength: Integer;
     FParentRegion: TBCEditorFoldRegionItem;
     FSharedClose: Boolean;
@@ -31,6 +32,7 @@ type
     property NoSubs: Boolean read FNoSubs write FNoSubs default False;
     property OpenIsClose: Boolean read FOpenIsClose write FOpenIsClose default False;
     property OpenToken: string read FOpenToken write FOpenToken;
+    property OpenTokenEnd: string read FOpenTokenEnd write FOpenTokenEnd;
     property OpenTokenLength: Integer read FOpenTokenLength write FOpenTokenLength;
     property ParentRegion: TBCEditorFoldRegionItem read FParentRegion write FParentRegion;
     property SharedClose: Boolean read FSharedClose write FSharedClose default False;

@@ -28,9 +28,7 @@ type
     procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
   public
     constructor Create(AHighlighter: TBCEditorHighlighter); overload;
-    //procedure ImportFromFile(AFileName: string);
     procedure ImportFromStream(AStream: TStream);
-    //procedure ImportColorsFromFile(AFileName: string);
     procedure ImportColorsFromStream(AStream: TStream);
   end;
 
@@ -525,6 +523,7 @@ begin
       FoldRegionItem.NoSubs := MemberObject.B['NoSubs'];
       FoldRegionItem.SkipIfFoundAfterOpenToken := MemberObject['SkipIfFoundAfterOpenToken'].Value;
       FoldRegionItem.BreakIfNotFoundBeforeNextRegion := MemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
+      FoldRegionItem.OpenTokenEnd := MemberObject['OpenTokenEnd'].Value;
     end;
   end;
 end;
@@ -599,24 +598,6 @@ begin
   end;
 end;
 
-{procedure TBCEditorHighlighterJSONImporter.ImportFromFile(AFileName: string);
-var
-  JSONObject: TJsonObject;
-begin
-  if FileExists(AFileName) then
-  begin
-    JSONObject := TJsonObject.ParseFromFile(AFileName) as TJsonObject;
-    try
-      if Assigned(JSONObject) then
-        ImportHighlighter(JSONObject);
-    finally
-      JSONObject.Free
-    end;
-  end
-  else
-    MessageDialog(Format(SBCEditorImporterFileNotFound, [AFileName]), mtError, [mbOK]);
-end;  }
-
 procedure TBCEditorHighlighterJSONImporter.ImportColorsFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
@@ -629,23 +610,5 @@ begin
     JSONObject.Free;
   end;
 end;
-
-{procedure TBCEditorHighlighterJSONImporter.ImportColorsFromFile(AFileName: string);
-var
-  JSONObject: TJsonObject;
-begin
-  if FileExists(AFileName) then
-  begin
-    JSONObject := TJsonObject.ParseFromFile(AFileName) as TJsonObject;
-    if Assigned(JSONObject) then
-    try
-      ImportColors(JSONObject);
-    finally
-      JSONObject.Free;
-    end;
-  end
-  else
-    MessageDialog(Format(SBCEditorImporterFileNotFound, [AFileName]), mtError, [mbOK]);
-end;  }
 
 end.

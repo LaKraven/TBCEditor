@@ -18,21 +18,20 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
 <h3>Usage example</h3>
 
 ```
-TYourForm = class(TForm)
-  Editor: TBCEditor;
-...
-begin
   with Editor do 
   begin
-    Highlighter.LoadFromFile('JSON.json'); { Highlighter }
-    Highlighter.LoadColorsFromFile('Default.json'); { Color }
-    LoadFromFile(GetHighlighterFileName('JSON.json')); { Editor file } 
+    { Load highlighter from file }
+    Highlighter.LoadFromFile('JSON.json');
+    { Load color from file }
+    Highlighter.LoadColorsFromFile('Default.json'); 
+    { Load a file into editor }  
+    LoadFromFile(GetHighlighterFileName('JSON.json')); 
     ...
+    { Set editor lines }
     ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample; { Set text }
     InitCodeFolding;
   end;
-end;
 ```
 
 <h3>Demo</h3>

@@ -28,9 +28,9 @@ type
     procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
   public
     constructor Create(AHighlighter: TBCEditorHighlighter); overload;
-    procedure ImportFromFile(AFileName: string);
+    //procedure ImportFromFile(AFileName: string);
     procedure ImportFromStream(AStream: TStream);
-    procedure ImportColorsFromFile(AFileName: string);
+    //procedure ImportColorsFromFile(AFileName: string);
     procedure ImportColorsFromStream(AStream: TStream);
   end;
 
@@ -354,13 +354,15 @@ var
   SubRulesObject, PropertiesObject, TokenRangeObject: TJsonObject;
   JSONObject: TJsonObject;
   LFileStream: TStream;
+  LEditor: TBCBaseEditor;
 begin
   if Assigned(RangeObject) then
   begin
     LFileName := RangeObject['File'].Value;
     if GMultiHighlighter and (LFileName <> '') then
     begin
-      LFileStream := TBCBaseEditor(FHighlighter.Editor).CreateHighlighterIncludeFileStream(LFileName);
+      LEditor := FHighlighter.Editor as TBCBaseEditor;
+      LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
       JSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
       if Assigned(JSONObject) then
       try
@@ -597,7 +599,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportFromFile(AFileName: string);
+{procedure TBCEditorHighlighterJSONImporter.ImportFromFile(AFileName: string);
 var
   JSONObject: TJsonObject;
 begin
@@ -613,7 +615,7 @@ begin
   end
   else
     MessageDialog(Format(SBCEditorImporterFileNotFound, [AFileName]), mtError, [mbOK]);
-end;
+end;  }
 
 procedure TBCEditorHighlighterJSONImporter.ImportColorsFromStream(AStream: TStream);
 var
@@ -628,7 +630,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportColorsFromFile(AFileName: string);
+{procedure TBCEditorHighlighterJSONImporter.ImportColorsFromFile(AFileName: string);
 var
   JSONObject: TJsonObject;
 begin
@@ -644,6 +646,6 @@ begin
   end
   else
     MessageDialog(Format(SBCEditorImporterFileNotFound, [AFileName]), mtError, [mbOK]);
-end;
+end;  }
 
 end.

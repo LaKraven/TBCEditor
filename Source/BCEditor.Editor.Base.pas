@@ -6686,8 +6686,6 @@ var
   S: string;
   LTopLine: Integer;
 begin
-  Exclude(FStateFlags, sfInSelection);
-
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     if FMinimap.Clicked then
@@ -6840,6 +6838,7 @@ var
 begin
   FMinimap.Clicked := False;
   FMinimap.Dragging := False;
+  Exclude(FStateFlags, sfInSelection);
 
   inherited MouseUp(Button, Shift, X, Y);
 
@@ -9619,8 +9618,10 @@ begin
   if Result = '' then
     Result := FDirectories.Colors;
   if Trim(ExtractFilePath(Result)) = '' then
+  {$WARN SYMBOL_PLATFORM OFF}
     Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
   Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
+  {$WARN SYMBOL_PLATFORM ON}
 end;
 
 function TBCBaseEditor.GetHighlighterFileName(AFileName: string): string;
@@ -9629,8 +9630,10 @@ begin
   if Result = '' then
     Result := FDirectories.Highlighters;
   if Trim(ExtractFilePath(Result)) = '' then
+  {$WARN SYMBOL_PLATFORM OFF}
     Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
   Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
+  {$WARN SYMBOL_PLATFORM ON}
 end;
 
 function TBCBaseEditor.FindPrevious: Boolean;
@@ -11588,9 +11591,6 @@ begin
               end
               else
               begin
-                if LIsJustIndented then
-                  FUndoList.AddGroupBreak;
-
                 FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, FCaretY), LHelper, smNormal);
                 FLines.Attributes[FCaretY - 1].LineState := lsModified;
 

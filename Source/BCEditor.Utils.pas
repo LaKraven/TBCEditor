@@ -320,6 +320,7 @@ end;
  20000 f0 a0 80 80  ..  2FFFD f0 af bf bd
  30000 f0 b0 80 80  ..  3FFFD f0 bf bf bd
 
+ TODO:
  Actually, they are incomplete. One can easily find character out of this
  range which is actually full-width but doesn't fall in any of ranges above.
  Also, there are characters even wider than full-width, which take 3 or even 4

@@ -46,6 +46,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string; var Glyph: TBitmap; var LineVisible: Boolean);
+    procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
   private
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
     procedure PrintPreview;
@@ -96,9 +97,6 @@ begin
     Editor.Margins.Bottom := 0
   else
     Editor.Margins.Bottom := 5;
-  InfoText := Format('%d: %d', [Editor.CaretY, Editor.CaretX]);
-  if StatusBar.Panels[0].Text <> InfoText then
-    StatusBar.Panels[0].Text := InfoText;
   if Editor.Modified then
     InfoText := LanguageDataModule.GetConstant('Modified')
   else
@@ -113,6 +111,16 @@ begin
     if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Overwrite')
     then
       StatusBar.Panels[1].Text := LanguageDataModule.GetConstant('Overwrite');
+end;
+
+procedure TMainForm.EditorCaretChanged(Sender: TObject; X, Y: Integer);
+var
+  InfoText: string;
+begin
+  inherited;
+  InfoText := Format('%d: %d', [Y, X]);
+  if StatusBar.Panels[0].Text <> InfoText then
+    StatusBar.Panels[0].Text := InfoText;
 end;
 
 procedure TMainForm.InitializeEditorPrint(EditorPrint: TBCEditorPrint);

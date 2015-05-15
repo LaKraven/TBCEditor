@@ -135,6 +135,7 @@ inherited MainForm: TMainForm
       Minimap.Font.Style = []
       Minimap.Visible = True
       Minimap.Width = 140
+      OnCaretChanged = EditorCaretChanged
       RightMargin.Position = 80
       RightMargin.Visible = True
       Search.Enabled = False

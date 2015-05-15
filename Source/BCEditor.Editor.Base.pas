@@ -10406,7 +10406,7 @@ var
 begin
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
     with FAllCodeFoldingRanges[i] do
-      if (FoldRangeLevel = ALevel) and (Collapsed) and (not ParentCollapsed) then
+      if (FoldRangeLevel = ALevel) and Collapsed and not ParentCollapsed then
         CodeFoldingUncollapse(FAllCodeFoldingRanges[i]);
 
   if NeedInvalidate then
@@ -11797,12 +11797,19 @@ end;
 
 procedure TBCBaseEditor.GotoLineAndCenter(ALine: Integer);
 var
-  LLine: Integer;
+  i: Integer;
 begin
-  LLine := ALine;
   if FCodeFolding.Visible then
-    Dec(LLine, GetUncollapsedLineNumberDifference(ALine));
-  SetCaretPosition(False, GetTextPosition(1, LLine));
+  begin
+    for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+    with FAllCodeFoldingRanges[i] do
+    if FromLine > ALine then
+      Break
+    else
+    if (FromLine <= ALine) and Collapsed then
+      CodeFoldingUncollapse(FAllCodeFoldingRanges[i]);
+  end;
+  SetCaretPosition(False, GetTextPosition(1, ALine));
   if SelectionAvailable then
     InvalidateSelection;
   FSelectionBeginPosition.Char := FCaretX;

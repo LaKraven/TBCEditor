@@ -39,8 +39,8 @@ type
     property MarkStyle: TBCEditorCodeFoldingMarkStyle read FMarkStyle write SetMarkStyle default msSquare;
     property OnChange: TBCEditorCodeFoldingChangeEvent read FOnChange write SetOnChange;
     property Options: TBCEditorCodeFoldingOptions read FOptions write SetOptions default [cfoShowCollapsedCodeHint, cfoHighlightIndentGuides, cfoHighlightMatchingPair, cfoShowIndentGuides, cfoUncollapseByHintClick];
-    property Padding: Integer read FPadding write SetPadding default 0;
-    property Width: Integer read FWidth write SetWidth default 10;
+    property Padding: Integer read FPadding write SetPadding default 2;
+    property Width: Integer read FWidth write SetWidth default 16;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -60,8 +60,8 @@ begin
   FMarkStyle := msSquare;
   FColors := TBCEditorCodeFoldingColors.Create;
   FHint := TBCEditorCodeFoldingHint.Create;
-  FPadding := 0;
-  FWidth := 10;
+  FPadding := 2;
+  FWidth := 16;
 
   FMouseOverHint := False;
 end;

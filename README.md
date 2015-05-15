@@ -23,7 +23,7 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
     { Load highlighter from file }
     Highlighter.LoadFromFile('JSON.json');
     { Load color from file }
-    Highlighter.LoadColorsFromFile('Default.json'); 
+    Highlighter.Colors.LoadFromFile('Default.json'); 
     { Load a file into editor }  
     LoadFromFile(GetHighlighterFileName('JSON.json')); 
     ...

@@ -188,7 +188,7 @@ var
   S: string;
   HasTabs: Boolean;
 begin
-  TabConvertProc := GetBestTabConvertProc(FTabWidth);
+  TabConvertProc := GetTabConvertProc(FTabWidth);
   with FLines do
   begin
     BeginUpdate;

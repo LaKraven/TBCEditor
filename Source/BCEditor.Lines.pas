@@ -654,7 +654,7 @@ begin
   if Value <> FTabWidth then
   begin
     FTabWidth := Value;
-    FTabConvertProc := GetBestTabConvertProc(FTabWidth);
+    FTabConvertProc := GetTabConvertProc(FTabWidth);
     FIndexOfLongestLine := -1;
     for i := 0 to FCount - 1 do
       with FList^[i] do

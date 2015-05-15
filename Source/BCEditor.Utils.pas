@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
   function CharWidthTable(AChar: Char): SmallInt;
-  function GetBestTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
+  function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
   function MessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer;
@@ -85,194 +85,29 @@ begin
   end
 end;
 
-function ConvertTabs1(const Line: string; TabWidth: Integer; var HasTabs: Boolean): string;
-//var
-//  pDest: PChar;
-//  nBeforeTab: Integer;
-begin
- { Result := Line; // increment reference count only
-  if GetHasTabs(Pointer(Line), nBeforeTab) then
-  begin
-    HasTabs := True;
-    pDest := @Result[nBeforeTab + 1]; // this will make a copy of Line
-    // We have at least one tab in the string, and the tab width is 1.
-    // pDest points to the first tab char. We overwrite all tabs with spaces.
-    repeat
-      if (pDest^ = BCEDITOR_TAB_CHAR) then
-        pDest^ := ' ';
-      Inc(pDest);
-    until (pDest^ = BCEDITOR_NONE_CHAR);
-  end
-  else
-    HasTabs := False;   }
-end;
-
-function ConvertTabs2n(const Line: string; TabWidth: Integer; var HasTabs: Boolean): string;
-var
-  i, DestLen, TabCount, TabMask: Integer;
-  pSrc, pDest: PChar;
-begin
-  Result := Line; // increment reference count only
-  if GetHasTabs(Pointer(Line), DestLen) then
-  begin
-    HasTabs := True;
-    pSrc := @Line[1 + DestLen];
-    // We have at least one tab in the string, and the tab width equals 2^n.
-    // pSrc points to the first tab char in Line. We get the number of tabs
-    // and the length of the expanded string now.
-    TabCount := 0;
-    TabMask := (TabWidth - 1) xor $7FFFFFFF;
-    repeat
-      if pSrc^ = BCEDITOR_TAB_CHAR then
-      begin
-        DestLen := (DestLen + TabWidth) and TabMask;
-        Inc(TabCount);
-      end
-      else
-        Inc(DestLen);
-      Inc(pSrc);
-    until (pSrc^ = BCEDITOR_NONE_CHAR);
-    // Set the length of the expanded string.
-    SetLength(Result, DestLen);
-    DestLen := 0;
-    pSrc := PChar(Line);
-    pDest := PChar(Result);
-    // We use another TabMask here to get the difference to 2^n.
-    TabMask := TabWidth - 1;
-    repeat
-      if pSrc^ = BCEDITOR_TAB_CHAR then
-      begin
-        i := TabWidth - (DestLen and TabMask);
-        Inc(DestLen, i);
-        // This is used for both drawing and other stuff and is meant to be BCEDITOR_TAB_CHAR and not BCEDITOR_SPACE_CHAR
-        repeat
-          pDest^ := BCEDITOR_TAB_CHAR;
-          Inc(pDest);
-          Dec(i);
-        until (i = 0);
-        Dec(TabCount);
-        if TabCount = 0 then
-        begin
-          repeat
-            Inc(pSrc);
-            pDest^ := pSrc^;
-            Inc(pDest);
-          until (pSrc^ = BCEDITOR_NONE_CHAR);
-          Exit;
-        end;
-      end
-      else
-      begin
-        pDest^ := pSrc^;
-        Inc(pDest);
-        Inc(DestLen);
-      end;
-      Inc(pSrc);
-    until (pSrc^ = BCEDITOR_NONE_CHAR);
-  end
-  else
-    HasTabs := False;
-end;
-
 function ConvertTabs(const Line: string; TabWidth: Integer; var HasTabs: Boolean): string;
 var
-  pSrc{, pDest}: PChar;
+  PSource: PChar;
 begin
   HasTabs := False;
   Result := '';
-  pSrc := PChar(Line);
-  while pSrc^ <> BCEDITOR_NONE_CHAR do
+  PSource := PChar(Line);
+  while PSource^ <> BCEDITOR_NONE_CHAR do
   begin
-    if pSrc^ = BCEDITOR_TAB_CHAR then
+    if PSource^ = BCEDITOR_TAB_CHAR then
     begin
       HasTabs := True;
       Result := Result + StringOfChar(BCEDITOR_SPACE_CHAR, TabWidth);
     end
     else
-      Result := Result + pSrc^;
-    Inc(pSrc);
+      Result := Result + PSource^;
+    Inc(PSource);
   end;
-
-  {Result := Line; // increment reference count only
-  if GetHasTabs(Pointer(Line), DestLen) then
-  begin
-    HasTabs := True;
-    pSrc := @Line[1 + DestLen];
-    // We have at least one tab in the string, and the tab width is greater
-    // than 1. pSrc points to the first tab char in Line. We get the number
-    // of tabs and the length of the expanded string now.
-    TabCount := 0;
-    repeat
-      if pSrc^ = BCEDITOR_TAB_CHAR then
-      begin
-        DestLen := DestLen + TabWidth - DestLen mod TabWidth;
-        Inc(TabCount);
-      end
-      else
-        Inc(DestLen);
-      Inc(pSrc);
-    until (pSrc^ = BCEDITOR_NONE_CHAR);
-    // Set the length of the expanded string.
-    SetLength(Result, DestLen);
-    DestLen := 0;
-    pSrc := PChar(Line);
-    pDest := PChar(Result);
-    repeat
-      if pSrc^ = BCEDITOR_TAB_CHAR then
-      begin
-        i := TabWidth - (DestLen mod TabWidth);
-        Inc(DestLen, i);
-        repeat
-          pDest^ := BCEDITOR_TAB_CHAR;
-          Inc(pDest);
-          Dec(i);
-        until (i = 0);
-        Dec(TabCount);
-        if TabCount = 0 then
-        begin
-          repeat
-            Inc(pSrc);
-            pDest^ := pSrc^;
-            Inc(pDest);
-          until (pSrc^ = BCEDITOR_NONE_CHAR);
-          Exit;
-        end;
-      end
-      else
-      begin
-        pDest^ := pSrc^;
-        Inc(pDest);
-        Inc(DestLen);
-      end;
-      Inc(pSrc);
-    until (pSrc^ = BCEDITOR_NONE_CHAR);
-  end
-  else
-    HasTabs := False;  }
 end;
 
-function IsPowerOfTwo(TabWidth: Integer): Boolean;
-var
-  nW: Integer;
+function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
 begin
-  nW := 2;
-  repeat
-    if (nW >= TabWidth) then
-      Break;
-    Inc(nW, nW);
-  until (nW >= $10000); // we don't want 64 kByte spaces...
-  Result := (nW = TabWidth);
-end;
-
-function GetBestTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
-begin
-  {if (TabWidth < 2) then
-    Result := TBCEditorTabConvertProc(@ConvertTabs1)
-  else
-  if IsPowerOfTwo(TabWidth) then
-    Result := TBCEditorTabConvertProc(@ConvertTabs2n)
-  else      }
-    Result := TBCEditorTabConvertProc(@ConvertTabs);
+  Result := TBCEditorTabConvertProc(@ConvertTabs);
 end;
 
 function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;

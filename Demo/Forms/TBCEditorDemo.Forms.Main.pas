@@ -9,7 +9,8 @@ uses
   BCCommon.Images, BCComponents.SkinProvider, BCComponents.SkinManager, BCControls.Panel, BCControls.StatusBar,
   BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
   BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
-  sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs;
+  sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
+  BCControls.Button;
 
 const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.0b';
@@ -66,7 +67,7 @@ procedure TMainForm.ActionSelectHighlighterExecute(Sender: TObject);
 begin
   with Editor do
   begin
-    Highlighter.LoadFromFile(Format('%sHighlighters\%s.json', [ExtractFilePath(Application.ExeName), TAction(Sender).Caption]));
+    Highlighter.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
     ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample;
     InitCodeFolding;
@@ -80,8 +81,7 @@ end;
 
 procedure TMainForm.ActionSelectHighlighterColorExecute(Sender: TObject);
 begin
-  Editor.Highlighter.LoadColorsFromFile(Format('%sColors\%s.json', [ExtractFilePath(Application.ExeName),
-    TAction(Sender).Caption]));
+  Editor.Highlighter.Colors.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
   TitleBar.Items[6].Caption := TAction(Sender).Caption;
   Editor.SetFocus;
 end;

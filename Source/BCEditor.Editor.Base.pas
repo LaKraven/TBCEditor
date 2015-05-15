@@ -236,7 +236,7 @@ type
     procedure DoShiftTabKey;
     procedure DoTabKey;
     procedure DrawCursor(ACanvas: TCanvas);
-    procedure FindAll;
+    procedure FindAll(ASearchText: string = '');
     procedure FontChanged(Sender: TObject);
     procedure LinesChanging(Sender: TObject);
     procedure MinimapChanged(Sender: TObject);
@@ -3173,7 +3173,7 @@ begin
   FSearchLines.Clear;
 end;
 
-procedure TBCBaseEditor.FindAll;
+procedure TBCBaseEditor.FindAll(ASearchText: string = '');
 var
   i: Integer;
   LLine, LKeyword: string;
@@ -3181,7 +3181,10 @@ var
   LPTextPosition: PBCEditorTextPosition;
 begin
   ClearSearchLines;
-  LKeyword := FSearch.SearchText;
+  if ASearchText = '' then
+    LKeyword := FSearch.SearchText
+  else
+    LKeyword := ASearchText;
   if LKeyword = '' then
     Exit;
   if not (soCaseSensitive in FSearch.Options) then
@@ -4005,14 +4008,18 @@ var
   LLine, LKeyword: string;
   LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
 begin
-  if not (Visible and (soHighlightResults in FSearch.Options)) then
-    Exit;
-  if FSearch.SearchText = '' then
+  if not Visible then
     Exit;
   if not Assigned(FSearchEngine) then
     Exit;
-
-  LKeyword := FSearch.SearchText;
+  LKeyword := '';
+  if FSearch.Enabled and (soHighlightResults in FSearch.Options) then
+    LKeyword := FSearch.SearchText
+  else
+  if soHighlightSimilarTerms in FSelection.Options then
+    LKeyword := SelectedText;
+  if LKeyword = '' then
+    Exit;
   if not (soCaseSensitive in FSearch.Options) then
     LKeyword := UpperCase(LKeyword);
 
@@ -4367,11 +4374,13 @@ begin
       FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, SelectedText, FSelection.ActiveMode)
     else
       FSelection.ActiveMode := FSelection.Mode;
+
     LBlockStartPosition := SelectionBeginPosition;
     LBlockEndPosition := SelectionEndPosition;
     FSelectionBeginPosition := LBlockStartPosition;
     FSelectionEndPosition := LBlockEndPosition;
     SetSelectedTextPrimitive(Value);
+
     if (Value <> '') and (FSelection.ActiveMode <> smColumn) then
       FUndoList.AddChange(crInsert, LBlockStartPosition, LBlockEndPosition, '', FSelection.ActiveMode);
   finally
@@ -4465,6 +4474,8 @@ begin
           InvalidateLines(LCurrentLine, FSelectionEndPosition.Line);
       end;
     end;
+    if soHighlightSimilarTerms in FSelection.Options then
+      FindAll(SelectedText);
   end;
 end;
 
@@ -7585,8 +7596,8 @@ begin
     Exit;
   if not Assigned(FSearchEngine) then
     Exit;
-  if FSearchEngine.ResultCount = 0 then
-    Exit;
+  //if (FSearchEngine.ResultCount = 0) and
+  //  Exit;
   { draw lines }
   if FSearch.Map.Colors.Foreground <> clNone then
     Canvas.Pen.Color := FSearch.Map.Colors.Foreground

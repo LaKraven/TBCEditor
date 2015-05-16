@@ -122,6 +122,7 @@ contains
   BCEditor.Editor.Caret.Offsets in '..\Source\BCEditor.Editor.Caret.Offsets.pas',
   BCEditor.Highlighter.Colors in '..\Source\BCEditor.Highlighter.Colors.pas',
   BCEditor.Highlighter.JSONImporter in '..\Source\BCEditor.Highlighter.JSONImporter.pas',
-  JsonDataObjects in '..\Source\JsonDataObjects.pas';
+  JsonDataObjects in '..\Source\JsonDataObjects.pas',
+  BCEditor.Editor.Directories in '..\Source\BCEditor.Editor.Directories.pas';
 
 end.

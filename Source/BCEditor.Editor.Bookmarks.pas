@@ -8,10 +8,10 @@ uses
 type
   TBCEditorBookmark = class
   protected
-    FBookmarkNumber: Integer;
     FChar: Integer;
     FEdit: TCustomControl;
     FImage: Integer;
+    FIndex: Integer;
     FInternalImage: Boolean;
     FLine: Integer;
     FVisible: Boolean;
@@ -25,9 +25,9 @@ type
   public
     constructor Create(AOwner: TCustomControl);
 
-    property BookmarkNumber: Integer read FBookmarkNumber write FBookmarkNumber;
     property Char: Integer read FChar write SetChar;
     property ImageIndex: Integer read FImage write SetImage;
+    property Index: Integer read FIndex write FIndex;
     property InternalImage: Boolean read FInternalImage write SetInternalImage;
     property IsBookmark: Boolean read GetIsBookmark;
     property Line: Integer read FLine write SetLine;
@@ -70,13 +70,13 @@ constructor TBCEditorBookmark.Create(AOwner: TCustomControl);
 begin
   inherited Create;
 
-  FBookmarkNumber := -1;
+  FIndex := -1;
   FEdit := AOwner as TBCBaseEditor;
 end;
 
 function TBCEditorBookmark.GetIsBookmark: Boolean;
 begin
-  Result := FBookmarkNumber >= 0;
+  Result := FIndex >= 0;
 end;
 
 procedure TBCEditorBookmark.SetChar(const Value: Integer);

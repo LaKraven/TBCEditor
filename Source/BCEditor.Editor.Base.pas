@@ -510,7 +510,7 @@ type
     procedure RescanCodeFoldingRanges;
     procedure SaveToFile(const AFileName: String);
     procedure SelectAll;
-    procedure SetBookmark(Index: Integer; X: Integer; Y: Integer);
+    procedure SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
     procedure SetCaretAndSelection(const CaretPosition, BlockBeginPosition, BlockEndPosition: TBCEditorTextPosition; ACaret: Integer = -1);
     procedure SetFocus; override;
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
@@ -9708,7 +9708,7 @@ begin
   Result := False;
   if Assigned(Marks) then
     for i := 0 to Marks.Count - 1 do
-      if Marks[i].IsBookmark and (Marks[i].BookmarkNumber = ABookmark) then
+      if Marks[i].IsBookmark and (Marks[i].Index = ABookmark) then
       begin
         X := Marks[i].Char;
         Y := Marks[i].Line;
@@ -12490,29 +12490,29 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.SetBookmark(Index: Integer; X: Integer; Y: Integer);
+procedure TBCBaseEditor.SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
 var
   LBookmark: TBCEditorBookmark;
 begin
-  if (Index in [0 .. 8]) and (Y >= 1) and (Y <= Max(1, FLines.Count)) then
+  if (AIndex in [0 .. 8]) and (Y >= 1) and (Y <= Max(1, FLines.Count)) then
   begin
     LBookmark := TBCEditorBookmark.Create(Self);
     with LBookmark do
     begin
       Line := Y;
       Char := X;
-      ImageIndex := Index;
-      BookmarkNumber := Index;
+      ImageIndex := AIndex;
+      Index := AIndex;
       Visible := True;
       InternalImage := not Assigned(FLeftMargin.Bookmarks.Images);
     end;
     DoOnPlaceBookmark(LBookmark);
     if Assigned(LBookmark) then
     begin
-      if Assigned(FBookmarks[Index]) then
-        ClearBookmark(Index);
-      FBookmarks[Index] := LBookmark;
-      FMarkList.Add(FBookmarks[Index]);
+      if Assigned(FBookmarks[AIndex]) then
+        ClearBookmark(AIndex);
+      FBookmarks[AIndex] := LBookmark;
+      FMarkList.Add(FBookmarks[AIndex]);
     end;
   end;
 end;
@@ -12573,7 +12573,7 @@ begin
   for i := 0 to Marks.Count - 1 do
     if CaretY = Marks[i].Line then
     begin
-      ClearBookmark(Marks[i].BookmarkNumber);
+      ClearBookmark(Marks[i].Index);
       Exit;
     end;
   X := CaretX;

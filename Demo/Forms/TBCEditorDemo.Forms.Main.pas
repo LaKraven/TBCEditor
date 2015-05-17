@@ -34,9 +34,9 @@ type
     PopupMenuFile: TPopupMenu;
     PopupMenuHighlighters: TPopupMenu;
     PopupMenuSkins: TPopupMenu;
-    SearchFrame: TBCSearchFrame;
     Splitter: TBCSplitter;
     OpenDialog: TsOpenDialog;
+    SearchFrame: TBCSearchFrame;
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionPreviewExecute(Sender: TObject);
     procedure ActionSearchExecute(Sender: TObject);

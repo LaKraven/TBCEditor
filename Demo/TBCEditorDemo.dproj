@@ -6,7 +6,7 @@
         <MainSource>TBCEditorDemo.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
     </PropertyGroup>
@@ -199,6 +199,12 @@
             </Delphi.Personality>
             <Deployment>
                 <DeployFile LocalName="..\Release\TBCEditorDemo.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>TBCEditorDemo.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\Debug\TBCEditorDemo.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>TBCEditorDemo.exe</RemoteName>
                         <Overwrite>true</Overwrite>

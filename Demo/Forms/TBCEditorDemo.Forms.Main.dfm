@@ -145,69 +145,47 @@ inherited MainForm: TMainForm
       WordWrap.Position = 80
       WordWrap.Style = wwsClientWidth
     end
-    inline SearchFrame: TBCSearchFrame
+    object PanelSearchFrame: TBCPanel
       Left = 0
       Top = 598
       Width = 754
       Height = 27
       Align = alBottom
-      Color = clBtnFace
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentBackground = False
-      ParentColor = False
-      ParentFont = False
+      AutoSize = True
+      BevelOuter = bvNone
+      Padding.Top = 3
+      Padding.Bottom = 3
       TabOrder = 1
-      inherited SearchPanel: TBCPanel
+      SkinData.SkinSection = 'CHECKBOX'
+      inline SearchFrame: TBCSearchFrame
+        Left = 0
+        Top = 3
         Width = 754
-        Height = 27
-        inherited SpeedButtonSearchClose: TBCSpeedButton
-          Left = 733
-          Height = 27
-          Images = nil
-        end
-        inherited Splitter: TBCSplitter
-          Height = 27
-        end
-        inherited ComboBoxSearchText: TBCComboBox
-          AlignWithMargins = True
-          Top = 3
-          Margins.Left = 0
-          Margins.Right = 0
-        end
-        inherited PanelRight: TBCPanel
-          Width = 400
-          Height = 27
-          inherited LabelSearchResultCount: TBCLabelFX
-            Left = 388
-            Height = 27
+        Height = 21
+        Align = alBottom
+        Color = clWindow
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentBackground = False
+        ParentColor = False
+        ParentFont = False
+        TabOrder = 0
+        inherited SearchPanel: TBCPanel
+          Width = 754
+          inherited SpeedButtonSearchClose: TBCSpeedButton
+            Left = 733
+          end
+          inherited PanelRight: TBCPanel
+            Width = 400
+            inherited LabelSearchResultCount: TBCLabelFX
+              Left = 388
+              Height = 21
+            end
           end
         end
-        inherited PanelToolBar: TBCPanel
-          Height = 27
-          inherited SpeedButtonFindPrevious: TBCSpeedButton
-            Height = 27
-            Images = nil
-          end
-          inherited SpeedButtonFindNext: TBCSpeedButton
-            Height = 27
-            Images = nil
-          end
-          inherited SpeedButtonDivider: TBCSpeedButton
-            Height = 25
-          end
-          inherited SpeedButtonOptions: TBCSpeedButton
-            Height = 27
-            Images = nil
-          end
-        end
-      end
-      inherited ActionList: TActionList
-        Images = nil
-        Left = 336
       end
     end
   end

@@ -200,7 +200,7 @@ begin
     Result := 2
   else
   if (AChar >= #$FFE0) and (AChar <= #$FFE6) then
-    Result := 2;
+    Result := 2
 end;
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;

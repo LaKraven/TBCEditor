@@ -134,8 +134,8 @@ type
     procedure BeginDrawing(AHandle: HDC); virtual;
     procedure EndDrawing; virtual;
     procedure TextOut(X, Y: Integer; Text: PChar; Length: Integer); virtual;
-    procedure ExtTextOut(X, Y: Integer; Options: TBCEditorTextOutOptions; ARect: TRect; Text: PChar; Length: Integer;
-      ExtTextOutDistance: PIntegerArray = nil); virtual;
+    procedure ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AText: PChar; ALength: Integer;
+      AExtTextOutDistance: PIntegerArray = nil); virtual;
     function TextExtent(const Text: string): TSize; overload;
     function TextExtent(Text: PChar; Count: Integer): TSize; overload;
     function TextWidth(const Text: string): Integer; overload;
@@ -158,8 +158,8 @@ type
 
 function GetFontsInfoManager: TBCEditorFontsInfoManager;
 
-function UniversalExtTextOut(AHandle: HDC; X, Y: Integer; Options: TBCEditorTextOutOptions; Rect: TRect; Str: PChar;
-  Count: Integer; ExtTextOutDistance: PIntegerArray): Boolean;
+function UniversalExtTextOut(AHandle: HDC; X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AStr: PChar;
+  ACount: Integer; AExtTextOutDistance: PIntegerArray): Boolean;
 
 implementation
 
@@ -175,19 +175,18 @@ begin
   Result := GFontsInfoManager;
 end;
 
-function UniversalExtTextOut(AHandle: HDC; X, Y: Integer; Options: TBCEditorTextOutOptions; Rect: TRect; Str: PChar;
-  Count: Integer; ExtTextOutDistance: PIntegerArray): Boolean;
-
+function UniversalExtTextOut(AHandle: HDC; X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AStr: PChar;
+  ACount: Integer; AExtTextOutDistance: PIntegerArray): Boolean;
 var
-  TextOutFlags: DWORD;
+  LTextOutFlags: DWORD;
 begin
-  TextOutFlags := 0;
-  if tooOpaque in Options then
-    TextOutFlags := TextOutFlags or ETO_OPAQUE;
-  if tooClipped in Options then
-    TextOutFlags := TextOutFlags or ETO_CLIPPED;
+  LTextOutFlags := 0;
+  if tooOpaque in AOptions then
+    LTextOutFlags := LTextOutFlags or ETO_OPAQUE;
+  if tooClipped in AOptions then
+    LTextOutFlags := LTextOutFlags or ETO_CLIPPED;
 
-  Result := Winapi.Windows.ExtTextOutW(AHandle, X, Y, TextOutFlags, @Rect, Str, Count, Pointer(ExtTextOutDistance));
+  Result := Winapi.Windows.ExtTextOutW(AHandle, X, Y, LTextOutFlags, @ARect, AStr, ACount, Pointer(AExtTextOutDistance));
 end;
 
 { TFontsInfoManager }
@@ -720,18 +719,18 @@ begin
   UniversalExtTextOut(FHandle, X, Y, [], TempRect, Text, Length, nil);
 end;
 
-procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; Options: TBCEditorTextOutOptions; ARect: TRect; Text: PChar;
-  Length: Integer; ExtTextOutDistance: PIntegerArray = nil);
+procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AText: PChar;
+  ALength: Integer; AExtTextOutDistance: PIntegerArray = nil);
 var
   EIS: Boolean;
 
-  procedure InitExtTextOutDistance(CharWidth: Integer);
+  procedure InitExtTextOutDistance(ACharWidth: Integer);
   var
     i: Integer;
   begin
-    ReallocMem(FExtTextOutDistance, Length * SizeOf(Integer));
-    for i := 0 to Length - 1 do
-      FExtTextOutDistance[i] := CharWidthTable(Text[i]) * CharWidth;
+    ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
+    for i := 0 to ALength - 1 do
+      FExtTextOutDistance[i] := CharWidthTable(AText[i]) * ACharWidth;
   end;
 
   procedure AdjustLastCharWidthAndRect;
@@ -741,13 +740,13 @@ var
     LCharInfo: TABC;
     LTextMetricA: TTextMetricA;
   begin
-    if Length <= 0 then
+    if ALength <= 0 then
       Exit;
-    LLastChar := Ord(Text[Length - 1]);
+    LLastChar := Ord(AText[ALength - 1]);
     if EIS then
-      LCharWidth := ExtTextOutDistance[Length - 1]
+      LCharWidth := AExtTextOutDistance[ALength - 1]
     else
-      LCharWidth := FExtTextOutDistance[Length - 1];
+      LCharWidth := FExtTextOutDistance[ALength - 1];
     LRealCharWidth := LCharWidth;
 
     if GetCachedABCWidth(LLastChar, LCharInfo) then
@@ -765,20 +764,20 @@ var
     if LRealCharWidth > LCharWidth then
       Inc(ARect.Right, LRealCharWidth - LCharWidth);
     if EIS then
-      ExtTextOutDistance[Length - 1] := Max(LRealCharWidth, LCharWidth)
+      AExtTextOutDistance[ALength - 1] := Max(LRealCharWidth, LCharWidth)
     else
-      FExtTextOutDistance[Length - 1] := Max(LRealCharWidth, LCharWidth);
+      FExtTextOutDistance[ALength - 1] := Max(LRealCharWidth, LCharWidth);
   end;
 
 begin
-  EIS := Assigned(ExtTextOutDistance);
+  EIS := Assigned(AExtTextOutDistance);
   if not EIS then
     InitExtTextOutDistance(GetCharWidth);
   AdjustLastCharWidthAndRect;
   if EIS then
-    UniversalExtTextOut(FHandle, X, Y, Options, ARect, Text, Length, ExtTextOutDistance)
+    UniversalExtTextOut(FHandle, X, Y, AOptions, ARect, AText, ALength, AExtTextOutDistance)
   else
-    UniversalExtTextOut(FHandle, X, Y, Options, ARect, Text, Length, FExtTextOutDistance);
+    UniversalExtTextOut(FHandle, X, Y, AOptions, ARect, AText, ALength, FExtTextOutDistance);
 end;
 
 function TBCEditorTextDrawer.TextExtent(const Text: string): TSize;

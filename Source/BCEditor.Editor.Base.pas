@@ -6079,6 +6079,13 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
 begin
+  CaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
+  CaretX := 0;
+  if (X < LeftMargin.Bookmarks.Panel.Width) and (Y div LineHeight <= CaretY - TopLine) and
+     LeftMargin.Bookmarks.Visible and
+    (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
+    ToggleBookmark;
+
   LCodeFoldingRegion := (X >= FLeftMargin.GetWidth) and (X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth);
 
   if FCodeFolding.Visible and LCodeFoldingRegion and (Lines.Count > 0) then
@@ -6677,22 +6684,12 @@ begin
   end;
 
   if X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth then
-  begin
-    CaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
-    CaretX := 0;
-    if (X < LeftMargin.Bookmarks.Panel.Width) and LeftMargin.Bookmarks.Visible and
-      (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
-      ToggleBookmark;
-    Include(FStateFlags, sfPossibleLeftMarginClick);
-  end;
-
-  if FMatchingPair.Enabled then
-    ScanMatchingPair;
-
-  if (sfPossibleLeftMarginClick in FStateFlags) and (Button = mbRight) then
     DoOnLeftMarginClick(Button, X, Y)
   else
     RepaintGuides;
+
+  if FMatchingPair.Enabled then
+    ScanMatchingPair;
 
   if CanFocus then
   begin
@@ -6902,10 +6899,7 @@ begin
   if (Button = mbRight) and (Shift = [ssRight]) and Assigned(PopupMenu) then
     Exit;
   MouseCapture := False;
-  if (sfPossibleLeftMarginClick in FStateFlags) and (X < FLeftMargin.GetWidth + FCodeFolding.GetWidth) and
-    (Button <> mbRight) then
-    DoOnLeftMarginClick(Button, X, Y)
-  else
+
   if FStateFlags * [sfDblClicked, sfWaitForDragging] = [sfWaitForDragging] then
   begin
     ComputeCaret(X, Y);
@@ -6917,7 +6911,6 @@ begin
     Exclude(FStateFlags, sfWaitForDragging);
   end;
   Exclude(FStateFlags, sfDblClicked);
-  Exclude(FStateFlags, sfPossibleLeftMarginClick);
 end;
 
 procedure TBCBaseEditor.NotifyHookedCommandHandlers(AfterProcessing: Boolean; var ACommand: TBCEditorCommand;
@@ -12586,7 +12579,7 @@ begin
   X := CaretX;
   Y := CaretY;
   for i := 0 to 8 do
-    if not GetBookmark(i, X, Y) then
+    if not GetBookmark(i, X, Y) then { variables used because X and Y are var parameters }
     begin
       SetBookmark(i, CaretX, CaretY);
       Exit;

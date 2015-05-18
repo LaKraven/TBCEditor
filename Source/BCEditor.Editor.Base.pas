@@ -956,6 +956,9 @@ begin
   Result := False;
   AForeground := clNone;
   ABackground := clNone;
+  ALine := RowToLine(ALine);
+  if FCodeFolding.Visible then
+    ALine := GetUncollapsedLineNumber(ALine);
   if Assigned(FOnCustomLineColors) then
     FOnCustomLineColors(Self, ALine, Result, AForeground, ABackground);
 end;

@@ -4518,8 +4518,6 @@ begin
           InvalidateLines(LCurrentLine, FSelectionEndPosition.Line);
       end;
     end;
-    if soHighlightSimilarTerms in FSelection.Options then
-      FindAll(SelectedText);
     if Assigned(FOnSelectionChanged) then
       FOnSelectionChanged(Self);
   end;

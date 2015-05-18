@@ -28,7 +28,7 @@ type
     property Colors: TBCEditorSearchMapColors read FColors write SetColors;
     property OnChange: TBCEditorSearchChangeEvent read FOnChange write SetOnChange;
     property Options: TBCEditorSearchMapOptions read FOptions write SetOptions default [moShowActiveLine];
-    property Visible: Boolean read FVisible write SetVisible default True;
+    property Visible: Boolean read FVisible write SetVisible default False;
     property Width: Integer read FWidth write SetWidth default 5;
   end;
 
@@ -45,7 +45,7 @@ begin
 
   FColors := TBCEditorSearchMapColors.Create;
   FOptions := [moShowActiveLine];
-  FVisible := True;
+  FVisible := False;
   FWidth := 5;
 end;
 

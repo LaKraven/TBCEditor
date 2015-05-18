@@ -2647,7 +2647,8 @@ var
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   LMaxFromLine := 0;
-  SetLength(FCodeFoldingRangeForLine, FLines.Count + 1); { max it can be}
+  SetLength(FCodeFoldingRangeForLine, 0); { empty }
+  SetLength(FCodeFoldingRangeForLine, FLines.Count + 1); { max }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];

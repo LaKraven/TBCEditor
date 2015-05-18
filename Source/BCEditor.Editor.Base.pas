@@ -2647,7 +2647,7 @@ var
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   LMaxFromLine := 0;
-  SetLength(FCodeFoldingRangeForLine, FLines.Count); { max it can be}
+  SetLength(FCodeFoldingRangeForLine, FLines.Count + 1); { max it can be}
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
@@ -2658,7 +2658,7 @@ begin
       FCodeFoldingRangeForLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
     end;
   end;
-  SetLength(FCodeFoldingRangeForLine, LMaxFromLine); { actual size }
+  SetLength(FCodeFoldingRangeForLine, LMaxFromLine + 1); { actual size }
 end;
 
 {
@@ -6089,6 +6089,12 @@ begin
     ecString, ecLineBreak, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteBeginningOfLine, ecDeleteEndOfLine,
     ecDeleteLine, ecClear:
       ScanMatchingPair;
+  end;
+
+  if not FNeedToRescanCodeFolding then
+  case ACommand of
+    ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecClear:
+      CodeFoldingPrepareRangeForLine;
   end;
 
   if cfoShowIndentGuides in CodeFolding.Options then

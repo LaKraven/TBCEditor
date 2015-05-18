@@ -49,6 +49,7 @@ type
     FCharsInWindow: Integer;
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
+    FCodeFoldingRangeForLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingHintForm: TBCEditorCompletionProposalForm;
     FCommandDrop: Boolean;
     FCompletionProposal: TBCEditorCompletionProposal;
@@ -223,6 +224,7 @@ type
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
+    procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
     procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CompletionProposalTimerHandler(Sender: TObject);
@@ -897,7 +899,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
+{function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
 var
   i: Integer;
 begin
@@ -909,6 +911,14 @@ begin
     Result := FAllCodeFoldingRanges[i];
     Break;
   end;
+end;}
+
+function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
+begin
+  if ALine < Length(FCodeFoldingRangeForLine) then
+    Result := FCodeFoldingRangeForLine[ALine]
+  else
+    Result := nil;
 end;
 
 function TBCBaseEditor.CodeFoldingTreeEndForLine(ALine: Integer): Boolean;
@@ -1179,7 +1189,7 @@ end;
 function TBCBaseEditor.GetDisplayLineCount: Integer;
 begin
   if not Assigned(FWordWrapHelper) then
-    Result := Lines.Count
+    Result := FLines.Count
   else
     Result := FWordWrapHelper.GetRowCount;
 end;
@@ -2627,6 +2637,27 @@ begin
   UpdateWordWrapHiddenOffsets;
 end;
 
+procedure TBCBaseEditor.CodeFoldingPrepareRangeForLine;
+var
+  i: Integer;
+  LMaxFromLine: Integer;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
+begin
+  LMaxFromLine := 0;
+  SetLength(FCodeFoldingRangeForLine, FLines.Count); { max it can be}
+  for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
+  begin
+    LCodeFoldingRange := FAllCodeFoldingRanges[i];
+    if not LCodeFoldingRange.ParentCollapsed then
+    begin
+      if LCodeFoldingRange.FromLine >= LMaxFromLine then
+        LMaxFromLine := LCodeFoldingRange.FromLine;
+      FCodeFoldingRangeForLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
+    end;
+  end;
+  SetLength(FCodeFoldingRangeForLine, LMaxFromLine); { actual size }
+end;
+
 {
 TODO: Needed?
 procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
@@ -3909,6 +3940,7 @@ begin
         end;
       end;
     end;
+    CodeFoldingPrepareRangeForLine;
   finally
     LOpenTokenSkipFoldRangeList.Free;
     LOpenTokenFoldRangeList.Free;

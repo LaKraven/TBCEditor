@@ -4568,7 +4568,9 @@ begin
   if LDisplayLineCount = 0 then
     LDisplayLineCount := 1;
 
-  if (soPastEndOfFileMarker in FScroll.Options) and not (sfInSelection in FStateFlags) then
+  if (soPastEndOfFileMarker in FScroll.Options) and not (sfInSelection in FStateFlags) or
+    (soPastEndOfFileMarker in FScroll.Options) and (sfInSelection in FStateFlags) and
+    (Value = FTopLine) then
     Value := Min(Value, LDisplayLineCount)
   else
     Value := Min(Value, LDisplayLineCount - FVisibleLines + 1);
@@ -9661,7 +9663,7 @@ begin
   else
     Result := TBCEditorTextPosition(ADisplayPosition);
 
-  if Result.Line <= lines.Count then
+  if Result.Line <= FLines.Count then
   begin
     s := Lines[Result.Line - 1];
     l := Length(s);

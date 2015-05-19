@@ -901,20 +901,6 @@ begin
   end;
 end;
 
-{function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
-var
-  i: Integer;
-begin
-  Result := nil;
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
-  with FAllCodeFoldingRanges[i] do
-  if not ParentCollapsed and (FromLine = ALine) then
-  begin
-    Result := FAllCodeFoldingRanges[i];
-    Break;
-  end;
-end;}
-
 function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
 begin
   if ALine < Length(FCodeFoldingRangeForLine) then
@@ -1679,6 +1665,7 @@ function TBCBaseEditor.GetSelectedText: string;
     LTrimCount: Integer;
     LLineCount: Integer;
     LUncollapsedLines: TStrings;
+    LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     LColumnFrom := SelectionBeginPosition.Char;
     LFirst := SelectionBeginPosition.Line - 1;
@@ -1692,8 +1679,9 @@ function TBCBaseEditor.GetSelectedText: string;
           LUncollapsedLines := CreateUncollapsedLines;
           { calculate total length of result string }
           Inc(LTotalLength, LColumnTo - LColumnFrom);
+          LCodeFoldingRange := CodeFoldingRangeForLine(LFirst);
           if (Length(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]) < LColumnTo) and
-            Assigned(CodeFoldingRangeForLine(LFirst)) and CodeFoldingRangeForLine(LFirst).Collapsed then
+            Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
           begin
             { Selection until line end -> Also get text from foldrange }
             LLineCount := 1;
@@ -1709,8 +1697,9 @@ function TBCBaseEditor.GetSelectedText: string;
           P := PChar(Result);
           CopyAndForward(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]), LColumnFrom,
             LColumnTo - LColumnFrom, P);
+          //LCodeFoldingRange := CodeFoldingRangeForLine(LFirst);
           if (Length(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]) < LColumnTo) and
-            Assigned(CodeFoldingRangeForLine(LFirst)) and CodeFoldingRangeForLine(LFirst).Collapsed then
+            Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
           begin
             { Selection until line end -> Also get text from foldrange }
             CopyAndForward(sLineBreak, 1, MaxInt, P);
@@ -3946,7 +3935,6 @@ begin
         end;
       end;
     end;
-    CodeFoldingPrepareRangeForLine;
   finally
     LOpenTokenSkipFoldRangeList.Free;
     LOpenTokenFoldRangeList.Free;
@@ -8370,10 +8358,7 @@ var
     for i := LFirstLine to LLastLine do
     begin
       LCurrentLine := i;
-      if FCodeFolding.Visible then
-        LFoldRange := CodeFoldingRangeForLine(LCurrentLine)
-      else
-        LFoldRange := nil;
+
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];
       LIsCurrentLine := CaretY = LCurrentLine;
@@ -8510,10 +8495,18 @@ var
           FHighlighter.Next;
         end;
         PaintHighlightToken(True);
-        PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy);
+
+        if FCodeFolding.Visible then
+          LFoldRange := CodeFoldingRangeForLine(LCurrentLine)
+        else
+          LFoldRange := nil;
+
+        if Assigned(LFoldRange) then
+          PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy);
         PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
-        PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
+        if Assigned(LFoldRange) then
+          PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
 
         if not AMinimap and LPaintRightMargin then
         begin
@@ -12514,6 +12507,7 @@ begin
       UpdateFoldRangeParents;
     end;
   finally
+    CodeFoldingPrepareRangeForLine;
     Finalize(LFoldRangeLookup);
     LFoldRangeLookup := nil;
     Finalize(LUncollapsedLinenumbersLookup);

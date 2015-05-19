@@ -73,7 +73,7 @@ type
     procedure SetParentCollapsedOfSubFoldRanges(AParentCollapsed: Boolean; ACollapsedBy: Integer);
     procedure Widen(LineCount: Integer);
     property AllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges read FAllCodeFoldingRanges write FAllCodeFoldingRanges;
-    property Collapsed: Boolean read FCollapsed write FCollapsed;
+    property Collapsed: Boolean read FCollapsed write FCollapsed default False;
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
     property CollapsedLines: TStringList read FCollapsedLines;
     property FoldRegion: TBCEditorFoldRegionItem read FFoldRegion write FFoldRegion;
@@ -272,6 +272,7 @@ begin
 
   FSubFoldRanges := TBCEditorCodeFoldingRanges.Create;
   FCollapsedLines := TStringList.Create;
+  FCollapsed := False;
   FCollapsedBy := -1;
   FIsExtraTokenFound := False;
 end;

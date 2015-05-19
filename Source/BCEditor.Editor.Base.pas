@@ -3490,7 +3490,7 @@ end;
 
 procedure TBCBaseEditor.ScanCodeFoldingRanges(var ATopFoldRanges: TBCEditorAllCodeFoldingRanges; AStrings: TStrings);
 const
-  VALID_CHARACTERS = ['\', '@'] + BCEDITOR_UNDERSCORE + BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_NUMBERS;
+  CODE_FOLDING_VALID_CHARACTERS = ['\', '@'] + BCEDITOR_UNDERSCORE + BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_NUMBERS;
 var
   LLine, LFold, LFoldCount, LCount: Integer;
   LTextPtr: PChar;
@@ -3504,7 +3504,7 @@ var
 
   function IsValidChar(Character: PChar): Boolean;
   begin
-    Result := CharInSet(Character^, VALID_CHARACTERS);
+    Result := CharInSet(Character^, CODE_FOLDING_VALID_CHARACTERS);
   end;
 
   function IsWholeWord(FirstChar, LastChar: PChar): Boolean;
@@ -4047,6 +4047,16 @@ procedure TBCBaseEditor.SearchHighlighterAfterPaint(ACanvas: TCanvas; AFirstLine
     end;
   end;
 
+  function IsValidChar(Character: PChar): Boolean;
+  begin
+    Result := CharInSet(Character^, BCEDITOR_WORD_BREAK_CHARACTERS);
+  end;
+
+  function IsWholeWord(FirstChar, LastChar: PChar): Boolean;
+  begin
+    Result := not (IsValidChar(FirstChar) and IsValidChar(LastChar));
+  end;
+
 var
   i: integer;
   LStartPosition, LEndPosition: TBCEditorTextPosition;
@@ -4058,11 +4068,15 @@ begin
   if not Assigned(FSearchEngine) then
     Exit;
   LKeyword := '';
-  if FSearch.Enabled and (soHighlightResults in FSearch.Options) then
+  if FSearch.Enabled and (FSearch.SearchText <> '') and (soHighlightResults in FSearch.Options) then
     LKeyword := FSearch.SearchText
   else
   if soHighlightSimilarTerms in FSelection.Options then
+  begin
     LKeyword := SelectedText;
+    if LKeyword <> GetWordAtRowColumn(GetTextPosition(CaretX - 1, CaretY)) then
+      Exit;
+  end;
   if LKeyword = '' then
     Exit;
   if not (soCaseSensitive in FSearch.Options) then
@@ -12081,7 +12095,7 @@ begin
       if LWithBOM then
         FEncoding := TEncoding.UTF8
       else
-        FEncoding := TEncoding.UTF8WithoutBOM;
+        FEncoding := BCEditor.Encoding.TEncoding.UTF8WithoutBOM;
     end
     else
     { Read file into buffer }

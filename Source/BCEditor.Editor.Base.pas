@@ -332,6 +332,7 @@ type
   protected
     function DoMouseWheel(AShift: TShiftState; AWheelDelta: Integer; AMousePos: TPoint): Boolean; override;
     function DoOnReplaceText(const ASearch, AReplace: string; ALine, AColumn: Integer; DeleteLine: Boolean): TBCEditorReplaceAction;
+    function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function GetReadOnly: Boolean; virtual;
     function GetSelectedLength: Integer;
     function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
@@ -362,6 +363,7 @@ type
     procedure DoOnPaint;
     procedure DoOnPlaceBookmark(var ABookmark: TBCEditorBookmark);
     procedure DoOnProcessCommand(var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer); virtual;
+    procedure DoSearchStringNotFoundDialog; virtual;
     procedure DoTripleClick;
     procedure DragCanceled; override;
     procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
@@ -5465,6 +5467,11 @@ begin
     FOnReplaceText(Self, ASearch, AReplace, ALine, AColumn, DeleteLine, Result);
 end;
 
+function TBCBaseEditor.DoSearchMatchNotFoundWraparoundDialog: Boolean;
+begin
+  Result := MessageDialog(SBCEditorSearchMatchNotFound, mtConfirmation, [mbYes, mbNo]) = MrYes;
+end;
+
 function TBCBaseEditor.GetReadOnly: Boolean;
 begin
   Result := FReadOnly;
@@ -6250,6 +6257,11 @@ begin
     if Assigned(FOnProcessUserCommand) then
       FOnProcessUserCommand(Self, ACommand, AChar, AData);
   end;
+end;
+
+procedure TBCBaseEditor.DoSearchStringNotFoundDialog;
+begin
+  MessageDialog(Format(SBCEditorSearchStringNotFound, [FSearch.SearchText]), mtInformation, [mbOK]);
 end;
 
 procedure TBCBaseEditor.DoTripleClick;
@@ -9744,10 +9756,10 @@ begin
     if (CaretX = 1) and (CaretY = 1) then
     begin
       if soShowStringNotFound in FSearch.Options then
-        MessageDialog(Format(SBCEditorSearchStringNotFound, [FSearch.SearchText]), mtInformation, [mbOK]);
+        DoSearchStringNotFoundDialog;
     end
     else
-    if MessageDialog(SBCEditorSearchMatchNotFound, mtConfirmation, [mbYes, mbNo]) = MrYes then
+    if DoSearchMatchNotFoundWraparoundDialog then
     begin
       CaretZero;
       Result := FindNext;

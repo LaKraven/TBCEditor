@@ -34,7 +34,7 @@ requires
   designide,
   dbrtl,
   vcldb,
-  BCEditorRXE7;
+  BCEditorRXE8;
 
 contains
   BCEditor.Register in '..\Source\BCEditor.Register.pas',

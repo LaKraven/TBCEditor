@@ -4063,9 +4063,14 @@ begin
   else
   if soHighlightSimilarTerms in FSelection.Options then
   begin
-    LKeyword := SelectedText;
-    if LKeyword <> GetWordAtRowColumn(GetTextPosition(CaretX - 1, CaretY)) then
-      Exit;
+    if (FSelectionBeginPosition.Line = FSelectionEndPosition.Line) and
+      (FSelectionBeginPosition.Char <> FSelectionEndPosition.Char) then
+    begin
+      LKeyWord := Copy(FLines[FSelectionBeginPosition.Line - 1], FSelectionBeginPosition.Char, FSelectionEndPosition.Char -
+        FSelectionBeginPosition.Char);
+      if LKeyword <> GetWordAtRowColumn(GetTextPosition(CaretX - 1, CaretY)) then
+        Exit;
+    end;
   end;
   if LKeyword = '' then
     Exit;

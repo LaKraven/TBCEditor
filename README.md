@@ -35,12 +35,17 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
 
 <h3>Demo</h3>
 
-TBCEditor Control Demo v1.0b. 
+TBCEditor Control Demo v. 1.0b. 
 
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
 The latest update: 19.05.2015 19:27, UTC+02:00
+
+EditBone Text Editor v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
+
+  * <a href="http://www.bonecode.com/downloads/EditBone32.zip">32-bit Windows</a> 
+  * <a href="http://www.bonecode.com/downloads/EditBone64.zip">64-bit Windows</a>
 
 <h3>Screenshots</h3>
 

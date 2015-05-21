@@ -10484,8 +10484,8 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
-      IsKeywordAtCursorPosition and ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteLastChar) or
+    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
+      IsKeywordAtCursorPosition and ((ACommand = ecChar) or (ACommand = ecTab) or
       (ACommand = ecDeleteChar)) then
       FNeedToRescanCodeFolding := True;
 

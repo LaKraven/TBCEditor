@@ -7,41 +7,42 @@
          },
          "Author":{
             "Name":"Lasse Rautiainen",
-            "Mail":"lasse@bonecode.com"
+            "Mail":"lasse@bonecode.com",
+            "Email":""
          }
       },
       "Editor":{
          "Colors":{
-            "Background":"clWindow",
-            "ActiveLine":"$00E6FAFF",
-            "CodeFoldingBackground":"clWhite",
-            "CodeFoldingCollapsedLine":"$00CC9999",
-            "CodeFoldingFoldingLine":"$00CC9999",
-            "CodeFoldingIndentHighlight":"$00CC9999",
-            "CodeFoldingHintBackground":"clWindow",
-            "CodeFoldingHintBorder":"$00CC9999",
+            "Background":"$00222827",
+            "ActiveLine":"$00323D3E",
+            "CodeFoldingBackground":"$00222827",
+            "CodeFoldingCollapsedLine":"$009F9F9F",
+            "CodeFoldingFoldingLine":"$00414746",
+            "CodeFoldingIndentHighlight":"$009F9F9F",
+            "CodeFoldingHintBackground":"00222827",
+            "CodeFoldingHintBorder":"$00414746",
             "CodeFoldingHintText":"clNone",
-            "CompletionProposalBackground":"clWindow",
+            "CompletionProposalBackground":"00222827",
             "CompletionProposalForeground":"clNone",
-            "CompletionProposalBorder":"$00CC9999",
+            "CompletionProposalBorder":"$00414746",
             "CompletionProposalSelectedBackground":"clHighlight",
             "CompletionProposalSelectedText":"clHighlightText",
-            "LeftMarginBackground":"clWhite",
-            "LeftMarginLineNumbers":"$00CC9999",
-            "LeftMarginLineStateModified":"clYellow",
-            "LeftMarginLineStateNormal":"clLime",
-            "LeftMarginBookmarkPanel":"clWhite",
+            "LeftMarginBackground":"$00222827",
+            "LeftMarginLineNumbers":"$009F9F9F",
+            "LeftMarginLineStateModified":"$0074DBE6",
+            "LeftMarginLineStateNormal":"$002EE2A6",
+            "LeftMarginBookmarkPanel":"$00222827",
             "MatchingPairMatched":"clAqua",
             "MatchingPairUnmatched":"clYellow",
             "RightMargin":"clSilver",
             "RightMovingEdge":"clSilver",
             "SearchHighlighterBackground":"$0078AAFF",
-            "SearchHighlighterForeground":"clWindowText",
+            "SearchHighlighterForeground":"$00F8F8F2",
             "SearchMapActiveLine":"$00F0F0F0",
             "SearchMapBackground":"$00F4F4F4",
             "SearchMapForeground":"$0078AAFF",
-            "SelectionBackground":"$00A56D53",
-            "SelectionForeground":"clHighlightText"
+            "SelectionBackground":"$003E4849",
+            "SelectionForeground":"clNone"
          },
          "Fonts":{
             "LineNumbers":"Consolas",
@@ -51,7 +52,7 @@
             "CompletionProposal":"Consolas"
          },
          "FontSizes":{
-            "LineNumbers":"8",
+            "LineNumbers":"9",
             "Text":"9",
             "Minimap":"1",
             "CodeFoldingHint":"8",
@@ -61,78 +62,76 @@
       "Elements":[
          {
             "Name":"Editor",
-            "Foreground":"$00333333",
-            "Background":"clWindow"
+            "Foreground":"$00F8F8F2",
+            "Background":"$00222827"
          },
          {
             "Name":"Comment",
-            "Foreground":"$00999999",
-            "Background":"clWindow",
-            "Style":"Italic"
+            "Foreground":"$005E7175",
+            "Background":"$00222827"
          },
          {
             "Name":"String",
-            "Foreground":"$005049d4",
-            "Background":"clWindow"
+            "Foreground":"$0074DBE6",
+            "Background":"$00222827"
          },
          {
             "Name":"Directive",
-            "Foreground":"$00999900",
-            "Background":"clWindow"
+            "Foreground":"$005E7175",
+            "Background":"$00222827"
          },
          {
             "Name":"Character",
-            "Foreground":"$00cf9f4f",
-            "Background":"clWindow"
+            "Foreground":"clPurple",
+            "Background":"$00222827"
          },
          {
             "Name":"ReservedWord",
-            "Foreground":"$009f6f2f",
-            "Background":"clWindow",
+            "Foreground":"$007226F9",
+            "Background":"$00222827",
             "Style":"Bold"
          },
          {
             "Name":"Symbol",
-            "Foreground":"clNavy",
-            "Background":"clWindow"
+            "Foreground":"$00F2F8F8",
+            "Background":"$00222827"
          },
          {
             "Name":"Number",
-            "Foreground":"$00AAAA33",
-            "Background":"clWindow"
+            "Foreground":"$00FF81AE",
+            "Background":"$00222827"
          },
          {
             "Name":"HexNumber",
-            "Foreground":"$00AAAA33",
-            "Background":"clWindow"
+            "Foreground":"$00FF81AE",
+            "Background":"$00222827"
          },
          {
             "Name":"HighlightedBlock",
-            "Foreground":"clBlack",
-            "Background":"$00f9f7f7"
+            "Foreground":"$00F8F8F2",
+            "Background":"$00222827"
          },
          {
             "Name":"AssemblerComment",
-            "Foreground":"$00999999",
-            "Background":"$00f9f7f7",
-            "Style":"Italic"
+            "Foreground":"$0075715E",
+            "Background":"$00222827"
          },
          {
             "Name":"AssemblerReservedWord",
-            "Foreground":"$009f6f2f",
-            "Background":"$00f9f7f7",
+            "Foreground":"$00F92672",
+            "Background":"$00222827",
             "Style":"Bold"
          },
          {
             "Name":"Attribute",
-            "Foreground":"$00cf9f4f",
-            "Background":"clWindow"
+            "Foreground":"$00EFD966",
+            "Background":"$00222827"
          },
          {
             "Name":"Method",
-            "Foreground":"$009f6f2f",
-            "Background":"clWindow",
-            "Style":"Bold"
+            "Foreground":"$00EFD966",
+            "Background":"$00222827",
+            "Style":"Italic"
          }
       ]
    }

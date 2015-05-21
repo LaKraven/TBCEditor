@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "15.5.2015",
+                "Date": "21.5.2015",
                 "Sample": [
                     "// Hello World in Pascal\r\n",
                     "\r\n",
@@ -235,7 +235,6 @@
                             "finally",
                             "for",
                             "forward",
-                            "function",
                             "goto",
                             "if",
                             "implementation",
@@ -267,9 +266,7 @@
                             "pascal",
                             "platform",
                             "private",
-                            "procedure",
                             "program",
-                            "property",
                             "protected",
                             "public",
                             "published",
@@ -308,6 +305,13 @@
                         "Attributes": {
                             "Element": "ReservedWord",
                             "ParentBackground": true
+                        }
+                    },
+                    {
+                        "Type": "Method",
+                        "Words": ["function", "procedure", "property"],
+                        "Attributes": {
+                            "Element": "Method"
                         }
                     },
                     {

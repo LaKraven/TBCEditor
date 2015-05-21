@@ -405,6 +405,7 @@ begin
         begin
           ARange.CloseOnEol := PropertiesObject.B['CloseOnEol'];
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
+          ARange.CloseParent := PropertiesObject.B['CloseParent'];
           ARange.AlternativeClose := PropertiesObject['AlternativeClose'].Value;
         end;
 

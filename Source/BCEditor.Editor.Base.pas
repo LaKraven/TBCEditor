@@ -6094,10 +6094,17 @@ end;
 procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
 begin
   if FCodeFolding.Visible then
+  begin
     if FNeedToRescanCodeFolding or
       IsKeywordAtCurrentLine and ((ACommand = ecLineBreak) or (ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) or
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
-    RescanCodeFoldingRanges;
+      RescanCodeFoldingRanges
+    else
+    case ACommand of
+      ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecClear:
+        CodeFoldingPrepareRangeForLine;
+    end;
+  end;
 
   if FMatchingPair.Enabled then
   case ACommand of
@@ -6106,12 +6113,6 @@ begin
     ecString, ecLineBreak, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteBeginningOfLine, ecDeleteEndOfLine,
     ecDeleteLine, ecClear:
       ScanMatchingPair;
-  end;
-
-  if not FNeedToRescanCodeFolding then
-  case ACommand of
-    ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecClear:
-      CodeFoldingPrepareRangeForLine;
   end;
 
   if cfoShowIndentGuides in CodeFolding.Options then
@@ -9852,8 +9853,8 @@ end;
 
 function TBCBaseEditor.IsWordBreakChar(AChar: Char): Boolean;
 begin
-  Result := CharInSet(AChar, [BCEDITOR_NONE_CHAR .. BCEDITOR_SPACE_CHAR, '.', ',', ';', ':', '"', '''', '´', '`', '°',
-    '^', '!', '?', '&', '$', '@', '§', '%', '#', '~', '[', ']', '(', ')', '{', '}', '<', '>', '-', '=', '+', '*', '/',
+  Result := CharInSet(AChar, [BCEDITOR_NONE_CHAR .. BCEDITOR_SPACE_CHAR, '.', ',', ';', ':', '"', '''', 'Â´', '`', 'Â°',
+    '^', '!', '?', '&', '$', '@', 'Â§', '%', '#', '~', '[', ']', '(', ')', '{', '}', '<', '>', '-', '=', '+', '*', '/',
     '\', '|']);
 end;
 
@@ -12797,5 +12798,3 @@ finalization
   {$ENDIF}
 
 end.
-
-

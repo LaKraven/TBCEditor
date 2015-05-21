@@ -84,6 +84,68 @@
                         }
                     },
                     {
+                        "Type": "Method",
+                        "Attributes": {
+                            "Element": "Method"
+                        },
+                        "Properties": {
+                            "CloseOnEol": true
+                        },
+                        "TokenRange": {
+                            "Open": "function"
+                        },
+                        "SubRules": {
+                           "Range": [
+                              {
+                                "Type": "MethodName",
+                                "Attributes": {
+                                    "Element": "MethodName"
+                                },
+                                "Delimiters": "(;",
+                                "Properties": {
+                                    "CloseParent": true,
+                                    "CloseOnTerm": true,
+                                    "CloseOnEol": true
+                                },
+                                 "TokenRange": {
+                                    "Open": " "
+                                 }
+                              }
+                           ]
+                        }
+                    },
+                    {
+                        "Type": "Method",
+                        "Attributes": {
+                            "Element": "Method"
+                        },
+                        "Properties": {
+                            "CloseOnEol": true
+                        },
+                        "TokenRange": {
+                            "Open": "procedure"
+                        },
+                        "SubRules": {
+                           "Range": [
+                              {
+                                "Type": "MethodName",
+                                "Attributes": {
+                                    "Element": "MethodName"
+                                },
+                                "Delimiters": "(;",
+                                "Properties": {
+                                    "CloseParent": true,
+                                    "CloseOnTerm": true,
+                                    "CloseOnEol": true
+                                },
+                                 "TokenRange": {
+                                    "Open": " "
+                                 }
+                              }
+                           ]
+                        }
+                    },
+                    {
                         "Type": "ReservedWord",
                         "Attributes": {
                             "Element": "HighlightedBlock"

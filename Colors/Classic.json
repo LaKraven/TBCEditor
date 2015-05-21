@@ -130,6 +130,11 @@
             "Name":"Method",
             "Foreground":"clWhite",
             "Background":"clNavy"
+         },
+         {
+            "Name":"MethodName",
+            "Foreground":"clYellow",
+            "Background":"clNavy"
          }
       ]
    }

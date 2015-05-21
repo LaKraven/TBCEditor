@@ -133,6 +133,11 @@
             "Foreground":"$009f6f2f",
             "Background":"clWindow",
             "Style":"Bold"
+         },
+         {
+            "Name":"MethodName",
+            "Foreground":"$00333333",
+            "Background":"clWindow"
          }
       ]
    }

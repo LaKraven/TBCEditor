@@ -134,6 +134,11 @@
             "Foreground":"clNavy",
             "Background":"clWindow",
             "Style":"Bold"
+         },
+         {
+            "Name":"MethodName",
+            "Foreground":"clWindowText",
+            "Background":"clWindow"
          }
       ]
    }

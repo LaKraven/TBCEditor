@@ -134,6 +134,11 @@
             "Foreground":"clBlack",
             "Background":"clAqua",
             "Style":"Bold"
+         },
+         {
+            "Name":"MethodName",
+            "Foreground":"clBlue",
+            "Background":"clAqua"
          }
       ]
    }

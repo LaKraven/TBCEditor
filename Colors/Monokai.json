@@ -14,7 +14,7 @@
       "Editor":{
          "Colors":{
             "Background":"$00222827",
-            "ActiveLine":"$00323D3E",
+            "ActiveLine":"$00222827",
             "CodeFoldingBackground":"$00222827",
             "CodeFoldingCollapsedLine":"$009F9F9F",
             "CodeFoldingFoldingLine":"$00414746",
@@ -25,19 +25,19 @@
             "CompletionProposalBackground":"00222827",
             "CompletionProposalForeground":"clNone",
             "CompletionProposalBorder":"$00414746",
-            "CompletionProposalSelectedBackground":"clHighlight",
+            "CompletionProposalSelectedBackground":"$003E4849",
             "CompletionProposalSelectedText":"clHighlightText",
             "LeftMarginBackground":"$00222827",
             "LeftMarginLineNumbers":"$009F9F9F",
             "LeftMarginLineStateModified":"$0074DBE6",
             "LeftMarginLineStateNormal":"$002EE2A6",
             "LeftMarginBookmarkPanel":"$00222827",
-            "MatchingPairMatched":"clAqua",
+            "MatchingPairMatched":"$007226F9",
             "MatchingPairUnmatched":"clYellow",
             "RightMargin":"clSilver",
             "RightMovingEdge":"clSilver",
-            "SearchHighlighterBackground":"$0078AAFF",
-            "SearchHighlighterForeground":"$00F8F8F2",
+            "SearchHighlighterBackground":"$003E4849",
+            "SearchHighlighterForeground":"clNone",
             "SearchMapActiveLine":"$00F0F0F0",
             "SearchMapBackground":"$00F4F4F4",
             "SearchMapForeground":"$0078AAFF",
@@ -132,6 +132,11 @@
             "Foreground":"$00EFD966",
             "Background":"$00222827",
             "Style":"Italic"
+         },
+         {
+            "Name":"MethodName",
+            "Foreground":"$002AE27F",
+            "Background":"$00222827"
          }
       ]
    }

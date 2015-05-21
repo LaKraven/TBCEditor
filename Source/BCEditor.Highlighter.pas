@@ -158,6 +158,9 @@ begin
   FTokenPosition := 0;
   FEol := False;
   FPreviousEol := False;
+  if Assigned(FCurrentToken) then
+    if FCurrentToken.Temporary then
+      FCurrentToken.Free;
   FCurrentToken := nil;
   Next;
 end;

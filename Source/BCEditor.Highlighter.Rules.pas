@@ -409,8 +409,8 @@ begin
     if CharInSet(APLine[ARun], AllowedDelimiters) then
     begin
       Result := True;
-      //AToken := TBCEditorToken.Create(TBCEditorSet(Sets[i]).Attribute);
-      //AToken.Temporary := True;
+      AToken := TBCEditorToken.Create(TBCEditorSet(Sets[i]).Attribute);
+      AToken.Temporary := True;
       Exit;
     end;
   end;

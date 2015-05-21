@@ -1,4 +1,4 @@
-unit BCEditor.Editor.Base;
+﻿unit BCEditor.Editor.Base;
 
 interface
 
@@ -7943,7 +7943,10 @@ var
       { Selection colors }
       if ASelected then
       begin
-        SetForegroundColor(LSelectionForegroundColor);
+        if LSelectionForegroundColor <> clNone then
+          SetForegroundColor(LSelectionForegroundColor)
+        else
+          SetForegroundColor(LForegroundColor);
         LColor := LSelectionBackgroundColor;
       end
       { Normal colors }

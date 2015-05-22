@@ -3,12 +3,11 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"21.5.2015"
+            "Date":"22.5.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
             "Mail":"lasse@bonecode.com",
-            "Email":""
          }
       },
       "Editor":{
@@ -17,8 +16,9 @@
             "ActiveLine":"$00222827",
             "CodeFoldingBackground":"$00222827",
             "CodeFoldingCollapsedLine":"$009F9F9F",
-            "CodeFoldingFoldingLine":"$00414746",
-            "CodeFoldingIndentHighlight":"$009F9F9F",
+            "CodeFoldingFoldingLine":"$009F9F9F",
+            "CodeFoldingIndent":"$00414746",
+            "CodeFoldingIndentHighlight":"$00414746", 
             "CodeFoldingHintBackground":"00222827",
             "CodeFoldingHintBorder":"$00414746",
             "CodeFoldingHintText":"clNone",
@@ -82,7 +82,7 @@
          },
          {
             "Name":"Character",
-            "Foreground":"clPurple",
+            "Foreground":"$00F8F8F2",
             "Background":"$00222827"
          },
          {

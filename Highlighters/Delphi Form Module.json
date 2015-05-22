@@ -31,6 +31,17 @@
             "SubRules": {
                 "Range": [
                     {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": true
+                        },
+                        "TokenRange": {
+                            "Open": "{",
+                            "Close": "}"
+                        }
+                    },
+                    {
                         "Type": "String",
                         "Attributes": {
                             "Element": "String",

@@ -11,11 +11,13 @@ type
     FBackground: TColor;
     FCollapsedLine: TColor;
     FFoldingLine: TColor;
+    FIndent: TColor;
     FIndentHighlight: TColor;
     FOnChange: TBCEditorCodeFoldingChangeEvent;
     procedure SetBackground(const Value: TColor);
     procedure SetCollapsedLine(const Value: TColor);
     procedure SetFoldingLine(const Value: TColor);
+    procedure SetIndent(const Value: TColor);
     procedure SetIndentHighlight(const Value: TColor);
     procedure DoChange;
   public
@@ -25,6 +27,7 @@ type
     property CollapsedLine: TColor read FCollapsedLine write SetCollapsedLine default clLeftMarginFontForeground;
     property Background: TColor read FBackground write SetBackground default clLeftMarginBackground;
     property FoldingLine: TColor read FFoldingLine write SetFoldingLine default clLeftMarginFontForeground;
+    property Indent: TColor read FIndent write SetIndent default clIndent;
     property IndentHighlight: TColor read FIndentHighlight write SetIndentHighlight default clIndentHighlight;
     property OnChange: TBCEditorCodeFoldingChangeEvent read FOnChange write FOnChange;
   end;
@@ -87,6 +90,15 @@ begin
   if Value <> FCollapsedLine then
   begin
     FCollapsedLine := Value;
+    DoChange;
+  end;
+end;
+
+procedure TBCEditorCodeFoldingColors.SetIndent(const Value: TColor);
+begin
+  if Value <> FIndent then
+  begin
+    FIndent := Value;
     DoChange;
   end;
 end;

@@ -66,6 +66,7 @@ const
   clLeftMarginFontForeground = $00CC9999;
   clLeftMarginBookmarkBackground = $00F4F4F4;
   clIndentHighlight = $00CC9999;
+  clIndent = $00CC9999;
 
 implementation
 

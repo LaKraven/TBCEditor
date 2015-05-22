@@ -7258,7 +7258,7 @@ begin
           X := GetLineIndentChars(FLines, ToLine - 1) * FMinimap.CharWidth
         else
           X := GetLineIndentChars(FLines, ToLine - 1) * FTextDrawer.CharWidth;
-        Canvas.Pen.Color := FCodeFolding.Colors.FoldingLine;
+        Canvas.Pen.Color := FCodeFolding.Colors.Indent;
 
         if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0 {Offset}) then
         begin

@@ -73,6 +73,7 @@ contains
   BCEditor.Editor.MatchingPair.Colors in '..\Source\BCEditor.Editor.MatchingPair.Colors.pas',
   BCEditor.Editor.MatchingPair in '..\Source\BCEditor.Editor.MatchingPair.pas',
   BCEditor.Editor.Minimap in '..\Source\BCEditor.Editor.Minimap.pas',
+  BCEditor.Editor.Minimap.Colors in '..\Source\BCEditor.Editor.Minimap.Colors.pas';
   BCEditor.Editor in '..\Source\BCEditor.Editor.pas',
   BCEditor.Editor.Replace in '..\Source\BCEditor.Editor.Replace.pas',
   BCEditor.Editor.RightMargin.Colors in '..\Source\BCEditor.Editor.RightMargin.Colors.pas',

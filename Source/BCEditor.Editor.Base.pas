@@ -8137,7 +8137,7 @@ var
 
       if AMinimap then
         if (LCurrentLine >= RowToLine(TopLine)) and (LCurrentLine < RowToLine(TopLine + VisibleLines)) then
-          LBackgroundColor := FActiveLine.Color;
+          LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;
@@ -8183,7 +8183,7 @@ var
       LBackgroundColor := GetBackgroundColor;
       if AMinimap then
         if (LCurrentLine >= RowToLine(TopLine)) and (LCurrentLine < RowToLine(TopLine + VisibleLines)) then
-          LBackgroundColor := FActiveLine.Color;
+          LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;

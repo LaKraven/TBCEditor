@@ -3,7 +3,7 @@ unit BCEditor.Editor.Minimap;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, BCEditor.Types;
+  System.Classes, Vcl.Graphics, BCEditor.Types, BCEditor.Editor.Minimap.Colors;
 
 type
   TBCEditorMinimap = class(TPersistent)
@@ -11,6 +11,7 @@ type
     FCharHeight: Integer;
     FCharWidth: Integer;
     FClicked: Boolean;
+    FColors: TBCEditorMinimapColors;
     FDragging: Boolean;
     FFont: TFont;
     FOnChange: TNotifyEvent;
@@ -20,6 +21,7 @@ type
     FVisibleLines: Integer;
     FWidth: Integer;
     procedure DoChange;
+    procedure SetColors(const Value: TBCEditorMinimapColors);
     procedure SetFont(Value: TFont);
     procedure SetOnChange(Value: TNotifyEvent);
     procedure SetVisible(Value: Boolean);
@@ -37,6 +39,7 @@ type
     property TopLine: Integer read FTopLine write FTopLine default 1;
     property VisibleLines: Integer read FVisibleLines write FVisibleLines;
   published
+    property Colors: TBCEditorMinimapColors read FColors write SetColors;
     property Font: TFont read FFont write SetFont;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
     property Options: TBCEditorMinimapOptions read FOptions write FOptions default [];
@@ -68,11 +71,14 @@ begin
   FClicked := False;
 
   FTopLine := 1;
+
+  FColors := TBCEditorMinimapColors.Create;
 end;
 
 destructor TBCEditorMinimap.Destroy;
 begin
   FFont.Free;
+  FColors.Free;
   inherited Destroy;
 end;
 
@@ -81,6 +87,7 @@ begin
   if Source is TBCEditorMinimap then
   with Source as TBCEditorMinimap do
   begin
+    Self.FColors.Assign(FColors);
     Self.FFont.Assign(FFont);
     Self.FOptions := FOptions;
     Self.FVisible := FVisible;
@@ -94,12 +101,18 @@ procedure TBCEditorMinimap.SetOnChange(Value: TNotifyEvent);
 begin
   FOnChange := Value;
   FFont.OnChange := Value;
+  FColors.OnChange := Value;
 end;
 
 procedure TBCEditorMinimap.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(Self);
+end;
+
+procedure TBCEditorMinimap.SetColors(const Value: TBCEditorMinimapColors);
+begin
+  FColors.Assign(Value);
 end;
 
 procedure TBCEditorMinimap.SetFont(Value: TFont);

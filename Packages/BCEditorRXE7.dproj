@@ -173,6 +173,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.LineSpacing.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.MatchingPair.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.MatchingPair.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.Minimap.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Minimap.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Replace.pas"/>

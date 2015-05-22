@@ -34,6 +34,7 @@
             "LeftMarginBookmarkPanel":"clBlack",
             "MatchingPairMatched":"clAqua",
             "MatchingPairUnmatched":"clYellow",
+            "MinimapVisibleLines":"$00505050",
             "RightMargin":"clSilver",
             "RightMovingEdge":"clSilver",
             "SearchHighlighterBackground":"$00FCFDCD",

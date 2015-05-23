@@ -232,10 +232,14 @@ type
     procedure ComputeScroll(X, Y: Integer);
     procedure DeflateMinimapRect(var ARect: TRect);
     procedure DoCaseChange(const ACommand: TBCEditorCommand);
+    procedure DoCutToClipboard;
     procedure DoEndKey(ASelection: Boolean);
     procedure DoHomeKey(ASelection: Boolean);
+    procedure DoInternalUndo;
+    procedure DoInternalRedo;
     procedure DoLinesDeleted(AFirstLine, ACount: Integer; AddToUndoList: Boolean);
     procedure DoLinesInserted(AFirstLine, ACount: Integer);
+    procedure DoPasteFromClipboard;
     procedure DoShiftTabKey;
     procedure DoTabKey;
     procedure DrawCursor(ACanvas: TCanvas);
@@ -5966,6 +5970,11 @@ begin
 end;
 
 procedure TBCBaseEditor.DoUndo;
+begin
+  CommandProcessor(ecUndo, #0, nil);
+end;
+
+procedure TBCBaseEditor.DoInternalUndo;
 
   procedure RemoveGroupBreak;
   var
@@ -10521,6 +10530,11 @@ end;
 
 procedure TBCBaseEditor.CutToClipboard;
 begin
+  CommandProcessor(ecCut, #0, nil);
+end;
+
+procedure TBCBaseEditor.DoCutToClipboard;
+begin
   if not ReadOnly and SelectionAvailable then
   begin
     BeginUndoBlock;
@@ -11701,7 +11715,7 @@ begin
         begin
           FUndoRedo := True;
           try
-            DoUndo;
+            DoInternalUndo;
           finally
             FUndoRedo := False;
           end;
@@ -11711,19 +11725,19 @@ begin
         begin
           FUndoRedo := True;
           try
-            DoRedo;
+            DoInternalRedo;
           finally
             FUndoRedo := False;
           end;
         end;
       ecCut:
         if (not ReadOnly) and SelectionAvailable then
-          CutToClipboard;
+          DoCutToClipboard;
       ecCopy:
         CopyToClipboard;
       ecPaste:
         if not ReadOnly then
-          PasteFromClipboard;
+          DoPasteFromClipboard;
       { Scrolling }
       ecScrollUp, ecScrollDown:
         begin
@@ -12160,6 +12174,11 @@ begin
 end;
 
 procedure TBCBaseEditor.PasteFromClipboard;
+begin
+  CommandProcessor(ecPaste, #0, nil);
+end;
+
+procedure TBCBaseEditor.DoPasteFromClipboard;
 var
   LAddPasteEndMarker: Boolean;
   LStartPositionOfBlock: TBCEditorTextPosition;
@@ -12265,6 +12284,11 @@ begin
 end;
 
 procedure TBCBaseEditor.DoRedo;
+begin
+  CommandProcessor(ecRedo, #0, nil);
+end;
+
+procedure TBCBaseEditor.DoInternalRedo;
 
   procedure RemoveGroupBreak;
   var

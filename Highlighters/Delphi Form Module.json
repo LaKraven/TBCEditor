@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "22.5.2015",
+                "Date": "23.5.2015",
                 "Sample": [
                     "object Form1: TForm1\r\n",
                     "  Left = 0\r\n",
@@ -148,6 +148,13 @@
         }
     },
     "CodeFolding": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            }
+        ],
         "FoldRegion": [
             {
                 "OpenToken": "OBJECT",

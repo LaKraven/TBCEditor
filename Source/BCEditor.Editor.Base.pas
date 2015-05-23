@@ -94,9 +94,12 @@ type
     FMouseWheelAccumulator: Integer;
     FNeedToRescanCodeFolding: Boolean;
     FOldMouseMovePoint: TPoint;
+    FOnAfterBookmarkPlaced: TNotifyEvent;
+    FOnAfterClearBookmark: TNotifyEvent;
+    FOnBeforeBookmarkPlaced: TBCEditorBookmarkEvent;
+    FOnBeforeClearBookmark: TBCEditorBookmarkEvent;
     FOnCaretChanged: TBCEditorCaretChangedEvent;
     FOnChange: TNotifyEvent;
-    FOnClearMark: TBCEditorBookmarkEvent;
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
     FOnContextHelp: TBCEditorContextHelpEvent;
     FOnCustomLineColors: TBCEditorCustomLineColorsEvent;
@@ -107,7 +110,6 @@ type
     FOnLinesInserted: TStringListChangeEvent;
     FOnLinesPutted: TStringListChangeEvent;
     FOnPaint: TBCEditorPaintEvent;
-    FOnPlaceMark: TBCEditorBookmarkEvent;
     FOnProcessCommand: TBCEditorProcessCommandEvent;
     FOnProcessUserCommand: TBCEditorProcessCommandEvent;
     FOnReplaceText: TBCEditorReplaceTextEvent;
@@ -362,12 +364,14 @@ type
     procedure DoCopyToClipboard(const AText: string);
     procedure DoExecuteCompletionProposal;
     procedure DoKeyPressW(var Message: TWMKey);
-    procedure DoOnClearBookmark(var ABookmark: TBCEditorBookmark);
+    procedure DoOnAfterBookmarkPlaced;
+    procedure DoOnAfterClearBookmark;
+    procedure DoOnBeforeBookmarkPlaced(var ABookmark: TBCEditorBookmark);
+    procedure DoOnBeforeClearBookmark(var ABookmark: TBCEditorBookmark);
     procedure DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
     procedure DoOnLeftMarginClick(Button: TMouseButton; X, Y: Integer);
     procedure DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
     procedure DoOnPaint;
-    procedure DoOnPlaceBookmark(var ABookmark: TBCEditorBookmark);
     procedure DoOnProcessCommand(var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer); virtual;
     procedure DoSearchStringNotFoundDialog; virtual;
     procedure DoTripleClick;
@@ -572,12 +576,15 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
+    property OnAfterBookmarkPlaced: TNotifyEvent read FOnAfterBookmarkPlaced write FOnAfterBookmarkPlaced;
+    property OnAfterClearBookmark: TNotifyEvent read FOnAfterClearBookmark write FOnAfterClearBookmark;
+    property OnBeforeBookmarkPlaced: TBCEditorBookmarkEvent read FOnBeforeBookmarkPlaced write FOnBeforeBookmarkPlaced;
+    property OnBeforeClearBookmark: TBCEditorBookmarkEvent read FOnBeforeClearBookmark write FOnBeforeClearBookmark;
     property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
     property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
     property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
     property OnCaretChanged: TBCEditorCaretChangedEvent read FOnCaretChanged write FOnCaretChanged;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property OnClearBookmark: TBCEditorBookmarkEvent read FOnClearMark write FOnClearMark;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
     property OnContextHelp: TBCEditorContextHelpEvent read FOnContextHelp write FOnContextHelp;
     property OnCustomLineColors: TBCEditorCustomLineColorsEvent read FOnCustomLineColors write FOnCustomLineColors;
@@ -588,7 +595,6 @@ type
     property OnLinesInserted: TStringListChangeEvent read FOnLinesInserted write FOnLinesInserted;
     property OnLinesPutted: TStringListChangeEvent read FOnLinesPutted write FOnLinesPutted;
     property OnPaint: TBCEditorPaintEvent read FOnPaint write FOnPaint;
-    property OnPlaceBookmark: TBCEditorBookmarkEvent read FOnPlaceMark write FOnPlaceMark;
     property OnProcessCommand: TBCEditorProcessCommandEvent read FOnProcessCommand write FOnProcessCommand;
     property OnProcessUserCommand: TBCEditorProcessCommandEvent read FOnProcessUserCommand write FOnProcessUserCommand;
     property OnReplaceText: TBCEditorReplaceTextEvent read FOnReplaceText write FOnReplaceText;
@@ -6096,10 +6102,22 @@ begin
     KeyPressW(LKey);
 end;
 
-procedure TBCBaseEditor.DoOnClearBookmark(var ABookmark: TBCEditorBookmark);
+procedure TBCBaseEditor.DoOnAfterBookmarkPlaced;
 begin
-  if Assigned(FOnClearMark) then
-    FOnClearMark(Self, ABookmark);
+  if Assigned(FOnAfterBookmarkPlaced) then
+    FOnAfterBookmarkPlaced(Self);
+end;
+
+procedure TBCBaseEditor.DoOnAfterClearBookmark;
+begin
+  if Assigned(FOnAfterClearBookmark) then
+    FOnAfterClearBookmark(Self);
+end;
+
+procedure TBCBaseEditor.DoOnBeforeClearBookmark(var ABookmark: TBCEditorBookmark);
+begin
+  if Assigned(FOnBeforeClearBookmark) then
+    FOnBeforeClearBookmark(Self, ABookmark);
 end;
 
 procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
@@ -6244,10 +6262,10 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.DoOnPlaceBookmark(var ABookmark: TBCEditorBookmark);
+procedure TBCBaseEditor.DoOnBeforeBookmarkPlaced(var ABookmark: TBCEditorBookmark);
 begin
-  if Assigned(FOnPlaceMark) then
-    FOnPlaceMark(Self, ABookmark);
+  if Assigned(FOnBeforeBookmarkPlaced) then
+    FOnBeforeBookmarkPlaced(Self, ABookmark);
 end;
 
 procedure TBCBaseEditor.DoOnProcessCommand(var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer);
@@ -10387,9 +10405,10 @@ procedure TBCBaseEditor.ClearBookmark(ABookmark: Integer);
 begin
   if (ABookmark in [0 .. 8]) and Assigned(FBookmarks[ABookmark]) then
   begin
-    DoOnClearBookmark(FBookmarks[ABookmark]);
+    DoOnBeforeClearBookmark(FBookmarks[ABookmark]);
     FMarkList.Remove(FBookmarks[ABookmark]);
     FBookmarks[ABookmark] := nil;
+    DoOnAfterClearBookmark;
   end
 end;
 
@@ -12604,7 +12623,7 @@ begin
       Visible := True;
       InternalImage := not Assigned(FLeftMargin.Bookmarks.Images);
     end;
-    DoOnPlaceBookmark(LBookmark);
+    DoOnBeforeBookmarkPlaced(LBookmark);
     if Assigned(LBookmark) then
     begin
       if Assigned(FBookmarks[AIndex]) then
@@ -12612,6 +12631,7 @@ begin
       FBookmarks[AIndex] := LBookmark;
       FMarkList.Add(FBookmarks[AIndex]);
     end;
+    DoOnAfterBookmarkPlaced;
   end;
 end;
 

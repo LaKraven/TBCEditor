@@ -47,12 +47,15 @@ type
     property MatchingPair;
     property Minimap;
     property Name;
+    property OnAfterBookmarkPlaced;
+    property OnAfterClearBookmark;
+    property OnBeforeBookmarkPlaced;
+    property OnBeforeClearBookmark;
     property OnBookmarkPanelAfterPaint;
     property OnBookmarkPanelBeforePaint;
     property OnBookmarkPanelLinePaint;
     property OnCaretChanged;
     property OnChange;
-    property OnClearBookmark;
     property OnClick;
     property OnCommandProcessed;
     property OnContextHelp;
@@ -76,7 +79,6 @@ type
     property OnMouseWheelDown;
     property OnMouseWheelUp;
     property OnPaint;
-    property OnPlaceBookmark;
     property OnProcessCommand;
     property OnProcessUserCommand;
     property OnReplaceText;

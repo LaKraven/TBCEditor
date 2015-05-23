@@ -194,10 +194,13 @@ end;
 procedure TBCEditorBookmarkList.Place(AMark: TBCEditorBookmark);
 begin
   if Assigned(FEdit) and (FEdit is TBCBaseEditor) then
-    if Assigned((FEdit as TBCBaseEditor).OnPlaceBookmark) then
-      (FEdit as TBCBaseEditor).OnPlaceBookmark(FEdit, AMark);
+    if Assigned((FEdit as TBCBaseEditor).OnBeforeBookmarkPlaced) then
+      (FEdit as TBCBaseEditor).OnBeforeBookmarkPlaced(FEdit, AMark);
   if Assigned(AMark) then
     Add(AMark);
+  if Assigned(FEdit) and (FEdit is TBCBaseEditor) then
+    if Assigned((FEdit as TBCBaseEditor).OnAfterBookmarkPlaced) then
+      (FEdit as TBCBaseEditor).OnAfterBookmarkPlaced(FEdit);
 end;
 
 end.

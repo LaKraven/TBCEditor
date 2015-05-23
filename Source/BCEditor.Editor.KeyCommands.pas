@@ -117,11 +117,12 @@ const
   { Case }
   ecUpperCase = 620;
   ecLowerCase = 621;
-  ecToggleCase = 622;
-  ecTitleCase = 623;
+  ecAlternatingCase = 622;
+  ecSentenceCase = 623;
+  ecTitleCase = 624;
   ecUpperCaseBlock = 625;
   ecLowerCaseBlock = 626;
-  ecToggleCaseBlock = 627;
+  ecAlternatingCaseBlock = 627;
   { Move }
   ecMoveLineUp      = 701;
   ecMoveLineDown    = 702;
@@ -228,7 +229,7 @@ type
   end;
 
 const
-  EditorCommandStrings: array [0 .. 108] of TBCEditorCommandString = (
+  EditorCommandStrings: array [0 .. 109] of TBCEditorCommandString = (
     (Value: ecNone; Name: 'ecNone'),
     (Value: ecLeft; Name: 'ecLeft'),
     (Value: ecRight; Name: 'ecRight'),
@@ -324,11 +325,12 @@ const
     (Value: ecMoveCharRight; Name: 'ecMoveCharRight'),
     (Value: ecUpperCase; Name: 'ecUpperCase'),
     (Value: ecLowerCase; Name: 'ecLowerCase'),
-    (Value: ecToggleCase; Name: 'ecToggleCase'),
+    (Value: ecAlternatingCase; Name: 'ecAlternatingCase'),
+    (Value: ecSentenceCase; Name: 'ecSentenceCase'),
     (Value: ecTitleCase; Name: 'ecTitleCase'),
     (Value: ecUpperCaseBlock; Name: 'ecUpperCaseBlock'),
     (Value: ecLowerCaseBlock; Name: 'ecLowerCaseBlock'),
-    (Value: ecToggleCaseBlock; Name: 'ecToggleCaseBlock'),
+    (Value: ecAlternatingCaseBlock; Name: 'ecAlternatingCaseBlock'),
     (Value: ecCollapse; Name: 'ecCollapse'),
     (Value: ecUncollapse; Name: 'ecUncollapse'),
     (Value: ecCollapseLevel; Name: 'ecCollapseLevel'),

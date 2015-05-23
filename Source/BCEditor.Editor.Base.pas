@@ -49,8 +49,8 @@ type
     FCharsInWindow: Integer;
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
-    FCodeFoldingRangeForLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingHintForm: TBCEditorCompletionProposalForm;
+    FCodeFoldingRangeForLine: array of TBCEditorCodeFoldingRange;
     FCommandDrop: Boolean;
     FCompletionProposal: TBCEditorCompletionProposal;
     FCompletionProposalTimer: TTimer;
@@ -83,8 +83,8 @@ type
     FLinespacing: TBCEditorLineSpacing;
     FMarkList: TBCEditorBookmarkList;
     FMatchingPair: TBCEditorMatchingPair;
-    FMatchingPairOpenDuplicate, FMatchingPairCloseDuplicate: array of Integer;
     FMatchingPairMatchStack: array of TBCEditorMatchingPairTokenMatch;
+    FMatchingPairOpenDuplicate, FMatchingPairCloseDuplicate: array of Integer;
     FMinimap: TBCEditorMinimap;
     FMinimapClickOffsetY: Integer;
     FModified: Boolean;
@@ -126,17 +126,19 @@ type
     FRightMargin: TBCEditorRightMargin;
     FRightMarginMovePosition: Integer;
     FSaveSelectionMode: TBCEditorSelectionMode;
-    FSelection: TBCEditorSelection;
-    FSelectionBeginPosition: TBCEditorTextPosition;
-    FSelectionEndPosition: TBCEditorTextPosition;
     FScroll: TBCEditorScroll;
     FScrollDeltaX, FScrollDeltaY: Integer;
     FScrollTimer: TTimer;
     FSearch: TBCEditorSearch;
     FSearchEngine: TBCEditorSearchCustom;
-    FSearchHighlighterBlendFunction: TBlendFunction;
     FSearchHighlighterBitmap: TBitmap;
+    FSearchHighlighterBlendFunction: TBlendFunction;
     FSearchLines: TList;
+    FSelectedCaseCycle: TBCEditorCase;
+    FSelectedCaseText: string;
+    FSelection: TBCEditorSelection;
+    FSelectionBeginPosition: TBCEditorTextPosition;
+    FSelectionEndPosition: TBCEditorTextPosition;
     FSpecialChars: TBCEditorSpecialChars;
     FStateFlags: TBCEditorStateFlags;
     FTabs: TBCEditorTabs;
@@ -148,9 +150,9 @@ type
     FUndoList: TBCEditorUndoList;
     FUndoRedo: Boolean;
     FURIOpener: Boolean;
-    FVisibleLines: Integer;
     FWantReturns: Boolean;
     FWindowProducedMessage: Boolean;
+    FVisibleLines: Integer;
     FWordWrap: TBCEditorWordWrap;
     FWordWrapHelper: TBCEditorWordWrapHelper;
     function CodeFoldingCollapsableFoldRangeForLine(ALine: Integer; AFoldCount: PInteger = nil): TBCEditorCodeFoldingRange;
@@ -231,7 +233,6 @@ type
     procedure ComputeCaret(X, Y: Integer);
     procedure ComputeScroll(X, Y: Integer);
     procedure DeflateMinimapRect(var ARect: TRect);
-    procedure DoCaseChange(const ACommand: TBCEditorCommand);
     procedure DoCutToClipboard;
     procedure DoEndKey(ASelection: Boolean);
     procedure DoHomeKey(ASelection: Boolean);
@@ -242,6 +243,7 @@ type
     procedure DoPasteFromClipboard;
     procedure DoShiftTabKey;
     procedure DoTabKey;
+    procedure DoToggleSelectedCase(const ACommand: TBCEditorCommand);
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(ASearchText: string = '');
     procedure FontChanged(Sender: TObject);
@@ -524,6 +526,7 @@ type
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
     procedure SetLineColorToDefault(ALine: Integer);
     procedure ToggleBookmark;
+    procedure ToggleSelectedCase(ACase: TBCEditorCase = cNone);
     procedure UnHookTextBuffer;
     procedure UnlockUndo;
     procedure UnregisterCommandHandler(AHookedCommandEvent: TBCEditorHookedCommandEvent);
@@ -676,6 +679,7 @@ begin
   FURIOpener := False;
   FDoubleClickTime := GetDoubleClickTime;
   FBreakWhitespace := True;
+  FSelectedCaseText := '';
   { Code folding }
   FAllCodeFoldingRanges := TBCEditorAllCodeFoldingRanges.Create;
   FPlugins := TList.Create;
@@ -2785,7 +2789,7 @@ begin
   ARect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
 end;
 
-procedure TBCBaseEditor.DoCaseChange(const ACommand: TBCEditorCommand);
+procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
 
   function ToggleCase(const Value: string): string;
   var
@@ -2801,12 +2805,36 @@ procedure TBCBaseEditor.DoCaseChange(const ACommand: TBCEditorCommand);
     end;
   end;
 
+  function TitleCase(const AString: string): string;
+  var
+    i, LLength: Integer;
+    s: string;
+  begin
+    i := 1;
+    LLength := Length(AString);
+    while i <= LLength do
+    begin
+      s := AString[i];
+      if i > 1 then
+      begin
+        if AString[i - 1] = ' ' then
+          s := UpperCase(s)
+        else
+          s := LowerCase(s);
+      end
+      else
+        s := UpperCase(s);
+      Result := Result + s;
+      Inc(i);
+    end;
+  end;
+
 var
   LSelectedText: string;
   LOldCaretPosition, LOldBlockBeginPosition, LOldBlockEndPosition: TBCEditorTextPosition;
   LWasSelectionAvailable: Boolean;
 begin
-  Assert((ACommand >= ecUpperCase) and (ACommand <= ecToggleCaseBlock));
+  Assert((ACommand >= ecUpperCase) and (ACommand <= ecAlternatingCaseBlock));
   if SelectionAvailable then
   begin
     LWasSelectionAvailable := True;
@@ -2817,34 +2845,6 @@ begin
     LWasSelectionAvailable := False;
   LOldCaretPosition := CaretPosition;
   try
-    if ACommand < ecUpperCaseBlock then
-    begin
-      { word commands }
-      SetSelectedWord;
-      if SelectedText = '' then
-      begin
-        { searches a previous word }
-        InternalCaretPosition := PreviousWordPosition;
-        SetSelectedWord;
-        if SelectedText = '' then
-        begin
-          InternalCaretPosition := PreviousWordPosition;
-          SetSelectedWord;
-        end;
-      end;
-    end
-    else
-    begin
-      if not SelectionAvailable then
-      begin
-        if CaretX <= Length(LineText) then
-          MoveCaretHorizontally(1, True)
-        else
-        if CaretY < Lines.Count then
-          InternalCaretPosition := GetTextPosition(1, CaretY + 1);
-      end;
-    end;
-
     LSelectedText := SelectedText;
     if LSelectedText <> '' then
     begin
@@ -2853,10 +2853,12 @@ begin
           LSelectedText := UpperCase(LSelectedText);
         ecLowerCase, ecLowerCaseBlock:
           LSelectedText := LowerCase(LSelectedText);
-        ecToggleCase, ecToggleCaseBlock:
+        ecAlternatingCase, ecAlternatingCaseBlock:
           LSelectedText := ToggleCase(LSelectedText);
-        ecTitleCase:
+        ecSentenceCase:
           LSelectedText := UpperCase(LSelectedText[1]) + LowerCase(Copy(LSelectedText, 2, Length(LSelectedText)));
+        ecTitleCase:
+          LSelectedText := TitleCase(LSelectedText);
       end;
       BeginUndoBlock;
       try
@@ -11706,9 +11708,10 @@ begin
               LeftChar := LeftChar + Min(25, FCharsInWindow - 1);
           end;
         end;
-      ecUpperCase, ecLowerCase, ecToggleCase, ecTitleCase, ecUpperCaseBlock, ecLowerCaseBlock, ecToggleCaseBlock:
+      ecUpperCase, ecLowerCase, ecAlternatingCase, ecSentenceCase, ecTitleCase, ecUpperCaseBlock, ecLowerCaseBlock,
+      ecAlternatingCaseBlock:
         if not ReadOnly then
-          DoCaseChange(ACommand);
+          DoToggleSelectedCase(ACommand);
       { Undo / Redo }
       ecUndo:
         if not readonly then
@@ -12718,6 +12721,53 @@ begin
   LinesHookChanged;
 
   UpdateWordWrap(LOldWrap);
+end;
+
+procedure TBCBaseEditor.ToggleSelectedCase(ACase: TBCEditorCase = cNone);
+var
+  LSelectionStart, LSelectionEnd: TBCEditorTextPosition;
+begin
+  if UpperCase(SelectedText) <> UpperCase(FSelectedCaseText) then
+  begin
+    FSelectedCaseCycle := cUpper;
+    FSelectedCaseText := SelectedText;
+  end;
+  if ACase <> cNone then
+    FSelectedCaseCycle := ACase;
+
+  BeginUpdate;
+  LSelectionStart := SelectionBeginPosition;
+  LSelectionEnd := SelectionEndPosition;
+  case FSelectedCaseCycle of
+    cUpper: { UPPERCASE }
+      if FSelection.ActiveMode = smColumn then
+        CommandProcessor(ecUpperCaseBlock, #0, nil)
+      else
+        CommandProcessor(ecUpperCase, #0, nil);
+    cLower: { lowercase }
+      if FSelection.ActiveMode = smColumn then
+        CommandProcessor(ecLowerCaseBlock, #0, nil)
+      else
+        CommandProcessor(ecLowerCase, #0, nil);
+    cAlternating: { aLtErNaTiNg cAsE }
+      if FSelection.ActiveMode = smColumn then
+        CommandProcessor(ecAlternatingCaseBlock, #0, nil)
+      else
+        CommandProcessor(ecAlternatingCase, #0, nil);
+    cSentence: { Sentence case }
+       CommandProcessor(ecSentenceCase, #0, nil);
+    cTitle: { Title Case }
+      CommandProcessor(ecTitleCase, #0, nil);
+    cOriginal: { Original text }
+      SelectedText := FSelectedCaseText;
+  end;
+  SelectionBeginPosition := LSelectionStart;
+  SelectionEndPosition := LSelectionEnd;
+  EndUpdate;
+
+  Inc(FSelectedCaseCycle);
+  if FSelectedCaseCycle > cOriginal then
+    FSelectedCaseCycle := cUpper;
 end;
 
 procedure TBCBaseEditor.UnlockUndo;

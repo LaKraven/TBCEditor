@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "21.5.2015",
+                "Date": "24.5.2015",
                 "Sample": [
                     "// Hello World in Pascal\r\n",
                     "\r\n",
@@ -329,6 +329,7 @@
                             "platform",
                             "private",
                             "program",
+                            "property",
                             "protected",
                             "public",
                             "published",
@@ -371,7 +372,7 @@
                     },
                     {
                         "Type": "Method",
-                        "Words": ["function", "procedure", "property"],
+                        "Words": ["function", "procedure"],
                         "Attributes": {
                             "Element": "Method"
                         }

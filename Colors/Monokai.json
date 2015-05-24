@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"22.5.2015"
+            "Date":"24.5.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -131,7 +131,8 @@
          {
             "Name":"Method",
             "Foreground":"$00EFD966",
-            "Background":"$00222827"
+            "Background":"$00222827",
+            "Style":"Italic"
          },
          {
             "Name":"MethodName",

@@ -131,8 +131,7 @@
          {
             "Name":"Method",
             "Foreground":"$00EFD966",
-            "Background":"$00222827",
-            "Style":"Italic"
+            "Background":"$00222827"
          },
          {
             "Name":"MethodName",

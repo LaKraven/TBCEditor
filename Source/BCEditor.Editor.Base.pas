@@ -3695,22 +3695,22 @@ var
             { Check if any shared close }
             if LOpenTokenFoldRangeList.Count > 0 then
             begin
-              i := 0;
-              while i < LOpenTokenFoldRangeList.Count do
-              begin
-                LCodeFoldingRange := LOpenTokenFoldRangeList.Items[i];
-                if Assigned(LCodeFoldingRange.FoldRegion) then
-                  if LCodeFoldingRange.FoldRegion.SharedClose and
-                    (LFoldRange.FoldRegion.OpenToken <> LCodeFoldingRange.FoldRegion.OpenToken) and
-                    (LFoldRange.FoldRegion.CloseToken = LCodeFoldingRange.FoldRegion.CloseToken)then
-                  begin
-                    LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
-                    LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
-                    Dec(LFoldCount);
-                    Continue;
-                  end;
-                Inc(i);
-              end;
+              //i := 0;
+              //while i < LOpenTokenFoldRangeList.Count do
+              //begin
+              LCodeFoldingRange := LOpenTokenFoldRangeList.Last; // LOpenTokenFoldRangeList.Items[i];
+              if Assigned(LCodeFoldingRange.FoldRegion) then
+                if LCodeFoldingRange.FoldRegion.SharedClose and
+                  (LFoldRange.FoldRegion.OpenToken <> LCodeFoldingRange.FoldRegion.OpenToken) and
+                  (LFoldRange.FoldRegion.CloseToken = LCodeFoldingRange.FoldRegion.CloseToken)then
+                begin
+                  LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
+                  LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
+                  Dec(LFoldCount);
+                  //Continue;
+                end;
+                //Inc(i);
+              //end;
             end;
             { Check if the close token is one of the open tokens }
             LBookmarkTextPtr2 := LBookmarkTextPtr; { save Bookmark }

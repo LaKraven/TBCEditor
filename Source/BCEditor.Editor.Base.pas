@@ -3573,6 +3573,20 @@ var
       Result := Odd(CountCharsBefore(TextPtr, Highlighter.CodeFoldingRegions.StringEscapeChar));
   end;
 
+  function IsPreviousCharStringEscape(TextPtr: PChar): Boolean;
+  begin
+    Result := False;
+    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
+      Result := (TextPtr - 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+  end;
+
+  function IsNextCharStringEscape(TextPtr: PChar): Boolean;
+  begin
+    Result := False;
+    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
+      Result := (TextPtr + 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+  end;
+
   function SkipRegionsClose: Boolean;
   var
     LSkipRegionItem: TBCEditorSkipRegionItem;
@@ -3603,20 +3617,6 @@ var
     end;
   end;
 
-  function IsPreviousCharStringEscape(TextPtr: PChar): Boolean;
-  begin
-    Result := False;
-    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
-      Result := (TextPtr - 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
-  end;
-
-  function IsNextCharStringEscape(TextPtr: PChar): Boolean;
-  begin
-    Result := False;
-    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
-      Result := (TextPtr + 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
-  end;
-
   function SkipRegionsOpen: Boolean;
   var
     i, j: Integer;
@@ -3628,7 +3628,8 @@ var
         j := Highlighter.CodeFoldingRegions.SkipRegions.Count - 1;
         for i := 0 to j do
         if (LTextPtr^ = PChar(Highlighter.CodeFoldingRegions.SkipRegions[i].OpenToken)^) and
-          not IsPreviousCharStringEscape(LTextPtr) and not IsNextCharStringEscape(LTextPtr) then { if the first character is a match and previous is not a string escape char }
+          not OddCountOfStringEscapeChars(LTextPtr) then
+          //not IsPreviousCharStringEscape(LTextPtr) and not IsNextCharStringEscape(LTextPtr) then { if the first character is a match and previous is not a string escape char }
         begin
           LKeyWordPtr := PChar(Highlighter.CodeFoldingRegions.SkipRegions[i].OpenToken);
           LBookmarkTextPtr := LTextPtr;
@@ -3666,7 +3667,7 @@ var
   begin
     Result := False;
     if LOpenTokenFoldRangeList.Count > 0 then
-      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds) and CharInSet(LTextPtr^, LFoldCloseKeyChars) then
+      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds {and not IsPreviousCharStringEscape(LTextPtr)} ) and CharInSet(LTextPtr^, LFoldCloseKeyChars) then
       begin
         LKeyWordPtr := PChar(TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).FoldRegion.CloseToken);
         LBookmarkTextPtr := LTextPtr;
@@ -3772,7 +3773,7 @@ var
     LSkipIfFoundAfterOpenToken: Boolean;
   begin
     if (LOpenTokenSkipFoldRangeList.Count = 0) then
-      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds) and CharInSet(LTextPtr^, LFoldOpenKeyChars) then
+      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds {and not IsPreviousCharStringEscape(LTextPtr)} ) and CharInSet(LTextPtr^, LFoldOpenKeyChars) then
       begin
         LFoldRange := nil;
         if LOpenTokenFoldRangeList.Count > 0 then

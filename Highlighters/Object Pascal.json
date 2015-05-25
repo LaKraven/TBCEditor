@@ -88,9 +88,6 @@
                         "Attributes": {
                             "Element": "Method"
                         },
-                        "Properties": {
-                            "CloseOnEol": true
-                        },
                         "TokenRange": {
                             "Open": "function"
                         },
@@ -101,11 +98,11 @@
                                 "Attributes": {
                                     "Element": "MethodName"
                                 },
-                                "Delimiters": "(;",
+                                "Delimiters": ":(;",
                                 "Properties": {
                                     "CloseParent": true,
                                     "CloseOnTerm": true,
-                                    "CloseOnEol": true
+                                    "SkipWhitespace": true
                                 },
                                  "TokenRange": {
                                     "Open": " "
@@ -118,9 +115,6 @@
                         "Type": "Method",
                         "Attributes": {
                             "Element": "Method"
-                        },
-                        "Properties": {
-                            "CloseOnEol": true
                         },
                         "TokenRange": {
                             "Open": "procedure"
@@ -136,7 +130,7 @@
                                 "Properties": {
                                     "CloseParent": true,
                                     "CloseOnTerm": true,
-                                    "CloseOnEol": true
+                                    "SkipWhitespace": true
                                 },
                                  "TokenRange": {
                                     "Open": " "

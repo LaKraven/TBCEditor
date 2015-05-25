@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"24.5.2015"
+            "Date":"25.5.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -18,7 +18,7 @@
             "CodeFoldingCollapsedLine":"$009F9F9F",
             "CodeFoldingFoldingLine":"$009F9F9F",
             "CodeFoldingIndent":"$00414746",
-            "CodeFoldingIndentHighlight":"$00414746", 
+            "CodeFoldingIndentHighlight":"$00414746",
             "CodeFoldingHintBackground":"00222827",
             "CodeFoldingHintBorder":"$00414746",
             "CodeFoldingHintText":"clNone",
@@ -37,7 +37,7 @@
             "MinimapVisibleLines":"$003E4849",
             "RightMargin":"clSilver",
             "RightMovingEdge":"clSilver",
-            "SearchHighlighterBackground":"$003E4849",
+            "SearchHighlighterBackground":"$0092E7FF",
             "SearchHighlighterForeground":"clNone",
             "SearchMapActiveLine":"$00F0F0F0",
             "SearchMapBackground":"$00F4F4F4",

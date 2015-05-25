@@ -7886,7 +7886,7 @@ var
   LPaintRightMargin: Boolean;
   LRightMarginPosition: Integer;
   LSelectionEndPosition: TBCEditorDisplayPosition;
-  LSelectionForegroundColor, LSelectionBackgroundColor: TColor;
+  //LSelectionForegroundColor, LSelectionBackgroundColor: TColor;
   LSelectionStartPosition: TBCEditorDisplayPosition;
   LTokenHelper: TBCEditorTokenHelper;
   LCustomLineColors: Boolean;
@@ -7973,11 +7973,11 @@ var
       { Selection colors }
       if ASelected then
       begin
-        if LSelectionForegroundColor <> clNone then
-          SetForegroundColor(LSelectionForegroundColor)
+        if FSelection.Colors.Foreground <> clNone then
+          SetForegroundColor(FSelection.Colors.Foreground)
         else
           SetForegroundColor(LForegroundColor);
-        LColor := LSelectionBackgroundColor;
+        LColor := FSelection.Colors.Background;
       end
       { Normal colors }
       else
@@ -8299,8 +8299,8 @@ var
     begin
       LCanAppend := ((LTokenHelper.FontStyle = AFontStyle) or
         (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and TokenIsSpaces)) and
-        (LIsLineSelected or
-        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or TokenIsSpaces)));
+        //LIsLineSelected or
+        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or TokenIsSpaces));
       if not LCanAppend then
         PaintHighlightToken(False);
     end;
@@ -8401,10 +8401,10 @@ var
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];
       LIsCurrentLine := CaretY = LCurrentLine;
-      LForegroundColor := Font.Color;
-      LBackgroundColor := GetBackgroundColor;
-      LSelectionForegroundColor := FSelection.Colors.Foreground;
-      LSelectionBackgroundColor := FSelection.Colors.Background;
+ //     LForegroundColor := Font.Color;
+ //     LBackgroundColor := GetBackgroundColor;
+      //LSelectionForegroundColor := FSelection.Colors.Foreground;
+      //LSelectionBackgroundColor := FSelection.Colors.Background;
 
       LStartRow := Max(LineToRow(LCurrentLine), AFirstRow);
       LEndRow := Min(LineToRow(LCurrentLine + 1) - 1, ALastRow);
@@ -8413,6 +8413,8 @@ var
 
       for LCurrentRow := LStartRow to LEndRow do
       begin
+        LForegroundColor := Font.Color;
+        LBackgroundColor := GetBackgroundColor;
         LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
 
         if GetWordWrap then

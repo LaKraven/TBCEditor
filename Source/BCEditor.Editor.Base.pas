@@ -8235,7 +8235,7 @@ var
         end;
         if LTokenRect.Left < X2 then
         begin
-          SetDrawingColors(True);
+          SetDrawingColors(not (soToEndOfLine in FSelection.Options));
           LTokenRect.Right := X2;
           if (LTokenHelper.Length > 0) and (LTokenHelper.FontStyle <> []) then
             AdjustEndRect;
@@ -8253,7 +8253,7 @@ var
       end
       else
       begin
-        SetDrawingColors(LIsLineSelected);
+        SetDrawingColors(not (soToEndOfLine in FSelection.Options) and LIsLineSelected);
         LTokenRect.Right := LLineRect.Right;
         if (LTokenHelper.Length > 0) and (LTokenHelper.FontStyle <> []) then
           AdjustEndRect;

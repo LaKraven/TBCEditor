@@ -68,6 +68,7 @@ type
   TBCEditorSelectionOption = (
     soALTSetsColumnMode,
     soHighlightSimilarTerms,
+    soToEndOfLine,
     soTripleClickRowSelect
   );
   TBCEditorSelectionOptions = set of TBCEditorSelectionOption;

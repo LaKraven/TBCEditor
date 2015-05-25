@@ -106,6 +106,7 @@ type
     FCaseSensitive: Boolean;
     FCloseOnEol: Boolean;
     FCloseOnTerm: Boolean;
+    FSkipWhitespace: Boolean;
     FCloseParent: Boolean;
     FCloseToken: TBCEditorMultiToken;
     FClosingToken: TBCEditorToken;
@@ -171,6 +172,7 @@ type
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
     property CloseOnEol: Boolean read FCloseOnEol write FCloseOnEol;
     property CloseOnTerm: Boolean read FCloseOnTerm write FCloseOnTerm;
+    property SkipWhitespace: Boolean read FSkipWhitespace write FSkipWhitespace;
     property CloseParent: Boolean read FCloseParent write FCloseParent;
     property CloseToken: TBCEditorMultiToken read FCloseToken write FCloseToken;
     property ClosingToken: TBCEditorToken read FClosingToken write FClosingToken;

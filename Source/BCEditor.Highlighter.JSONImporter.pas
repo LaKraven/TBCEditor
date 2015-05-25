@@ -407,6 +407,7 @@ begin
         begin
           ARange.CloseOnEol := PropertiesObject.B['CloseOnEol'];
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
+          ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];
           ARange.AlternativeClose := PropertiesObject['AlternativeClose'].Value;
         end;

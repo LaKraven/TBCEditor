@@ -210,7 +210,8 @@ begin
   if Assigned(FCurrentRange) then
   begin
     LCloseParent := FCurrentRange.CloseParent;
-    if FCurrentRange.CloseOnTerm and CharInSet(FCurrentLine[FRunPosition], FCurrentRange.Delimiters) then
+    if FCurrentRange.CloseOnTerm and CharInSet(FCurrentLine[FRunPosition], FCurrentRange.Delimiters) and
+      not (FCurrentRange.SkipWhitespace and CharInSet(FCurrentLine[FRunPosition], BCEDITOR_ABSOLUTE_DELIMITERS)) then
     begin
       FCurrentRange := FCurrentRange.Parent;
       if Assigned(FCurrentRange) then

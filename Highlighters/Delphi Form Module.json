@@ -160,28 +160,28 @@
                 "OpenToken": "OBJECT",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "INLINE",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "ITEM",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
                 "OpenToken": "INHERITED",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             }
         ]

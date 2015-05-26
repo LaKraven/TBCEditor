@@ -463,7 +463,7 @@
                 "OpenToken": "TRY",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
@@ -474,7 +474,7 @@
                 "OpenToken": "ASM",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
@@ -496,7 +496,7 @@
                 "OpenToken": "INTERFACE",
                 "CloseToken": "IMPLEMENTATION",
                 "Properties": {
-                    "BeginningOfLine": true
+                    "OpenTokenBeginningOfLine": true
                 }
             },
             {
@@ -511,7 +511,7 @@
                 "OpenToken": "IMPLEMENTATION",
                 "CloseToken": "END.",
                 "Properties": {
-                    "BeginningOfLine": true,
+                    "OpenTokenBeginningOfLine": true,
                     "OpenIsClose": true,
                     "SharedClose": true
                 }
@@ -520,7 +520,7 @@
                 "OpenToken": "UNIT",
                 "CloseToken": "END.",
                 "Properties": {
-                    "BeginningOfLine": true,
+                    "OpenTokenBeginningOfLine": true,
                     "SharedClose": true
                 }
             },
@@ -528,7 +528,7 @@
                 "OpenToken": "PROGRAM",
                 "CloseToken": "END",
                 "Properties": {
-                    "BeginningOfLine": true,
+                    "OpenTokenBeginningOfLine": true,
                     "SharedClose": true
                 }
             },

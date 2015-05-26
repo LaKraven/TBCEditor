@@ -64,40 +64,6 @@
                         "TokenRange": {
                             "Open": "'",
                             "Close": "'"
-                        },
-                        "SubRules": {
-                            "Range": [
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "Properties": {
-                                        "CloseOnEol": true,
-                                        "CloseOnTerm": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "\\'",
-                                        "Close": ""
-                                    }
-                                },
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "Properties": {
-                                        "CloseOnEol": true,
-                                        "CloseOnTerm": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "\\\\",
-                                        "Close": ""
-                                    }
-                                }
-                            ]
                         }
                     },
                     {
@@ -112,40 +78,6 @@
                         "TokenRange": {
                             "Open": "\"",
                             "Close": "\""
-                        },
-                        "SubRules": {
-                            "Range": [
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "Properties": {
-                                        "CloseOnEol": true,
-                                        "CloseOnTerm": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "\\\"",
-                                        "Close": ""
-                                    }
-                                },
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "Properties": {
-                                        "CloseOnEol": true,
-                                        "CloseOnTerm": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "\\\\",
-                                        "Close": ""
-                                    }
-                                }
-                            ]
                         }
                     },
 										{

@@ -11,6 +11,7 @@ type
   TBCEditorHighlighter = class(TObject)
   strict private
     FAttributes: TStringList;
+    FBeginningOfLine: Boolean;
     FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FColors: TBCEditorHighlighterColors;
     FCompletionProposalSkipRegions: TBCEditorSkipRegions;
@@ -18,7 +19,7 @@ type
     FCurrentRange: TBCEditorRange;
     FCurrentToken: TBCEditorToken;
     FEditor: TWinControl;
-    FEol: Boolean;
+    FEndOfLine: Boolean;
     FFileName: string;
     FIdentChars: TBCEditorCharSet;
     FInfo: TBCEditorHighlighterInfo;
@@ -105,7 +106,8 @@ begin
   FMainRules := TBCEditorRange.Create;
   FMainRules.Parent := FMainRules;
 
-  FEol := False;
+  FEndOfLine := False;
+  FBeginningOfLine := True;
   FPreviousEol := False;
   FCurrentRange := MainRules;
 
@@ -160,7 +162,8 @@ begin
   FCurrentLine := PChar(NewValue);
   FRunPosition := 0;
   FTokenPosition := 0;
-  FEol := False;
+  FEndOfLine := False;
+  FBeginningOfLine := True;
   FPreviousEol := False;
   FCurrentToken := nil;
   Next;
@@ -186,7 +189,7 @@ begin
     if Assigned(FCurrentRange) then
       if FCurrentRange.CloseOnEol or FCurrentRange.CloseOnTerm then
         FCurrentRange := FCurrentRange.Parent;
-    FEol := True;
+    FEndOfLine := True;
     Exit;
   end;
 
@@ -230,8 +233,7 @@ begin
     begin
       FCurrentToken := FCurrentRange.DefaultToken;
 
-      while not (CharInSet(FCurrentLine[FRunPosition], FCurrentRange.Delimiters) {or
-        FCurrentRange.HasNodeAnyStart[FCurrentRange.CaseFunct(FCurrentLine[FRunPosition])]}) do
+      while not CharInSet(FCurrentLine[FRunPosition], FCurrentRange.Delimiters) do
         Inc(FRunPosition);
     end
     else
@@ -243,11 +245,21 @@ begin
       begin
         FCurrentRange := TBCEditorRange(FCurrentToken.OpenRule);
         FCurrentRange.ClosingToken := FCurrentToken.ClosingToken;
+        if FCurrentRange.OpenBeginningOfLine and not FBeginningOfLine then
+        begin
+          FCurrentRange := FCurrentRange.Parent;
+          FCurrentToken := FCurrentRange.DefaultToken;
+        end;
       end;
     if Assigned(FCurrentToken) then
       if FCurrentToken.Temporary then
         FTemporaryCurrentTokens.Add(FCurrentToken);
   end;
+
+  if FBeginningOfLine then
+    if (FRunPosition - 1 >= 0) then
+      if not CharInset(FCurrentLine[FRunPosition - 1], BCEDITOR_ABSOLUTE_DELIMITERS) then
+        FBeginningOfLine := False;
 
   if FCurrentLine[FRunPosition] = BCEDITOR_NONE_CHAR then
     FPreviousEol := True;
@@ -262,7 +274,7 @@ end;
 
 function TBCEditorHighlighter.GetEol: Boolean;
 begin
-  Result := FEol;
+  Result := FEndOfLine;
 end;
 
 function TBCEditorHighlighter.GetCurrentRange: Pointer;

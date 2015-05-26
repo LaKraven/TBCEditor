@@ -410,6 +410,7 @@ begin
           ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];
           ARange.AlternativeClose := PropertiesObject['AlternativeClose'].Value;
+          ARange.OpenBeginningOfLine := PropertiesObject.B['OpenBeginningOfLine'];
         end;
 
         ARange.OpenToken.Clear;
@@ -487,10 +488,20 @@ begin
 
   if not Assigned(ACodeFoldingObject) then
     Exit;
+
+  LFoldRegions.StringEscapeChar := #0;
+  TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options := TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options +
+    [cfoHighlightMatchingPair];
   if ACodeFoldingObject.Contains('Options') then
-    LFoldRegions.StringEscapeChar := ACodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1]
-  else
-    LFoldRegions.StringEscapeChar := #0;
+  begin
+    if ACodeFoldingObject['Options'].ObjectValue.Contains('StringEscapeChar') then
+      LFoldRegions.StringEscapeChar := ACodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1];
+
+    if ACodeFoldingObject['Options'].ObjectValue.Contains('NoMatchingPairHighlight') then
+      if ACodeFoldingObject['Options'].ObjectValue.B['NoMatchingPairHighlight'] then
+        TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options := TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options -
+          [cfoHighlightMatchingPair]
+  end;
   { Skip regions }
   if ACodeFoldingObject.Contains('SkipRegion') then
   for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
@@ -521,9 +532,11 @@ begin
     if Assigned(MemberObject) then
     begin
       { Options }
-      FoldRegionItem.BeginningOfLine := MemberObject.B['BeginningOfLine'];
+      FoldRegionItem.OpenTokenBeginningOfLine := MemberObject.B['OpenTokenBeginningOfLine'];
+      FoldRegionItem.CloseTokenBeginningOfLine := MemberObject.B['CloseTokenBeginningOfLine'];
       FoldRegionItem.SharedClose := MemberObject.B['SharedClose'];
       FoldRegionItem.OpenIsClose := MemberObject.B['OpenIsClose'];
+      FoldRegionItem.TokenEndIsPreviousLine := MemberObject.B['TokenEndIsPreviousLine'];
       FoldRegionItem.NoSubs := MemberObject.B['NoSubs'];
       FoldRegionItem.SkipIfFoundAfterOpenToken := MemberObject['SkipIfFoundAfterOpenToken'].Value;
       FoldRegionItem.BreakIfNotFoundBeforeNextRegion := MemberObject['BreakIfNotFoundBeforeNextRegion'].Value;

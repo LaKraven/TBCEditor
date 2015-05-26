@@ -3669,7 +3669,10 @@ var
     if LOpenTokenFoldRangeList.Count > 0 then
       if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds {and not IsPreviousCharStringEscape(LTextPtr)} ) and CharInSet(LTextPtr^, LFoldCloseKeyChars) then
       begin
-        LKeyWordPtr := PChar(TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).FoldRegion.CloseToken);
+        LCodeFoldingRange := TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last);
+        if LCodeFoldingRange.FoldRegion.CloseTokenBeginningOfLine and not LBeginningOfLine then
+          Exit;
+        LKeyWordPtr := PChar(LCodeFoldingRange.FoldRegion.CloseToken);
         LBookmarkTextPtr := LTextPtr;
         { check if the close keyword found }
         while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (LTextPtr^ = LKeyWordPtr^) do
@@ -3691,8 +3694,10 @@ var
                 LTextPtr := LBookmarkTextPtr;
                 Exit(True);
               end;
-
-            LFoldRange.ToLine := LLine + 1; { +1 for not 0-based }
+            if LFoldRange.FoldRegion.TokenEndIsPreviousLine then
+              LFoldRange.ToLine := LLine
+            else
+              LFoldRange.ToLine := LLine + 1; { +1 for not 0-based }
             { Check if any shared close }
             if LOpenTokenFoldRangeList.Count > 0 then
             begin
@@ -3705,7 +3710,10 @@ var
                   (LFoldRange.FoldRegion.OpenToken <> LCodeFoldingRange.FoldRegion.OpenToken) and
                   (LFoldRange.FoldRegion.CloseToken = LCodeFoldingRange.FoldRegion.CloseToken)then
                 begin
-                  LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
+                  if LFoldRange.FoldRegion.TokenEndIsPreviousLine then
+                    LCodeFoldingRange.ToLine := LLine
+                  else
+                    LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
                   LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
                   Dec(LFoldCount);
                   //Continue;
@@ -3783,7 +3791,7 @@ var
 
         j := FHighlighter.CodeFoldingRegions.Count - 1;
         for i := 0 to j do
-        if (Highlighter.CodeFoldingRegions[i].BeginningOfLine and LBeginningOfLine) or (not Highlighter.CodeFoldingRegions[i].BeginningOfLine) then
+        if (Highlighter.CodeFoldingRegions[i].OpenTokenBeginningOfLine and LBeginningOfLine) or (not Highlighter.CodeFoldingRegions[i].OpenTokenBeginningOfLine) then
         begin
           { check if extra token found }
           if Assigned(LFoldRange) then
@@ -3942,6 +3950,7 @@ begin
         LFoldRange := LOpenTokenFoldRangeList.Last;
         if Assigned(LFoldRange) then
         begin
+          LFoldRange.ToLine := LLine + 1;
           LOpenTokenFoldRangeList.Remove(LFoldRange);
           Dec(LFoldCount);
           FoldRegionsClose;
@@ -8514,7 +8523,7 @@ var
               LBackgroundColor := LHighlighterAttribute.Background;
               LStyle := LHighlighterAttribute.Style;
 
-              { This is quite ugly, think better solution }
+              { TODO: This is quite ugly and should not be here, think a better solution }
               if LHighlighterAttribute.UseParentElementForTokens then
               begin
                 LCurrentRange := TBCEditorRange(FHighlighter.GetCurrentRange);

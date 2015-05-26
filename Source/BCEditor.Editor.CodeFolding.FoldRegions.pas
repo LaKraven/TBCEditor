@@ -10,7 +10,8 @@ type
 
   TBCEditorFoldRegionItem = class(TCollectionItem)
   strict private
-    FBeginningOfLine: Boolean;
+    FOpenTokenBeginningOfLine: Boolean;
+    FCloseTokenBeginningOfLine: Boolean;
     FBreakIfNotFoundBeforeNextRegion: string;
     FCloseAtNextToken: Boolean;
     FCloseToken: string;
@@ -23,8 +24,10 @@ type
     FParentRegion: TBCEditorFoldRegionItem;
     FSharedClose: Boolean;
     FSkipIfFoundAfterOpenToken: string;
+    FTokenEndIsPreviousLine: Boolean;
   public
-    property BeginningOfLine: Boolean read FBeginningOfLine write FBeginningOfLine default False;
+    property OpenTokenBeginningOfLine: Boolean read FOpenTokenBeginningOfLine write FOpenTokenBeginningOfLine default False;
+    property CloseTokenBeginningOfLine: Boolean read FCloseTokenBeginningOfLine write FCloseTokenBeginningOfLine default False;
     property BreakIfNotFoundBeforeNextRegion: string read FBreakIfNotFoundBeforeNextRegion write FBreakIfNotFoundBeforeNextRegion;
     property CloseAtNextToken: Boolean read FCloseAtNextToken write FCloseAtNextToken;
     property CloseToken: string read FCloseToken write FCloseToken;
@@ -37,6 +40,7 @@ type
     property ParentRegion: TBCEditorFoldRegionItem read FParentRegion write FParentRegion;
     property SharedClose: Boolean read FSharedClose write FSharedClose default False;
     property SkipIfFoundAfterOpenToken: string read FSkipIfFoundAfterOpenToken write FSkipIfFoundAfterOpenToken;
+    property TokenEndIsPreviousLine: Boolean read FTokenEndIsPreviousLine write FTokenEndIsPreviousLine;
   end;
 
   TBCEditorCodeFoldingRegions = class(TCollection)
@@ -68,7 +72,8 @@ begin
     OpenTokenLength := Length(AOpenToken);
     CloseToken := ACloseToken;
     CloseTokenLength := Length(ACloseToken);
-    BeginningOfLine := False;
+    OpenTokenBeginningOfLine := False;
+    CloseTokenBeginningOfLine := False;
     SharedClose := False;
     OpenIsClose := False;
     NoSubs := False;

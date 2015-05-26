@@ -102,6 +102,7 @@ type
   TBCEditorRange = class(TBCEditorRule)
   strict private
     FAlternativeClose: string;
+    FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
     FCloseOnEol: Boolean;
@@ -168,6 +169,7 @@ type
     procedure Reset;
     procedure SetDelimiters(ADelimiters: TBCEditorCharSet);
     property AlternativeClose: string read FAlternativeClose write FAlternativeClose;
+    property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TBCEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
     property CloseOnEol: Boolean read FCloseOnEol write FCloseOnEol;

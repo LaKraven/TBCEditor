@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
-  function CharWidthTable(AChar: Char): SmallInt;
+ // function CharWidthTable(AChar: Char): SmallInt;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
@@ -160,7 +160,7 @@ end;
  range which is actually full-width but doesn't fall in any of ranges above.
  Also, there are characters even wider than full-width, which take 3 or even 4
  regular spaces in text }
-function CharWidthTable(AChar: Char): SmallInt;
+(*function CharWidthTable(AChar: Char): SmallInt;
 begin
   Result := 1;
   if (AChar >= #$1100) and (AChar <= #$115F) then
@@ -201,7 +201,7 @@ begin
   else
   if (AChar >= #$FFE0) and (AChar <= #$FFE6) then
     Result := 2
-end;
+end; *)
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
 begin

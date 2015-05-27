@@ -6135,7 +6135,7 @@ begin
   if FCodeFolding.Visible then
   begin
     if FNeedToRescanCodeFolding or
-      IsKeywordAtCurrentLine and ((ACommand = ecLineBreak) or (ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) or
+      IsKeywordAtCurrentLine and ({(ACommand = ecLineBreak) or} (ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) or
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
     else
@@ -8089,7 +8089,7 @@ var
         LText := ShrinkAtWideGlyphs(AToken, AFirst, LCharsToPaint);
       end;
 
-      fTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), LCharsToPaint);
+      FTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), LCharsToPaint);
 
       LTokenRect.Left := LTokenRect.Right;
     end;
@@ -10526,7 +10526,7 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
+    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or (ACommand = ecLineBreak) or
       IsKeywordAtCursorPosition and ((ACommand = ecChar) or (ACommand = ecTab) or
       (ACommand = ecDeleteChar)) then
       FNeedToRescanCodeFolding := True;

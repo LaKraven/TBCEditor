@@ -20,7 +20,7 @@ type
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
-    property Rule: TLineSpacingRule read FRule write SetRule;
+    property Rule: TLineSpacingRule read FRule write SetRule default lsSpecified;
     property Spacing: Integer read FSpacing write SetSpacing;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
@@ -46,7 +46,7 @@ constructor TBCEditorLineSpacing.Create;
 begin
   inherited;
 
-  FSpacing := 0;
+  FSpacing := 1;
   FRule := lsSpecified;
 end;
 

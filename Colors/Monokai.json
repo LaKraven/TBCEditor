@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"25.5.2015"
+            "Date":"30.5.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -17,6 +17,7 @@
             "CodeFoldingBackground":"$00222827",
             "CodeFoldingCollapsedLine":"$009F9F9F",
             "CodeFoldingFoldingLine":"$009F9F9F",
+            "CodeFoldingFoldingLineHighlight":"$009F9F9F",
             "CodeFoldingIndent":"$00414746",
             "CodeFoldingIndentHighlight":"$00414746",
             "CodeFoldingHintBackground":"00222827",

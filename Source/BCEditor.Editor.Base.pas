@@ -9697,7 +9697,6 @@ function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDi
 var
   s: string;
   i, L, X: Integer;
-  LCountOfAvgGlyphs: Integer;
 begin
   if GetWordWrap then
     Result := FWordWrapHelper.DisplayToTextPosition(ADisplayPosition)
@@ -9718,10 +9717,7 @@ begin
         Inc(X, FTabs.Width)
       else
       if i <= l then
-      begin
-        LCountOfAvgGlyphs := CeilOfIntDiv(FTextDrawer.TextWidth(s[i]) , FCharWidth);
-        Inc(X, LCountOfAvgGlyphs);
-      end
+        Inc(X, CharWidthTable(s[i]))
       else
         Inc(X);
     end;
@@ -10228,7 +10224,6 @@ var
   i: Integer;
   s: string;
   L, X: Integer;
-  //LCountOfAvgGlyphs: Integer;
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
 
@@ -10250,12 +10245,6 @@ begin
       if (i <= l) and (s[i] = BCEDITOR_TAB_CHAR) then
         Inc(X, FTabs.Width)
       else
-      {if i <= l then
-      begin
-        LCountOfAvgGlyphs := CeilOfIntDiv(FTextDrawer.TextWidth(s[i]), FCharWidth);
-        Inc(X, LCountOfAvgGlyphs);
-      end
-      else }
         Inc(X);
     end;
     Result.Column := X + 1;

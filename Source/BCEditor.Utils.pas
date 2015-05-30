@@ -162,11 +162,8 @@ end;
  regular spaces in text }
 function CharWidthTable(AChar: Char): SmallInt;
 begin
-  if AChar < #$0080 then
-    Result := 1
-  else
-    Result := 2;
-  {
+  Result := 1;
+
   if (AChar >= #$1100) and (AChar <= #$115F) then
     Result := 2
   else
@@ -204,7 +201,7 @@ begin
     Result := 2
   else
   if (AChar >= #$FFE0) and (AChar <= #$FFE6) then
-    Result := 2    }
+    Result := 2
 end;
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;

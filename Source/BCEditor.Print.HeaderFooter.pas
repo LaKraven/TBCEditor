@@ -601,7 +601,7 @@ begin
       end;
     end;
     OldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
-    ExtTextOutW(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).MaxBaseDist, 0, nil, PChar(S),
+    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).MaxBaseDist, 0, nil, PChar(S),
       Length(S), nil);
     SetTextAlign(ACanvas.Handle, OldAlign);
   end;

@@ -10,6 +10,7 @@ type
 
   TBCEditorCodeFoldingOption = (
     cfoFoldMultilineComments,
+    cfoHighlightFoldingLine,
     cfoHighlightIndentGuides,
     cfoHighlightMatchingPair,
     cfoShowCollapsedCodeHint,

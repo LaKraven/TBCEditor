@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
- // function CharWidthTable(AChar: Char): SmallInt;
+  function CharWidthTable(AChar: Char): SmallInt;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
@@ -18,7 +18,7 @@ uses
   procedure ClearList(var List: TList);
   procedure FreeList(var List: TList);
   procedure TextOut(ACanvas: TCanvas; X, Y: Integer; const Text: string);
-  procedure TextRect(ACanvas: TCanvas; Rect: TRect; x, Y: Integer; const Text: string);
+//  procedure TextRect(ACanvas: TCanvas; Rect: TRect; x, Y: Integer; const Text: string);
 
 implementation
 
@@ -160,9 +160,13 @@ end;
  range which is actually full-width but doesn't fall in any of ranges above.
  Also, there are characters even wider than full-width, which take 3 or even 4
  regular spaces in text }
-(*function CharWidthTable(AChar: Char): SmallInt;
+function CharWidthTable(AChar: Char): SmallInt;
 begin
-  Result := 1;
+  if AChar < #$0080 then
+    Result := 1
+  else
+    Result := 2;
+  {
   if (AChar >= #$1100) and (AChar <= #$115F) then
     Result := 2
   else
@@ -200,8 +204,8 @@ begin
     Result := 2
   else
   if (AChar >= #$FFE0) and (AChar <= #$FFE6) then
-    Result := 2
-end; *)
+    Result := 2    }
+end;
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
 begin
@@ -241,13 +245,13 @@ begin
     RequiredState([csHandleValid, csFontValid, csBrushValid]);
     if CanvasOrientation = coRightToLeft then
       Inc(x, BCEditor.Utils.TextWidth(ACanvas, Text) + 1);
-    Winapi.Windows.ExtTextOutW(Handle, x, Y, TextFlags, nil, PChar(Text), Length(Text), nil);
+    Winapi.Windows.ExtTextOut(Handle, x, Y, TextFlags, nil, PChar(Text), Length(Text), nil);
     MoveTo(x + BCEditor.Utils.TextWidth(ACanvas, Text), Y);
     Changed;
   end;
 end;
 
-procedure TextRect(ACanvas: TCanvas; Rect: TRect; X, Y: Integer; const Text: string);
+{procedure TextRect(ACanvas: TCanvas; Rect: TRect; X, Y: Integer; const Text: string);
 var
   Options: Longint;
 begin
@@ -260,10 +264,10 @@ begin
       Options := Options or ETO_OPAQUE;
     if ((TextFlags and ETO_RTLREADING) <> 0) and (CanvasOrientation = coRightToLeft) then
       Inc(X, BCEditor.Utils.TextWidth(ACanvas, Text) + 1);
-    Winapi.Windows.ExtTextOutW(Handle, X, Y, Options, @Rect, PChar(Text), Length(Text), nil);
+    Winapi.Windows.ExtTextOut(Handle, X, Y, Options, @Rect, PChar(Text), Length(Text), nil);
     Changed;
   end;
-end;
+end;  }
 
 function RoundCorrect(Value: Real): LongInt;
 begin

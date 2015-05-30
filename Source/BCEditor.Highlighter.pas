@@ -23,6 +23,7 @@ type
     FFileName: string;
     FIdentChars: TBCEditorCharSet;
     FInfo: TBCEditorHighlighterInfo;
+    FLoading: Boolean;
     FMatchingPairs: TList;
     FMainRules: TBCEditorRange;
     FName: string;
@@ -72,6 +73,7 @@ type
     property Editor: TWinControl read FEditor;
     property FileName: string read FFileName write FFileName;
     property Info: TBCEditorHighlighterInfo read FInfo write FInfo;
+    property Loading: Boolean read FLoading write FLoading;
     property MainRules: TBCEditorRange read FMainRules;
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
     property Name: string read FName write FName;
@@ -115,6 +117,8 @@ begin
   FMatchingPairs := TList.Create;
 
   FTemporaryCurrentTokens := TList.Create;
+
+  FLoading := False;
 end;
 
 destructor TBCEditorHighlighter.Destroy;
@@ -428,6 +432,7 @@ var
   LStream: TStream;
   LEditor: TBCBaseEditor;
 begin
+  FLoading := True;
   FFileName := AFileName;
   FName := ExtractFileName(AFileName);
   FName := Copy(FName, 1, Pos('.', FName) - 1);
@@ -447,6 +452,7 @@ begin
     end;
     UpdateColors;
   end;
+  FLoading := False;
 end;
 
 function TBCEditorHighlighter.GetAttribute(Index: Integer): TBCEditorHighlighterAttribute;

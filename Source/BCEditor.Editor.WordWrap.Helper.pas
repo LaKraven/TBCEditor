@@ -401,8 +401,8 @@ begin
   end
   else
   begin
-    FMaxRowLength := (FEditor as TBCBaseEditor).CharsInWindow { - 1 } ;
-    FMinRowLength := (FEditor as TBCBaseEditor).CharsInWindow { - 1 } - ((FEditor as TBCBaseEditor).CharsInWindow div 3);
+    FMaxRowLength := (FEditor as TBCBaseEditor).CharsInWindow;
+    FMinRowLength := (FEditor as TBCBaseEditor).CharsInWindow - ((FEditor as TBCBaseEditor).CharsInWindow div 3);
   end;
 
   if FMinRowLength <= 0 then

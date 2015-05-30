@@ -86,6 +86,7 @@ var
   LHighlighter: TBCEditorHighlighter;
   LEditor: TBCBaseEditor;
 begin
+  TBCEditorHighlighter(FOwner).Loading := True;
   FFileName := AFileName;
   FName := ExtractFileName(AFileName);
   FName := Copy(FName, 1, Pos('.', FName) - 1);
@@ -104,6 +105,7 @@ begin
     LStream.Free;
   end;
   LHighlighter.UpdateColors;
+  TBCEditorHighlighter(FOwner).Loading := False;
 end;
 
 end.

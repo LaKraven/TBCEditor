@@ -7203,8 +7203,8 @@ begin
     begin
       X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2);
       Canvas.MoveTo(X, AClipRect.Top);
-      Canvas.LineTo(X, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 1 {div 2}));
-      Canvas.LineTo(AClipRect.Right, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 1 {div 2}));
+      Canvas.LineTo(X, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
+      Canvas.LineTo(AClipRect.Right, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
     end
   end
   else

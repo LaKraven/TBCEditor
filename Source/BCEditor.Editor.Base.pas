@@ -7970,15 +7970,8 @@ var
         LAnySelection := (LEndPosition.Line >= LFirstLine) and (LStartPosition.Line <= LLastLine);
         if LAnySelection then
         begin
-          LSelectionStartPosition.Column := LStartPosition.Char;
-          LSelectionStartPosition.Row := LStartPosition.Line;
-          if GetWordWrap then
-            LSelectionStartPosition := FWordWrapHelper.TextToDisplayPosition(LStartPosition);
-          LSelectionEndPosition.Column := LEndPosition.Char;
-          LSelectionEndPosition.Row := LEndPosition.Line;
-          if GetWordWrap then
-            LSelectionEndPosition := FWordWrapHelper.TextToDisplayPosition(LEndPosition);
-
+          LSelectionStartPosition := TextToDisplayPosition(LStartPosition);
+          LSelectionEndPosition := TextToDisplayPosition(LEndPosition);
           if (FSelection.ActiveMode = smColumn) and (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
             SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column);
         end;
@@ -10235,7 +10228,7 @@ var
   i: Integer;
   s: string;
   L, X: Integer;
-  LCountOfAvgGlyphs: Integer;
+  //LCountOfAvgGlyphs: Integer;
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
 
@@ -10254,15 +10247,15 @@ begin
     X := 0;
     for i := 1 to ATextPosition.Char - 1 do
     begin
-      if (i <= l) and (s[i] = #9) then
-        Inc(x, FTabs.Width)
+      if (i <= l) and (s[i] = BCEDITOR_TAB_CHAR) then
+        Inc(X, FTabs.Width)
       else
-      if i <= l then
+      {if i <= l then
       begin
         LCountOfAvgGlyphs := CeilOfIntDiv(FTextDrawer.TextWidth(s[i]), FCharWidth);
         Inc(X, LCountOfAvgGlyphs);
       end
-      else
+      else }
         Inc(X);
     end;
     Result.Column := X + 1;

@@ -1,0 +1,159 @@
+{
+    "Highlighter": {
+        "Info": {
+            "General": {
+                "Version": "1.0",
+                "Date": "30.5.2015",
+                "Sample": [
+                    "; Comment\r\n",
+                    "[Section]\r\n",
+                    "Name=Value"
+                ]
+            },
+            "Author": {
+                "Name": "Lasse Rautiainen",
+                "Mail": "lasse@bonecode.com"
+            }
+        },
+        "MainRules": {
+            "Attributes": {
+                "Element": "Editor"
+            },
+            "SubRules": {
+                "Range": [
+                    {
+                        "Type": "Comment",
+                        "Attributes": {
+                            "Element": "Comment",
+                            "ParentBackground": true
+                        },
+                        "Properties": {
+                            "CloseOnEol": true,
+                            "OpenBeginningOfLine": true
+                        },
+                        "TokenRange": {
+                            "Open": ";"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "ReservedWord",
+                            "ParentBackground": true
+                        },
+                        "Properties": {
+                            "CloseOnEol": true
+                        },
+                        "TokenRange": {
+                            "Open": "[",
+                            "Close": "]"
+                        }
+                    },
+                    {
+                        "Type": "String",
+                        "Attributes": {
+                            "Element": "String",
+                            "ParentBackground": true
+                        },
+                        "Properties": {
+                            "CloseOnEol": true
+                        },
+                        "TokenRange": {
+                            "Open": "="
+                        }
+                    }
+                ],
+                "KeyList": [
+                    {
+                        "Type": "Symbol",
+                        "Words": [
+                            "="
+                        ],
+                        "Attributes": {
+                            "Element": "Symbol",
+                            "ParentBackground": true
+                        }
+                    }
+                ],
+                "Set": [
+                    {
+                        "Type": "Numbers",
+                        "Symbols": "0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": true
+                        }
+                    },
+                    {
+                        "Type": "Float",
+                        "Symbols": ".0123456789",
+                        "Attributes": {
+                            "Element": "Number",
+                            "ParentBackground": true
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "CodeFolding": {
+        "Options": {
+            "NoMatchingPairHighlight": true
+        },
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": ";",
+                "RegionType": "SingleLine"
+            }
+        ],
+        "FoldRegion": [
+            {
+                "OpenToken": "[",
+                "CloseToken": "[",
+                "Properties": {
+                    "OpenTokenBeginningOfLine": true,
+                    "CloseTokenBeginningOfLine": true,
+                    "OpenIsClose": true,
+                    "TokenEndIsPreviousLine": true,
+                    "OpenTokenEnd": "]"
+                }
+            }
+        ]
+    },
+    "MatchingPair": {
+        "Pairs": [
+            {
+                "OpenToken": "[",
+                "CloseToken": "]"
+            }
+        ]
+    },
+    "CompletionProposal": {
+        "SkipRegion": [
+            {
+                "OpenToken": "'",
+                "CloseToken": "'",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": "\"",
+                "CloseToken": "\"",
+                "RegionType": "String"
+            },
+            {
+                "OpenToken": ";",
+                "RegionType": "SingleLine"
+            }
+        ]
+    }
+}

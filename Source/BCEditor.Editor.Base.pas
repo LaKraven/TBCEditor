@@ -452,7 +452,6 @@ type
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
     function GetWordAtPixels(X, Y: Integer): string;
     function IsBookmark(ABookmark: Integer): Boolean;
-    function IsIdentChar(AChar: Char): Boolean;
     function IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
     function IsWordBreakChar(AChar: Char): Boolean;
     function LineToRow(ALine: Integer): Integer;
@@ -2203,17 +2202,15 @@ begin
       begin
         LLine := Lines[Y];
         Inc(Y);
-        X := StringScan(LLine, 1, IsIdentChar);
+        X := StringScan(LLine, 1, IsWordBreakChar);
         if X = 0 then
           Inc(X);
       end;
     end
     else
     begin
-      if IsIdentChar(LLine[X]) then
-        X := StringScan(LLine, X, IsWordBreakChar);
       if X > 0 then
-        X := StringScan(LLine, X, IsIdentChar);
+        X := StringScan(LLine, X, IsWordBreakChar);
       if X = 0 then
         X := LineLength + 1;
     end;
@@ -2267,8 +2264,6 @@ begin
     end
     else
     begin
-      if IsWordBreakChar(LLine[X - 1]) then
-        X := StringReverseScan(LLine, X - 1, IsIdentChar);
       if X > 0 then
         X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1;
       if X = 0 then
@@ -9844,16 +9839,6 @@ var
   X, Y: Integer;
 begin
   Result := GetBookmark(ABookmark, X, Y);
-end;
-
-function TBCBaseEditor.IsIdentChar(AChar: Char): Boolean;
-begin
-  if Assigned(Highlighter) then
-    Result := Highlighter.IsIdentChar(AChar)
-  else
-    Result := AChar >= BCEDITOR_EXCLAMATION_MARK;
-
-  Result := Result and not IsWordBreakChar(AChar);
 end;
 
 function TBCBaseEditor.IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;

@@ -5,7 +5,6 @@ interface
 uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
-  function CharWidthTable(AChar: Char): SmallInt;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
@@ -18,7 +17,6 @@ uses
   procedure ClearList(var List: TList);
   procedure FreeList(var List: TList);
   procedure TextOut(ACanvas: TCanvas; X, Y: Integer; const Text: string);
-//  procedure TextRect(ACanvas: TCanvas; Rect: TRect; x, Y: Integer; const Text: string);
 
 implementation
 
@@ -133,75 +131,6 @@ begin
     Inc(iRun);
     Dec(Len);
   end;
-end;
-
-{
- Full-width ranges:
-
- U-16  U-8              U-16  U-8
- 1100  e1 84 80     ..  115F  e1 85 9f
- 2329  e2 8c a9     ..  232A  e2 8c aa
- 2E80  e2 ba 80     ..  303E  e3 80 be
- 3041  e3 81 81     ..  33FF  e3 8f bf
- 3400  e3 90 80     ..  4DB5  e4 b6 b5
- 4E00  e4 b8 80     ..  9FC3  e9 bf 83
- A000  ea 80 80     ..  A4C6  ea 93 86
- AC00  ea b0 80     ..  D7A3  ed 9e a3
- F900  ef a4 80     ..  FAD9  ef ab 99
- FE10  ef b8 90     ..  FE19  ef b8 99
- FE30  ef b8 b0     ..  FE6B  ef b9 ab
- FF01  ef bc 81     ..  FF60  ef bd a0
- FFE0  ef bf a0     ..  FFE6  ef bf a6
- 20000 f0 a0 80 80  ..  2FFFD f0 af bf bd
- 30000 f0 b0 80 80  ..  3FFFD f0 bf bf bd
-
- TODO:
- Actually, they are incomplete. One can easily find character out of this
- range which is actually full-width but doesn't fall in any of ranges above.
- Also, there are characters even wider than full-width, which take 3 or even 4
- regular spaces in text }
-function CharWidthTable(AChar: Char): SmallInt;
-begin
-  Result := 1;
-
-  if (AChar >= #$1100) and (AChar <= #$115F) then
-    Result := 2
-  else
-  if (AChar >= #$2329) and (AChar <= #$232A) then
-    Result := 2
-  else
-  if (AChar >= #$2E80) and (AChar <= #$303E) then
-    Result := 2
-  else
-  if (AChar >= #$3041) and (AChar <= #$33FF) then
-    Result := 2
-  else
-  if (AChar >= #$3400) and (AChar <= #$4DB5) then
-    Result := 2
-  else
-  if (AChar >= #$4E00) and (AChar <= #$9FC3) then
-    Result := 2
-  else
-  if (AChar >= #$A000) and (AChar <= #$A4C6) then
-    Result := 2
-  else
-  if (AChar >= #$AC00) and (AChar <= #$D7A3) then
-    Result := 2
-  else
-  if (AChar >= #$F900) and (AChar <= #$FAD9) then
-    Result := 2
-  else
-  if (AChar >= #$FE10) and (AChar <= #$FE19) then
-    Result := 2
-  else
-  if (AChar >= #$FE30) and (AChar <= #$FE6B) then
-    Result := 2
-  else
-  if (AChar >= #$FF01) and (AChar <= #$FF60) then
-    Result := 2
-  else
-  if (AChar >= #$FFE0) and (AChar <= #$FFE6) then
-    Result := 2
 end;
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;

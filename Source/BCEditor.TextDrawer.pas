@@ -127,7 +127,7 @@ type
   public
     constructor Create(CalcExtentBaseStyle: TFontStyles; BaseFont: TFont); virtual;
     destructor Destroy; override;
-
+    function GetCharCount(AChar: Char): Integer;
     function GetCharWidth: Integer; virtual;
     function GetCharHeight: Integer; virtual;
     procedure BeginDrawing(AHandle: HDC); virtual;
@@ -717,6 +717,14 @@ begin
   UniversalExtTextOut(FHandle, X, Y, [], TempRect, Text, Length, nil);
 end;
 
+function TBCEditorTextDrawer.GetCharCount(AChar: Char): Integer;
+var
+  Size: TSize;
+begin
+  Size := TextExtent(PChar(@AChar), 1);
+  Result := Ceil(Size.cx / CharWidth);
+end;
+
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AText: PChar;
   ALength: Integer);
 
@@ -726,7 +734,7 @@ procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextO
   begin
     ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
     for i := 0 to ALength - 1 do
-      FExtTextOutDistance[i] := CharWidthTable(AText[i]) * ACharWidth;
+      FExtTextOutDistance[i] := GetCharCount(AText[i]) * ACharWidth;
   end;
 
   procedure AdjustLastCharWidthAndRect;

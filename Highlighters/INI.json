@@ -74,24 +74,6 @@
                             "ParentBackground": true
                         }
                     }
-                ],
-                "Set": [
-                    {
-                        "Type": "Numbers",
-                        "Symbols": "0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Type": "Float",
-                        "Symbols": ".0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    }
                 ]
             }
         }

@@ -458,7 +458,8 @@ type
     function LineToRow(ALine: Integer): Integer;
     function ReplaceText(const ASearchText: string; const AReplaceText: string): Integer;
     function SplitTextIntoWords(AStringList: TStrings; CaseSensitive: Boolean): string;
-    function TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True): TBCEditorDisplayPosition;
+    function TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True;
+      ARealWidth: Boolean = True): TBCEditorDisplayPosition;
     function TranslateKeyCode(ACode: Word; AShift: TShiftState; var AData: pointer): TBCEditorCommand;
     function WordEnd: TBCEditorTextPosition; overload;
     function WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
@@ -7970,8 +7971,8 @@ var
         LAnySelection := (LEndPosition.Line >= LFirstLine) and (LStartPosition.Line <= LLastLine);
         if LAnySelection then
         begin
-          LSelectionStartPosition := TextToDisplayPosition(LStartPosition);
-          LSelectionEndPosition := TextToDisplayPosition(LEndPosition);
+          LSelectionStartPosition := TextToDisplayPosition(LStartPosition, True, False);
+          LSelectionEndPosition := TextToDisplayPosition(LEndPosition, True, False);
           if (FSelection.ActiveMode = smColumn) and (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
             SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column);
         end;
@@ -8055,11 +8056,6 @@ var
     end;
 
   begin
-    {if AMinimap then
-      LCharWidth := FMinimap.CharWidth
-    else
-      LCharWidth := FCharWidth; }
-
     if (ALast >= AFirst) and (LTokenRect.Right > LTokenRect.Left) then
     begin
       X := ColumnToWidth(AFirst, AMinimap);
@@ -10219,7 +10215,8 @@ begin
   end;
 end;
 
-function TBCBaseEditor.TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True): TBCEditorDisplayPosition;
+function TBCBaseEditor.TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True;
+  ARealWidth: Boolean = True): TBCEditorDisplayPosition;
 var
   i: Integer;
   s: string;
@@ -10244,6 +10241,9 @@ begin
     begin
       if (i <= l) and (s[i] = BCEDITOR_TAB_CHAR) then
         Inc(X, FTabs.Width)
+      else
+      if ARealWidth and (i <= l) then
+        Inc(X, CharWidthTable(s[i]))
       else
         Inc(X);
     end;

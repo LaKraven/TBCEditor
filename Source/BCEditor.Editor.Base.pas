@@ -1928,12 +1928,12 @@ begin
     LLength := Length(LTextLine);
     if LLength = 0 then
       Exit;
-    if (ATextPosition.Char >= 1) and (ATextPosition.Char <= LLength + 1) and IsIdentChar(LTextLine[ATextPosition.Char]) then
+    if (ATextPosition.Char >= 1) and (ATextPosition.Char <= LLength + 1) and not IsWordBreakChar(LTextLine[ATextPosition.Char]) then
     begin
       LStop := ATextPosition.Char;
-      while (LStop <= LLength) and IsIdentChar(LTextLine[LStop]) do
+      while (LStop <= LLength) and not IsWordBreakChar(LTextLine[LStop]) do
         Inc(LStop);
-      while (ATextPosition.Char > 1) and IsIdentChar(LTextLine[ATextPosition.Char - 1]) do
+      while (ATextPosition.Char > 1) and not IsWordBreakChar(LTextLine[ATextPosition.Char - 1]) do
         Dec(ATextPosition.Char);
       if LStop > ATextPosition.Char then
         Result := Copy(LTextLine, ATextPosition.Char, LStop - ATextPosition.Char);
@@ -4048,8 +4048,10 @@ procedure TBCBaseEditor.SearchHighlighterAfterPaint(ACanvas: TCanvas; AFirstLine
 
   procedure PaintHighlight(StartPosition, EndPosition: TBCEditorTextPosition);
   var
+    i: Integer;
     LPoint: TPoint;
     S: string;
+    LLength: Integer;
   begin
     FSearchHighlighterBlendFunction.SourceConstantAlpha := FSearch.Highlighter.AlphaBlending;
     if StartPosition.Char < EndPosition.Char then
@@ -4058,11 +4060,22 @@ procedure TBCBaseEditor.SearchHighlighterAfterPaint(ACanvas: TCanvas; AFirstLine
       FSearchHighlighterBitmap.Canvas.Brush.Color := FSearch.Highlighter.Colors.Background;
       FSearchHighlighterBitmap.Canvas.Brush.Style := bsSolid;
       S := Copy(Lines[StartPosition.Line - 1], StartPosition.Char, EndPosition.Char - StartPosition.Char);
-      FSearchHighlighterBitmap.Height := LineHeight;
-      FSearchHighlighterBitmap.Width := CharWidth * Length(S);
+
       FSearchHighlighterBitmap.Canvas.Font.Assign(Font);
       FSearchHighlighterBitmap.Canvas.Font.Color := FSearch.Highlighter.Colors.Foreground;
-      FSearchHighlighterBitmap.Canvas.TextOut(0, 0, S);
+
+      FSearchHighlighterBitmap.Height := LineHeight;
+      FSearchHighlighterBitmap.Width := 0;
+      LLength := Length(S);
+      ReallocMem(FColumnWidths, LLength * SizeOf(Integer));
+      for i := 0 to LLength - 1 do
+      begin
+        FColumnWidths[i] := FTextDrawer.GetCharCount(S[i + 1]) * FTextDrawer.CharWidth;
+        FSearchHighlighterBitmap.Width := FSearchHighlighterBitmap.Width + FColumnWidths[i];
+      end;
+      UniversalExtTextOut(FSearchHighlighterBitmap.Canvas.Handle, 0, 0, [tooOpaque],
+        FSearchHighlighterBitmap.Canvas.ClipRect, PChar(S), Length(S), FColumnWidths);
+
       Winapi.Windows.AlphaBlend(ACanvas.Handle, LPoint.X, LPoint.Y, FSearchHighlighterBitmap.Width,
         FSearchHighlighterBitmap.Height, FSearchHighlighterBitmap.Canvas.Handle, 0, 0,
         FSearchHighlighterBitmap.Width, FSearchHighlighterBitmap.Height, FSearchHighlighterBlendFunction);
@@ -4636,14 +4649,14 @@ var
   begin
     LBlockEndPosition.Char := Length(LTempString);
     for i := ATextPosition.Char to Length(LTempString) do
-      if not IsIdentChar(LTempString[i]) then
+      if IsWordBreakChar(LTempString[i]) then
       begin
         LBlockEndPosition.Char := i;
         Break;
       end;
     LBlockBeginPosition.Char := 1;
     for i := ATextPosition.Char - 1 downto 1 do
-      if not IsIdentChar(LTempString[i]) then
+      if IsWordBreakChar(LTempString[i]) then
       begin
         LBlockBeginPosition.Char := i + 1;
         Break;

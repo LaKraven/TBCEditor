@@ -718,11 +718,8 @@ begin
 end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: Char): Integer;
-var
-  Size: TSize;
 begin
-  Size := TextExtent(PChar(@AChar), 1);
-  Result := Ceil(Size.cx / CharWidth);
+  Result := CeilOfIntDiv(TextWidth(AChar), CharWidth);
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; ARect: TRect; AText: PChar;

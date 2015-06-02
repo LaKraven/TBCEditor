@@ -7887,15 +7887,6 @@ begin
   end;
 end;
 
-function CeilOfIntDiv(Dividend: Cardinal; Divisor: word): word;
-var
-  LRemainder: Word;
-begin
-  DivMod(Dividend, Divisor, Result, LRemainder);
-  if LRemainder > 0 then
-    Inc(Result);
-end;
-
 procedure TBCBaseEditor.PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow, AFirstColumn, ALastColumn: Integer;
   AMinimap: Boolean);
 var

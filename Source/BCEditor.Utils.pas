@@ -5,6 +5,7 @@ interface
 uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
+  function CeilOfIntDiv(ADividend: Cardinal; ADivisor: Word): Word;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
@@ -31,6 +32,15 @@ begin
     List.Free;
     List := nil;
   end;
+end;
+
+function CeilOfIntDiv(ADividend: Cardinal; ADivisor: Word): Word;
+var
+  LRemainder: Word;
+begin
+  DivMod(ADividend, ADivisor, Result, LRemainder);
+  if LRemainder > 0 then
+    Inc(Result);
 end;
 
 procedure ClearList(var List: TList);

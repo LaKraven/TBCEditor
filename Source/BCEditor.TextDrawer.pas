@@ -135,8 +135,7 @@ type
     function TextExtent(Text: PChar; Count: Integer): TSize; overload;
     function TextWidth(const Text: string): Integer; overload;
     function TextWidth(Text: PChar; Count: Integer): Integer; overload;
-    procedure AdjustLastCharWidthAndRect(var ARect: TRect; AText: PChar; ALength: Integer;
-      AUseExtTextOutDistance: Boolean = True);
+    procedure AdjustLastCharWidthAndRect(var ARect: TRect; AText: PChar; ALength: Integer);
     procedure BeginDrawing(AHandle: HDC); virtual;
     procedure EndDrawing; virtual;
     procedure ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; var ARect: TRect; AText: PChar; ALength: Integer); virtual;
@@ -726,8 +725,7 @@ begin
 end;
 
 { avoid clipping the last pixels of text in italic }
-procedure TBCEditorTextDrawer.AdjustLastCharWidthAndRect(var ARect: TRect; AText: PChar; ALength: Integer;
-  AUseExtTextOutDistance: Boolean = True);
+procedure TBCEditorTextDrawer.AdjustLastCharWidthAndRect(var ARect: TRect; AText: PChar; ALength: Integer);
 var
   LLastChar: Cardinal;
   LRealCharWidth, LNormalCharWidth: Integer;
@@ -739,10 +737,7 @@ begin
   LLastChar := Ord(AText[ALength]);
   if LLastChar = 32 then
     Exit;
-  if AUseExtTextOutDistance then
-    LNormalCharWidth := FExtTextOutDistance[ALength]
-  else
-    LNormalCharWidth := TextWidth(Char(LLastChar));
+  LNormalCharWidth := FExtTextOutDistance[ALength];
   LRealCharWidth := LNormalCharWidth;
 
   if GetCachedABCWidth(LLastChar, LCharInfo) then
@@ -758,15 +753,9 @@ begin
     LRealCharWidth := LTextMetricA.tmAveCharWidth + LTextMetricA.tmOverhang;
   end;
 
-  if AUseExtTextOutDistance then
-  begin
-    if LRealCharWidth > LNormalCharWidth then
-      Inc(ARect.Right, LRealCharWidth - LNormalCharWidth);
-    FExtTextOutDistance[ALength] := Max(LRealCharWidth, LNormalCharWidth);
-  end
-  else
   if LRealCharWidth > LNormalCharWidth then
-    Inc(ARect.Left, LRealCharWidth - LNormalCharWidth);
+    Inc(ARect.Right, LRealCharWidth - LNormalCharWidth);
+  FExtTextOutDistance[ALength] := Max(LRealCharWidth, LNormalCharWidth);
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; var ARect: TRect; AText: PChar;

@@ -8087,12 +8087,6 @@ var
     end;
   end;
 
-  procedure AdjustLastCharWidthAndRect;
-  begin
-    if (LTokenHelper.Length > 0) and (LTokenHelper.FontStyle <> []) then
-      FTextDrawer.AdjustLastCharWidthAndRect(LTokenRect, PChar(LTokenHelper.Text), LTokenHelper.Length, False);
-  end;
-
   procedure PaintHighlightToken(AFillToEndOfLine: Boolean);
   var
     LIsTokenSelected: Boolean;
@@ -8188,7 +8182,6 @@ var
         begin
           SetDrawingColors(False);
           LTokenRect.Right := X1;
-          AdjustLastCharWidthAndRect;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
           LTokenRect.Left := X1;
         end;
@@ -8196,7 +8189,6 @@ var
         begin
           SetDrawingColors(not (soToEndOfLine in FSelection.Options));
           LTokenRect.Right := X2;
-          AdjustLastCharWidthAndRect;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
           LTokenRect.Left := X2;
         end;
@@ -8204,7 +8196,6 @@ var
         begin
           SetDrawingColors(False);
           LTokenRect.Right := LLineRect.Right;
-          AdjustLastCharWidthAndRect;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
         end;
       end
@@ -8212,7 +8203,6 @@ var
       begin
         SetDrawingColors(not (soToEndOfLine in FSelection.Options) and LIsLineSelected);
         LTokenRect.Right := LLineRect.Right;
-        AdjustLastCharWidthAndRect;
         Canvas.FillRect(LTokenRect); { fill end of line rect }
       end;
     end;

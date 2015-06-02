@@ -8343,36 +8343,6 @@ var
     LTokenPosition, LTokenLength: Integer;
     LCurrentRange: TBCEditorRange;
     LStyle: TFontStyles;
-
-    function ExpandAtWideGlyphs(const S: string): string;
-    var
-      I, j, CountOfAvgGlyphs: Integer;
-    begin
-      Result := S;
-      j := 0;
-      SetLength(Result, Length(S) * 2); { speed improvement }
-      for I := 1 to Length(S) do
-      begin
-        Inc(j);
-        CountOfAvgGlyphs := CeilOfIntDiv(FTextDrawer.TextWidth(S[I]), FCharWidth);
-
-        if j + CountOfAvgGlyphs > Length(Result) then
-          SetLength(Result, Length(Result) + 128);
-
-        { insert CountOfAvgGlyphs filling chars }
-        while CountOfAvgGlyphs > 1 do
-        begin
-          Result[j] := BCEDITOR_FILLER_CHAR;
-          Inc(j);
-          Dec(CountOfAvgGlyphs);
-        end;
-
-        Result[j] := S[I];
-      end;
-
-      SetLength(Result, j);
-    end;
-
   begin
     LLineRect := AClipRect;
     if AMinimap then

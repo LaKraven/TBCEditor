@@ -85,6 +85,7 @@ type
     soSearchOnTyping,
     soSelectedOnly,
     soShowStringNotFound,
+    soShowSearchMatchNotFound,
     soWholeWordsOnly
   );
   TBCEditorSearchOptions = set of TBCEditorSearchOption;

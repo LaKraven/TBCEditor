@@ -7,7 +7,7 @@ uses
   BCEditor.Editor.Search.Highlighter;
 
 const
-  BCEDITOR_SEARCH_OPTIONS = [soHighlightResults, soSearchOnTyping, soBeepIfStringNotFound];
+  BCEDITOR_SEARCH_OPTIONS = [soHighlightResults, soSearchOnTyping, soBeepIfStringNotFound, soShowSearchMatchNotFound];
 
 type
   TBCEditorSearch = class(TPersistent)

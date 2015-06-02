@@ -9714,11 +9714,12 @@ begin
         DoSearchStringNotFoundDialog;
     end
     else
-    if DoSearchMatchNotFoundWraparoundDialog then
-    begin
-      CaretZero;
-      Result := FindNext;
-    end;
+    if soShowSearchMatchNotFound in FSearch.Options then
+      if DoSearchMatchNotFoundWraparoundDialog then
+      begin
+        CaretZero;
+        Result := FindNext;
+      end;
   end
   else
     Result := True;

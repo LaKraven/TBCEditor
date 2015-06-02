@@ -40,7 +40,7 @@ TBCEditor Control Demo v. 1.0b.
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 31.05.2015 19:54, UTC+02:00
+The latest update: 02.06.2015 18:57, UTC+02:00
 
 EditBone Text Editor v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
 

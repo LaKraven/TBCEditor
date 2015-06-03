@@ -262,7 +262,6 @@ type
     procedure ScrollChanged(Sender: TObject);
     procedure ScrollTimerHandler(Sender: TObject);
     procedure SearchChanged(AEvent: TBCEditorSearchChanges);
-    procedure SearchHighlighterAfterPaint(ACanvas: TCanvas; AFirstLine, ALastLine: Integer);
     procedure SelectionChanged(Sender: TObject);
     procedure SetActiveLine(const Value: TBCEditorActiveLine);
     procedure SetBackgroundColor(const Value: TColor);
@@ -4027,132 +4026,6 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.SearchHighlighterAfterPaint(ACanvas: TCanvas; AFirstLine, ALastLine: integer);
-
-  procedure PaintHighlight(StartPosition, EndPosition: TBCEditorTextPosition);
-  var
-    i: Integer;
-    LPoint: TPoint;
-    S: string;
-    LLength: Integer;
-  begin
-    FSearchHighlighterBlendFunction.SourceConstantAlpha := FSearch.Highlighter.AlphaBlending;
-    if StartPosition.Char < EndPosition.Char then
-    begin
-      LPoint := RowColumnToPixels(TextToDisplayPosition(StartPosition));
-      FSearchHighlighterBitmap.Canvas.Brush.Color := FSearch.Highlighter.Colors.Background;
-      FSearchHighlighterBitmap.Canvas.Brush.Style := bsSolid;
-      S := Copy(Lines[StartPosition.Line - 1], StartPosition.Char, EndPosition.Char - StartPosition.Char);
-
-      FSearchHighlighterBitmap.Canvas.Font.Assign(Font);
-      FSearchHighlighterBitmap.Canvas.Font.Color := FSearch.Highlighter.Colors.Foreground;
-
-      FSearchHighlighterBitmap.Height := LineHeight;
-      FSearchHighlighterBitmap.Width := 0;
-      LLength := Length(S);
-      ReallocMem(FColumnWidths, LLength * SizeOf(Integer));
-      for i := 0 to LLength - 1 do
-      begin
-        FColumnWidths[i] := FTextDrawer.GetCharCount(S[i + 1]) * FTextDrawer.CharWidth;
-        FSearchHighlighterBitmap.Width := FSearchHighlighterBitmap.Width + FColumnWidths[i];
-      end;
-      UniversalExtTextOut(FSearchHighlighterBitmap.Canvas.Handle, 0, 0, [tooOpaque],
-        FSearchHighlighterBitmap.Canvas.ClipRect, PChar(S), Length(S), FColumnWidths);
-
-      Winapi.Windows.AlphaBlend(ACanvas.Handle, LPoint.X, LPoint.Y, FSearchHighlighterBitmap.Width,
-        FSearchHighlighterBitmap.Height, FSearchHighlighterBitmap.Canvas.Handle, 0, 0,
-        FSearchHighlighterBitmap.Width, FSearchHighlighterBitmap.Height, FSearchHighlighterBlendFunction);
-    end;
-  end;
-
-  function IsValidChar(Character: PChar): Boolean;
-  begin
-    Result := CharInSet(Character^, BCEDITOR_WORD_BREAK_CHARACTERS);
-  end;
-
-  function IsWholeWord(FirstChar, LastChar: PChar): Boolean;
-  begin
-    Result := not (IsValidChar(FirstChar) and IsValidChar(LastChar));
-  end;
-
-var
-  i: integer;
-  LStartPosition, LEndPosition: TBCEditorTextPosition;
-  LLine, LKeyword: string;
-  LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
-begin
-  if not Visible then
-    Exit;
-  if not Assigned(FSearchEngine) then
-    Exit;
-  LKeyword := '';
-  if FSearch.Enabled and (FSearch.SearchText <> '') and (soHighlightResults in FSearch.Options) then
-    LKeyword := FSearch.SearchText
-  else
-  if soHighlightSimilarTerms in FSelection.Options then
-  begin
-    if (FSelectionBeginPosition.Line = FSelectionEndPosition.Line) and
-      (FSelectionBeginPosition.Char <> FSelectionEndPosition.Char) then
-    begin
-      LKeyWord := Copy(FLines[FSelectionBeginPosition.Line - 1], FSelectionBeginPosition.Char, FSelectionEndPosition.Char -
-        FSelectionBeginPosition.Char);
-      if LKeyword <> GetWordAtRowColumn(GetTextPosition(CaretX - 1, CaretY)) then
-        Exit;
-    end;
-  end;
-  if LKeyword = '' then
-    Exit;
-  if not (soCaseSensitive in FSearch.Options) then
-    LKeyword := UpperCase(LKeyword);
-
-  for i := AFirstLine to ALastLine do
-  begin
-    LLine := Lines[i-1];
-    if not (soCaseSensitive in FSearch.Options) then
-      LLine := UpperCase(LLine);
-    LTextPtr := PChar(LLine);
-    while LTextPtr^ <> BCEDITOR_NONE_CHAR do
-    begin
-      if LTextPtr^ = PChar(LKeyword)^ then { if the first character is a match }
-      begin
-        LKeyWordPtr := PChar(LKeyword);
-        LBookmarkTextPtr := LTextPtr;
-        { check if the keyword found }
-        while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (LTextPtr^ = LKeyWordPtr^) do
-        begin
-          Inc(LTextPtr);
-          Inc(LKeyWordPtr);
-        end;
-        if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
-        begin
-          { do not highlight selection }
-          { Highlight front part }
-          LStartPosition.Line := i;
-          LStartPosition.Char := LBookmarkTextPtr - PChar(LLine) + 1;
-          LEndPosition := LStartPosition;
-          { Skip Selection }
-          while not IsPointInSelection(LEndPosition) and (LEndPosition.Char < LStartPosition.Char + Length(LKeyword)) do
-            Inc(LEndPosition.Char);
-          PaintHighlight(LStartPosition, LEndPosition);
-          if LEndPosition.Char < LStartPosition.Char + Length(LKeyword) then
-          begin
-            LStartPosition.Char := LEndPosition.Char;
-            LEndPosition.Char := LBookmarkTextPtr - PChar(LLine) + 1 + Length(LKeyword);
-            { Skip Selection }
-            while IsPointInSelection(LStartPosition) and (LStartPosition.Char < LEndPosition.Char) do
-              Inc(LStartPosition.Char);
-            { Highlight end part }
-            PaintHighlight(LStartPosition, LEndPosition);
-          end;
-        end
-        else
-          LTextPtr := LBookmarkTextPtr; { not found, return pointer back }
-      end;
-      Inc(LTextPtr);
-    end;
-  end;
-end;
-
 procedure TBCBaseEditor.SelectionChanged(Sender: TObject);
 begin
   InvalidateSelection;
@@ -7089,7 +6962,6 @@ begin
     if FCaret.NonBlinking.Enabled then
       DrawCursor(Canvas);
 
-    SearchHighlighterAfterPaint(Canvas, LLine1, LLine2);
     DoOnPaint;
 
     if LClipRect.Left <= FLeftMargin.GetWidth then
@@ -8274,6 +8146,8 @@ var
     LTokenPosition, LTokenLength: Integer;
     LCurrentRange: TBCEditorRange;
     LStyle: TFontStyles;
+    LKeyWord, LWord: string;
+    LSelectionBeginChar, LSelectionEndChar: Integer;
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8435,6 +8309,37 @@ var
                       if mpoHighlightUnmatched in FMatchingPair.Options then
                         LBackgroundColor := FMatchingPair.Colors.Unmatched
                     end;
+
+              LKeyword := '';
+              LWord := LTokenText;
+              if FSearch.Enabled and (FSearch.SearchText <> '') and (soHighlightResults in FSearch.Options) then
+              begin
+                LKeyword := FSearch.SearchText;
+                if not (soCaseSensitive in FSearch.Options) then
+                begin
+                  LKeyword := UpperCase(LKeyword);
+                  LWord := UpperCase(LWord);
+                end;
+              end
+              else
+              if soHighlightSimilarTerms in FSelection.Options then
+              begin
+                if (FSelectionBeginPosition.Line = FSelectionEndPosition.Line) and
+                  (FSelectionBeginPosition.Char <> FSelectionEndPosition.Char) then
+                begin
+                  LSelectionBeginChar := FSelectionBeginPosition.Char;
+                  LSelectionEndChar := FSelectionEndPosition.Char;
+                  if LSelectionBeginChar > LSelectionEndChar then
+                    SwapInt(LSelectionBeginChar, LSelectionEndChar);
+                  LKeyWord := Copy(FLines[FSelectionBeginPosition.Line - 1], LSelectionBeginChar, LSelectionEndChar -
+                    LSelectionBeginChar);
+                end;
+              end;
+              if (LKeyword <> '') and (LKeyword = LWord) then
+              begin
+                LForegroundColor := FSearch.Highlighter.Colors.Foreground;
+                LBackgroundColor := FSearch.Highlighter.Colors.Background;
+              end;
 
               AddHighlightToken(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle)
             end

@@ -73,7 +73,7 @@ type
   );
   TBCEditorSelectionOptions = set of TBCEditorSelectionOption;
 
-    TBCEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate);
+  TBCEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate);
   TBCEditorSearchChangeEvent = procedure(Event: TBCEditorSearchChanges) of object;
 
   TBCEditorSearchOption = (

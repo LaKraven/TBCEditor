@@ -174,7 +174,6 @@ type
     function GetCanUndo: Boolean;
     function GetCaretPosition: TBCEditorTextPosition;
     function GetClipboardText: string;
-    function GetCodeFoldingCollapseMarkRect(AFoldRange: TBCEditorCodeFoldingRange; ARow: Integer): TRect;
     function GetCollapsedLineNumber(ALine: Integer): Integer;
     function GetDisplayLineCount: Integer;
     function GetDisplayPosition: TBCEditorDisplayPosition; overload;
@@ -405,7 +404,7 @@ type
     procedure PaintCodeFolding(AClipRect: TRect; ALineCount: Integer);
     procedure PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
     procedure PaintCodeFoldingCollapsedLine(AFoldRange: TBCEditorCodeFoldingRange; ALineRect: TRect);
-    procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer);
+    procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALastTextRow, ALastRow: Integer);
     procedure PaintRightMarginMove;
@@ -1012,7 +1011,7 @@ begin
   begin
     LScrolledXBy := (LeftChar - 1) * CharWidth;
     LPoint := Point(X, Y);
-    LCollapseMarkRect := GetCodeFoldingCollapseMarkRect(LFoldRange, LDisplayPosition.Row);
+    LCollapseMarkRect := LFoldRange.CollapseMarkRect;
 
     if LCollapseMarkRect.Right - LScrolledXBy > 0 then
     begin
@@ -1168,14 +1167,6 @@ begin
   finally
     Clipboard.Close;
   end;
-end;
-
-function TBCBaseEditor.GetCodeFoldingCollapseMarkRect(AFoldRange: TBCEditorCodeFoldingRange; ARow: Integer): TRect;
-begin
-  Result.Top := (ARow - TopLine) * LineHeight + 1;
-  Result.Bottom := Result.Top + LineHeight - 2;
-  Result.Left := AFoldRange.HintMarkLeft;
-  Result.Right := Result.Left + CharWidth * 4 - 2;
 end;
 
 function TBCBaseEditor.CreateUncollapsedLines: TBCEditorLines;
@@ -6374,7 +6365,7 @@ begin
   if Assigned(LFoldRange) and LFoldRange.Collapsed then
   begin
     LPoint := Point(Mouse.CursorPos.X, Mouse.CursorPos.Y);
-    LRect := GetCodeFoldingCollapseMarkRect(LFoldRange, LDisplayPosition.Row);
+    LRect := LFoldRange.CollapseMarkRect;
   end;
 
   if Assigned(AForm) then
@@ -6895,7 +6886,7 @@ begin
     begin
       LScrolledXBy := (LeftChar - 1) * CharWidth;
       LPoint := Point(X, Y);
-      LRect := GetCodeFoldingCollapseMarkRect(LFoldRange, LDisplayPosition.Row);
+      LRect := LFoldRange.CollapseMarkRect;
 
       if LRect.Right - LScrolledXBy > 0 then
       begin
@@ -7268,7 +7259,7 @@ begin
 end;
 
 procedure TBCBaseEditor.PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine,
-  AScrolledXBy: Integer);
+  AScrolledXBy: Integer; ALineRect: TRect);
 var
   LOldPenColor, LOldBrushColor: TColor;
   LCollapseMarkRect: TRect;
@@ -7280,9 +7271,12 @@ begin
     LOldBrushColor := Canvas.Brush.Color;
     LOldPenColor := Canvas.Pen.Color;
 
-    AFoldRange.HintMarkLeft := (ATokenPosition + ATokenLength + 1) * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    LCollapseMarkRect.Left := (ATokenPosition + ATokenLength + 1) * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    LCollapseMarkRect.Top := ALineRect.Top + 2;
+    LCollapseMarkRect.Bottom := ALineRect.Bottom - 2;
+    LCollapseMarkRect.Right := AFoldRange.CollapseMarkRect.Left + CharWidth * 4 - 2;
 
-    LCollapseMarkRect := GetCodeFoldingCollapseMarkRect(AFoldRange, ALine);
+    AFoldRange.CollapseMarkRect := LCollapseMarkRect;
 
     if LCollapseMarkRect.Right - AScrolledXBy > 0 then
     begin
@@ -8450,12 +8444,12 @@ var
         PaintHighlightToken(True);
 
         if FCodeFolding.Visible then
-          LFoldRange := CodeFoldingRangeForLine(LCurrentLine)
+          LFoldRange := CodeFoldingRangeForLine(GetUncollapsedLineNumber(LCurrentLine))
         else
           LFoldRange := nil;
 
         if Assigned(LFoldRange) then
-          PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy);
+          PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
         PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         if Assigned(LFoldRange) then

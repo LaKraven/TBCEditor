@@ -3,7 +3,7 @@ unit BCEditor.Editor.CodeFolding.Ranges;
 interface
 
 uses
-  System.Classes, System.SysUtils, BCEditor.Editor.CodeFolding.FoldRegions;
+  Winapi.Windows, System.Classes, System.SysUtils, BCEditor.Editor.CodeFolding.FoldRegions;
 
 type
   TBCEditorCodeFoldingRange = class;
@@ -54,6 +54,7 @@ type
     FCollapsed: Boolean;
     FCollapsedBy: Integer;
     FCollapsedLines: TStringList;
+    FCollapseMarkRect: TRect;
     FFoldRegion: TBCEditorFoldRegionItem;
     FFromLine: Integer;
     FHintMarkLeft: Integer;
@@ -76,9 +77,9 @@ type
     property Collapsed: Boolean read FCollapsed write FCollapsed default False;
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
     property CollapsedLines: TStringList read FCollapsedLines;
+    property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
     property FoldRegion: TBCEditorFoldRegionItem read FFoldRegion write FFoldRegion;
     property FromLine: Integer read FFromLine write FFromLine;
-    property HintMarkLeft: Integer read FHintMarkLeft write FHintMarkLeft;
     property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
     property IndentLevel: Integer read FIndentLevel write FIndentLevel;
     property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;

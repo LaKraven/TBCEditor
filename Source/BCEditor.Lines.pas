@@ -493,7 +493,7 @@ begin
       if index < FCount then
         System.Move(FList^[index], FList^[index + NumLines], (FCount - index) * EditorStringRecSize);
       i := 0;
-      for LLine := index to index + NumLines - 1 do
+      for LLine := Index to Index + NumLines - 1 do
         with FList^[LLine] do
         begin
           Pointer(FString) := nil;

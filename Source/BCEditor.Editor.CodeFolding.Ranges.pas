@@ -57,7 +57,6 @@ type
     FCollapseMarkRect: TRect;
     FFoldRegion: TBCEditorFoldRegionItem;
     FFromLine: Integer;
-    FHintMarkLeft: Integer;
     FIndentLevel: Integer;
     FParentCollapsed: Boolean;
     FFoldRangeLevel: Integer;

@@ -7274,7 +7274,7 @@ begin
     LCollapseMarkRect.Left := (ATokenPosition + ATokenLength + 1) * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     LCollapseMarkRect.Top := ALineRect.Top + 2;
     LCollapseMarkRect.Bottom := ALineRect.Bottom - 2;
-    LCollapseMarkRect.Right := AFoldRange.CollapseMarkRect.Left + CharWidth * 4 - 2;
+    LCollapseMarkRect.Right := LCollapseMarkRect.Left + CharWidth * 4 - 2;
 
     AFoldRange.CollapseMarkRect := LCollapseMarkRect;
 
@@ -8448,12 +8448,10 @@ var
         else
           LFoldRange := nil;
 
-        if Assigned(LFoldRange) then
-          PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
+        PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
         PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
-        if Assigned(LFoldRange) then
-          PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
+        PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
 
         if not AMinimap and LPaintRightMargin then
         begin

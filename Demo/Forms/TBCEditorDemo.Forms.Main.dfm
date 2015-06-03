@@ -6,6 +6,8 @@ inherited MainForm: TMainForm
   Position = poScreenCenter
   ShowHint = True
   OnShow = FormShow
+  ExplicitWidth = 1116
+  ExplicitHeight = 682
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter: TBCSplitter [0]
@@ -32,6 +34,8 @@ inherited MainForm: TMainForm
       item
         Width = 50
       end>
+    ExplicitTop = 625
+    ExplicitWidth = 1100
   end
   object PanelProperty: TBCPanel [2]
     Left = 760
@@ -60,13 +64,6 @@ inherited MainForm: TMainForm
       Margins.Right = 0
       Margins.Bottom = 5
       Options = [goFixedVertLineEh, goVertLineEh, goEditingEh, goAlwaysShowEditorEh]
-      Align = alClient
-      ContraColCount = 0
-      Flat = True
-      ParentColor = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 0
     end
   end
   object PanelLeft: TBCPanel [3]
@@ -94,6 +91,7 @@ inherited MainForm: TMainForm
       Align = alClient
       Caret.NonBlinking.Enabled = False
       Caret.Options = []
+      CodeFolding.Colors.Indent = clBlack
       CodeFolding.Hint.Font.Charset = DEFAULT_CHARSET
       CodeFolding.Hint.Font.Color = clWindowText
       CodeFolding.Hint.Font.Height = -11
@@ -125,7 +123,6 @@ inherited MainForm: TMainForm
       LeftMargin.Width = 55
       Lines.Strings = (
         '')
-      LineSpacing.Rule = lsSpecified
       LineSpacing.Spacing = 0
       MatchingPair.Enabled = True
       Minimap.Font.Charset = DEFAULT_CHARSET
@@ -133,7 +130,6 @@ inherited MainForm: TMainForm
       Minimap.Font.Height = -4
       Minimap.Font.Name = 'Courier New'
       Minimap.Font.Style = []
-      Minimap.Visible = True
       Minimap.Width = 140
       OnCaretChanged = EditorCaretChanged
       RightMargin.Position = 80
@@ -173,16 +169,22 @@ inherited MainForm: TMainForm
         ParentColor = False
         ParentFont = False
         TabOrder = 0
+        ExplicitTop = 3
+        ExplicitWidth = 754
         inherited SearchPanel: TBCPanel
           Width = 754
+          ExplicitWidth = 754
           inherited SpeedButtonSearchClose: TBCSpeedButton
             Left = 733
+            ExplicitLeft = 733
           end
           inherited PanelRight: TBCPanel
             Width = 400
+            ExplicitWidth = 400
             inherited LabelSearchResultCount: TBCLabelFX
               Left = 388
               Height = 21
+              ExplicitLeft = 388
             end
           end
         end
@@ -219,7 +221,6 @@ inherited MainForm: TMainForm
     Top = 26
   end
   inherited TitleBar: TBCTitleBar
-    Images = ImagesDataModule.ImageListSmall
     Items = <
       item
         Caption = 'File'
@@ -249,6 +250,7 @@ inherited MainForm: TMainForm
         Width = 6
       end
       item
+        Caption = 'Skin'
         DropdownMenu = PopupMenuSkins
         FontData.Font.Charset = DEFAULT_CHARSET
         FontData.Font.Color = clWindowText
@@ -256,11 +258,11 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         Height = 22
-        ImageIndex = 86
         Index = 2
         Name = 'TitleBarItemSkins'
         ShowHint = False
-        Width = 34
+        Style = bsMenu
+        Width = 52
       end
       item
         Align = tbaCenterInSpace

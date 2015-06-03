@@ -6565,6 +6565,8 @@ begin
     if DoOnCodeFoldingHintClick(X, Y) then
     begin
       Include(FStateFlags, sfCodeFoldingInfoClicked);
+      FCodeFolding.MouseOverHint := False;
+      UpdateMouseCursor;
       Exit;
     end;
 

@@ -113,22 +113,24 @@ procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
   procedure RecursiveAssign(FoldRanges: TBCEditorCodeFoldingRanges; SrcFoldRanges: TBCEditorCodeFoldingRanges);
   var
     i: Integer;
-    LFoldRange: TBCEditorCodeFoldingRange;
+    LCodeFoldingRange: TBCEditorCodeFoldingRange;
+    LSourceCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     if Assigned(SrcFoldRanges) then
     for i := 0 to SrcFoldRanges.Count - 1 do
     begin
-      with SrcFoldRanges[i] do
-      begin
-        LFoldRange := FoldRanges.Add(Self, FromLine, IndentLevel, FoldRangeLevel, FoldRegion, ToLine);
-        LFoldRange.CollapsedBy := CollapsedBy;
-        LFoldRange.Collapsed := Collapsed;
-        LFoldRange.ParentCollapsed := ParentCollapsed;
-        if Assigned(CollapsedLines) then
-          LFoldRange.CollapsedLines.Assign(CollapsedLines);
-        LFoldRange.FoldRegion := FoldRegion;
-      end;
-      RecursiveAssign(LFoldRange.SubFoldRanges, SrcFoldRanges[i].SubFoldRanges);
+      LSourceCodeFoldingRange := SrcFoldRanges[i];
+
+      LCodeFoldingRange := FoldRanges.Add(Self, LSourceCodeFoldingRange.FromLine, LSourceCodeFoldingRange.IndentLevel,
+        LSourceCodeFoldingRange.FoldRangeLevel, LSourceCodeFoldingRange.FoldRegion, LSourceCodeFoldingRange.ToLine);
+      LCodeFoldingRange.CollapsedBy := LSourceCodeFoldingRange.CollapsedBy;
+      LCodeFoldingRange.Collapsed := LSourceCodeFoldingRange.Collapsed;
+      LCodeFoldingRange.ParentCollapsed := LSourceCodeFoldingRange.ParentCollapsed;
+      if Assigned(LSourceCodeFoldingRange.CollapsedLines) then
+        LCodeFoldingRange.CollapsedLines.Assign(LSourceCodeFoldingRange.CollapsedLines);
+      LCodeFoldingRange.FoldRegion := LSourceCodeFoldingRange.FoldRegion;
+
+      RecursiveAssign(LCodeFoldingRange.SubFoldRanges, SrcFoldRanges[i].SubFoldRanges);
     end;
   end;
 

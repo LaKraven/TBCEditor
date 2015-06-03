@@ -936,12 +936,14 @@ function TBCBaseEditor.CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCode
 var
   LLength: Integer;
 begin
+  Result := nil;
   LLength := Length(FCodeFoldingRangeForLine) - 1;
   if ALine > LLength then
     ALine := LLength;
   while (ALine > 0) and not Assigned(FCodeFoldingRangeForLine[ALine]) do
     Dec(ALine);
-  Result := FCodeFoldingRangeForLine[ALine]
+  if (ALine > 0) and Assigned(FCodeFoldingRangeForLine[ALine]) then
+    Result := FCodeFoldingRangeForLine[ALine]
 end;
 
 function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;

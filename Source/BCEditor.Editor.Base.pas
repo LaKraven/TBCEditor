@@ -206,7 +206,7 @@ type
     function GetWordWrap: Boolean;
     function GetWrapAtColumn: Integer;
     function IsLineInsideCollapsedCodeFolding(ALine: Integer): Boolean;
-    function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil): Boolean;
+    function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
     function IsKeywordAtCurrentLine: Boolean;
     function IsStringAllWhite(const ALine: string): Boolean;
     function LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
@@ -408,7 +408,6 @@ type
     procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer);
     procedure PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALastTextRow, ALastRow: Integer);
-    procedure PaintMatchingPair;
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
@@ -1973,7 +1972,7 @@ begin
       Exit(True);
 end;
 
-function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean): Boolean;
+function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
 
   function IsKeywordAtCursorPosForFoldRegions(AOpenKeyWord: PBoolean): Boolean;
   var
@@ -1981,10 +1980,15 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean): Boolea
     LKeyword: PChar;
     LLine: String;
     LFoldRegions: TBCEditorCodeFoldingRegions;
+    LOffset: Byte;
   begin
     Result := False;
 
     LFoldRegions := FHighlighter.CodeFoldingRegions;
+
+    LOffset := 0;
+    if not AIncludeAfterToken then
+      LOffset := 1;
 
     for i := 0 to LFoldRegions.Count - 1 do
     begin
@@ -1995,7 +1999,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean): Boolea
         P := Pos(LKeyword, LLine);
         if P > 0 then
         begin
-          if (CaretX >= P) and (CaretX <= P + Integer(StrLen(LKeyword))) then
+          if (CaretX >= P) and (CaretX <= P + Integer(StrLen(LKeyword)) - LOffset) then
           begin
             Result := True;
 
@@ -2017,7 +2021,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean): Boolea
 
         if P > 0 then
         begin
-          if (CaretX >= P) and (CaretX <= P + Integer(StrLen(LKeyword))) then
+          if (CaretX >= P) and (CaretX <= P + Integer(StrLen(LKeyword)) - LOffset) then
           begin
             Result := True;
 
@@ -2557,7 +2561,7 @@ var
   end;
 
 begin
-  LIsKeyWord := IsKeywordAtCursorPosition(@LOpenKeyWord);
+  LIsKeyWord := IsKeywordAtCursorPosition(@LOpenKeyWord, mpoHighlightAfterToken in FMatchingPair.Options);
 
   if not Assigned(FHighlightedFoldRange) then
   begin
@@ -7088,7 +7092,6 @@ begin
       PaintTextLines(DrawRect, LLine1, LLine2, LColumn1, LColumn2, False);
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
-      PaintMatchingPair;
     end;
 
     if FCaret.NonBlinking.Enabled then
@@ -7624,47 +7627,6 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.PaintMatchingPair;
-var
-  LPoint: TPoint;
-  LCurrentCaret: TBCEditorTextPosition;
-
-  function CharToPixels(TextPosition: TBCEditorTextPosition): TPoint;
-  begin
-    Result := RowColumnToPixels(TextToDisplayPosition(TextPosition));
-  end;
-
-begin
-  if not FMatchingPair.Enabled or SelectionAvailable or (FCurrentMatchingPair = trNotFound) then
-    Exit;
-
-  if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
-    FTextDrawer.SetBackgroundColor(FMatchingPair.Colors.Matched)
-  else
-  if mpoHighlightUnmatched in FMatchingPair.Options then
-    FTextDrawer.SetBackgroundColor(FMatchingPair.Colors.Unmatched)
-  else
-    Exit;
-
-  if Assigned(FCurrentMatchingPairMatch.TokenAttribute) then
-    FTextDrawer.SetStyle(FCurrentMatchingPairMatch.TokenAttribute.Style);
-  FTextDrawer.SetForegroundColor(Font.Color);
-
-  LCurrentCaret := CaretPosition;
-  LCurrentCaret.Char := LCurrentCaret.Char - 1;
-
-  if (FCurrentMatchingPair <> trCloseTokenFound) and not IsPointInSelection(LCurrentCaret) and not Dragging then
-  begin
-    LPoint := CharToPixels(FCurrentMatchingPairMatch.OpenTokenPos);
-    FTextDrawer.TextOut(LPoint.X, LPoint.Y, PChar(FCurrentMatchingPairMatch.OpenToken), Length(FCurrentMatchingPairMatch.OpenToken));
-  end;
-  if (FCurrentMatchingPair <> trOpenTokenFound) and (FCurrentMatchingPair <> trCloseTokenFound) and not IsPointInSelection(LCurrentCaret) and not Dragging then
-  begin
-    LPoint := CharToPixels(FCurrentMatchingPairMatch.CloseTokenPos);
-    FTextDrawer.TextOut(LPoint.X, LPoint.Y, PChar(FCurrentMatchingPairMatch.CloseToken), Length(FCurrentMatchingPairMatch.CloseToken));
-  end;
-end;
-
 procedure TBCBaseEditor.PaintRightMarginMove;
 var
   LRightMarginPosition: Integer;
@@ -7907,6 +7869,7 @@ var
   LCustomLineColors: Boolean;
   LCustomForegroundColor: TColor;
   LCustomBackgroundColor: TColor;
+  LMatchingPair: Boolean;
 
   function GetBackgroundColor: TColor;
   var
@@ -8235,7 +8198,7 @@ var
     end;
 
   begin
-    if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine) then
+    if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not LMatchingPair) then
       ABackground := GetBackgroundColor;
     if AForeground = clNone then
       AForeground := Font.Color;
@@ -8452,6 +8415,23 @@ var
                     LStyle := LCurrentRange.Parent.Attribute.Style;
                   end;
               end;
+
+              LMatchingPair := False;
+              if FMatchingPair.Enabled then
+                if FCurrentMatchingPair <> trNotFound then
+                  if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
+                    if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
+                       (LCurrentLine = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
+                       (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
+                       (LCurrentLine = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
+                    begin
+                      LMatchingPair := True;
+                      if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
+                        LBackgroundColor := FMatchingPair.Colors.Matched
+                      else
+                      if mpoHighlightUnmatched in FMatchingPair.Options then
+                        LBackgroundColor := FMatchingPair.Colors.Unmatched
+                    end;
 
               AddHighlightToken(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle)
             end
@@ -8819,10 +8799,10 @@ begin
     end;
   if cfoHighlightMatchingPair in FCodeFolding.Options then
   begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(CaretY));
+    LFoldRange := CodeFoldingLineInsideRange(RowToLine(CaretY));
     if Assigned(LFoldRange) and LFoldRange.Collapsable then
     begin
-      if IsKeywordAtCursorPosition then
+      if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
         LTempPosition := Pos(LFoldRange.FoldRegion.OpenToken, UpperCase(FLines[LFoldRange.FromLine - 1]));

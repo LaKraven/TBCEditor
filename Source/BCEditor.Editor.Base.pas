@@ -408,7 +408,7 @@ type
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALastTextRow, ALastRow: Integer);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
-    procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+    procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow, AFirstColumn, ALastColumn: Integer; AMinimap: Boolean);
     procedure RecalculateCharExtent;
     procedure RedoItem;
@@ -7031,7 +7031,11 @@ procedure TBCBaseEditor.PaintCodeFolding(AClipRect: TRect; ALineCount: Integer);
 var
   i: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
+  LOldBrushColor, LOldPenColor: TColor;
 begin
+  LOldBrushColor := Canvas.Brush.Color;
+  LOldPenColor := Canvas.Pen.Color;
+
   Canvas.Brush.Color := FCodeFolding.Colors.Background;
   Canvas.FillRect(AClipRect); { fill code folding rect }
   Canvas.Pen.Style := psSolid;
@@ -7057,6 +7061,9 @@ begin
     AClipRect.Bottom := AClipRect.Top + LineHeight;
     PaintCodeFoldingLine(AClipRect, i);
   end;
+
+  Canvas.Brush.Color := LOldBrushColor;
+  Canvas.Pen.Color := LOldPenColor;
 end;
 
 procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
@@ -7594,7 +7601,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+procedure TBCBaseEditor.PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
 var
   i: Integer;
   LPLine: PChar;
@@ -7602,7 +7609,7 @@ var
   LCharPosition, X, Y: Integer;
   LCharRect: TRect;
 begin
-  if FSpecialChars.Visible and not AMinimap then
+  if FSpecialChars.Visible then
   begin
     LPLine := PChar(FLines.Strings[ALine - 1]);
 
@@ -8352,15 +8359,19 @@ var
         end;
         PaintHighlightToken(True);
 
-        if FCodeFolding.Visible then
-          LFoldRange := CodeFoldingRangeForLine(GetUncollapsedLineNumber(LCurrentLine))
-        else
-          LFoldRange := nil;
+        if not AMinimap then
+        begin
+          if FCodeFolding.Visible then
+            LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(LCurrentLine))
+          else
+            LFoldRange := nil;
 
-        PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
-        PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
+          PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
+          PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect);
+          PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
+        end;
+
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
-        PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
 
         if not AMinimap and LPaintRightMargin then
         begin
@@ -8413,19 +8424,17 @@ begin
     LTokenRect.Top := (ALastRow - TopLine + 1) * LineHeight;
 
   if LTokenRect.Top < LTokenRect.Bottom then
-  with Canvas do
   begin
     LBackgroundColor := GetBackgroundColor;
     SetDrawingColors(False);
 
-    FillRect(LTokenRect);
+    Canvas.FillRect(LTokenRect);
 
-    if LPaintRightMargin then
-    with Canvas, LTokenRect do
+    if not AMinimap and LPaintRightMargin then
     begin
-      Pen.Color := FRightMargin.Colors.Edge;
-      MoveTo(LRightMarginPosition, Top);
-      LineTo(LRightMarginPosition, Bottom + 1);
+      Canvas.Pen.Color := FRightMargin.Colors.Edge;
+      Canvas.MoveTo(LRightMarginPosition, LTokenRect.Top);
+      Canvas.LineTo(LRightMarginPosition, LTokenRect.Bottom + 1);
     end;
   end;
 end;

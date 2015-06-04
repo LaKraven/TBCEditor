@@ -290,7 +290,7 @@ begin
     i := 1;
     while i < FLines.Count do
     begin
-      FHighlighter.SetCurrentLine(FLines[i - 1], i - 1);
+      FHighlighter.SetCurrentLine(FLines[i - 1]);
       FHighlighter.NextToEol;
       FLines.Objects[i] := FHighlighter.GetCurrentRange;
       Inc(i);
@@ -544,7 +544,7 @@ begin
   begin
     SaveCurrentFont;
     FHighlighter.SetCurrentRange(FLines.Objects[FLineNumber - 1]);
-    FHighlighter.SetCurrentLine(Text, FLineNumber);
+    FHighlighter.SetCurrentLine(Text);
     Token := '';
     TokenStart := 0;
     LCount := 0;

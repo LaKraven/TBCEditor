@@ -1298,7 +1298,7 @@ begin
       Highlighter.ResetCurrentRange
     else
       Highlighter.SetCurrentRange(FLines.Ranges[LPositionY - 1]);
-    Highlighter.SetCurrentLine(LLine, LPositionY);
+    Highlighter.SetCurrentLine(LLine);
     LPositionX := ATextPosition.Char;
     if (LPositionX > 0) and (LPositionX <= Length(LLine)) then
     while not Highlighter.GetEol do
@@ -1491,7 +1491,7 @@ begin
       ResetCurrentRange
     else
       SetCurrentRange(Lines.Ranges[APoint.Line]);
-    SetCurrentLine(Lines[APoint.Line], APoint.Line);
+    SetCurrentLine(Lines[APoint.Line]);
 
     while not GetEol and (APoint.Char >= GetTokenPosition + Length(GetToken)) do
       Next;
@@ -1570,7 +1570,7 @@ begin
         Inc(APoint.Line);
         if APoint.Line >= FLines.Count then
           Break;
-        SetCurrentLine(Lines[APoint.Line], APoint.Line);
+        SetCurrentLine(Lines[APoint.Line]);
       end;
     end
     else
@@ -1583,7 +1583,7 @@ begin
         ResetCurrentRange
       else
         SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
-      SetCurrentLine(Lines[APoint.Line], APoint.Line);
+      SetCurrentLine(Lines[APoint.Line]);
       while not GetEol and (GetTokenPosition < AMatch.CloseTokenPos.Char -1) do
         CheckTokenBack;
       if LMatchStackID > -1 then
@@ -1601,7 +1601,7 @@ begin
           ResetCurrentRange
         else
           SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
-        SetCurrentLine(Lines[APoint.Line], APoint.Line);
+        SetCurrentLine(Lines[APoint.Line]);
         LMatchStackID := -1;
         while not GetEol do
           CheckTokenBack;
@@ -2311,7 +2311,7 @@ begin
     FHighlighter.SetCurrentRange(FLines.Ranges[Result - 1]);
 
   repeat
-    FHighlighter.SetCurrentLine(Lines[Result], Result);
+    FHighlighter.SetCurrentLine(Lines[Result]);
     FHighlighter.NextToEol;
     LCurrentRange := FHighlighter.GetCurrentRange;
     if FLines.Ranges[Result] = LCurrentRange then
@@ -8261,7 +8261,7 @@ var
           FHighlighter.ResetCurrentRange
         else
           FHighlighter.SetCurrentRange(Lines.Ranges[LCurrentLine - 2]);
-        FHighlighter.SetCurrentLine(LCurrentLineText, LCurrentLine - 1);
+        FHighlighter.SetCurrentLine(LCurrentLineText);
         LTokenHelper.Length := 0;
 
         while not FHighlighter.GetEol do

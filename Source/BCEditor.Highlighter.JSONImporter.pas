@@ -481,12 +481,40 @@ var
   LFoldRegionItem: TBCEditorFoldRegionItem;
   LFoldRegions: TBCEditorCodeFoldingRegions;
   LSkipRegionItem: TBCEditorSkipRegionItem;
+  LFileName: string;
+  LEditor: TBCBaseEditor;
+  LFileStream: TStream;
+  LJSONObject: TJsonObject;
 begin
   LFoldRegions := FHighlighter.CodeFoldingRegions;
   if ACodeFoldingObject.Contains('SkipRegion') then
   for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
   begin
     LJsonDataValue := ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i];
+
+    if GMultiHighlighter then
+    begin
+      { Multi highlighter code folding skip region include }
+      LFileName := LJsonDataValue.ObjectValue['File'].Value;
+      if LFileName <> '' then
+      begin
+        LEditor := FHighlighter.Editor as TBCBaseEditor;
+        LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
+        LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
+        if Assigned(LJSONObject) then
+        try
+          if LJSONObject.Contains('CodeFolding') then
+            ImportCodeFoldingSkipRegions(LJSONObject['CodeFolding'].ObjectValue);
+        finally
+          LJSONObject.Free;
+          LFileStream.Free;
+        end;
+      end;
+      { Skip duplicates }
+      if LFoldRegions.SkipRegions.Contains(LJsonDataValue.ObjectValue['OpenToken'].Value, LJsonDataValue.ObjectValue['CloseToken'].Value) then
+        Continue;
+    end;
+
     LSkipRegionType := StrToRegionType(LJsonDataValue.ObjectValue['RegionType'].Value);
     if (LSkipRegionType = ritMultiLineComment) and (cfoFoldMultilineComments in TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options) then
     begin
@@ -509,14 +537,41 @@ var
   LFoldRegionItem: TBCEditorFoldRegionItem;
   LMemberObject: TJsonObject;
   LFoldRegions: TBCEditorCodeFoldingRegions;
+  LFileName: string;
+  LEditor: TBCBaseEditor;
+  LFileStream: TStream;
+  LJSONObject: TJsonObject;
 begin
   LFoldRegions := FHighlighter.CodeFoldingRegions;
   if ACodeFoldingObject.Contains('FoldRegion') then
   for i := 0 to ACodeFoldingObject['FoldRegion'].ArrayValue.Count - 1 do
   begin
     LJsonDataValue := ACodeFoldingObject['FoldRegion'].ArrayValue.Items[i];
-    LFoldRegionItem := LFoldRegions.Add(LJsonDataValue.ObjectValue['OpenToken'].Value,
-      LJsonDataValue.ObjectValue['CloseToken'].Value);
+
+    if GMultiHighlighter then
+    begin
+      { Multi highlighter code folding fold region include }
+      LFileName := LJsonDataValue.ObjectValue['File'].Value;
+      if LFileName <> '' then
+      begin
+        LEditor := FHighlighter.Editor as TBCBaseEditor;
+        LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
+        LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
+        if Assigned(LJSONObject) then
+        try
+          if LJSONObject.Contains('CodeFolding') then
+            ImportCodeFoldingFoldRegions(LJSONObject['CodeFolding'].ObjectValue);
+        finally
+          LJSONObject.Free;
+          LFileStream.Free;
+        end;
+      end;
+      { Skip duplicates }
+      if LFoldRegions.Contains(LJsonDataValue.ObjectValue['OpenToken'].Value, LJsonDataValue.ObjectValue['CloseToken'].Value) then
+        Continue;
+    end;
+
+    LFoldRegionItem := LFoldRegions.Add(LJsonDataValue.ObjectValue['OpenToken'].Value, LJsonDataValue.ObjectValue['CloseToken'].Value);
 
     LMemberObject := LJsonDataValue.ObjectValue['Properties'].ObjectValue;
     if Assigned(LMemberObject) then
@@ -566,9 +621,13 @@ end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportMatchingPair(AMatchingPairObject: TJsonObject);
 var
-  i: Integer;
+  i, j: Integer;
   LTokenMatch: PBCEditorMatchingPairToken;
   LJsonDataValue: PJsonDataValue;
+  LFileName: string;
+  LEditor: TBCBaseEditor;
+  LFileStream: TStream;
+  LJSONObject: TJsonObject;
 begin
   if not Assigned(AMatchingPairObject) then
     Exit;
@@ -576,7 +635,32 @@ begin
   for i := 0 to AMatchingPairObject['Pairs'].ArrayValue.Count - 1 do
   begin
     LJsonDataValue := AMatchingPairObject['Pairs'].ArrayValue.Items[i];
-    { Add element }
+
+    if GMultiHighlighter then
+    begin
+      { Multi highlighter code folding fold region include }
+      LFileName := LJsonDataValue.ObjectValue['File'].Value;
+      if LFileName <> '' then
+      begin
+        LEditor := FHighlighter.Editor as TBCBaseEditor;
+        LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
+        LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
+        if Assigned(LJSONObject) then
+        try
+          if LJSONObject.Contains('MatchingPair') then
+            ImportMatchingPair(LJSONObject['MatchingPair'].ObjectValue);
+        finally
+          LJSONObject.Free;
+          LFileStream.Free;
+        end;
+      end;
+      { Skip duplicates }
+      for j := 0 to FHighlighter.MatchingPairs.Count - 1 do
+        if (PBCEditorMatchingPairToken(FHighlighter.MatchingPairs.Items[j])^.OpenToken = LJsonDataValue.ObjectValue['OpenToken'].Value) and
+          (PBCEditorMatchingPairToken(FHighlighter.MatchingPairs.Items[j])^.CloseToken = LJsonDataValue.ObjectValue['CloseToken'].Value) then
+          Continue;
+    end;
+
     New(LTokenMatch);
     LTokenMatch.OpenToken := LJsonDataValue.ObjectValue['OpenToken'].Value;
     LTokenMatch.CloseToken := LJsonDataValue.ObjectValue['CloseToken'].Value;

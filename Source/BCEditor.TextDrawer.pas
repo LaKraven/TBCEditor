@@ -730,7 +730,7 @@ procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextO
   begin
     ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
     for i := 0 to ALength - 1 do
-      FExtTextOutDistance[i] := GetCharCount(@AText[i]) * ACharWidth;
+      FExtTextOutDistance[i] := GetCharCount(PChar(AText[i])) * ACharWidth;
   end;
 
   { avoid clipping the last pixels of text in italic }
@@ -743,10 +743,10 @@ procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextO
   begin
     if ALength <= 0 then
       Exit;
-    LLastChar := Ord(AText[ALength]);
+    LLastChar := Ord(AText[ALength - 1]);
     if LLastChar = 32 then
       Exit;
-    LNormalCharWidth := FExtTextOutDistance[ALength];
+    LNormalCharWidth := FExtTextOutDistance[ALength - 1];
     LRealCharWidth := LNormalCharWidth;
 
     if GetCachedABCWidth(LLastChar, LCharInfo) then
@@ -764,7 +764,7 @@ procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextO
 
     if LRealCharWidth > LNormalCharWidth then
       Inc(ARect.Right, LRealCharWidth - LNormalCharWidth);
-    FExtTextOutDistance[ALength] := Max(LRealCharWidth, LNormalCharWidth);
+    FExtTextOutDistance[ALength - 1] := Max(LRealCharWidth, LNormalCharWidth);
   end;
 
 begin

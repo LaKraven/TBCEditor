@@ -8134,7 +8134,7 @@ var
     for i := 0 to ALength do
     begin
       FColumnWidths[i] := LWidthSum;
-      LWidthSum := LWidthSum + FTextDrawer.GetCharCount(PChar(AText[i])) * ACharWidth;
+      LWidthSum := LWidthSum + FTextDrawer.GetCharCount(@AText[i]) * ACharWidth;
     end;
   end;
 
@@ -9544,7 +9544,7 @@ begin
         Inc(X, FTabs.Width)
       else
       if i <= l then
-        Inc(X, FTextDrawer.GetCharCount(PChar(s[i])))
+        Inc(X, FTextDrawer.GetCharCount(@s[i]))
       else
         Inc(X);
     end;
@@ -10064,8 +10064,8 @@ begin
       if (i <= l) and (s[i] = BCEDITOR_TAB_CHAR) then
         Inc(X, FTabs.Width)
       else
-      if ARealWidth and (i <= l) then
-        Inc(X, FTextDrawer.GetCharCount(PChar(s[i])))
+      if ARealWidth and (i <= l) and (s[i] <> BCEDITOR_SPACE_CHAR) and (s[i] <> '') then
+        Inc(X, FTextDrawer.GetCharCount(@s[i]))
       else
         Inc(X);
     end;

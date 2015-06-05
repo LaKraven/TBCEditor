@@ -109,6 +109,7 @@ type
     FCurrentFont: HFont;
     FDrawingCount: Integer;
     FExtTextOutDistance: PIntegerArray;
+    FExtTextOutLength: Integer;
     FFontStock: TBCEditorFontStock;
     FHandle: HDC;
     FSaveHandle: Integer;
@@ -118,7 +119,6 @@ type
     procedure AfterStyleSet; virtual;
     procedure DoSetCharExtra(Value: Integer); virtual;
     procedure FlushCharABCWidthCache;
-    procedure ReleaseExtTextOutDistance; virtual;
     property BaseCharHeight: Integer read FBaseCharHeight;
     property BaseCharWidth: Integer read FBaseCharWidth;
     property DrawingCount: Integer read FDrawingCount;
@@ -535,24 +535,20 @@ begin
   SetBaseFont(BaseFont);
   FColor := clWindowText;
   FBackgroundColor := clWindow;
+  FExtTextOutLength := 0;
 end;
 
 destructor TBCEditorTextDrawer.Destroy;
 begin
   FStockBitmap.Free;
   FFontStock.Free;
-  ReleaseExtTextOutDistance;
-
-  inherited;
-end;
-
-procedure TBCEditorTextDrawer.ReleaseExtTextOutDistance;
-begin
   if Assigned(FExtTextOutDistance) then
   begin
     FreeMem(FExtTextOutDistance);
     FExtTextOutDistance := nil;
   end;
+
+  inherited;
 end;
 
 procedure TBCEditorTextDrawer.BeginDrawing(AHandle: HDC);
@@ -601,7 +597,6 @@ begin
   if Assigned(Value) then
   begin
     FlushCharABCWidthCache;
-    ReleaseExtTextOutDistance;
     FStockBitmap.Canvas.Font.Assign(Value);
     FStockBitmap.Canvas.Font.Style := [];
     with FFontStock do
@@ -623,7 +618,6 @@ begin
   begin
     FlushCharABCWidthCache;
     FCalcExtentBaseStyle := Value;
-    ReleaseExtTextOutDistance;
     with FFontStock do
     begin
       Style := Value;
@@ -728,9 +722,13 @@ procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextO
   var
     i: Integer;
   begin
-    ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
+    if ALength > FExtTextOutLength then
+    begin
+      FExtTextOutLength := ALength;
+      ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
+    end;
     for i := 0 to ALength - 1 do
-      FExtTextOutDistance[i] := GetCharCount(PChar(AText[i])) * ACharWidth;
+      FExtTextOutDistance[i] := GetCharCount(@AText[i]) * ACharWidth;
   end;
 
   { avoid clipping the last pixels of text in italic }

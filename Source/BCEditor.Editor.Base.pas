@@ -7884,8 +7884,7 @@ var
     var
       i, j: Integer;
     begin
-      SetLength(Result, Length(Token));
-
+      Result := Token;
       i := First;
       j := 0;
       while i < First + CharCount do
@@ -7893,11 +7892,12 @@ var
         Inc(j);
         while Token[i] = BCEDITOR_FILLER_CHAR do
           Inc(i);
-        Result[j] := Token[i];
+        if j <> i then
+          Result[j] := Token[i];
         Inc(i);
       end;
-
-      SetLength(Result, j);
+      if Length(Result) <> j then
+        SetLength(Result, j);
       CharCount := j;
     end;
 

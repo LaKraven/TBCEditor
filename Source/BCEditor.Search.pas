@@ -39,7 +39,7 @@ type
     FTextLength: Integer;
     FTextToSearch: string;
     FTheEnd: PChar;
-    FWhole: Boolean;
+    FWholeWordsOnly: Boolean;
     function GetFinished: Boolean;
     procedure InitShiftTable;
     procedure SetCaseSensitive(const Value: Boolean);
@@ -63,7 +63,7 @@ type
     property Count: Integer read FCount write FCount;
     property Finished: Boolean read GetFinished;
     property Pattern read FCasedPattern;
-    property Whole: Boolean read FWhole write FWhole;
+    property WholeWordsOnly: Boolean read FWholeWordsOnly write FWholeWordsOnly;
   end;
 
 implementation
@@ -174,7 +174,7 @@ begin
       begin
         if i = FPatternLength then
         begin
-          if FWhole then
+          if FWholeWordsOnly then
             if not TestWholeWord then
               break;
           Inc(FCount);

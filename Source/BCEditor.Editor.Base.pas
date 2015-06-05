@@ -2449,7 +2449,7 @@ begin
     seNormal:
     begin
       TBCEditorNormalSearch(FSearchEngine).CaseSensitive := soCaseSensitive in FSearch.Options;
-      TBCEditorNormalSearch(FSearchEngine).Whole := soWholeWordsOnly in FSearch.Options;
+      TBCEditorNormalSearch(FSearchEngine).WholeWordsOnly := soWholeWordsOnly in FSearch.Options;
     end;
   end;
   LIsEndUndoBlock := False;
@@ -9815,6 +9815,13 @@ begin
       LCurrentTextPosition := LStartTextPosition;
   end;
   FSearchEngine.Pattern := ASearchText;
+  case FReplace.Engine of
+    seNormal:
+    begin
+      TBCEditorNormalSearch(FSearchEngine).CaseSensitive := roCaseSensitive in FReplace.Options;
+      TBCEditorNormalSearch(FSearchEngine).WholeWordsOnly := roWholeWordsOnly in FReplace.Options;
+    end;
+  end;
   LReplaceLength := 0;
   if LIsReplaceAll and not LIsPrompt then
   begin

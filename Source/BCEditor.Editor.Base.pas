@@ -451,6 +451,7 @@ type
     function IsBookmark(ABookmark: Integer): Boolean;
     function IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
     function IsWordBreakChar(AChar: Char): Boolean;
+    function IsWordChar(AChar: Char): Boolean;
     function LineToRow(ALine: Integer): Integer;
     function ReplaceText(const ASearchText: string; const AReplaceText: string): Integer;
     function SplitTextIntoWords(AStringList: TStrings; CaseSensitive: Boolean): string;
@@ -2223,8 +2224,10 @@ begin
     end
     else
     begin
-      if X > 0 then
+      if not IsWordBreakChar(LLine[X]) then
         X := StringScan(LLine, X, IsWordBreakChar);
+      if X > 0 then
+        X := StringScan(LLine, X, IsWordChar);
       if X = 0 then
         X := LineLength + 1;
     end;
@@ -2290,6 +2293,23 @@ begin
         end
         else
           X := 1;
+
+        { if previous char is a word-break-char search for the last IdentChar }
+        if IsWordBreakChar(LLine[X - 1]) then
+          X := StringReverseScan(LLine, X - 1, IsWordChar);
+        if X > 0 then
+          X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1;
+        if X = 0 then
+        begin
+          if Y > 1 then
+          begin
+            Dec(Y);
+            LLine := Lines[Y - 1];
+            X := Length(LLine) + 1;
+          end
+          else
+            X := 1;
+        end;
       end;
     end;
   end;
@@ -8308,6 +8328,7 @@ var
                 if FCurrentMatchingPair <> trNotFound then
                   if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
                   begin
+                    // TODO: It's not a current line, if code is folded
                     if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
                        (LCurrentLine = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
@@ -9702,6 +9723,11 @@ begin
   Result := CharInSet(AChar, [BCEDITOR_NONE_CHAR .. BCEDITOR_SPACE_CHAR, '.', ',', ';', ':', '"', '''', '´', '`', '°',
     '^', '!', '?', '&', '$', '@', '§', '%', '#', '~', '[', ']', '(', ')', '{', '}', '<', '>', '-', '=', '+', '*', '/',
     '\', '|']);
+end;
+
+function TBCBaseEditor.IsWordChar(AChar: Char): Boolean;
+begin
+  Result :=not IsWordBreakChar(AChar);
 end;
 
 function TBCBaseEditor.LineToRow(ALine: Integer): Integer;

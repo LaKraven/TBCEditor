@@ -4640,7 +4640,7 @@ begin
   for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   begin
     LCodeFoldingRangeItem := FAllCodeFoldingRanges[i];
-    if (LCodeFoldingRangeItem.Collapsed) and (not LCodeFoldingRangeItem.ParentCollapsed) then
+    if LCodeFoldingRangeItem.Collapsed and not LCodeFoldingRangeItem.ParentCollapsed then
     begin
       LNearest := -1;
       LCollapsedFromLine := LCodeFoldingRangeItem.FromLine;
@@ -9978,7 +9978,7 @@ begin
       while LTextPtr^ <> BCEDITOR_NONE_CHAR do
       begin
         { Skip regions - Close }
-        if (LOpenTokenSkipFoldRangeList.Count > 0) and CharInSet(UpCase(LTextPtr^), LSkipCloseKeyChars) then
+        if (LOpenTokenSkipFoldRangeList.Count > 0) and CharInSet(LTextPtr^, LSkipCloseKeyChars) then
         begin
           LKeyWordPtr := PChar(TBCEditorSkipRegionItem(LOpenTokenSkipFoldRangeList.Last).CloseToken);
           LBookmarkTextPtr := LTextPtr;
@@ -12399,21 +12399,23 @@ begin
       if LTemporaryAllCodeFoldingRanges.AllCount > 0 then
       begin
         for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+        begin
+          LCodeFoldingRange := FAllCodeFoldingRanges[i];
           for j := 0 to LTemporaryAllCodeFoldingRanges.AllCount - 1 do
           begin
-            LCodeFoldingRange := FAllCodeFoldingRanges[i];
-            if LCodeFoldingRange.FromLine < LTemporaryAllCodeFoldingRanges[j].FromLine then
+            if FAllCodeFoldingRanges[i].FromLine < LTemporaryAllCodeFoldingRanges[j].FromLine then
             begin
               LTemporaryAllCodeFoldingRanges.AllRanges.Insert(j, LCodeFoldingRange);
-              LCodeFoldingRange := nil; { destroy pointer }
+              FAllCodeFoldingRanges[i] := nil; { destroy pointer }
               Break;
             end;
             if j = LTemporaryAllCodeFoldingRanges.AllCount - 1 then
             begin
               LTemporaryAllCodeFoldingRanges.AllRanges.Add(LCodeFoldingRange);
-              LCodeFoldingRange := nil; { destroy pointer }
+              FAllCodeFoldingRanges[i] := nil; { destroy pointer }
             end;
           end;
+        end;
       end
       else
         LTemporaryAllCodeFoldingRanges.Assign(FAllCodeFoldingRanges);

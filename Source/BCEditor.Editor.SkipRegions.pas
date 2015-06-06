@@ -3,7 +3,7 @@ unit BCEditor.Editor.SkipRegions;
 interface
 
 uses
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils, BCEditor.Consts;
 
 type
   TBCEditorSkipRegionItemType = (ritUnspecified, ritString, ritMultiLineComment, ritSingleLineComment);
@@ -14,11 +14,13 @@ type
     FOpenToken: string;
     FRegionType: TBCEditorSkipRegionItemType;
     FSkipEmptyChars: Boolean;
+    FSkipIfNextCharIsNot: Char;
   public
     property OpenToken: string read FOpenToken write FOpenToken;
     property CloseToken: string read FCloseToken write FCloseToken;
     property RegionType: TBCEditorSkipRegionItemType read FRegionType write FRegionType;
     property SkipEmptyChars: Boolean read FSkipEmptyChars write FSkipEmptyChars;
+    property SkipIfNextCharIsNot: Char read FSkipIfNextCharIsNot write FSkipIfNextCharIsNot default BCEDITOR_NONE_CHAR;
   end;
 
   TBCEditorSkipRegions = class(TCollection)

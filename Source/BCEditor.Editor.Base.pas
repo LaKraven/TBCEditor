@@ -3556,25 +3556,32 @@ var
     end;
   end;
 
-  function OddCountOfStringEscapeChars(TextPtr: PChar): Boolean;
+  function OddCountOfStringEscapeChars(ATextPtr: PChar): Boolean;
   begin
     Result := False;
     if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
-      Result := Odd(CountCharsBefore(TextPtr, Highlighter.CodeFoldingRegions.StringEscapeChar));
+      Result := Odd(CountCharsBefore(ATextPtr, Highlighter.CodeFoldingRegions.StringEscapeChar));
   end;
 
-  function IsPreviousCharStringEscape(TextPtr: PChar): Boolean;
+  function IsNextSkipChar(ATextPtr: PChar; ASkipRegionItem: TBCEditorSkipRegionItem): Boolean;
   begin
     Result := False;
-    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
-      Result := (TextPtr - 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+    if ASkipRegionItem.SkipIfNextCharIsNot <> #0 then
+      Result := (ATextPtr + 1)^ = ASkipRegionItem.SkipIfNextCharIsNot;
   end;
 
-  function IsNextCharStringEscape(TextPtr: PChar): Boolean;
+  function IsPreviousCharStringEscape(ATextPtr: PChar): Boolean;
   begin
     Result := False;
     if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
-      Result := (TextPtr + 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+      Result := (ATextPtr - 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
+  end;
+
+  function IsNextCharStringEscape(ATextPtr: PChar): Boolean;
+  begin
+    Result := False;
+    if Highlighter.CodeFoldingRegions.StringEscapeChar <> #0 then
+      Result := (ATextPtr + 1)^ = Highlighter.CodeFoldingRegions.StringEscapeChar;
   end;
 
   function SkipRegionsClose: Boolean;
@@ -3620,17 +3627,17 @@ var
         for i := 0 to j do
         begin
           LSkipRegionItem := Highlighter.CodeFoldingRegions.SkipRegions[i];
-          if (LTextPtr^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LTextPtr) then
+          if (LTextPtr^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LTextPtr) and
+            not IsNextSkipChar(LTextPtr, LSkipRegionItem) then
           begin
             LKeyWordPtr := PChar(LSkipRegionItem.OpenToken);
             LBookmarkTextPtr := LTextPtr;
             { check if the open keyword found }
             while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and ((LTextPtr^ = LKeyWordPtr^) or
-               (LSkipRegionItem.SkipEmptyChars and
-               ((LTextPtr^ = BCEDITOR_SPACE_CHAR) or (LTextPtr^ = BCEDITOR_TAB_CHAR)) )) do
+               (LSkipRegionItem.SkipEmptyChars and ((LTextPtr^ = BCEDITOR_SPACE_CHAR) or (LTextPtr^ = BCEDITOR_TAB_CHAR)) )) do
             begin
-              if not LSkipRegionItem.SkipEmptyChars or (LSkipRegionItem.SkipEmptyChars and
-                (LTextPtr^ <> BCEDITOR_SPACE_CHAR) and (LTextPtr^ <> BCEDITOR_TAB_CHAR)) then
+              if not LSkipRegionItem.SkipEmptyChars or
+                (LSkipRegionItem.SkipEmptyChars and (LTextPtr^ <> BCEDITOR_SPACE_CHAR) and (LTextPtr^ <> BCEDITOR_TAB_CHAR)) then
                 Inc(LKeyWordPtr);
               Inc(LTextPtr);
             end;

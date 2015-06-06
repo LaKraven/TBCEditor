@@ -560,6 +560,9 @@ begin
       LSkipRegionItem := LFoldRegions.SkipRegions.Add(LOpenToken, LCloseToken);
       LSkipRegionItem.RegionType := LSkipRegionType;
       LSkipRegionItem.SkipEmptyChars := LJsonDataValue.ObjectValue.B['SkipEmptyChars'];
+      LSkipRegionItem.SkipIfNextCharIsNot := BCEDITOR_NONE_CHAR;
+      if LJsonDataValue.ObjectValue.Contains('NextCharIsNot') then
+        LSkipRegionItem.SkipIfNextCharIsNot := LJsonDataValue.ObjectValue['NextCharIsNot'].Value[1];;
       FHighlighter.AddKeyChar(ctSkipOpen, LOpenToken[1]);
       if LCloseToken <> '' then
         FHighlighter.AddKeyChar(ctSkipClose, LCloseToken[1]);
@@ -640,7 +643,7 @@ var
   LFoldRegions: TBCEditorCodeFoldingRegions;
 begin
   LFoldRegions := FHighlighter.CodeFoldingRegions;
-  LFoldRegions.StringEscapeChar := #0;
+  LFoldRegions.StringEscapeChar := BCEDITOR_NONE_CHAR;
 
   if ACodeFoldingObject.Contains('Options') then
   begin

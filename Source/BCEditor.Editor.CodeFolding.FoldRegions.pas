@@ -3,7 +3,7 @@ unit BCEditor.Editor.CodeFolding.FoldRegions;
 interface
 
 uses
-  System.Classes, System.SysUtils, BCEditor.Editor.SkipRegions;
+  System.Classes, System.SysUtils, BCEditor.Editor.SkipRegions, BCEditor.Consts;
 
 type
   TBCEditorCodeFoldingRegions = class;
@@ -57,7 +57,7 @@ type
     property Items[index: Integer]: TBCEditorFoldRegionItem read GetItem; default;
     property ReverseRegions: TBCEditorCodeFoldingRegions read FReverseRegions write FReverseRegions;
     property SkipRegions: TBCEditorSkipRegions read FSkipRegions;
-    property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default #0;
+    property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default BCEDITOR_NONE_CHAR;
   end;
 
 implementation
@@ -87,7 +87,7 @@ constructor TBCEditorCodeFoldingRegions.Create(ItemClass: TCollectionItemClass);
 begin
   inherited Create(ItemClass);
   FSkipRegions := TBCEditorSkipRegions.Create(TBCEditorSkipRegionItem);
-  FStringEscapeChar := #0;
+  FStringEscapeChar := BCEDITOR_NONE_CHAR;
 end;
 
 destructor TBCEditorCodeFoldingRegions.Destroy;

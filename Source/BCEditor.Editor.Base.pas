@@ -7223,7 +7223,6 @@ begin
       if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
         (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) then
       begin
-        Y := ALineRect.Top;
         if AMinimap then
           X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1) * FMinimap.CharWidth
         else
@@ -7242,6 +7241,7 @@ begin
             (CaretY >= LCodeFoldingRange.FromLine) and (CaretY <= LCodeFoldingRange.ToLine) then
             if cfoHighlightIndentGuides in FCodeFolding.Options then
               Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
+          Y := ALineRect.Top;
           Canvas.MoveTo(X, Y);
           Canvas.LineTo(X, ALineRect.Bottom);
           Canvas.Pen.Color := LTempColor;
@@ -8657,13 +8657,13 @@ begin
     LLineRect.Left := FLeftMargin.GetWidth + FCodeFolding.Width;
     LLineRect.Right := LLineRect.Left + CharsInWindow * CharWidth;
     LLineRect.Top := 0;
-    LLineRect.Bottom := FTextHeight;
+    LLineRect.Bottom := GetLineHeight;
     LScrolledXBy := (LeftChar - 1) * CharWidth;
     for LCurrentLine := RowToLine(TopLine) to RowToLine(TopLine) + VisibleLines do
     begin
       PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, False);
       LLineRect.Top := LLineRect.Bottom;
-      Inc(LLineRect.Bottom, FTextHeight);
+      Inc(LLineRect.Bottom, GetLineHeight);
     end;
   finally
     UpdateCaret;

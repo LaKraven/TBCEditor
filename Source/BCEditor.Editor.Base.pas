@@ -3532,7 +3532,7 @@ var
 
   function IsValidChar(Character: PChar): Boolean;
   begin
-    Result := CharInSet(Character^, CODE_FOLDING_VALID_CHARACTERS);
+    Result := CharInSet(UpCase(Character^), CODE_FOLDING_VALID_CHARACTERS);
   end;
 
   function IsWholeWord(FirstChar, LastChar: PChar): Boolean;

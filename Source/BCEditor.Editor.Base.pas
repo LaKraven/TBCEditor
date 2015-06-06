@@ -7722,6 +7722,7 @@ begin
             FTextDrawer.TextOut(LCharRect.Left, LCharRect.Top, Char($00B6), 1);
           end
           else
+          if FSpecialChars.EndOfLine.Style = eolArrow then
           begin
             Y := LCharRect.Top + 2;
             if FSpecialChars.Style = scsDot then
@@ -7744,6 +7745,20 @@ begin
             LineTo(LCharRect.Left + 3, Y - 3);
             MoveTo(LCharRect.Left + 6, Y);
             LineTo(LCharRect.Left + 9, Y - 3);
+          end
+          else
+          begin
+            Y := LCharRect.Top + GetLineHeight div 2;
+            MoveTo(LCharRect.Left, Y);
+            LineTo(LCharRect.Left + 11, Y);
+            MoveTo(LCharRect.Left + 1, Y - 1);
+            LineTo(LCharRect.Left + 1, Y + 2);
+            MoveTo(LCharRect.Left + 2, Y - 2);
+            LineTo(LCharRect.Left + 2, Y + 3);
+            MoveTo(LCharRect.Left + 3, Y - 3);
+            LineTo(LCharRect.Left + 3, Y + 4);
+            MoveTo(LCharRect.Left + 10, Y - 3);
+            LineTo(LCharRect.Left + 10, Y);
           end;
         end;
       end;

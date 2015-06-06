@@ -193,7 +193,7 @@ type
   end;
 
   TBCEditorCompletionType = (ctNone, ctCode, ctHint);
-  TBCEditorSpecialCharsEndOfLineStyle = (eolArrow, eolPilcrow);
+  TBCEditorSpecialCharsEndOfLineStyle = (eolArrow, eolEnter, eolPilcrow);
 
   TBCEditorSpecialCharsOption = (scoUseTextColor);
   TBCEditorSpecialCharsOptions = set of TBCEditorSpecialCharsOption;

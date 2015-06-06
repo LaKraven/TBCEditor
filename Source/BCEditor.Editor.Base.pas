@@ -3369,6 +3369,9 @@ begin
       end;
     end;
 
+  if not SelectionAvailable and SelectionCommand then
+    FSelectionBeginPosition := CaretPosition;
+
   LZeroPosition := CaretPosition;
   LDestinationPosition := LZeroPosition;
 
@@ -3445,6 +3448,9 @@ begin
     DoTrimTrailingSpaces(FSelectionBeginPosition.Line);
     DoTrimTrailingSpaces(LDestinationLineChar.Line);
   end;
+
+  if not SelectionAvailable and SelectionCommand then
+    FSelectionBeginPosition := CaretPosition;
 
   { Set caret and block begin / end }
   IncPaintLock;

@@ -6062,7 +6062,7 @@ begin
   if FCodeFolding.Visible then
   begin
     if FNeedToRescanCodeFolding or
-      IsKeywordAtCurrentLine and ((ACommand = ecLineBreak) or (ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) or
+      IsKeywordAtCurrentLine and ((ACommand = ecLineBreak) or (ACommand = ecChar)) or
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
     else
@@ -6387,7 +6387,11 @@ begin
     FMouseOverURI := False;
 
   if FCodeFolding.Visible then
+  begin
     CheckIfAtMatchingKeywords;
+    if (Key = VK_DELETE) or (Key = VK_BACK) then
+      RescanCodeFoldingRanges
+  end;
 
   FKeyboardHandler.ExecuteKeyUp(Self, Key, Shift);
 end;
@@ -10394,8 +10398,8 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
-      IsKeywordAtCursorPosition and ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar)) or
+    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
+      IsKeywordAtCursorPosition and ((ACommand = ecChar) or (ACommand = ecTab)) or
       SelectionAvailable and (ACommand = ecLineBreak) then
       FNeedToRescanCodeFolding := True;
 

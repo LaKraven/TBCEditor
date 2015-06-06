@@ -32,6 +32,7 @@ type
     FTemporaryCurrentTokens: TList;
     FTokenPosition: Integer;
     FWordBreakChars: TBCEditorCharSet;
+    FFoldOpenKeyChars, FFoldCloseKeyChars, FSkipOpenKeyChars, FSkipCloseKeyChars: TBCEditorCharSet;
     procedure AddAllAttributes(ARange: TBCEditorRange);
     procedure UpdateAttributes(ARange: TBCEditorRange; AParentRange: TBCEditorRange);
   protected
@@ -62,6 +63,7 @@ type
     procedure SetCurrentLine(NewValue: string);
     procedure SetCurrentRange(Value: Pointer);
     procedure UpdateColors;
+    procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
 
     property Attribute[Index: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
@@ -76,6 +78,11 @@ type
     property Name: string read FName write FName;
     property Colors: TBCEditorHighlighterColors read FColors write FColors;
     property WordBreakChars: TBCEditorCharSet read FWordBreakChars write SetWordBreakChars;
+
+    property FoldOpenKeyChars: TBCEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
+    property FoldCloseKeyChars: TBCEditorCharSet read FFoldCloseKeyChars write FFoldCloseKeyChars;
+    property SkipOpenKeyChars: TBCEditorCharSet read FSkipOpenKeyChars write FSkipOpenKeyChars;
+    property SkipCloseKeyChars: TBCEditorCharSet read FSkipCloseKeyChars write FSkipCloseKeyChars;
   end;
 
 implementation
@@ -84,6 +91,16 @@ uses
   BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Utils, BCEditor.Consts, BCEditor.Editor.Base;
 
 { TBCEditorHighlighter }
+
+procedure TBCEditorHighlighter.AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
+begin
+  case AKeyCharType of
+    ctFoldOpen: FFoldOpenKeyChars := FFoldOpenKeyChars + [AChar];
+    ctFoldClose: FFoldCloseKeyChars := FFoldCloseKeyChars + [AChar];
+    ctSkipOpen: FSkipOpenKeyChars := FSkipOpenKeyChars + [AChar];
+    ctSkipClose: FSkipCloseKeyChars := FSkipCloseKeyChars + [AChar];
+  end;
+end;
 
 constructor TBCEditorHighlighter.Create(AOwner: TWinControl);
 begin
@@ -358,6 +375,10 @@ procedure TBCEditorHighlighter.Clear;
 var
   i: Integer;
 begin
+  FFoldOpenKeyChars := [];
+  FFoldCloseKeyChars := [];
+  FSkipOpenKeyChars := [];
+  FSkipCloseKeyChars := [];
   FAttributes.Clear;
   FMainRules.Clear;
   FInfo.Clear;

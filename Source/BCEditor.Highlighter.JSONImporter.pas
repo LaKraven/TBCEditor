@@ -19,7 +19,7 @@ type
     procedure ImportColors(AJSONObject: TJsonObject);
     procedure ImportColorsEditorProperties(AEditorObject: TJsonObject);
     procedure ImportColorsInfo(AInfoObject: TJsonObject);
-    procedure ImportCompletionProposal(ACodeFoldingObject: TJsonObject);
+    procedure ImportCompletionProposal(ACompletionProposalObject: TJsonObject);
     procedure ImportEditorProperties(AEditorObject: TJsonObject);
     procedure ImportElements(AColorsObject: TJsonObject);
     procedure ImportHighlighter(AJSONObject: TJsonObject);
@@ -454,18 +454,46 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCompletionProposal(ACodeFoldingObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportCompletionProposal(ACompletionProposalObject: TJsonObject);
 var
   i: Integer;
   LSkipRegionItem: TBCEditorSkipRegionItem;
   LJsonDataValue: PJsonDataValue;
+  LFileName: string;
+  LEditor: TBCBaseEditor;
+  LFileStream: TStream;
+  LJSONObject: TJsonObject;
 begin
-  if not Assigned(ACodeFoldingObject) then
+  if not Assigned(ACompletionProposalObject) then
     Exit;
   { Skip regions }
-  for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
+  for i := 0 to ACompletionProposalObject['SkipRegion'].ArrayValue.Count - 1 do
   begin
-    LJsonDataValue := ACodeFoldingObject['SkipRegion'].ArrayValue.Items[i];
+    LJsonDataValue := ACompletionProposalObject['SkipRegion'].ArrayValue.Items[i];
+
+    if GMultiHighlighter then
+    begin
+      { Multi highlighter code folding skip region include }
+      LFileName := LJsonDataValue.ObjectValue['File'].Value;
+      if LFileName <> '' then
+      begin
+        LEditor := FHighlighter.Editor as TBCBaseEditor;
+        LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
+        LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
+        if Assigned(LJSONObject) then
+        try
+          if LJSONObject.Contains('CodeFolding') then
+            ImportCompletionProposal(LJSONObject['CompletionProposal'].ObjectValue);
+        finally
+          LJSONObject.Free;
+          LFileStream.Free;
+        end;
+      end;
+      { Skip duplicates }
+      if FHighlighter.CompletionProposalSkipRegions.Contains(LJsonDataValue.ObjectValue['OpenToken'].Value, LJsonDataValue.ObjectValue['CloseToken'].Value) then
+        Continue;
+    end;
+
     LSkipRegionItem := FHighlighter.CompletionProposalSkipRegions.Add(LJsonDataValue.ObjectValue['OpenToken'].Value,
       LJsonDataValue.ObjectValue['CloseToken'].Value);
     LSkipRegionItem.RegionType := StrToRegionType(LJsonDataValue.ObjectValue['RegionType'].Value);

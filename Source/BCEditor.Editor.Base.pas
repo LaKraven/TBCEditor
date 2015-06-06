@@ -1228,7 +1228,7 @@ end;
 
 function TBCBaseEditor.GetDisplayPosition: TBCEditorDisplayPosition;
 begin
-  Result := TextToDisplayPosition(CaretPosition);
+  Result := TextToDisplayPosition(CaretPosition, False);
   if GetWordWrap and FCaretAtEndOfLine then
   begin
     if Result.Column = 1 then

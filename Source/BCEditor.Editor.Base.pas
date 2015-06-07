@@ -8386,7 +8386,8 @@ var
               if (LKeyword <> '') and (LKeyword = LWord) then
               begin
                 LIsCustomBackgroundColor := True;
-                LForegroundColor := FSearch.Highlighter.Colors.Foreground;
+                if FSearch.Highlighter.Colors.Foreground <> clNone then
+                  LForegroundColor := FSearch.Highlighter.Colors.Foreground;
                 LBackgroundColor := FSearch.Highlighter.Colors.Background;
               end;
 

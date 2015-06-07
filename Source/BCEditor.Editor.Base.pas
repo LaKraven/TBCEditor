@@ -533,7 +533,7 @@ type
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
     procedure SetLineColorToDefault(ALine: Integer);
     procedure Sort(ASortOrder: TBCEditorSortOrder = soToggle);
-    procedure ToggleBookmark;
+    procedure ToggleBookmark(AIndex: Integer = -1);
     procedure ToggleSelectedCase(ACase: TBCEditorCase = cNone);
     procedure UnHookTextBuffer;
     procedure UnlockUndo;
@@ -12631,25 +12631,35 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.ToggleBookmark;
+procedure TBCBaseEditor.ToggleBookmark(AIndex: Integer = -1);
 var
   i: Integer;
   X, Y: Integer;
 begin
-  for i := 0 to Marks.Count - 1 do
-    if CaretY = Marks[i].Line then
-    begin
-      ClearBookmark(Marks[i].Index);
-      Exit;
-    end;
-  X := CaretX;
-  Y := CaretY;
-  for i := 0 to 8 do
-    if not GetBookmark(i, X, Y) then { variables used because X and Y are var parameters }
-    begin
-      SetBookmark(i, CaretX, CaretY);
-      Exit;
-    end;
+  if AIndex <> -1 then
+  begin
+    if not GetBookmark(AIndex, X, Y) then
+      SetBookmark(AIndex, CaretX, CaretY)
+    else
+      ClearBookmark(AIndex);
+  end
+  else
+  begin
+    for i := 0 to Marks.Count - 1 do
+      if CaretY = Marks[i].Line then
+      begin
+        ClearBookmark(Marks[i].Index);
+        Exit;
+      end;
+    X := CaretX;
+    Y := CaretY;
+    for i := 0 to 8 do
+      if not GetBookmark(i, X, Y) then { variables used because X and Y are var parameters }
+      begin
+        SetBookmark(i, CaretX, CaretY);
+        Exit;
+      end;
+  end;
 end;
 
 procedure TBCBaseEditor.UnHookTextBuffer;

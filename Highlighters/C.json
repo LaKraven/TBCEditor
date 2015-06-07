@@ -5,13 +5,13 @@
                 "Version": "1.0",
                 "Date": "7.6.2015",
                 "Sample": [
-                    "// Hello World in C++\r\n",
+                    "// Hello World in C\r\n",
                     "\r\n",
-                    "#include <iostream>\r\n",
+                    "#include <stdio.h>\r\n",
                     "\r\n",
-                    "int main()\r\n",
+                    "int main(void)\r\n",
                     "{\r\n",
-                    "    std::cout << \"Hello, world!\" << std::endl;\r\n",
+                    "    printf(\"Hello, world!\\n\");\r\n",
                     "    return 0;\r\n",
                     "}"
                 ]
@@ -177,7 +177,7 @@
                     }
                 ],
                 "KeyList": [
-                   {
+                    {
                         "Name": "C Keywords",
                         "Type": "ReservedWord",
                         "Words": [
@@ -216,82 +216,6 @@
                         ],
                         "Attributes": {
                             "Element": "ReservedWord",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Name": "C++ Keywords",
-                        "Type": "ReservedWord",
-                        "Words": [
-                            "asm",
-                            "and",
-                            "and_eq",
-                            "bitand",
-														"bitor",
-                            "bool",
-                            "catch",
-                            "char",
-                            "class",
-                            "compl",
-                            "const_cast",
-                            "delete",
-                            "dynamic_cast",
-                            "explicit",
-                            "false",
-                            "friend",
-                            "inline",
-                            "mutable",
-                            "namespace",
-                            "new",
-                            "not",
-                            "not_eq",
-                            "operator",
-                            "or",
-                            "or_eq",
-                            "private",
-                            "protected",
-                            "public",
-                            "reinterpret_cast",
-                            "static_cast",
-                            "template",
-                            "this",
-                            "throw",
-                            "true",
-                            "try",
-                            "typeid",
-                            "typename",
-                            "using",
-                            "virtual",
-                            "wchar_t",
-                            "xor",
-                            "xor_eq"
-                        ],
-                        "Attributes": {
-                            "Element": "ReservedWord",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Name": "C++ Predefined Indetifiers",
-                        "Type": "ReservedWord",
-                        "Words": [
-                            "cin",
-                            "cout",
-                            "endl",
-                            "include",
-														"INT_MIN",
-                            "INT_MAX",
-                            "iomanip",
-                            "iostream",
-                            "main",
-                            "MAX_RAND",
-                            "npos",
-                            "NULL",
-                            "std",
-                            "string"
-                        ],
-                        "Attributes": {
-                            "Element": "MethodName",
                             "ParentBackground": true
                         }
                     },

@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Editor.LeftMargin.Bookmarks, BCEditor.Editor.Bookmarks,
   BCEditor.Editor.LeftMargin.Border, BCEditor.Consts, BCEditor.Editor.LeftMargin.LineState,
-  BCEditor.Editor.LeftMargin.LineNumbers;
+  BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.LeftMargin.Colors;
 
 type
   TLeftMarginGetTextEvent = procedure(Sender: TObject; ALine: Integer; var AText: string) of object;
@@ -17,7 +17,7 @@ type
     FAutosize: Boolean;
     FBookMarks: TBCEditorLeftMarginBookMarks;
     FBorder: TBCEditorLeftMarginBorder;
-    FColor: TColor;
+    FColors: TBCEditorLeftMarginColors;
     FCursor: TCursor;
     FFont: TFont;
     FLineState: TBCEditorLeftMarginLineState;
@@ -28,7 +28,7 @@ type
     procedure DoChange;
     procedure SetAutosize(const Value: Boolean);
     procedure SetBookMarks(const Value: TBCEditorLeftMarginBookMarks);
-    procedure SetColor(const Value: TColor);
+    procedure SetColors(const Value: TBCEditorLeftMarginColors);
     procedure SetFont(Value: TFont);
     procedure SetOnChange(Value: TNotifyEvent);
     procedure SetVisible(const Value: Boolean);
@@ -46,7 +46,7 @@ type
     property Autosize: Boolean read FAutosize write SetAutosize default True;
     property Bookmarks: TBCEditorLeftMarginBookMarks read FBookMarks write SetBookMarks;
     property Border: TBCEditorLeftMarginBorder read FBorder write FBorder;
-    property Color: TColor read FColor write SetColor default clLeftMarginBackground;
+    property Colors: TBCEditorLeftMarginColors read FColors write SetColors;
     property Cursor: TCursor read FCursor write FCursor default crDefault;
     property Font: TFont read FFont write SetFont;
     property LineNumbers: TBCEditorLeftMarginLineNumbers read FLineNumbers write FLineNumbers;
@@ -68,7 +68,7 @@ begin
   inherited Create;
 
   FAutosize := True;
-  FColor := clLeftMarginBackground;
+  FColors := TBCEditorLeftMarginColors.Create;
   FCursor := crDefault;
   FBorder := TBCEditorLeftMarginBorder.Create;
   FFont := TFont.Create;
@@ -87,18 +87,21 @@ end;
 procedure TBCEditorLeftMargin.SetOnChange(Value: TNotifyEvent);
 begin
   FOnChange := Value;
-  FFont.OnChange := Value;
+
   FBookmarks.OnChange := Value;
   FBorder.OnChange := Value;
+  FColors.OnChange := Value;
+  FFont.OnChange := Value;
   FLineState.OnChange := Value;
   FLineNumbers.OnChange := Value;
 end;
 
 destructor TBCEditorLeftMargin.Destroy;
 begin
-  FFont.Free;
   FBookmarks.Free;
   FBorder.Free;
+  FColors.Free;
+  FFont.Free;
   FLineState.Free;
   FLineNumbers.Free;
   inherited Destroy;
@@ -114,9 +117,6 @@ function TBCEditorLeftMargin.RealLeftMarginWidth(CharWidth: Integer): Integer;
 var
   PanelWidth: Integer;
 begin
-  //Result := GetWidth;
-  //Exit;
-
   PanelWidth := FBookmarks.Panel.Width;
   if not FBookmarks.Panel.Visible and not FBookmarks.Visible then
     PanelWidth := 0;
@@ -137,7 +137,7 @@ begin
   begin
     Self.FAutosize := FAutosize;
     Self.FBookmarks.Assign(FBookmarks);
-    Self.FColor := FColor;
+    Self.FColors.Assign(FColors);
     Self.FBorder := FBorder;
     Self.FCursor := FCursor;
     Self.FFont.Assign(FFont);
@@ -167,13 +167,9 @@ begin
   end;
 end;
 
-procedure TBCEditorLeftMargin.SetColor(const Value: TColor);
+procedure TBCEditorLeftMargin.SetColors(const Value: TBCEditorLeftMarginColors);
 begin
-  if FColor <> Value then
-  begin
-    FColor := Value;
-    DoChange
-  end;
+  FColors.Assign(Value);
 end;
 
 procedure TBCEditorLeftMargin.SetFont(Value: TFont);

@@ -8,14 +8,12 @@ uses
 type
   TBCEditorLeftMarginBookMarkPanel = class(TPersistent)
   strict private
-    FColor: TColor;
     FLeftMargin: Integer;
     FOnChange: TNotifyEvent;
     FOptions: TBCEditorLeftMarginBookMarkPanelOptions;
     FOtherMarkXOffset: Integer;
     FVisible: Boolean;
     FWidth: Integer;
-    procedure SetColor(const Value: TColor);
     procedure SetLeftMargin(Value: Integer);
     procedure SetOtherMarkXOffset(Value: Integer);
     procedure SetVisible(const Value: Boolean);
@@ -25,7 +23,6 @@ type
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
-    property Color: TColor read FColor write SetColor default clLeftMarginBookmarkBackground;
     property LeftMargin: Integer read FLeftMargin write SetLeftMargin default 2;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Options: TBCEditorLeftMarginBookMarkPanelOptions read FOptions write FOptions default [bpoToggleBookmarkByClick];
@@ -43,7 +40,6 @@ constructor TBCEditorLeftMarginBookMarkPanel.Create;
 begin
   inherited;
 
-  FColor := clLeftMarginBookmarkbackground;
   FWidth := 20;
   FLeftMargin := 2;
   FOptions := [bpoToggleBookmarkByClick];
@@ -56,7 +52,6 @@ begin
   if Assigned(Source) and (Source is TBCEditorLeftMarginBookMarkPanel) then
   with Source as TBCEditorLeftMarginBookMarkPanel do
   begin
-    Self.FColor := FColor;
     Self.FLeftMargin := FLeftMargin;
     Self.FOtherMarkXOffset := FOtherMarkXOffset;
     Self.FVisible := FVisible;
@@ -73,15 +68,6 @@ procedure TBCEditorLeftMarginBookMarkPanel.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(Self);
-end;
-
-procedure TBCEditorLeftMarginBookMarkPanel.SetColor(const Value: TColor);
-begin
-  if Value <> FColor then
-  begin
-    FColor := Value;
-    DoChange
-  end;
 end;
 
 procedure TBCEditorLeftMarginBookMarkPanel.SetWidth(Value: Integer);

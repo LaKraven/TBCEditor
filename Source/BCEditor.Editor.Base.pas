@@ -7088,7 +7088,16 @@ procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
 var
   X, LHeight: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
+  FOldBrushColor: TColor;
 begin
+  if (CaretY = ALine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
+  begin
+    FOldBrushColor := Canvas.Brush.Color;
+    Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
+    Canvas.FillRect(AClipRect);
+    Canvas.Brush.Color := FOldBrushColor;
+  end;
+
   if CodeFolding.Padding > 0 then
     InflateRect(AClipRect, -CodeFolding.Padding, 0);
 
@@ -7329,14 +7338,17 @@ var
   LOldColor: TColor;
   LLineStateRect: TRect;
   LPanelRect: TRect;
+  LPanelActiveLineRect: TRect;
   LPEditorLineAttribute: PBCEditorLineAttribute;
   LBookmark: TBCEditorBookmark;
+  LActiveLine: Integer;
 begin
   LFirstLine := RowToLine(AFirstRow);
   LLastLine := RowToLine(ALastRow);
   LLastTextLine := RowToLine(ALastTextRow);
+  LActiveLine := (DisplayY - TopLine) * LineHeight;
 
-  Canvas.Brush.Color := FLeftMargin.Color;
+  Canvas.Brush.Color := FLeftMargin.Colors.Background;
   Canvas.FillRect(AClipRect); { fill left margin rect }
 
   { Line numbers }
@@ -7345,7 +7357,6 @@ begin
     FTextDrawer.SetBaseFont(FLeftMargin.Font);
     try
       FTextDrawer.SetForegroundColor(FLeftMargin.Font.Color);
-      FTextDrawer.SetBackgroundColor(FLeftMargin.Color);
 
       LLineRect := AClipRect;
 
@@ -7354,6 +7365,10 @@ begin
 
       for LLine := LFirstLine to LLastTextLine do
       begin
+        if (LLine <> CaretY) or (FLeftMargin.Colors.ActiveLineBackground = clNone) then
+          FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background)
+        else
+          FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground);
         LLineTop := (LineToRow(LLine) - TopLine) * LineHeight;
         if GetWordWrap then
         begin
@@ -7378,7 +7393,7 @@ begin
         begin
           LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
           LOldColor := Canvas.Pen.Color;
-          Canvas.Pen.Color := LeftMargin.Font.Color;
+          Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
           if (LUncollapsedLineNumber mod 5) = 0 then
           begin
             Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
@@ -7399,6 +7414,7 @@ begin
           LLineRect.Top + ((LineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, PChar(LLineNumber),
           Length(LLineNumber), nil);
       end;
+      FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background);
       { erase the remaining area }
       if AClipRect.Bottom > LLineRect.Bottom then
       begin
@@ -7415,10 +7431,16 @@ begin
   if FLeftMargin.Bookmarks.Panel.Visible then
   begin
     LPanelRect := System.Types.Rect(0, 0, FLeftMargin.Bookmarks.Panel.Width, ClientHeight);
-    if FLeftMargin.Bookmarks.Panel.Color <> clNone then
+    if FLeftMargin.Colors.BookmarkPanelBackground <> clNone then
     begin
-      Canvas.Brush.Color := FLeftMargin.Bookmarks.Panel.Color;
+      Canvas.Brush.Color := FLeftMargin.Colors.BookmarkPanelBackground;
       Canvas.FillRect(LPanelRect); { fill bookmark panel rect }
+    end;
+    if FLeftMargin.Colors.ActiveLineBackground <> clNone then
+    begin
+      LPanelActiveLineRect := System.Types.Rect(0, LActiveLine, FLeftMargin.Bookmarks.Panel.Width, LActiveLine + LineHeight);
+      Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
+      Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
     end;
     if Assigned(FBookmarkPanelBeforePaint) then
       FBookmarkPanelBeforePaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
@@ -7433,7 +7455,7 @@ begin
   if (FLeftMargin.Border.Style <> mbsNone) and (AClipRect.Right >= FLeftMargin.GetWidth - 2) then
     with Canvas do
     begin
-      Pen.Color := FLeftMargin.Border.Color;
+      Pen.Color := FLeftMargin.Colors.Border;
       Pen.Width := 1;
       with AClipRect do
       begin
@@ -7441,7 +7463,7 @@ begin
         begin
           MoveTo(FLeftMargin.GetWidth - 2, Top);
           LineTo(FLeftMargin.GetWidth - 2, Bottom);
-          Pen.Color := FLeftMargin.Color;
+          Pen.Color := FLeftMargin.Colors.Background;
         end;
         MoveTo(FLeftMargin.GetWidth - 1, Top);
         LineTo(FLeftMargin.GetWidth - 1, Bottom);
@@ -7488,7 +7510,7 @@ begin
   end;
   { Active Line Indicator }
   if FActiveLine.Visible and FActiveLine.Indicator.Visible then
-    FActiveLine.Indicator.Draw(Canvas, FActiveLine.Indicator.Left, (DisplayY - TopLine) * LineHeight, LineHeight);
+    FActiveLine.Indicator.Draw(Canvas, FActiveLine.Indicator.Left, LActiveLine, LineHeight);
   { Line state }
   if FLeftMargin.LineState.Enabled then
   begin
@@ -7504,9 +7526,9 @@ begin
         LLineStateRect.Top := (LLine - TopLine) * LineHeight;
         LLineStateRect.Bottom := LLineStateRect.Top + LineHeight;
         if LPEditorLineAttribute.LineState = lsNormal then
-          Canvas.Brush.Color := FLeftMargin.LineState.Colors.Normal
+          Canvas.Brush.Color := FLeftMargin.Colors.LineStateNormal
         else
-          Canvas.Brush.Color := FLeftMargin.LineState.Colors.Modified;
+          Canvas.Brush.Color := FLeftMargin.Colors.LineStateModified;
         Canvas.FillRect(LLineStateRect); { fill line state rect }
       end;
     end;
@@ -8344,7 +8366,6 @@ var
                 if FCurrentMatchingPair <> trNotFound then
                   if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
                   begin
-                    // TODO: It's not a current line, if code is folded
                     if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
                        (LCurrentLine = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
@@ -8352,10 +8373,18 @@ var
                     begin
                       LIsCustomBackgroundColor := True;
                       if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
+                      begin
+                        if LForegroundColor = FMatchingPair.Colors.Matched then
+                          LForegroundColor := BackgroundColor;
                         LBackgroundColor := FMatchingPair.Colors.Matched
+                      end
                       else
                       if mpoHighlightUnmatched in FMatchingPair.Options then
+                      begin
+                        if LForegroundColor = FMatchingPair.Colors.Unmatched then
+                          LForegroundColor := BackgroundColor;
                         LBackgroundColor := FMatchingPair.Colors.Unmatched
+                      end;
                     end;
                   end;
 

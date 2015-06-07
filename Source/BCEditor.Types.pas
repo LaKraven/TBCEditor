@@ -224,6 +224,8 @@ type
 
   TBCEditorKeyCharType = (ctFoldOpen, ctFoldClose, ctSkipOpen, ctSkipClose);
 
+  TBCEditorSortOrder = (soToggle, soAsc, soDesc);
+
 implementation
 
 end.

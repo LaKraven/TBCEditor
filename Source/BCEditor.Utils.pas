@@ -6,6 +6,7 @@ uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
   function CeilOfIntDiv(ADividend: Cardinal; ADivisor: Word): Word;
+  function DeleteWhiteSpace(const AStr: string): string;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
   function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
@@ -22,7 +23,7 @@ uses
 implementation
 
 uses
-  Vcl.Forms, Vcl.Dialogs, System.SysUtils, Vcl.Clipbrd;
+  Vcl.Forms, Vcl.Dialogs, System.SysUtils, Vcl.Clipbrd, System.Character;
 
 procedure FreeList(var List: TList);
 begin
@@ -56,6 +57,21 @@ begin
     List[i] := nil;
   end;
   List.Clear;
+end;
+
+function DeleteWhiteSpace(const AStr: string): string;
+var
+  i, j: Integer;
+begin
+  SetLength(Result, Length(AStr));
+  j := 0;
+  for i := 1 to Length(AStr) do
+    if not AStr[i].IsWhiteSpace then
+    begin
+      inc(j);
+      Result[j] := AStr[i];
+    end;
+  SetLength(Result, j);
 end;
 
 function MessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer;

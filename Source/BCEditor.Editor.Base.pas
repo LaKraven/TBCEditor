@@ -77,6 +77,7 @@ type
     FLastKey: Word;
     FLastRow: Integer;
     FLastShiftState: TShiftState;
+    FLastSortOrder: TBCEditorSortOrder;
     FLeftChar: Integer;
     FLeftMargin: TBCEditorLeftMargin;
     FLeftMarginCharWidth: Integer;
@@ -488,6 +489,7 @@ type
     procedure CommandProcessor(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
     procedure CopyToClipboard;
     procedure CutToClipboard;
+    procedure DeleteWhitespace;
     procedure DoUndo;
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
     procedure EndUndoBlock;
@@ -530,6 +532,7 @@ type
     procedure SetFocus; override;
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
     procedure SetLineColorToDefault(ALine: Integer);
+    procedure Sort(ASortOrder: TBCEditorSortOrder = soToggle);
     procedure ToggleBookmark;
     procedure ToggleSelectedCase(ACase: TBCEditorCase = cNone);
     procedure UnHookTextBuffer;
@@ -10424,6 +10427,27 @@ begin
   CommandProcessor(ecCut, #0, nil);
 end;
 
+procedure TBCBaseEditor.DeleteWhitespace;
+var
+  Strings: TStringList;
+begin
+  if Focused then
+  begin
+    if SelectionAvailable then
+    begin
+      Strings := TStringList.Create;
+      try
+        Strings.Text := SelectedText;
+        SelectedText := BCEditor.Utils.DeleteWhiteSpace(Strings.Text);
+      finally
+        Strings.Free;
+      end;
+    end
+    else
+      Text := BCEditor.Utils.DeleteWhiteSpace(Text);
+  end;
+end;
+
 procedure TBCBaseEditor.DoCutToClipboard;
 begin
   if not ReadOnly and SelectionAvailable then
@@ -12566,6 +12590,44 @@ begin
   begin
     Lines.Attributes[ALine].Mask := Lines.Attributes[ALine].Mask - [amBackground, amForeground];
     InvalidateLine(ALine + 1);
+  end;
+end;
+
+procedure TBCBaseEditor.Sort(ASortOrder: TBCEditorSortOrder = soToggle);
+var
+  i: Integer;
+  s: string;
+  Strings: TStringList;
+begin
+  if Focused then
+  begin
+    Strings := TStringList.Create;
+    try
+      if SelectionAvailable then
+        Strings.Text := SelectedText
+      else
+        Strings.Text := Text;
+      Strings.Sort;
+      s := '';
+      if (ASortOrder = soDesc) or (ASortOrder = soToggle) and (FLastSortOrder = soAsc) then
+      begin
+         FLastSortOrder := soDesc;
+        for i := Strings.Count - 1 downto 0 do
+          s := s + Strings.Strings[i] + Chr(13) + Chr(10);
+      end
+      else
+      begin
+        FLastSortOrder := soAsc;
+        s := Strings.Text;
+      end;
+      s := TrimRight(s);
+      if SelectionAvailable then
+        SelectedText := s
+      else
+        Text := s;
+    finally
+      Strings.Free;
+    end;
   end;
 end;
 

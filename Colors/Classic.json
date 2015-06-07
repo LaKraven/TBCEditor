@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"30.5.2015"
+            "Date":"7.6.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -13,7 +13,8 @@
       "Editor":{
          "Colors":{
             "Background":"clNavy",
-            "ActiveLine":"$009F0000",
+            "ActiveLineBackground":"$009F0000",
+            "CodeFoldingActiveLineBackground":"$009F0000",
             "CodeFoldingBackground":"clNavy",
             "CodeFoldingCollapsedLine":"clSilver",
             "CodeFoldingFoldingLine":"clSilver",
@@ -28,12 +29,15 @@
             "CompletionProposalBorder":"clSilver",
             "CompletionProposalSelectedBackground":"clSilver",
             "CompletionProposalSelectedText":"clNavy",
+            "LeftMarginActiveLineBackground":"$009F0000",
             "LeftMarginBackground":"clNavy",
+            "LeftMarginBorder":"clNavy",
+            "LeftMarginLineNumberLine":"clSilver",
             "LeftMarginLineNumbers":"clSilver",
             "LeftMarginLineStateModified":"clYellow",
             "LeftMarginLineStateNormal":"clLime",
             "LeftMarginBookmarkPanel":"clNavy",
-            "MatchingPairMatched":"clAqua",
+            "MatchingPairMatched":"$00808080",
             "MatchingPairUnmatched":"clYellow",
             "MinimapVisibleLines":"$009F0000",
             "RightMargin":"clSilver",

@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"30.5.2015"
+            "Date":"7.6.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -13,22 +13,26 @@
       "Editor":{
          "Colors":{
             "Background":"$00222827",
-            "ActiveLine":"$00222827",
+            "ActiveLineBackground":"$00222827",
+            "CodeFoldingActiveLineBackground":"$00323D3E",
             "CodeFoldingBackground":"$00222827",
             "CodeFoldingCollapsedLine":"$009F9F9F",
             "CodeFoldingFoldingLine":"$009F9F9F",
             "CodeFoldingFoldingLineHighlight":"$009F9F9F",
             "CodeFoldingIndent":"$00414746",
             "CodeFoldingIndentHighlight":"$00414746",
-            "CodeFoldingHintBackground":"00222827",
+            "CodeFoldingHintBackground":"$00222827",
             "CodeFoldingHintBorder":"$00414746",
             "CodeFoldingHintText":"clNone",
-            "CompletionProposalBackground":"00222827",
+            "CompletionProposalBackground":"$00222827",
             "CompletionProposalForeground":"clNone",
             "CompletionProposalBorder":"$00414746",
             "CompletionProposalSelectedBackground":"$003E4849",
             "CompletionProposalSelectedText":"clHighlightText",
+            "LeftMarginActiveLineBackground":"$00323D3E",
             "LeftMarginBackground":"$00222827",
+            "LeftMarginBorder":"$00222827",
+            "LeftMarginLineNumberLine":"$009F9F9F",
             "LeftMarginLineNumbers":"$009F9F9F",
             "LeftMarginLineStateModified":"$0074DBE6",
             "LeftMarginLineStateNormal":"$002EE2A6",
@@ -38,7 +42,7 @@
             "MinimapVisibleLines":"$003E4849",
             "RightMargin":"clSilver",
             "RightMovingEdge":"clSilver",
-            "SearchHighlighterBackground":"$0092E7FF",
+            "SearchHighlighterBackground":"$003E4849",
             "SearchHighlighterForeground":"clNone",
             "SearchMapActiveLine":"$00F0F0F0",
             "SearchMapBackground":"$00F4F4F4",

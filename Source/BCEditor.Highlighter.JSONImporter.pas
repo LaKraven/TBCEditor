@@ -566,8 +566,9 @@ begin
       LSkipRegionItem.SkipEmptyChars := LJsonDataValue.ObjectValue.B['SkipEmptyChars'];
       LSkipRegionItem.SkipIfNextCharIsNot := BCEDITOR_NONE_CHAR;
       if LJsonDataValue.ObjectValue.Contains('NextCharIsNot') then
-        LSkipRegionItem.SkipIfNextCharIsNot := LJsonDataValue.ObjectValue['NextCharIsNot'].Value[1];;
-      FHighlighter.AddKeyChar(ctSkipOpen, LOpenToken[1]);
+        LSkipRegionItem.SkipIfNextCharIsNot := LJsonDataValue.ObjectValue['NextCharIsNot'].Value[1];
+      if LOpenToken <> '' then
+        FHighlighter.AddKeyChar(ctSkipOpen, LOpenToken[1]);
       if LCloseToken <> '' then
         FHighlighter.AddKeyChar(ctSkipClose, LCloseToken[1]);
     end;
@@ -634,7 +635,8 @@ begin
       LFoldRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
       LFoldRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
     end;
-    FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
+    if LOpenToken <> '' then
+      FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
     if LFoldRegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
       FHighlighter.AddKeyChar(ctFoldOpen, LFoldRegionItem.BreakIfNotFoundBeforeNextRegion[1]);
     if LCloseToken <> '' then

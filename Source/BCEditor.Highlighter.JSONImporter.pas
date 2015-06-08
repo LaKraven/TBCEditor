@@ -11,7 +11,8 @@ type
   TBCEditorHighlighterJSONImporter = class(TObject)
   private
     FHighlighter: TBCEditorHighlighter;
-    procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject);
+    procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject;
+      AElementPrefix: string);
     procedure ImportCodeFolding(ACodeFoldingObject: TJsonObject);
     procedure ImportCodeFoldingFoldRegions(ACodeFoldingObject: TJsonObject);
     procedure ImportCodeFoldingOptions(ACodeFoldingObject: TJsonObject);
@@ -24,11 +25,11 @@ type
     procedure ImportElements(AColorsObject: TJsonObject);
     procedure ImportHighlighter(AJSONObject: TJsonObject);
     procedure ImportInfo(AInfoObject: TJsonObject);
-    procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
+    procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject; AElementPrefix: string);
     procedure ImportMatchingPair(AMatchingPairObject: TJsonObject);
     procedure ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil;
-      ASkipBeforeSubRules: Boolean = False);
-    procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
+      ASkipBeforeSubRules: Boolean = False; AElementPrefix: string = '');
+    procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject; AElementPrefix: string);
   public
     constructor Create(AHighlighter: TBCEditorHighlighter); overload;
     procedure ImportFromStream(AStream: TStream);
@@ -306,18 +307,20 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute;
+  AAttributesObject: TJsonObject; AElementPrefix: string);
 begin
   if Assigned(AAttributesObject) then
   begin
-    AHighlighterAttribute.Element := AAttributesObject['Element'].Value;
+    AHighlighterAttribute.Element := AElementPrefix + AAttributesObject['Element'].Value;
     AHighlighterAttribute.ParentForeground := AAttributesObject.B['ParentForeground'];
     AHighlighterAttribute.ParentBackground := AAttributesObject.B['ParentBackground'];
     AHighlighterAttribute.UseParentElementForTokens := AAttributesObject.B['UseParentElementForTokens'];
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject;
+  AElementPrefix: string);
 var
   i: Integer;
   LWordArray: TJsonArray;
@@ -328,20 +331,23 @@ begin
     LWordArray := KeyListObject.A['Words'];
     for i := 0 to LWordArray.Count - 1 do
       AKeyList.KeyList.Add(LWordArray.S[i]);
-    ImportAttributes(AKeyList.Attribute, KeyListObject['Attributes'].ObjectValue);
+    ImportAttributes(AKeyList.Attribute, KeyListObject['Attributes'].ObjectValue, AElementPrefix);
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject);
+procedure TBCEditorHighlighterJSONImporter.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject;
+  AElementPrefix: string);
 begin
   if Assigned(SetObject) then
   begin
     ASet.CharSet := StrToSet(SetObject['Symbols'].Value);
-    ImportAttributes(ASet.Attribute, SetObject['Attributes'].ObjectValue);
+    ImportAttributes(ASet.Attribute, SetObject['Attributes'].ObjectValue, AElementPrefix);
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False); { Recursive method }
+procedure TBCEditorHighlighterJSONImporter.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject;
+  AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False;
+  AElementPrefix: string = ''); { Recursive method }
 var
   i, j: Integer;
   LFileName: string;
@@ -352,12 +358,14 @@ var
   LJSONObject, LJSONSubRulesObject: TJsonObject;
   LFileStream: TStream;
   LEditor: TBCBaseEditor;
+  LElementPrefix: string;
 begin
   if Assigned(RangeObject) then
   begin
     LFileName := RangeObject['File'].Value;
     if GMultiHighlighter and (LFileName <> '') then
     begin
+      LElementPrefix := RangeObject['ElementPrefix'].Value;
       LEditor := FHighlighter.Editor as TBCBaseEditor;
       LFileStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(LFileName));
       LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
@@ -366,7 +374,7 @@ begin
         TokenRangeObject := LJSONObject['Highlighter']['MainRules'].ObjectValue;
         { You can include MainRules... }
         if TokenRangeObject['Name'].Value = RangeObject['IncludeRange'].Value then
-          ImportRange(AParentRange, TokenRangeObject, nil, True)
+          ImportRange(AParentRange, TokenRangeObject, nil, True, LElementPrefix)
         else
         { or SubRules... }
         begin
@@ -380,7 +388,7 @@ begin
               LJSONSubRulesObject := SubRulesObject.Items[i].ArrayValue.O[j];
               if LJSONSubRulesObject.S['Name'] = RangeObject['IncludeRange'].Value then
               begin
-                ImportRange(ARange, LJSONSubRulesObject);
+                ImportRange(ARange, LJSONSubRulesObject, nil, False, LElementPrefix);
                 Break;
               end;
             end;
@@ -397,7 +405,7 @@ begin
       begin
         ARange.Clear;
         ARange.CaseSensitive := RangeObject.B['CaseSensitive'];
-        ImportAttributes(ARange.Attribute, RangeObject['Attributes'].ObjectValue);
+        ImportAttributes(ARange.Attribute, RangeObject['Attributes'].ObjectValue, AElementPrefix);
         if RangeObject['Delimiters'].Value <> '' then
           ARange.Delimiters := StrToSet(RangeObject['Delimiters'].Value);
         ARange.TokenType := StrToRangeType(RangeObject['Type'].Value);
@@ -441,7 +449,7 @@ begin
           for j := 0 to SubRulesObject.Items[i].ArrayValue.Count - 1 do
           begin
             NewKeyList := TBCEditorKeyList.Create;
-            ImportKeyList(NewKeyList, SubRulesObject.Items[i].ArrayValue.O[j]);
+            ImportKeyList(NewKeyList, SubRulesObject.Items[i].ArrayValue.O[j], AElementPrefix);
             ARange.AddKeyList(NewKeyList);
           end
           else
@@ -449,7 +457,7 @@ begin
           for j := 0 to SubRulesObject.Items[i].ArrayValue.Count - 1 do
           begin
             NewSet := TBCEditorSet.Create;
-            ImportSet(NewSet, SubRulesObject.Items[i].ArrayValue.O[j]);
+            ImportSet(NewSet, SubRulesObject.Items[i].ArrayValue.O[j], AElementPrefix);
             ARange.AddSet(NewSet);
           end
         end;

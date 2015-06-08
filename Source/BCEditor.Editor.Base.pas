@@ -6969,8 +6969,8 @@ begin
     if LClipRect.Right > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
     begin
       DrawRect := LClipRect;
-      DrawRect.Left := Max(DrawRect.Left, FLeftMargin.GetWidth + FCodeFolding.GetWidth);
-      DrawRect.Right := ClientRect.Width;
+      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+      DrawRect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
       DeflateMinimapRect(DrawRect);
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;

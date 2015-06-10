@@ -165,8 +165,8 @@ end;
 
 function TBCEditorAllCodeFoldingRanges.GetAllFoldRange(Index: Integer): TBCEditorCodeFoldingRange;
 begin
-  if Index < FAllRanges.Count then
-    Result := FAllRanges[index]
+  if Cardinal(Index) < Cardinal(FAllRanges.Count) then
+    Result := FAllRanges.List[index]
   else
     Result := nil;
 end;

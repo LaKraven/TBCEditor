@@ -6723,15 +6723,18 @@ var
   LRect: TRect;
   LHintWindow: THintWindow;
   S: string;
-  LTopLine: Integer;
+  LTopLine, LTemp: Integer;
 begin
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
-  begin
     if FMinimap.Clicked then
     begin
       if FMinimap.Dragging then
       begin
-        FMinimap.TopLine := Max(TopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (TopLine / GetDisplayLineCount))), 1);
+        LTemp := GetDisplayLineCount - FMinimap.VisibleLines;
+        FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * (Y div FMinimap.CharHeight - FMinimapClickOffsetY)) );
+        if FMinimap.TopLine > LTemp then
+          FMinimap.TopLine := LTemp;
+
         LTopLine := Max(1, FMinimap.TopLine + Y div FMinimap.CharHeight - FMinimapClickOffsetY);
         if TopLine <> LTopLine then
         begin
@@ -6744,7 +6747,6 @@ begin
           FMinimap.Dragging := True;
       Exit;
     end;
-  end;
 
   if FMinimap.Clicked then
     Exit;
@@ -6756,7 +6758,7 @@ begin
 
   if (rmoMouseMove in FRightMargin.Options) and FRightMargin.Visible then
   begin
-    FRightMargin.MouseOver := (Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3);
+    FRightMargin.MouseOver := Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3;
 
     if FRightMargin.Moving and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) then
     begin
@@ -6774,7 +6776,6 @@ begin
         LHintWindow.ActivateHint(LRect, S);
         LHintWindow.Invalidate;
       end;
-
       Invalidate;
       Exit;
     end;
@@ -7029,7 +7030,8 @@ begin
 
         LSelectionAvailable := SelectionAvailable;
 
-        if (DrawRect.Height = FMinimapBufferBmp.Height) and (FLastTopLine = FTopLine) and
+        if not FMinimap.Dragging and
+          (DrawRect.Height = FMinimapBufferBmp.Height) and (FLastTopLine = FTopLine) and
           (FLastDisplayLineCount = DisplayLineCount) and (not LSelectionAvailable or
           LSelectionAvailable and
           (FSelectionBeginPosition.Line >= FTopLine) and (FSelectionEndPosition.Line <= FTopLine + FVisibleLines)) then

@@ -6723,7 +6723,7 @@ var
   LRect: TRect;
   LHintWindow: THintWindow;
   S: string;
-  LTopLine, LTemp: Integer;
+  LTopLine, LTemp, LTemp2: Integer;
 begin
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
     if FMinimap.Clicked then
@@ -6731,11 +6731,12 @@ begin
       if FMinimap.Dragging then
       begin
         LTemp := GetDisplayLineCount - FMinimap.VisibleLines;
-        FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * (Y div FMinimap.CharHeight - FMinimapClickOffsetY)) );
+        LTemp2 := Y div FMinimap.CharHeight - FMinimapClickOffsetY;
+        FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2) );
         if FMinimap.TopLine > LTemp then
           FMinimap.TopLine := LTemp;
 
-        LTopLine := Max(1, FMinimap.TopLine + Y div FMinimap.CharHeight - FMinimapClickOffsetY);
+        LTopLine := Max(1, FMinimap.TopLine + LTemp2);
         if TopLine <> LTopLine then
         begin
           TopLine := LTopLine;

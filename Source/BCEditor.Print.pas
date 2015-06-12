@@ -113,7 +113,6 @@ type
     property LineNumbers: Boolean read FLineNumbers write FLineNumbers default False;
     property LineNumbersInMargin: Boolean read FLineNumbersInMargin write FLineNumbersInMargin default False;
     property LineOffset: Integer read FLineOffset write FLineOffset default 0;
-    //property Lines: TStrings read FLines write SetLines;
     property Margins: TBCEditorPrintMargins read FMargins write SetMargins;
     property OnPrintLine: TBCEditorPrintLineEvent read FOnPrintLine write FOnPrintLine;
     property OnPrintStatus: TBCEditorPrintStatusEvent read FOnPrintStatus write FOnPrintStatus;

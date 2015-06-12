@@ -7220,16 +7220,15 @@ end;
 procedure TBCBaseEditor.PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine,
   AScrolledXBy: Integer; ALineRect: TRect);
 var
-  LOldPenColor, LOldBrushColor: TColor;
+  LOldPenColor: TColor;
   LCollapseMarkRect: TRect;
   X, Y: Integer;
+  LBrush: TBrush;
 begin
+  LOldPenColor := Canvas.Pen.Color;
   if FCodeFolding.Visible and (cfoShowCollapsedCodeHint in CodeFolding.Options) and Assigned(AFoldRange) and
     AFoldRange.Collapsed and not AFoldRange.ParentCollapsed then
   begin
-    LOldBrushColor := Canvas.Brush.Color;
-    LOldPenColor := Canvas.Pen.Color;
-
     LCollapseMarkRect.Left := (ATokenPosition + ATokenLength + 1) * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     LCollapseMarkRect.Top := ALineRect.Top + 2;
     LCollapseMarkRect.Bottom := ALineRect.Bottom - 2;
@@ -7240,12 +7239,16 @@ begin
     if LCollapseMarkRect.Right - AScrolledXBy > 0 then
     begin
       OffsetRect(LCollapseMarkRect, -AScrolledXBy, 0);
-
-      Canvas.Brush.Color := FCodeFolding.Colors.FoldingLine;
+      LBrush := TBrush.Create;
+      try
+        LBrush.Color := FCodeFolding.Colors.FoldingLine;
+        Winapi.Windows.FrameRect(Canvas.Handle, LCollapseMarkRect, LBrush.Handle);
+      finally
+        LBrush.Free;
+      end;
       Canvas.Pen.Color := FCodeFolding.Colors.FoldingLine;
-      Canvas.FrameRect(LCollapseMarkRect);
       { paint [...] }
-      Y := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2 {- 1};
+      Y := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2;
       X := LCollapseMarkRect.Left + FCharWidth - 1;
       Canvas.Rectangle(X, Y, X + 2, Y + 2);
       X := X + FCharWidth - 1;
@@ -7253,9 +7256,9 @@ begin
       X := X + FCharWidth - 1;
       Canvas.Rectangle(X, Y, X + 2, Y + 2);
     end;
-    Canvas.Brush.Color := LOldBrushColor;
-    Canvas.Pen.Color := LOldPenColor;
   end;
+  //Canvas.Brush.Color := LOldBrushColor;
+  Canvas.Pen.Color := LOldPenColor;
 end;
 
 procedure TBCBaseEditor.PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);

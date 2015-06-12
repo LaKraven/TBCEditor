@@ -47,12 +47,13 @@ type
     property MatchingPair;
     property Minimap;
     property Name;
+    property OnAfterBookmarkPanelPaint;
     property OnAfterBookmarkPlaced;
     property OnAfterClearBookmark;
+    property OnAfterLinePaint;
     property OnBeforeBookmarkPlaced;
     property OnBeforeClearBookmark;
-    property OnBookmarkPanelAfterPaint;
-    property OnBookmarkPanelBeforePaint;
+    property OnBeforeBookmarkPanelPaint;
     property OnBookmarkPanelLinePaint;
     property OnCaretChanged;
     property OnChange;

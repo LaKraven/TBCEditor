@@ -26,6 +26,8 @@ type
   TBCEditorBookmarkPanelPaintEvent = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; AFirstLine: Integer; ALastLine: Integer) of object;
   TBCEditorBookmarkPanelLinePaintEvent = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; ALineNumber: Integer) of object;
 
+  TBCEditorLinePaintEvent = procedure(Sender: TObject; ACanvas: TCanvas; ARect: TRect; ALineNumber: Integer; const AIsMinimapLine: Boolean) of object;
+
   TBCEditorCustomLineColorsEvent = procedure(Sender: TObject; ALine: Integer; var AUseColors: Boolean;
     var AForeground: TColor; var ABackground: TColor) of object;
 

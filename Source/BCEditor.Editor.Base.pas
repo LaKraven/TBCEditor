@@ -21,12 +21,13 @@ type
   TBCBaseEditor = class(TCustomControl)
   strict private
     FActiveLine: TBCEditorActiveLine;
+    FAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
+    FOnAfterLinePaint: TBCEditorLinePaintEvent;
     FAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges;
     FAltEnabled: Boolean;
     FAlwaysShowCaret: Boolean;
     FBackgroundColor: TColor;
-    FBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent;
-    FBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent;
+    FBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent;
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
@@ -584,12 +585,13 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
+    property OnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FAfterBookmarkPanelPaint write FAfterBookmarkPanelPaint;
     property OnAfterBookmarkPlaced: TNotifyEvent read FOnAfterBookmarkPlaced write FOnAfterBookmarkPlaced;
     property OnAfterClearBookmark: TNotifyEvent read FOnAfterClearBookmark write FOnAfterClearBookmark;
+    property OnAfterLinePaint: TBCEditorLinePaintEvent read FOnAfterLinePaint write FOnAfterLinePaint;
     property OnBeforeBookmarkPlaced: TBCEditorBookmarkEvent read FOnBeforeBookmarkPlaced write FOnBeforeBookmarkPlaced;
     property OnBeforeClearBookmark: TBCEditorBookmarkEvent read FOnBeforeClearBookmark write FOnBeforeClearBookmark;
-    property OnBookmarkPanelAfterPaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelAfterPaint write FBookmarkPanelAfterPaint;
-    property OnBookmarkPanelBeforePaint: TBCEditorBookmarkPanelPaintEvent read FBookmarkPanelBeforePaint write FBookmarkPanelBeforePaint;
+    property OnBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FBeforeBookmarkPanelPaint write FBeforeBookmarkPanelPaint;
     property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
     property OnCaretChanged: TBCEditorCaretChangedEvent read FOnCaretChanged write FOnCaretChanged;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -7494,8 +7496,8 @@ begin
       Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
       Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
     end;
-    if Assigned(FBookmarkPanelBeforePaint) then
-      FBookmarkPanelBeforePaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+    if Assigned(FBeforeBookmarkPanelPaint) then
+      FBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
   end;
   Canvas.Brush.Style := bsClear;
   { Word wrap }
@@ -7601,8 +7603,8 @@ begin
         FBookmarkPanelLinePaint(Self, Canvas, LLineRect, i);
       end;
     end;
-    if Assigned(FBookmarkPanelAfterPaint) then
-      FBookmarkPanelAfterPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+    if Assigned(FAfterBookmarkPanelPaint) then
+      FAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
   end;
 end;
 
@@ -8492,6 +8494,9 @@ var
         end;
 
         PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
+
+        if Assigned(FOnAfterLinePaint) then
+          FOnAfterLinePaint(Self, Canvas, LLineRect, RowToLine(LCurrentLine), AMinimap);
       end;
     end;
     LIsCurrentLine := False;

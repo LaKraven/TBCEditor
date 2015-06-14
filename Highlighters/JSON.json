@@ -1,219 +1,253 @@
 {
-    "Highlighter": {
-        "Info": {
-            "General": {
-                "Version": "1.0",
-                "Date": "24.5.2015",
-                "Sample": [
-                    "{\r\n",
-                    "  \"firstName\": \"John\",\r\n",
-                    "  \"lastName\": \"Smith\",\r\n",
-                    "  \"age\": 25,\r\n",
-                    "  \"address\":\r\n",
-                    "  {\r\n",
-                    "    \"streetAddress\": \"21 2nd Street\",\r\n",
-                    "    \"city\": \"New York\",\r\n",
-                    "    \"state\": \"NY\",\r\n",
-                    "    \"postalCode\": \"10021\"\r\n",
-                    "  },\r\n",
-                    "  \"phoneNumber\":\r\n",
-                    "  [\r\n",
-                    "    {\r\n",
-                    "      \"type\": \"home\",\r\n",
-                    "      \"number\": \"212 555-1234\"\r\n",
-                    "    },\r\n",
-                    "    {\r\n",
-                    "      \"type\": \"fax\",\r\n",
-                    "      \"number\": \"646 555-4567\"\r\n",
-                    "    }\r\n",
-                    "  ]\r\n",
-                    "}"
-                ]
-            },
-            "Author": {
-                "Name": "Lasse Rautiainen",
-                "Mail": "lasse@bonecode.com"
-            }
-        },
-        "MainRules": {
-            "Attributes": {
-                "Element": "Editor"
-            },
-            "Delimiters": "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~",
-            "SubRules": {
-                "Range": [
-                    {
-                        "Type": "String",
-                        "Attributes": {
-                            "Element": "Attribute",
-                            "ParentBackground": true
+   "Highlighter":{
+      "Info":{
+         "General":{
+            "Version":"1.0",
+            "Date":"14.6.2015",
+            "Sample":[
+               "{\r\n",
+               "  \"firstName\": \"John\",\r\n",
+               "  \"lastName\": \"Smith\",\r\n",
+               "  \"age\": 25,\r\n",
+               "  \"address\":\r\n",
+               "  {\r\n",
+               "    \"streetAddress\": \"21 2nd Street\",\r\n",
+               "    \"city\": \"New York\",\r\n",
+               "    \"state\": \"NY\",\r\n",
+               "    \"postalCode\": \"10021\"\r\n",
+               "  },\r\n",
+               "  \"phoneNumber\":\r\n",
+               "  [\r\n",
+               "    {\r\n",
+               "      \"type\": \"home\",\r\n",
+               "      \"number\": \"212 555-1234\"\r\n",
+               "    },\r\n",
+               "    {\r\n",
+               "      \"type\": \"fax\",\r\n",
+               "      \"number\": \"646 555-4567\"\r\n",
+               "    }\r\n",
+               "  ]\r\n",
+               "}"
+            ]
+         },
+         "Author":{
+            "Name":"Lasse Rautiainen",
+            "Mail":"lasse@bonecode.com"
+         }
+      },
+      "MainRules":{
+         "Attributes":{
+            "Element":"Editor"
+         },
+         "Delimiters":"!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~",
+         "SubRules":{
+            "Range":[
+               {
+                  "Type":"String",
+                  "Attributes":{
+                     "Element":"Attribute",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEol":true
+                  },
+                  "TokenRange":{
+                     "Open":"\"",
+                     "Close":"\""
+                  },
+                  "SubRules":{
+                     "Range":[
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"Attribute",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnEol":true,
+                              "CloseOnTerm":true
+                           },
+                           "TokenRange":{
+                              "Open":"\\\"",
+                              "Close":"\""
+                           }
                         },
-                        "Properties": {
-                            "CloseOnEol": true
-                        },
-                        "TokenRange": {
-                            "Open": "\"",
-                            "Close": "\""
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"Attribute",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnEol":true,
+                              "CloseOnTerm":true
+                           },
+                           "TokenRange":{
+                              "Open":"\\\\",
+                              "Close":""
+                           }
                         }
-                    },
-                    {
-                        "Type": "String",
-                        "Attributes": {
-                            "Element": "Symbol",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnEol": true
-                        },
-                        "TokenRange": {
-                            "Open": ":"
-                        },
-                        "SubRules": {
-                            "Range": [
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
+                     ]
+                  }
+               },
+               {
+                  "Type":"String",
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEol":true
+                  },
+                  "TokenRange":{
+                     "Open":":"
+                  },
+                  "SubRules":{
+                     "Range":[
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"String",
+                              "ParentBackground":true
+                           },
+                           "TokenRange":{
+                              "Open":"\"",
+                              "Close":"\""
+                           },
+                           "SubRules":{
+                              "Range":[
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
                                     },
-                                    "TokenRange": {
-                                        "Open": "\"",
-                                        "Close": "\""
+                                    "Properties":{
+                                       "CloseOnEol":true,
+                                       "CloseOnTerm":true
                                     },
-                                    "SubRules": {
-                                        "Range": [
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEol": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\\"",
-                                                    "Close": "\""
-                                                }
-                                            },
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEol": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\\\",
-                                                    "Close": ""
-                                                }
-                                            }
-                                        ]
+                                    "TokenRange":{
+                                       "Open":"\\\"",
+                                       "Close":"\""
                                     }
-                                }
-                            ]
+                                 },
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
+                                    },
+                                    "Properties":{
+                                       "CloseOnEol":true,
+                                       "CloseOnTerm":true
+                                    },
+                                    "TokenRange":{
+                                       "Open":"\\\\",
+                                       "Close":""
+                                    }
+                                 }
+                              ]
+                           }
                         }
-                    }
-                ],
-                "KeyList": [
-                    {
-                        "Type": "Symbol",
-                        "Words": [
-                            "..",
-                            ":",
-                            ";",
-                            "<",
-                            ">",
-                            "=",
-                            "/",
-                            "*",
-                            ".",
-                            ",",
-                            "-",
-                            "+",
-                            "(",
-                            ")",
-                            "[",
-                            "]",
-                            "{",
-                            "}"
-                        ],
-                        "Attributes": {
-                            "Element": "Symbol",
-                            "ParentBackground": true
-                        }
-                    }
-                ],
-                "Set": [
-                    {
-                        "Type": "Numbers",
-                        "Symbols": "0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Type": "Float",
-                        "Symbols": ".0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    }
-                ]
-            }
-        }
-    },
-    "CodeFolding": {
-        "Options": {
-            "StringEscapeChar": "\\"
-        },
-        "SkipRegion": [
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            }
-        ],
-        "FoldRegion": [
-            {
-                "OpenToken": "{",
-                "CloseToken": "}"
-            },
-            {
-                "OpenToken": "[",
-                "CloseToken": "]"
-            }
-        ]
-    },
-    "MatchingPair": {
-        "Pairs": [
-            {
-                "OpenToken": "(",
-                "CloseToken": ")"
-            },
-            {
-                "OpenToken": "[",
-                "CloseToken": "]"
-            },
-            {
-                "OpenToken": "{",
-                "CloseToken": "}"
-            }
-        ]
-    },
-    "CompletionProposal": {
-        "SkipRegion": [
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            }
-        ]
-    }
+                     ]
+                  }
+               }
+            ],
+            "KeyList":[
+               {
+                  "Type":"Symbol",
+                  "Words":[
+                     "..",
+                     ":",
+                     ";",
+                     "<",
+                     ">",
+                     "=",
+                     "/",
+                     "*",
+                     ".",
+                     ",",
+                     "-",
+                     "+",
+                     "(",
+                     ")",
+                     "[",
+                     "]",
+                     "{",
+                     "}"
+                  ],
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
+                  }
+               }
+            ],
+            "Set":[
+               {
+                  "Type":"Numbers",
+                  "Symbols":"0123456789",
+                  "Attributes":{
+                     "Element":"Number",
+                     "ParentBackground":true
+                  }
+               },
+               {
+                  "Type":"Float",
+                  "Symbols":".0123456789",
+                  "Attributes":{
+                     "Element":"Number",
+                     "ParentBackground":true
+                  }
+               }
+            ]
+         }
+      }
+   },
+   "CodeFolding":{
+      "Options":{
+         "StringEscapeChar":"\\"
+      },
+      "SkipRegion":[
+         {
+            "OpenToken":"\"",
+            "CloseToken":"\"",
+            "RegionType":"String"
+         }
+      ],
+      "FoldRegion":[
+         {
+            "OpenToken":"{",
+            "CloseToken":"}"
+         },
+         {
+            "OpenToken":"[",
+            "CloseToken":"]"
+         }
+      ]
+   },
+   "MatchingPair":{
+      "Pairs":[
+         {
+            "OpenToken":"(",
+            "CloseToken":")"
+         },
+         {
+            "OpenToken":"[",
+            "CloseToken":"]"
+         },
+         {
+            "OpenToken":"{",
+            "CloseToken":"}"
+         }
+      ]
+   },
+   "CompletionProposal":{
+      "SkipRegion":[
+         {
+            "OpenToken":"\"",
+            "CloseToken":"\"",
+            "RegionType":"String"
+         }
+      ]
+   }
 }

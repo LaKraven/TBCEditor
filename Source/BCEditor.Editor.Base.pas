@@ -1343,7 +1343,7 @@ function TBCBaseEditor.GetLeadingWhite(const ALine: string): string;
 var
   i: Integer;
 begin
-  Result := EmptyStr;
+  Result := '';
 
   i := 1;
   while (i <= Length(ALine)) and (ALine[i] < BCEDITOR_EXCLAMATION_MARK) do
@@ -1858,7 +1858,7 @@ function TBCBaseEditor.GetSelectedText: string;
 
 begin
   if not SelectionAvailable then
-    Result := EmptyStr
+    Result := ''
   else
     Result := DoGetSelectedText;
 end;
@@ -3124,7 +3124,7 @@ begin
   try
     if SelectionAvailable then
     begin
-      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, SelectedText, FSelection.ActiveMode);
+      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode);
       SetSelectedTextPrimitive('');
     end;
     LBlockStartPosition := CaretPosition;
@@ -4360,7 +4360,7 @@ begin
   BeginUndoBlock;
   try
     if SelectionAvailable then
-      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, SelectedText, FSelection.ActiveMode)
+      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode)
     else
       FSelection.ActiveMode := FSelection.Mode;
 
@@ -4371,7 +4371,7 @@ begin
     SetSelectedTextPrimitive(Value);
 
     if (Value <> '') and (FSelection.ActiveMode <> smColumn) then
-      FUndoList.AddChange(crInsert, LBlockStartPosition, LBlockEndPosition, '', FSelection.ActiveMode);
+      FUndoList.AddChange(crInsert, LBlockStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
   finally
     EndUndoBlock;
   end;
@@ -8977,7 +8977,7 @@ var
 begin
   LUndoBeginPosition := SelectionBeginPosition;
   LUndoEndPosition := SelectionEndPosition;
-  if AChangeString <> EmptyStr then
+  if AChangeString <> '' then
   begin
     LBlockStartPosition := SelectionBeginPosition;
     if FSelection.ActiveMode = smLine then
@@ -8986,9 +8986,9 @@ begin
   end;
   FUndoList.AddChange(crDelete, LUndoBeginPosition, LUndoEndPosition, GetSelectedText, FSelection.ActiveMode);
   SetSelectedTextPrimitive(AChangeString);
-  if AChangeString <> EmptyStr then
+  if AChangeString <> '' then
   begin
-    FUndoList.AddChange(crInsert, LBlockStartPosition, SelectionEndPosition, EmptyStr, smNormal);
+    FUndoList.AddChange(crInsert, LBlockStartPosition, SelectionEndPosition, '', smNormal);
     FUndoList.EndBlock;
   end;
 end;
@@ -10783,7 +10783,7 @@ begin
         Exit;
   end;
 { Process a comand }
-  LHelper := EmptyStr;
+  LHelper := '';
   IncPaintLock;
   try
     case ACommand of
@@ -11408,7 +11408,7 @@ begin
                 end
                 else
                 begin
-                  FLines.Insert(FCaretY - 1, EmptyStr);
+                  FLines.Insert(FCaretY - 1, '');
 
                   FUndoList.AddChange(crLineInsert, LCaretPosition, LCaretPosition, '', smNormal);
 
@@ -12240,7 +12240,7 @@ begin
     FUndoList.AddChange(crPasteBegin, SelectionBeginPosition, SelectionEndPosition, '', smNormal);
     LAddPasteEndMarker := True;
     if SelectionAvailable then
-      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, SelectedText, FSelection.ActiveMode)
+      FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode)
     else
       FSelection.ActiveMode := Selection.Mode;
 

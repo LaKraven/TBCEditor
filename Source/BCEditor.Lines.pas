@@ -386,7 +386,7 @@ begin
   if (Index >= 0) and (Index < FCount) then
   begin
     if sfExpandedLengthUnknown in FList^[index].FFlags then
-      Result := Length( ExpandedStrings[index] ) //AnalyzeString(Index);
+      Result := Length(ExpandedStrings[index])
     else
       Result := FList^[Index].FExpandedLength;
   end

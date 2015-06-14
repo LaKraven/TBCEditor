@@ -1185,18 +1185,26 @@ end;
 function TBCBaseEditor.CreateUncollapsedLines: TBCEditorLines;
 var
   i, j, k: Integer;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   Result := TBCEditorLines.Create(Self);
   Result.Clear;
   j := 0;
   for i := 0 to FLines.Count - 1 do
   begin
-    while (j < FAllCodeFoldingRanges.AllCount) and Assigned(FAllCodeFoldingRanges[j]) and not FAllCodeFoldingRanges[j].Collapsed do
-      Inc(j);
-    if (j < FAllCodeFoldingRanges.AllCount) and Assigned(FAllCodeFoldingRanges[j]) and (FAllCodeFoldingRanges[j].FromLine - 1 = i) then
+    LCodeFoldingRange := nil;
+    while j < FAllCodeFoldingRanges.AllCount do
     begin
-      for k := 0 to FAllCodeFoldingRanges[j].CollapsedLines.Count - 1 do
-        Result.Add(FAllCodeFoldingRanges[j].CollapsedLines[k]);
+      LCodeFoldingRange := FAllCodeFoldingRanges[j];
+      if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed then
+        Inc(j)
+      else
+        Break;
+    end;
+    if (j < FAllCodeFoldingRanges.AllCount) and Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine - 1 = i) then
+    begin
+      for k := 0 to LCodeFoldingRange.CollapsedLines.Count - 1 do
+        Result.Add(LCodeFoldingRange.CollapsedLines[k]);
       Inc(j);
     end
     else
@@ -5646,7 +5654,7 @@ begin
         LInsertionPosition.Char := Min(LBlockBeginPosition.Char, LBlockEndPosition.Char)
       else
         LInsertionPosition.Char := 1;
-      InsertBlock(LInsertionPosition, LInsertionPosition, LStringToInsert, true);
+      InsertBlock(LInsertionPosition, LInsertionPosition, LStringToInsert, True);
       FUndoList.AddChange(crIndent, LBlockBeginPosition, LBlockEndPosition, '', smColumn);
       FUndoList.AddChange(crIndent, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces), LBlockBeginPosition.Line),
         GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line), '', smColumn);

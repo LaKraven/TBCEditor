@@ -67,8 +67,7 @@ type
     FHighlightedFoldRange: TBCEditorCodeFoldingRange;
     FHighlighter: TBCEditorHighlighter;
     FHookedCommandHandlers: TObjectList;
-    FInserting: Boolean;
-    FInsertingMirrors: Boolean;
+    FInsertMode: Boolean;
     FInternalImage: TBCEditorInternalImage;
     FInvalidateRect: TRect;
     FIsScrolling: Boolean;
@@ -572,7 +571,7 @@ type
     property Encoding: TEncoding read FEncoding write FEncoding;
     property Font;
     property Highlighter: TBCEditorHighlighter read FHighlighter;
-    property InsertMode: Boolean read FInserting write SetInsertMode default True;
+    property InsertMode: Boolean read FInsertMode write SetInsertMode default True;
     property IsScrolling: Boolean read FIsScrolling;
     property KeyCommands: TBCEditorKeyCommands read FKeyCommands write SetKeyCommands stored False;
     property LeftChar: Integer read FLeftChar write SetLeftChar;
@@ -767,7 +766,7 @@ begin
   FRightMargin.OnChange := RightMarginChanged;
   { Text }
   TabStop := True;
-  FInserting := True;
+  FInsertMode := True;
   FFocusList := TList.Create;
   FKeyboardHandler := TBCEditorKeyboardHandler.Create;
   FKeyCommands := TBCEditorKeyCommands.Create(Self);
@@ -4187,9 +4186,9 @@ end;
 
 procedure TBCBaseEditor.SetInsertMode(const Value: Boolean);
 begin
-  if FInserting <> Value then
+  if FInsertMode <> Value then
   begin
-    FInserting := Value;
+    FInsertMode := Value;
     if not (csDesigning in ComponentState) then
       ResetCaret;
   end;
@@ -11120,8 +11119,6 @@ begin
             if not LIsJustIndented then
               FLines.Attributes[FCaretY - 1].LineState := lsModified;
           end;
-          if not FInsertingMirrors then
-            EnsureCursorPositionVisible;
         end;
       { Delete command }
       ecDeleteChar:
@@ -11632,20 +11629,20 @@ begin
             if LLength < FCaretX - 1 then
             begin
               if toTabsToSpaces in FTabs.Options then
-                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FCaretX - LLength - Ord(FInserting))
+                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FCaretX - LLength - Ord(FInsertMode))
               else
               if AllWhiteUpToCaret(LLineText, LLength) then
-                LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, (FCaretX - LLength - Ord(FInserting)) div FTabs.Width) +
-                  StringOfChar(BCEDITOR_SPACE_CHAR, (FCaretX - LLength - Ord(FInserting)) mod FTabs.Width)
+                LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, (FCaretX - LLength - Ord(FInsertMode)) div FTabs.Width) +
+                  StringOfChar(BCEDITOR_SPACE_CHAR, (FCaretX - LLength - Ord(FInsertMode)) mod FTabs.Width)
               else
-                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FCaretX - LLength - Ord(FInserting));
+                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FCaretX - LLength - Ord(FInsertMode));
               LSpaceCount1 := Length(LSpaceBuffer);
               LSpaceCount2 := GetLeadingExpandedLength(LSpaceBuffer, FTabs.Width);
             end;
 
             LBlockStartPosition := CaretPosition;
 
-            if FInserting then
+            if FInsertMode then
             begin
               if not GetWordWrap and not (soAutosizeMaxWidth in FScroll.Options) and (CaretX > FScroll.MaxWidth) then
                 Exit;
@@ -11851,7 +11848,7 @@ begin
                 FScroll.Options := FScroll.Options + [soPastEndOfLine];
               LBlockStartPosition := CaretPosition;
               LLength := Length(S);
-              if not FInserting then
+              if not FInsertMode then
               begin
                 LHelper := Copy(LLineText, CaretX, LLength);
                 Delete(LLineText, CaretX, LLength);
@@ -11859,7 +11856,7 @@ begin
               Insert(S, LLineText, CaretX);
               InternalCaretX := (CaretX + LLength);
               ProperSetLine(CaretY - 1, LLineText);
-              if FInserting then
+              if FInsertMode then
                 LHelper := '';
               FUndoList.AddChange(crInsert, LBlockStartPosition, CaretPosition, LHelper, smNormal);
               if CaretX >= LeftChar + FCharsInWindow then

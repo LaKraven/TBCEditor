@@ -6069,7 +6069,8 @@ procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: 
 begin
   if FCodeFolding.Visible then
   begin
-    if not (sfKeyDown in FStateFlags) and (FNeedToRescanCodeFolding or
+    if not (sfBackspaceDown in FStateFlags) and
+      (FNeedToRescanCodeFolding or
       ((ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(FCaretY) or
       ((ACommand = ecLineBreak) and IsKeywordAtLine(FCaretY - 1)) or { the caret is already in the new line }
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo)) then
@@ -6359,6 +6360,9 @@ begin
     FMouseOverURI := LTokenType in [Integer(ttWebLink), Integer(ttMailtoLink)];
   end;
 
+  if Key = 8 then
+    Include(FStateFlags, sfBackspaceDown);
+
   LData := nil;
   LChar := BCEDITOR_NONE_CHAR;
   try
@@ -6375,7 +6379,6 @@ begin
     if Assigned(LData) then
       FreeMem(LData);
   end;
-  Include(FStateFlags, sfKeyDown);
 end;
 
 procedure TBCBaseEditor.KeyPressW(var Key: Char);
@@ -6395,7 +6398,7 @@ var
   LEditorCommand: TBCEditorCommand;
 begin
   inherited;
-  Exclude(FStateFlags, sfKeyDown);
+  Exclude(FStateFlags, sfBackspaceDown);
 
   if FMouseOverURI then
     FMouseOverURI := False;
@@ -10490,9 +10493,11 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if not (sfKeyDown in FStateFlags) and ((ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
+    if not (sfBackspaceDown in FStateFlags) and
+      ((ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar)) and IsKeywordAtCursorPosition or
-      SelectionAvailable and (ACommand = ecLineBreak)) then
+      SelectionAvailable and (ACommand = ecLineBreak) or
+      ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars))) then
       FNeedToRescanCodeFolding := True;
 
     { internal command handler }

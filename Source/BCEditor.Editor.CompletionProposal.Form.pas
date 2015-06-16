@@ -421,7 +421,7 @@ begin
               if Assigned(OnKeyPress) then
                 OnKeyPress(Self, Key);
             end;
-          BCEDITOR_F11_CHAR:
+          BCEDITOR_BACKSPACE_CHAR:
             if Assigned(OnKeyPress) then
               OnKeyPress(Self, Key);
         else

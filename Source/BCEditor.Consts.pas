@@ -28,7 +28,7 @@ const
   BCEDITOR_DEFAULT_DELIMITERS: TBCEditorCharSet = ['*', '/', '+', '-', '=', '\', '|', '&', '(', ')', '[', ']', '{', '}',
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
   BCEDITOR_NONE_CHAR = #0;
-  BCEDITOR_F11_CHAR = #8;
+  BCEDITOR_BACKSPACE_CHAR = #8;
   BCEDITOR_TAB_CHAR = #9;
   BCEDITOR_LINEFEED = #10;
   BCEDITOR_CARRIAGE_RETURN = #13;

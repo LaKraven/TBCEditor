@@ -231,12 +231,12 @@ type
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearSearchLines;
-    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
+    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
     procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
-    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
+    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
     procedure CompletionProposalTimerHandler(Sender: TObject);
     procedure ComputeCaret(X, Y: Integer);
     procedure ComputeScroll(X, Y: Integer);
@@ -2656,7 +2656,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
+procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
 var
   i: Integer;
   LLineState: TBCEditorLineState;
@@ -2689,7 +2689,8 @@ begin
     SetParentCollapsedOfSubFoldRanges(True, FoldRangeLevel);
     MoveCodeFoldingRangesAfter(AFoldRange, -CollapsedLines.Count + 1);
   end;
-  FUndoList.AddChange(crCollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
+  if AddToUndoList then
+    FUndoList.AddChange(crCollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
   CheckIfAtMatchingKeywords;
   Lines.EndUpdate;
 
@@ -2765,7 +2766,7 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange{; AAddUndoList: Boolean = True});
+procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
 var
   i: Integer;
 begin
@@ -2784,7 +2785,8 @@ begin
     SetParentCollapsedOfSubFoldRanges(False, FoldRangeLevel);
     CollapsedLines.Clear;
   end;
-
+  if AddToUndoList then
+    FUndoList.AddChange(crUncollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
   CheckIfAtMatchingKeywords;
   Lines.EndUpdate;
 
@@ -8744,11 +8746,21 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition,
             LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode);
         end;
+      crCollapseFold:
+        if Assigned(LUndoItem.ChangeData) then
+        begin
+          LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
+          CodeFoldingUncollapse(LCodeFoldingRange, False);
+          FUndoList.AddChange(crUncollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
+            LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
+        end;
       crUncollapseFold:
         if Assigned(LUndoItem.ChangeData) then
         begin
           LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          CodeFoldingCollapse(LCodeFoldingRange);
+          CodeFoldingCollapse(LCodeFoldingRange, False);
+          FUndoList.AddChange(crCollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
+            LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
         end;
       {crDeleteCollapsedFold:
         begin
@@ -9575,8 +9587,16 @@ begin
         if Assigned(LUndoItem.ChangeData) then
         begin
           LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          CodeFoldingUncollapse(LCodeFoldingRange);
+          CodeFoldingUncollapse(LCodeFoldingRange, False);
           FRedoList.AddChange(crUncollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
+            LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
+        end;
+      crUncollapseFold:
+        if Assigned(LUndoItem.ChangeData) then
+        begin
+          LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
+          CodeFoldingCollapse(LCodeFoldingRange, False);
+          FRedoList.AddChange(crCollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
             LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
         end;
       {crDeleteCollapsedFold:

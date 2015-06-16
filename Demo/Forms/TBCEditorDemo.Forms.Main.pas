@@ -10,7 +10,7 @@ uses
   BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
   BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
   sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
-  BCControls.Button;
+  BCControls.Button, System.Diagnostics;
 
 const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.0b';
@@ -48,6 +48,7 @@ type
     procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string; var Glyph: TBitmap; var LineVisible: Boolean);
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
   private
+    FStopWatch: TStopWatch;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
     procedure PrintPreview;
     procedure SetHighlighterColors;
@@ -192,13 +193,13 @@ end;
 procedure TMainForm.ActionFileOpenExecute(Sender: TObject);
 var
   i: Integer;
-  T1, T2: TTime;
   FileName, Ext, ItemString, Token: string;
 begin
   OpenDialog.Title := 'Open';
   if OpenDialog.Execute(Handle) then
   begin
-    T1 := Now;
+    FStopWatch.Reset;
+    FStopWatch.Start;
     FileName := OpenDialog.Files[0];
     Ext := LowerCase(ExtractFileExt(FileName));
 
@@ -216,11 +217,10 @@ begin
         end;
       end;
     end;
-
     TitleBar.Items[3].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, FileName]);
     Editor.LoadFromFile(FileName);
-    T2 := Now;
-    StatusBar.Panels[3].Text := 'Load: ' + FormatDateTime('s.zzz "s"', T2 - T1);
+    FStopWatch.Stop;
+    StatusBar.Panels[3].Text := 'Load: ' + FormatDateTime('s.zzz "s"', FStopWatch.ElapsedMilliseconds / MSecsPerDay);
   end;
 end;
 

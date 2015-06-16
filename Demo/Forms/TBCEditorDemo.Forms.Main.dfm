@@ -123,7 +123,7 @@ inherited MainForm: TMainForm
       LeftMargin.Width = 55
       Lines.Strings = (
         '')
-      LineSpacing.Spacing = 0
+      LineSpacing.Spacing = 1
       MatchingPair.Enabled = True
       Minimap.Font.Charset = DEFAULT_CHARSET
       Minimap.Font.Color = clWindowText

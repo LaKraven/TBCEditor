@@ -9,7 +9,7 @@ type
   TBCEditorChangeReason = (crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert, crDeleteAfterCursor, crDelete,
     crLineBreak, crLineInsert, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
     crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll, crWhiteSpaceAdd,
-    crDeleteCollapsedFold);
+    {crDeleteCollapsedFold,} crCollapseFold, crUncollapseFold);
 
   TBCEditorUndoItem = class(TPersistent)
   protected

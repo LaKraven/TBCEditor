@@ -6778,7 +6778,7 @@ begin
         LTemp := GetDisplayLineCount - FMinimap.VisibleLines;
         LTemp2 := Y div FMinimap.CharHeight - FMinimapClickOffsetY;
         FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2));
-        if FMinimap.TopLine > LTemp then
+        if (FMinimap.TopLine > LTemp) and (LTemp > 0) then
           FMinimap.TopLine := LTemp;
 
         LTopLine := Max(1, FMinimap.TopLine + LTemp2);

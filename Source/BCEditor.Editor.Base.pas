@@ -695,6 +695,7 @@ begin
   FDoubleClickTime := GetDoubleClickTime;
   FBreakWhitespace := True;
   FSelectedCaseText := '';
+  FLastSortOrder := soDesc;
   { Code folding }
   FAllCodeFoldingRanges := TBCEditorAllCodeFoldingRanges.Create;
   FPlugins := TList.Create;

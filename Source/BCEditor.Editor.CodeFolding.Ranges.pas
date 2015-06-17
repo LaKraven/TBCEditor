@@ -38,7 +38,8 @@ type
     destructor Destroy; override;
 
     procedure ClearAll;
-    procedure Delete(FoldRange: TBCEditorCodeFoldingRange);
+    procedure Delete(FoldRange: TBCEditorCodeFoldingRange); overload;
+    procedure Delete(AIndex: Integer); overload;
     procedure Assign(Source: TPersistent); override;
     procedure UpdateFoldRanges;
     procedure SetParentCollapsedOfSubFoldRanges(AFoldRange: TBCEditorCodeFoldingRange);
@@ -59,6 +60,7 @@ type
     FFromLine: Integer;
     FIndentLevel: Integer;
     FParentCollapsed: Boolean;
+    FUndoListed: Boolean;
     FFoldRangeLevel: Integer;
     FSubFoldRanges: TBCEditorCodeFoldingRanges;
     FToLine: Integer;
@@ -82,6 +84,7 @@ type
     property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
     property IndentLevel: Integer read FIndentLevel write FIndentLevel;
     property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
+    property UndoListed: Boolean read FUndoListed write FUndoListed default False;
     property FoldRangeLevel: Integer read FFoldRangeLevel write FFoldRangeLevel;
     property SubFoldRanges: TBCEditorCodeFoldingRanges read FSubFoldRanges;
     property ToLine: Integer read FToLine write FToLine;
@@ -151,11 +154,16 @@ begin
   for i := 0 to FAllRanges.Count - 1 do
   if FAllRanges[i] = FoldRange then
   begin
-    TObject(FAllRanges[i]).Free;
+    TBCEditorCodeFoldingRange(FAllRanges[i]).Free;
     FAllRanges[i] := nil;
     FAllRanges.Delete(i);
     Break;
   end;
+end;
+
+procedure TBCEditorAllCodeFoldingRanges.Delete(AIndex: Integer);
+begin
+  FAllRanges.Delete(AIndex);
 end;
 
 function TBCEditorAllCodeFoldingRanges.GetAllCount: Integer;
@@ -277,6 +285,7 @@ begin
   FCollapsed := False;
   FCollapsedBy := -1;
   FIsExtraTokenFound := False;
+  FUndoListed := False;
 end;
 
 destructor TBCEditorCodeFoldingRange.Destroy;

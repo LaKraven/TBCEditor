@@ -6353,6 +6353,8 @@ begin
     AForm.Free;
     AForm := nil;
   end;
+  FCodeFolding.MouseOverHint := False;
+  UpdateMouseCursor;
 end;
 
 procedure TBCBaseEditor.HideCaret;

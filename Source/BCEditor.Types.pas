@@ -32,7 +32,7 @@ type
     var AForeground: TColor; var ABackground: TColor) of object;
 
   TBCEditorStateFlag = (sfCaretChanged, sfScrollBarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
-    sfWaitForDragging, sfCodeFoldingInfoClicked, sfInSelection, sfBackspaceDown);
+    sfWaitForDragging, sfCodeFoldingInfoClicked, sfInSelection);
   TBCEditorStateFlags = set of TBCEditorStateFlag;
 
   TBCEditorOption = (

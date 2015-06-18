@@ -234,6 +234,7 @@ type
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
+    procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
     procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
@@ -2740,6 +2741,33 @@ begin
   UpdateWordWrapHiddenOffsets;
 end;
 
+procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
+var
+  i: Integer;
+  StartTextPosition, EndTextPosition: TBCEditorTextPosition;
+begin
+  if ACount > 0 then
+  begin
+    for i := AllCodeFoldingRanges.AllCount - 1 downto 0 do
+    with AllCodeFoldingRanges[i] do
+    if ((ACount <= 1) and (FromLine = AFirstLine)) or
+      ((ACount > 1) and (FromLine >= AFirstLine) and (FromLine <= Pred(AFirstLine + ACount))) then
+    begin
+      StartTextPosition.Line := FromLine;
+      StartTextPosition.Char := 1;
+      EndTextPosition.Line := FromLine;
+      EndTextPosition.Char := Length(Lines[FromLine - 1]);
+      UndoList.AddChange(crDeleteCollapsedFold, StartTextPosition, EndTextPosition, '', FSelection.Mode,
+        AllCodeFoldingRanges[i], i);
+
+      AllCodeFoldingRanges.AllRanges.Delete(i);
+    end;
+    if ACount > 0 then
+      UpdateFoldRanges(AFirstLine, -ACount);
+    LeftMarginChanged(Self);
+  end;
+end;
+
 procedure TBCBaseEditor.CodeFoldingPrepareRangeForLine;
 var
   i: Integer;
@@ -3028,8 +3056,8 @@ begin
     if Marks[i].Line > AFirstLine then
       Marks[i].Line := AFirstLine;
 
-  //if FCodeFolding.Visible then
-  //  CodeFoldingLinesDeleted(AFirstLine + 1, ACount);
+  if FCodeFolding.Visible then
+    CodeFoldingLinesDeleted(AFirstLine + 1, ACount);
 
   if Assigned(FOnLinesDeleted) then
     FOnLinesDeleted(Self, AFirstLine, ACount);
@@ -6016,9 +6044,9 @@ begin
           if LUndoItem.ChangeNumber = LOldChangeNumber then
             LIsKeepGoing := True
           else
-          //if FCodeFolding.Visible and (LUndoItem.ChangeReason = crDeleteCollapsedFold) then
-          //  LIsKeepGoing := True
-          //else
+          if FCodeFolding.Visible and (LUndoItem.ChangeReason = crDeleteCollapsedFold) then
+            LIsKeepGoing := True
+          else
             LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
               not (LLastChangeReason in [crIndent, crUnindent]);
           LLastChangeReason := LUndoItem.ChangeReason;
@@ -6095,11 +6123,10 @@ procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: 
 begin
   if FCodeFolding.Visible then
   begin
-    if not (sfBackspaceDown in FStateFlags) and
-      (FNeedToRescanCodeFolding or
+    if FNeedToRescanCodeFolding or
       ((ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(FCaretY) or
       ((ACommand = ecLineBreak) and IsKeywordAtLine(FCaretY - 1)) or { the caret is already in the new line }
-      (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo)) then
+      (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
     else
     case ACommand of
@@ -6387,9 +6414,6 @@ begin
     FMouseOverURI := LTokenType in [Integer(ttWebLink), Integer(ttMailtoLink)];
   end;
 
-  if Key = VK_BACK then
-    Include(FStateFlags, sfBackspaceDown);
-
   LData := nil;
   LChar := BCEDITOR_NONE_CHAR;
   try
@@ -6420,12 +6444,8 @@ begin
 end;
 
 procedure TBCBaseEditor.KeyUp(var Key: Word; Shift: TShiftState);
-var
-  LData: Pointer;
-  LEditorCommand: TBCEditorCommand;
 begin
   inherited;
-  Exclude(FStateFlags, sfBackspaceDown);
 
   if FMouseOverURI then
     FMouseOverURI := False;
@@ -6434,16 +6454,6 @@ begin
     CheckIfAtMatchingKeywords;
 
   FKeyboardHandler.ExecuteKeyUp(Self, Key, Shift);
-
-  LData := nil;
-  try
-    LEditorCommand := TranslateKeyCode(Key, Shift, LData);
-    if (LEditorCommand = ecDeleteLastChar) or (LEditorCommand = ecDeleteChar) then
-      RescanCodeFoldingRanges;
-  finally
-    if Assigned(LData) then
-      FreeMem(LData);
-  end;
 end;
 
 procedure TBCBaseEditor.LinesChanged(Sender: TObject);
@@ -8792,7 +8802,7 @@ begin
               LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
           end;
         end;
-      {crDeleteCollapsedFold:
+      crDeleteCollapsedFold:
         begin
           if FCodeFolding.Visible then
           begin
@@ -8800,7 +8810,7 @@ begin
               '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeData, LUndoItem.ChangeIndex);
             FAllCodeFoldingRanges.AllRanges.Insert(LUndoItem.ChangeIndex, LUndoItem.ChangeData);
           end;
-        end;  }
+        end;
       crWhiteSpaceAdd:
         begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
@@ -9498,6 +9508,7 @@ end;
 
 procedure TBCBaseEditor.UndoItem;
 var
+  i: Integer;
   LUndoItem: TBCEditorUndoItem;
   LTempPosition: TBCEditorTextPosition;
   LTempText: string;
@@ -9637,7 +9648,7 @@ begin
               LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
           end;
         end;
-      {crDeleteCollapsedFold:
+      crDeleteCollapsedFold:
         begin
           if FAllCodeFoldingRanges.AllCount > 0 then
           begin
@@ -9668,7 +9679,7 @@ begin
               LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode,
               FAllCodeFoldingRanges[FAllCodeFoldingRanges.AllCount-1], FAllCodeFoldingRanges.AllCount-1);
           end;
-        end; }
+        end;
     end;
   finally
     if LChangeScrollPastEndOfLine then
@@ -10551,7 +10562,7 @@ var
   LOldSelectionBeginPosition, LOldSelectionEndPosition: TBCEditorTextPosition;
   LBeginLine, LEndLine: Integer;
 
-  function UncollapseCodeFolding(ALine: Integer): Integer;
+  function CodeFoldingUncollapseLine(ALine: Integer): Integer;
   var
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
@@ -10576,11 +10587,10 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if not (sfBackspaceDown in FStateFlags) and
-      ((ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
+    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or //(ACommand = ecDeleteLastChar) or
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar)) and IsKeywordAtCursorPosition or
       SelectionAvailable and (ACommand = ecLineBreak) or
-      ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars))) then
+      ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
       FNeedToRescanCodeFolding := True;
 
     if FCodeFolding.Visible then
@@ -10597,16 +10607,17 @@ begin
             SwapInt(LBeginLine, LEndLine);
           LCollapsedCount := 0;
           for i := LBeginLine to LEndLine do
-            LCollapsedCount := LCollapsedCount + UncollapseCodeFolding(i);
+            LCollapsedCount := LCollapsedCount + CodeFoldingUncollapseLine(i);
           FSelectionBeginPosition := LOldSelectionBeginPosition;
           FSelectionEndPosition := LOldSelectionEndPosition;
           if FSelectionBeginPosition.Line > FSelectionEndPosition.Line then
             FSelectionBeginPosition.Line := FSelectionBeginPosition.Line + LCollapsedCount
           else
             FSelectionEndPosition.Line := FSelectionEndPosition.Line + LCollapsedCount
+          // TODO: If last line was folded, set the selection char
         end
         else
-          UncollapseCodeFolding(CaretY);
+          CodeFoldingUncollapseLine(CaretY);
     end;
 
     { internal command handler }
@@ -12597,13 +12608,13 @@ begin
   FNeedToRescanCodeFolding := False;
 
   { A key press on collapsed fold don't need to rescan }
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+  {for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if Assigned(LCodeFoldingRange) then
       if (CaretY = LCodeFoldingRange.FromLine) and LCodeFoldingRange.Collapsed then
         Exit;
-  end;
+  end; }
 
   { Delete all uncollapsed folds, if not in redo list }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do

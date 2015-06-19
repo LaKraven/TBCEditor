@@ -4,7 +4,7 @@
             "General": {
                 "MultiHighlighter": true,
                 "Version": "1.0",
-                "Date": "6.6.2015",
+                "Date": "19.6.2015",
                 "Sample": [
                     "<!DOCTYPE HTML>\r\n",
                     "<!-- Hello World in HTML -->\r\n",
@@ -135,7 +135,7 @@
                                         "Element": "Editor"
                                     },
                                     "Properties": {
-                                        "AlternativeClose": "/>"
+                                        "AlternativeClose1": "/>"
                                     },
                                     "TokenRange": {
                                         "Open": "script",

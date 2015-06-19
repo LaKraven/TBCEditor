@@ -417,7 +417,8 @@ begin
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
           ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];
-          ARange.AlternativeClose := PropertiesObject['AlternativeClose'].Value;
+          ARange.AlternativeClose1 := PropertiesObject['AlternativeClose1'].Value;
+          ARange.AlternativeClose2 := PropertiesObject['AlternativeClose2'].Value;
           ARange.OpenBeginningOfLine := PropertiesObject.B['OpenBeginningOfLine'];
         end;
 

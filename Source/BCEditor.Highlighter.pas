@@ -193,6 +193,20 @@ var
   LParser: TBCEditorAbstractParser;
   LKeyword: PChar;
   LCloseParent: Boolean;
+
+  procedure CheckAlternativeClose(AAlternativeClose: string);
+  begin
+    LKeyword := PChar(AAlternativeClose);
+    i := FRunPosition;
+    while (FCurrentLine[i] <> BCEDITOR_NONE_CHAR) and (FCurrentLine[i] = LKeyword^) do
+    begin
+      Inc(LKeyword);
+      Inc(i);
+    end;
+    if LKeyword^ = BCEDITOR_NONE_CHAR then
+      FCurrentRange := FCurrentRange.Parent;
+  end;
+
 begin
   while FTemporaryCurrentTokens.Count > 0 do
   begin
@@ -213,18 +227,10 @@ begin
 
   if Assigned(FCurrentRange) then
   begin
-    if FCurrentRange.AlternativeClose <> '' then
-    begin
-      LKeyword := PChar(FCurrentRange.AlternativeClose);
-      i := FRunPosition;
-      while (FCurrentLine[i] <> BCEDITOR_NONE_CHAR) and (FCurrentLine[i] = LKeyword^) do
-      begin
-        Inc(LKeyword);
-        Inc(i);
-      end;
-      if LKeyword^ = BCEDITOR_NONE_CHAR then
-        FCurrentRange := FCurrentRange.Parent;
-    end;
+    if FCurrentRange.AlternativeClose1 <> '' then
+      CheckAlternativeClose(FCurrentRange.AlternativeClose1);
+     if FCurrentRange.AlternativeClose2 <> '' then
+      CheckAlternativeClose(FCurrentRange.AlternativeClose2);
   end;
 
   FTokenPosition := FRunPosition;

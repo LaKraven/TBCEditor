@@ -83,15 +83,10 @@ type
 
   TBCEditorSet = class(TBCEditorRule)
   strict private
-    //FBreakType: TBCEditorBreakType;
     FCharSet: TBCEditorCharSet;
-    //FStartType: TBCEditorStartType;
   public
     constructor Create(ACharSet: TBCEditorCharSet = []);
-
-    //property BreakType: TBCEditorBreakType read FBreakType;
     property CharSet: TBCEditorCharSet read FCharSet write FCharSet;
-    //property StartType: TBCEditorStartType read FStartType;
   end;
 
   TBCEditorAbstractParserArray = array [Char] of TBCEditorAbstractParser;
@@ -101,7 +96,8 @@ type
 
   TBCEditorRange = class(TBCEditorRule)
   strict private
-    FAlternativeClose: string;
+    FAlternativeClose1: string;
+    FAlternativeClose2: string;
     FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
@@ -115,7 +111,6 @@ type
     FDefaultTermSymbol: TDelimitersParser;
     FDefaultToken: TBCEditorToken;
     FDelimiters: TBCEditorCharSet;
-    //FHasNodeAnyStart: TBCEditorBooleanArray;
     FKeyList: TList;
     FOpenToken: TBCEditorMultiToken;
     FPrepared: Boolean;
@@ -168,7 +163,8 @@ type
     procedure RemoveRule(ARule: TBCEditorRule);
     procedure Reset;
     procedure SetDelimiters(ADelimiters: TBCEditorCharSet);
-    property AlternativeClose: string read FAlternativeClose write FAlternativeClose;
+    property AlternativeClose1: string read FAlternativeClose1 write FAlternativeClose1;
+    property AlternativeClose2: string read FAlternativeClose2 write FAlternativeClose2;
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TBCEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
@@ -199,25 +195,6 @@ implementation
 
 uses
   BCEditor.Utils, BCEditor.Consts, System.Types;
-
-{function DoesNodeHaveAnyStart(Node: TBCEditorTokenNode): Boolean;
-var
-  i: Integer;
-begin
-  Result := False;
-
-  if Node.StartType = stAny then
-  begin
-    Result := True;
-    Exit;
-  end;
-  for i := 0 to Node.NextNodes.Count - 1 do
-    if (Node.NextNodes.Nodes[i].StartType = stAny) or DoesNodeHaveAnyStart(Node.NextNodes.Nodes[i]) then
-    begin
-      Result := True;
-      Exit;
-    end
-end;  }
 
 function CaseNone(AChar: Char): Char;
 begin
@@ -280,7 +257,6 @@ begin
     end;
     TokenNodeList := TokenNode.NextNodes;
   end;
-  //TokenNode.StartType := AToken.StartType;
   TokenNode.BreakType := ABreakType;
   TokenNode.Token := AToken;
 end;
@@ -296,32 +272,6 @@ var
   CurrentTokenNode, StartTokenNode, FindTokenNode: TBCEditorTokenNode;
   i, StartPosition, NextPosition, PreviousPosition: Integer;
   AllowedDelimiters: TBCEditorCharSet;
-
- (* function CanBeToken: Boolean;
- // var
- //   i: Integer;
-  begin
-    CanBeToken := True;
-    if not Assigned(CurrentTokenNode.Token) then
-      CanBeToken := False
-   { else
-    if (CurrentTokenNode.BreakType = btTerm) and not CharInSet(APLine[Succ(ARun)], ACurrentRange.FDelimiters) then
-      CanBeToken := False  }
-    {else
-    case CurrentTokenNode.Token.StartLine of
-      slFirstNonSpace:
-        for i := 0 to StartPosition - 1 do
-          if not CharInSet(APLine[i], [BCEDITOR_SPACE_CHAR, BCEDITOR_TAB_CHAR]) then
-          begin
-            CanBeToken := False;
-            Break;
-          end;
-      slFirst:
-        if StartPosition <> 0 then
-          CanBeToken := False;
-    end;  }
-  end;   *)
-
 begin
   Result := False;
   StartPosition := ARun;
@@ -337,7 +287,7 @@ begin
         ARun := NextPosition;
         StartTokenNode := nil;
       end;
-      if Assigned(CurrentTokenNode.Token) then // if CanBeToken then
+      if Assigned(CurrentTokenNode.Token) then
         FindTokenNode := CurrentTokenNode
       else
         FindTokenNode := nil;
@@ -359,9 +309,7 @@ begin
         end;
 
         if not Assigned(StartTokenNode) then
-          if //ACurrentRange.HasNodeAnyStart[ACurrentRange.CaseFunct(CurrentTokenNode.Char)] or
-            CharInSet(CurrentTokenNode.Char, ACurrentRange.Delimiters){ or CharInSet(ACurrentRange.CaseFunct(APLine[ARun]),
-            ACurrentRange.FDelimiters) }then
+          if CharInSet(CurrentTokenNode.Char, ACurrentRange.Delimiters) then
           begin
             StartTokenNode := CurrentTokenNode;
             NextPosition := ARun;
@@ -405,13 +353,6 @@ begin
       Inc(ARun);
     until not CharInSet(APLine[ARun], TBCEditorSet(Sets[i]).CharSet) or (APLine[ARun] = BCEDITOR_NONE_CHAR);
 
-   { if TBCEditorSet(Sets[i]).BreakType = btAny then
-    begin
-      Result := True;
-      AToken := TBCEditorToken.Create(TBCEditorSet(Sets[i]).Attribute);
-      AToken.Temporary := True;
-      Exit;
-    end;  }
     if CharInSet(APLine[ARun], AllowedDelimiters) then
     begin
       Result := True;
@@ -992,16 +933,6 @@ begin
             TBCEditorParser(SymbolList[CaseFunct(c)]).AddSet(TBCEditorSet(FSets[j]));
       end;
     end;
-
- { for i := 0 to 255 do
-  begin
-    c := Char(i);
-    if Assigned(SymbolList[Char(i)]) then
-      if SymbolList[c] <> FDefaultTermSymbol then
-        if SymbolList[c] <> FDefaultSymbols then
-          if Assigned(TBCEditorParser(SymbolList[c]).HeadNode) then
-            FHasNodeAnyStart[c] := DoesNodeHaveAnyStart(TBCEditorParser(SymbolList[CaseFunct(c)]).HeadNode);
-  end;  }
 
   for i := 0 to 255 do
   begin

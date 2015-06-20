@@ -6948,6 +6948,7 @@ begin
       InternalCaretPosition := DisplayToTextPosition(LDisplayPosition);
       SelectionEndPosition := CaretPosition;
     end;
+    FLastSortOrder := soDesc;
     Include(FStateFlags, sfInSelection);
     Exclude(FStateFlags, sfCodeFoldingInfoClicked);
   end;
@@ -12757,6 +12758,7 @@ begin
   else
     LLastTextPosition.Line := 1;
   SetCaretAndSelection(LOldCaretPosition, GetTextPosition(1, 1), LLastTextPosition);
+  FLastSortOrder := soDesc;
   Invalidate;
 end;
 
@@ -12857,7 +12859,11 @@ begin
       begin
         FLastSortOrder := soDesc;
         for i := Strings.Count - 1 downto 0 do
-          s := s + Strings.Strings[i] + Chr(13) + Chr(10);
+        begin
+          s := s + Strings.Strings[i];
+          if i <> 0 then
+            s := s + Chr(13) + Chr(10);
+        end;
       end
       else
       begin
@@ -12866,6 +12872,7 @@ begin
       end;
       s := TrimRight(s);
       Strings.Text := s;
+
       if SelectionAvailable then
       begin
         LOldSelectionBeginPosition := FSelectionBeginPosition;

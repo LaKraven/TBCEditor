@@ -98,40 +98,49 @@ end;
 function StrToRangeType(const AString: string): TBCEditorRangeType;
 begin
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_ADDRESS then
-    Result :=  ttAddress
+    Result := ttAddress
+  else
+  if AString = BCEDITOR_ATTRIBUTE_ELEMENT_ATTRIBUTE then
+    Result := ttAttribute
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_CHARACTER then
-    Result :=  ttChar
+    Result := ttChar
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT then
-    Result :=  ttComment
+    Result := ttComment
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_DIRECTIVE then
-    Result :=  ttDirective
+    Result := ttDirective
    else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_FLOAT then
-    Result :=  ttFloat
+    Result := ttFloat
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_HEX then
-    Result :=  ttHex
-   else
+    Result := ttHex
+  else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_MAIL_TO_LINK then
     Result := ttMailtoLink
   else
+  if AString = BCEDITOR_ATTRIBUTE_ELEMENT_METHOD then
+    Result := ttMethod
+  else
+  if AString = BCEDITOR_ATTRIBUTE_ELEMENT_METHOD_NAME then
+    Result := ttMethodName
+  else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_NUMBER then
-    Result :=  ttNumber
+    Result := ttNumber
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_OCTAL then
-    Result :=  ttOctal
+    Result := ttOctal
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_RESERVED_WORD then
-    Result :=  ttReservedWord
+    Result := ttReservedWord
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_STRING then
-    Result :=  ttString
+    Result := ttString
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_SYMBOL then
-    Result :=  ttSymbol
+    Result := ttSymbol
   else
   if AString = BCEDITOR_ATTRIBUTE_ELEMENT_WEB_LINK then
     Result := ttWebLink

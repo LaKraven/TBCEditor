@@ -151,11 +151,9 @@ type
     Token: string;
   end;
 
-  //TBCEditorStartType = (stUnspecified, stAny, stTerm);
   TBCEditorBreakType = (btUnspecified, btAny, btTerm);
-  //TBCEditorStartLine = (slNotFirst, slFirst, slFirstNonSpace);
-  TBCEditorRangeType = (ttUnspecified, ttAddress, ttChar, ttComment, ttDirective, ttFloat, ttHex, ttMailtoLink,
-    ttNumber, ttOctal, ttReservedWord, ttString, ttSymbol, ttWebLink);
+  TBCEditorRangeType = (ttUnspecified, ttAddress, ttAttribute, ttChar, ttComment, ttDirective, ttFloat, ttHex,
+    ttMailtoLink, ttMethod, ttMethodName, ttNumber, ttOctal, ttReservedWord, ttString, ttSymbol, ttWebLink);
 
   TBCEditorMatchingPairToken = record
     OpenToken: string;

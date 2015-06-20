@@ -69,6 +69,7 @@ const
   clLeftMarginBookmarkBackground = $00F4F4F4;
   clIndentHighlight = $00CC9999;
   clIndent = $00CC9999;
+  clMatchingPairUnderline = $00CC9999;
   clMinimapVisibleLines = $00E6FAFF;
 
 implementation

@@ -8061,6 +8061,7 @@ var
     LText: string;
     X: Integer;
     LCharsToPaint: Integer;
+    OldPenColor: TColor;
   const
     ETOOptions = [tooOpaque, tooClipped];
 
@@ -8114,6 +8115,16 @@ var
       end;
 
       FTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), LCharsToPaint);
+
+      if LTokenHelper.MatchingPairUnderline then
+      begin
+        OldPenColor := Canvas.Pen.Color;
+        Canvas.Pen.Color := FMatchingPair.Colors.Underline;
+        Canvas.MoveTo(LTokenRect.Left, LTokenRect.Bottom - 1);
+        Canvas.LineTo(LTokenRect.Right, LTokenRect.Bottom - 1);
+        Canvas.Pen.Color := OldPenColor;
+      end;
+
       LTokenRect.Left := LTokenRect.Right;
     end;
   end;
@@ -8239,8 +8250,8 @@ var
     end;
   end;
 
-  procedure AddHighlightToken(const AToken: string; ACharsBefore, ATokenLength: Integer; AForeground, ABackground: TColor;
-    AFontStyle: TFontStyles);
+  procedure PrepareTokenHelper(const AToken: string; ACharsBefore, ATokenLength: Integer; AForeground, ABackground: TColor;
+    AFontStyle: TFontStyles; AMatchingPairUnderline: Boolean);
   var
     i: Integer;
     LCanAppend: Boolean;
@@ -8276,6 +8287,7 @@ var
     begin
       LCanAppend := ((LTokenHelper.FontStyle = AFontStyle) or
         (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and TokenIsSpaces)) and
+        (LTokenHelper.MatchingPairUnderline = AMatchingPairUnderline) and
         ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or TokenIsSpaces));
       if not LCanAppend then
         PaintHighlightToken(False);
@@ -8305,6 +8317,7 @@ var
       LTokenHelper.Foreground := AForeground;
       LTokenHelper.Background := ABackground;
       LTokenHelper.FontStyle := AFontStyle;
+      LTokenHelper.MatchingPairUnderline := AMatchingPairUnderline;
     end;
   end;
 
@@ -8342,6 +8355,7 @@ var
     LKeyWord, LWord: string;
     LSelectionBeginChar, LSelectionEndChar: Integer;
     LTempTextPosition: TBCEditorTextPosition;
+    LMatchingPairUnderline: Boolean;
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8488,6 +8502,8 @@ var
               end;
 
               LIsCustomBackgroundColor := False;
+              LMatchingPairUnderline := False;
+
               if FMatchingPair.Enabled then
                 if FCurrentMatchingPair <> trNotFound then
                   if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
@@ -8497,19 +8513,28 @@ var
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
                        (LCurrentLine = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
                     begin
-                      LIsCustomBackgroundColor := True;
                       if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                       begin
-                        if LForegroundColor = FMatchingPair.Colors.Matched then
-                          LForegroundColor := BackgroundColor;
-                        LBackgroundColor := FMatchingPair.Colors.Matched
+                        if mpoUseMatchedColor in FMatchingPair.Options then
+                        begin
+                          LIsCustomBackgroundColor := True;
+                          if LForegroundColor = FMatchingPair.Colors.Matched then
+                            LForegroundColor := BackgroundColor;
+                          LBackgroundColor := FMatchingPair.Colors.Matched;
+                        end;
+                        LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
                       end
                       else
                       if mpoHighlightUnmatched in FMatchingPair.Options then
                       begin
-                        if LForegroundColor = FMatchingPair.Colors.Unmatched then
-                          LForegroundColor := BackgroundColor;
-                        LBackgroundColor := FMatchingPair.Colors.Unmatched
+                        if mpoUseMatchedColor in FMatchingPair.Options then
+                        begin
+                          LIsCustomBackgroundColor := True;
+                          if LForegroundColor = FMatchingPair.Colors.Unmatched then
+                            LForegroundColor := BackgroundColor;
+                          LBackgroundColor := FMatchingPair.Colors.Unmatched;
+                        end;
+                        LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
                       end;
                     end;
                   end;
@@ -8546,13 +8571,16 @@ var
                 LBackgroundColor := FSearch.Highlighter.Colors.Background;
               end;
 
-              AddHighlightToken(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle)
+              PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle,
+                LMatchingPairUnderline)
             end
             else
-              AddHighlightToken(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style);
+              PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
+                False);
           end;
           FHighlighter.Next;
         end;
+
         PaintHighlightToken(True);
 
         if not AMinimap then

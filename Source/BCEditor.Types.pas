@@ -190,6 +190,7 @@ type
     TabString: string;
     Foreground, Background: TColor;
     FontStyle: TFontStyles;
+    MatchingPairUnderline: Boolean;
   end;
 
   TBCEditorCompletionType = (ctNone, ctCode, ctHint);
@@ -211,7 +212,7 @@ type
   );
   TBCEditorLeftMarginLineNumberOptions = set of TBCEditorLeftMarginLineNumberOption;
 
-  TBCEditorMatchingPairOption = (mpoHighlightAfterToken, mpoHighlightUnmatched);
+  TBCEditorMatchingPairOption = (mpoHighlightAfterToken, mpoHighlightUnmatched, mpoUnderline, mpoUseMatchedColor);
   TBCEditorMatchingPairOptions = set of TBCEditorMatchingPairOption;
 
   TBCEditorMinimapOption = (moShowIndentGuides);

@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"7.6.2015"
+            "Date":"20.6.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -38,6 +38,7 @@
             "LeftMarginLineStateNormal":"clLime",
             "LeftMarginBookmarkPanel":"clNavy",
             "MatchingPairMatched":"$00808080",
+            "MatchingPairUnderline":"clSilver",
             "MatchingPairUnmatched":"clYellow",
             "MinimapVisibleLines":"$009F0000",
             "RightMargin":"clSilver",

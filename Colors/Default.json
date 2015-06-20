@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "7.6.2015"
+                "Date": "20.6.2015"
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -15,7 +15,7 @@
             "Colors": {
                 "Background": "clWindow",
                 "ActiveLineBackground": "$00E6FAFF",
-                "CodeFoldingActiveLineBackground":"$00E6FAFF",
+                "CodeFoldingActiveLineBackground": "$00E6FAFF",
                 "CodeFoldingBackground": "clWhite",
                 "CodeFoldingCollapsedLine": "$00CC9999",
                 "CodeFoldingFoldingLineHighlight": "$00CC9999",
@@ -30,15 +30,16 @@
                 "CompletionProposalBorder": "$00CC9999",
                 "CompletionProposalSelectedBackground": "clHighlight",
                 "CompletionProposalSelectedText": "clHighlightText",
-                "LeftMarginActiveLineBackground":"$00E6FAFF",
+                "LeftMarginActiveLineBackground": "$00E6FAFF",
                 "LeftMarginBackground": "clWhite",
-                "LeftMarginBorder":"clWhite",
-                "LeftMarginLineNumberLine":"$00CC9999",
+                "LeftMarginBorder": "clWhite",
+                "LeftMarginLineNumberLine": "$00CC9999",
                 "LeftMarginLineNumbers": "$00CC9999",
                 "LeftMarginLineStateModified": "clYellow",
                 "LeftMarginLineStateNormal": "clLime",
                 "LeftMarginBookmarkPanel": "clWhite",
                 "MatchingPairMatched": "clAqua",
+                "MatchingPairUnderline":"$00CC9999",
                 "MatchingPairUnmatched": "clYellow",
                 "MinimapVisibleLines": "$00E6FAFF",
                 "RightMargin": "clSilver",

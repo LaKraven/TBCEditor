@@ -12838,9 +12838,10 @@ end;
 
 procedure TBCBaseEditor.Sort(ASortOrder: TBCEditorSortOrder = soToggle);
 var
-  i: Integer;
+  i, LLastLength: Integer;
   s: string;
   Strings: TStringList;
+  LOldSelectionBeginPosition, LOldSelectionEndPosition: TBCEditorTextPosition;
 begin
   if Focused then
   begin
@@ -12854,7 +12855,7 @@ begin
       s := '';
       if (ASortOrder = soDesc) or (ASortOrder = soToggle) and (FLastSortOrder = soAsc) then
       begin
-         FLastSortOrder := soDesc;
+        FLastSortOrder := soDesc;
         for i := Strings.Count - 1 downto 0 do
           s := s + Strings.Strings[i] + Chr(13) + Chr(10);
       end
@@ -12864,8 +12865,20 @@ begin
         s := Strings.Text;
       end;
       s := TrimRight(s);
+      Strings.Text := s;
       if SelectionAvailable then
-        SelectedText := s
+      begin
+        LOldSelectionBeginPosition := FSelectionBeginPosition;
+        LOldSelectionEndPosition := FSelectionEndPosition;
+        SelectedText := s;
+        FSelectionBeginPosition := LOldSelectionBeginPosition;
+        FSelectionEndPosition := LOldSelectionEndPosition;
+        LLastLength := Length(Strings.Strings[Strings.Count - 1]) + 1;
+        if FSelectionBeginPosition.Line < FSelectionEndPosition.Line then
+          FSelectionEndPosition.Char := LLastLength
+        else
+          FSelectionBeginPosition.Char := LLastLength
+      end
       else
         Text := s;
     finally

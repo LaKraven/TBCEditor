@@ -33,6 +33,7 @@ type
     function PeekItem: TBCEditorUndoItem;
     function PopItem: TBCEditorUndoItem;
     function LastChangeReason: TBCEditorChangeReason;
+    function LastChangeString: string;
     procedure AddChange(AReason: TBCEditorChangeReason; const AStart, AEnd: TBCEditorTextPosition;
       const ChangeText: string; SelectionMode: TBCEditorSelectionMode; Data: Pointer = nil; Index: Integer = 0);
     procedure BeginBlock;
@@ -271,6 +272,14 @@ begin
     Result := crNothing
   else
     Result := TBCEditorUndoItem(FItems[FItems.Count - 1]).ChangeReason;
+end;
+
+function TBCEditorUndoList.LastChangeString: string;
+begin
+  if FItems.Count = 0 then
+    Result := ''
+  else
+    Result := TBCEditorUndoItem(FItems[FItems.Count - 1]).ChangeString;
 end;
 
 procedure TBCEditorUndoList.AddGroupBreak;

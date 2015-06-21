@@ -6002,6 +6002,7 @@ var
   LOldChangeNumber: Integer;
   LSaveChangeNumber: Integer;
   LLastChangeReason: TBCEditorChangeReason;
+  LLastChangeString: string;
   LIsAutoComplete: Boolean;
   LIsPasteAction: Boolean;
   LIsKeepGoing: Boolean;
@@ -6013,9 +6014,10 @@ begin
   RemoveGroupBreak;
 
   LLastChangeReason := FUndoList.LastChangeReason;
+  LLastChangeString := FUndoList.LastChangeString;
   LIsAutoComplete := LLastChangeReason = crAutoCompleteEnd;
-  LIsPasteAction := LLastChangeReason = crPasteEnd;
-  LIsCodeFoldingAction := FCodeFolding.Visible and ({LUndoItem.ChangeReason}LLastChangeReason in [crCollapseFold, crUncollapseFold]);
+  LIsPasteAction := LLastChangeReason = crPaste;
+  LIsCodeFoldingAction := FCodeFolding.Visible and (LLastChangeReason in [crCollapseFold, crUncollapseFold]);
 
   LUndoItem := FUndoList.PeekItem;
   if Assigned(LUndoItem) then
@@ -6036,7 +6038,7 @@ begin
             LIsKeepGoing := FUndoList.LastChangeReason <> crAutoCompleteBegin
           else
           if LIsPasteAction then
-            LIsKeepGoing := FUndoList.LastChangeReason <> crPasteBegin
+            LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
           else
           if LIsCodeFoldingAction then
             LIsKeepGoing := False
@@ -6053,8 +6055,7 @@ begin
         end;
       until not LIsKeepGoing;
 
-      if (LIsAutoComplete and (FUndoList.LastChangeReason = crAutoCompleteBegin)) or
-        (LIsPasteAction and (FUndoList.LastChangeReason = crPasteBegin)) then
+      if LIsAutoComplete and (FUndoList.LastChangeReason = crAutoCompleteBegin) then
       begin
         Self.UndoItem;
         UpdateModifiedStatus;
@@ -8728,7 +8729,7 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
           SetCaretAndSelection(CaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
         end;
-      crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert:
+      crInsert, crPaste, crDragDropInsert:
         begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition);
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
@@ -9566,7 +9567,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
           SetCaretAndSelection(CaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
         end;
-      crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert:
+      crInsert, crPaste, crDragDropInsert:
         begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;
@@ -12359,7 +12360,6 @@ end;
 
 procedure TBCBaseEditor.DoPasteFromClipboard;
 var
-  LAddPasteEndMarker: Boolean;
   LStartPositionOfBlock: TBCEditorTextPosition;
   LEndPositionOfBlock: TBCEditorTextPosition;
   LPasteMode: TBCEditorSelectionMode;
@@ -12377,7 +12377,6 @@ begin
     Exit;
 
   BeginUndoBlock;
-  LAddPasteEndMarker := False;
   LPasteMode := FSelection.Mode;
   try
     if Clipboard.HasFormat(ClipboardFormatBCEditor) then
@@ -12419,8 +12418,7 @@ begin
     else
     if Clipboard.HasFormat(ClipboardFormatMSDev) then
       LPasteMode := smColumn;
-    FUndoList.AddChange(crPasteBegin, SelectionBeginPosition, SelectionEndPosition, '', smNormal);
-    LAddPasteEndMarker := True;
+
     if SelectionAvailable then
       FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode)
     else
@@ -12453,8 +12451,6 @@ begin
         FUndoList.AddChange(crPaste, GetTextPosition(1, LStartPositionOfBlock.Line), LEndPositionOfBlock, SelectedText, smNormal);
     end;
   finally
-    if LAddPasteEndMarker then
-      FUndoList.AddChange(crPasteEnd, SelectionBeginPosition, SelectionEndPosition, '', smNormal);
     EndUndoBlock;
   end;
 
@@ -12494,7 +12490,8 @@ var
   LUndoItem: TBCEditorUndoItem;
   LOldChangeNumber: Integer;
   LSaveChangeNumber: Integer;
-  LLastChange: TBCEditorChangeReason;
+  LLastChangeReason: TBCEditorChangeReason;
+  LLastChangeString: string;
   LAutoComplete: Boolean;
   LPasteAction: Boolean;
   LKeepGoing: Boolean;
@@ -12503,10 +12500,11 @@ begin
   if ReadOnly then
     Exit;
 
-  LLastChange := FRedoList.LastChangeReason;
-  LAutoComplete := LLastChange = crAutoCompleteBegin;
-  LPasteAction := LLastChange = crPasteBegin;
-  LCodeFoldingAction := FCodeFolding.Visible and ({LUndoItem.ChangeReason} LLastChange in [crCollapseFold, crUncollapseFold]);
+  LLastChangeReason := FRedoList.LastChangeReason;
+  LLastChangeString := FRedoList.LastChangeString;
+  LAutoComplete := LLastChangeReason = crAutoCompleteBegin;
+  LPasteAction := LLastChangeReason = crPaste;
+  LCodeFoldingAction := FCodeFolding.Visible and (LLastChangeReason in [crCollapseFold, crUncollapseFold]);
 
   LUndoItem := FRedoList.PeekItem;
   if Assigned(LUndoItem) then
@@ -12526,7 +12524,7 @@ begin
             LKeepGoing := FRedoList.LastChangeReason <> crAutoCompleteEnd
           else
           if LPasteAction then
-            LKeepGoing := FRedoList.LastChangeReason <> crPasteEnd
+            LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
           else
           if LCodeFoldingAction then
             LKeepGoing := False
@@ -12535,15 +12533,14 @@ begin
             LKeepGoing := True
           else
           begin
-            LKeepGoing := ((uoGroupUndo in FUndo.Options) and (LLastChange = LUndoItem.ChangeReason) and
-              not (LLastChange in [crIndent, crUnindent]));
+            LKeepGoing := ((uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
+              not (LLastChangeReason in [crIndent, crUnindent]));
           end;
-          LLastChange := LUndoItem.ChangeReason;
+          LLastChangeReason := LUndoItem.ChangeReason;
         end;
       until not LKeepGoing;
 
-      if (LAutoComplete and (FRedoList.LastChangeReason = crAutoCompleteEnd)) or
-        (LPasteAction and (FRedoList.LastChangeReason = crPasteEnd)) then
+      if LAutoComplete and (FRedoList.LastChangeReason = crAutoCompleteEnd) then
       begin
         RedoItem;
         UpdateModifiedStatus;

@@ -6,7 +6,7 @@ uses
   System.Classes, BCEditor.Types;
 
 type
-  TBCEditorChangeReason = (crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert, crDeleteAfterCursor, crDelete,
+  TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete,
     crLineBreak, crLineInsert, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
     crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll, crWhiteSpaceAdd,
     crDeleteCollapsedFold, crCollapseFold, crUncollapseFold);

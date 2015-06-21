@@ -1713,7 +1713,6 @@ function TBCBaseEditor.GetSelectedText: string;
     LTextPosition: TBCEditorTextPosition;
     LDisplayPosition: TBCEditorDisplayPosition;
     LTrimCount: Integer;
-    LLineCount: Integer;
     LUncollapsedLines: TStrings;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
@@ -1763,75 +1762,6 @@ function TBCBaseEditor.GetSelectedText: string;
             LUncollapsedLines.Free;
           end;
         end;
-       (* if LFirst = Last then
-        begin
-          LUncollapsedLines := CreateUncollapsedLines;
-          { calculate total length of result string }
-          Inc(LTotalLength, LColumnTo - LColumnFrom);
-          LCodeFoldingRange := CodeFoldingRangeForLine(LFirst);
-          if (Length(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]) < LColumnTo) and
-            Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
-          begin
-            { Selection until line end -> Also get text from foldrange }
-            LLineCount := 1;
-            for i := GetUncollapsedLineNumber(LFirst + 1) to GetUncollapsedLineNumber(Last + 2) - 2 do
-            begin
-              Inc(LTotalLength, Length(TrimRight(LUncollapsedLines[i])));
-              Inc(LLineCount);
-            end;
-            Inc(LTotalLength, Length(sLineBreak) * LLineCount);
-          end;
-          { build up result string }
-          SetLength(Result, LTotalLength);
-          P := PChar(Result);
-          CopyAndForward(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]), LColumnFrom,
-            LColumnTo - LColumnFrom, P);
-          if (Length(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]) < LColumnTo) and
-            Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
-          begin
-            { Selection until line end -> Also get text from foldrange }
-            CopyAndForward(sLineBreak, 1, MaxInt, P);
-            for i := GetUncollapsedLineNumber(LFirst + 1) to GetUncollapsedLineNumber(Last + 2) - 2 do
-            begin
-              CopyAndForward(TrimRight(LUncollapsedLines[i]), 1, MaxInt, P);
-              CopyAndForward(sLineBreak, 1, MaxInt, P);
-            end;
-          end;
-          LUncollapsedLines.Free;
-        end
-        else
-        begin
-          LUncollapsedLines := CreateUncollapsedLines;
-          { calculate total length of result string }
-          LLineCount := 0;
-          { first line }
-          Inc(LTotalLength, Length(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1])));
-          Inc(LLineCount);
-          { middle lines }
-          for i := GetUncollapsedLineNumber(LFirst + 1) to GetUncollapsedLineNumber(Last + 1) - 2 do
-          begin
-            Inc(LTotalLength, Length(TrimRight(LUncollapsedLines[i])));
-            Inc(LLineCount);
-          end;
-          { last line }
-          Inc(LTotalLength, LColumnTo - 1);
-          Inc(LTotalLength, Length(sLineBreak) * LLineCount);
-          { build up result string }
-          SetLength(Result, LTotalLength);
-          P := PChar(Result);
-          { first line }
-          CopyAndForward(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(LFirst + 1) - 1]), LColumnFrom, MaxInt, P);
-          CopyAndForward(sLineBreak, 1, MaxInt, P);
-          { middle lines }
-          for i := GetUncollapsedLineNumber(LFirst + 1) to GetUncollapsedLineNumber(Last + 1) - 2 do
-          begin
-            CopyAndForward(TrimRight(LUncollapsedLines[i]), 1, MaxInt, P);
-            CopyAndForward(sLineBreak, 1, MaxInt, P);
-          end;
-          { last line }
-          CopyAndForward(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(Last + 1) - 1]), 1, LColumnTo - 1, P);
-          LUncollapsedLines.Free;
-        end; *)
       smColumn:
         begin
           with TextToDisplayPosition(SelectionBeginPosition, False) do

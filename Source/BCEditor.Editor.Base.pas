@@ -8728,7 +8728,7 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
           SetCaretAndSelection(CaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
         end;
-      crInsert, crPaste, crDragDropInsert:
+      crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert:
         begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition);
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
@@ -9566,7 +9566,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
           SetCaretAndSelection(CaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
         end;
-      crInsert, crPaste, crDragDropInsert:
+      crInsert, crPaste, crPasteBegin, crPasteEnd, crDragDropInsert:
         begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;

@@ -445,7 +445,7 @@ type
 
     function CaretInView: Boolean;
     function CreateFileStream(AFileName: string): TStream; virtual;
-    function CreateUncollapsedLines: TBCEditorLines;
+    function CreateUncollapsedLines: TStrings;
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
     function GetColorsFileName(AFileName: string): string;
     function GetHighlighterFileName(AFileName: string): string;
@@ -1188,33 +1188,23 @@ begin
   end;
 end;
 
-function TBCBaseEditor.CreateUncollapsedLines: TBCEditorLines;
+function TBCBaseEditor.CreateUncollapsedLines: TStrings;
 var
   i, j, k: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  Result := TBCEditorLines.Create(Self);
-  Result.Clear;
-  j := 0;
-  for i := 0 to FLines.Count - 1 do
+  Result := TStringList.Create;
+  Result.Text := Lines.Text;
+  j := Length(FCodeFoldingRangeForLine) - 1;
+  for i := 1 to j do
   begin
-    LCodeFoldingRange := nil;
-    while j < FAllCodeFoldingRanges.AllCount do
+    LCodeFoldingRange := CodeFoldingRangeForLine(i);
+    if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
     begin
-      LCodeFoldingRange := FAllCodeFoldingRanges[j];
-      if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed then
-        Inc(j)
-      else
-        Break;
+      Result.Delete(i - 1); { Collapsed line }
+      for k := LCodeFoldingRange.CollapsedLines.Count - 1 downto 0 do
+        Result.Insert(i - 1, LCodeFoldingRange.CollapsedLines.Strings[k]);
     end;
-    if (j < FAllCodeFoldingRanges.AllCount) and Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine - 1 = i) then
-    begin
-      for k := 0 to LCodeFoldingRange.CollapsedLines.Count - 1 do
-        Result.Add(LCodeFoldingRange.CollapsedLines[k]);
-      Inc(j);
-    end
-    else
-      Result.Add(FLines[i])
   end;
 end;
 
@@ -1714,7 +1704,7 @@ function TBCBaseEditor.GetSelectedText: string;
 
   function DoGetSelectedText: string;
   var
-    LFirst, Last, LTotalLength: Integer;
+    LFirst, LLast, LTotalLength: Integer;
     LColumnFrom, LColumnTo: Integer;
     i, L, R: Integer;
     S: string;
@@ -1728,13 +1718,52 @@ function TBCBaseEditor.GetSelectedText: string;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     LColumnFrom := SelectionBeginPosition.Char;
-    LFirst := SelectionBeginPosition.Line - 1;
+    LFirst := SelectionBeginPosition.Line;
     LColumnTo := SelectionEndPosition.Char;
-    Last := SelectionEndPosition.Line - 1;
+    LLast := SelectionEndPosition.Line;
     LTotalLength := 0;
     case FSelection.ActiveMode of
       smNormal:
-        if LFirst = Last then
+        begin
+          LFirst := GetUncollapsedLineNumber(LFirst);
+          LLast := GetUncollapsedLineNumber(LLast);
+          LCodeFoldingRange := CodeFoldingRangeForLine(LLast);
+          if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
+            LLast := LCodeFoldingRange.ToLine;
+
+          LUncollapsedLines := CreateUncollapsedLines;
+          try
+            if LFirst = LLast then
+              Result := Copy(LUncollapsedLines[LFirst - 1], LColumnFrom, LColumnTo - LColumnFrom)
+            else
+            begin
+              // step1: calculate total length of result string
+              LTotalLength := Max(0, Length(LUncollapsedLines[LFirst - 1]) - LColumnFrom + 1);
+              Inc(LTotalLength, Length(SLineBreak));
+              for i := LFirst to LLast - 2 do
+              begin
+                Inc(LTotalLength, Length(LUncollapsedLines[i]));
+                Inc(LTotalLength, Length(SLineBreak));
+              end;
+              Inc(LTotalLength, LColumnTo - 1);
+              //Inc(LTotalLength, Length(SLineBreak) * (LLast - LFirst));
+              // step2: build up result string
+              SetLength(Result, LTotalLength);
+              P := PChar(Result);
+              CopyAndForward(LUncollapsedLines[LFirst - 1], LColumnFrom, MaxInt, P);
+              CopyAndForward(SLineBreak, 1, MaxInt, P);
+              for i := LFirst to LLast - 2 do
+              begin
+                CopyAndForward(LUncollapsedLines[i], 1, MaxInt, P);
+                CopyAndForward(SLineBreak, 1, MaxInt, P);
+              end;
+              CopyAndForward(LUncollapsedLines[LLast - 1], 1, LColumnTo - 1, P);
+            end;
+          finally
+            LUncollapsedLines.Free;
+          end;
+        end;
+       (* if LFirst = Last then
         begin
           LUncollapsedLines := CreateUncollapsedLines;
           { calculate total length of result string }
@@ -1802,7 +1831,7 @@ function TBCBaseEditor.GetSelectedText: string;
           { last line }
           CopyAndForward(TrimRight(LUncollapsedLines[GetUncollapsedLineNumber(Last + 1) - 1]), 1, LColumnTo - 1, P);
           LUncollapsedLines.Free;
-        end;
+        end; *)
       smColumn:
         begin
           with TextToDisplayPosition(SelectionBeginPosition, False) do
@@ -1812,20 +1841,20 @@ function TBCBaseEditor.GetSelectedText: string;
           end;
           with TextToDisplayPosition(SelectionEndPosition, False) do
           begin
-            Last := Row;
+            LLast := Row;
             LColumnTo := Column;
           end;
           if LColumnFrom > LColumnTo then
             SwapInt(LColumnFrom, LColumnTo);
 
           { pre-allocate string large enough for worst case }
-          LTotalLength := ((LColumnTo - LColumnFrom) + Length(sLineBreak)) * (Last - LFirst + 1);
+          LTotalLength := ((LColumnTo - LColumnFrom) + Length(sLineBreak)) * (LLast - LFirst + 1);
           SetLength(Result, LTotalLength);
           P := PChar(Result);
 
           { copy chunks to the pre-allocated string }
           LTotalLength := 0;
-          for LRow := LFirst to Last do
+          for LRow := LFirst to LLast do
           begin
             LDisplayPosition.Row := LRow;
             LDisplayPosition.Column := LColumnFrom;
@@ -1845,16 +1874,16 @@ function TBCBaseEditor.GetSelectedText: string;
       smLine:
         begin
           LUncollapsedLines := CreateUncollapsedLines;
-          for i := GetUncollapsedLineNumber(LFirst + 1) - 1 to GetUncollapsedLineNumber(Last + 2) - 2 do
+          for i := GetUncollapsedLineNumber(LFirst) - 1 to GetUncollapsedLineNumber(LLast + 1) - 2 do
           begin
             Inc(LTotalLength, Length(TrimRight(LUncollapsedLines[i])) + Length(sLineBreak));
           end;
-          if Last = Lines.Count then
+          if LLast - 1 = Lines.Count then
             Dec(LTotalLength, Length(sLineBreak));
 
           SetLength(Result, LTotalLength);
           P := PChar(Result);
-          for i := GetUncollapsedLineNumber(LFirst + 1) - 1 to GetUncollapsedLineNumber(Last + 2) - 2 do
+          for i := GetUncollapsedLineNumber(LFirst) - 1 to GetUncollapsedLineNumber(LLast + 1) - 2 do
           begin
             CopyAndForward(TrimRight(LUncollapsedLines[i]), 1, MaxInt, P);
             CopyAndForward(sLineBreak, 1, MaxInt, P);

@@ -10564,7 +10564,7 @@ var
         if LCodeFoldingRange.Collapsed then
         begin
           Result := LCodeFoldingRange.CollapsedLines.Count - 1;
-          CodeFoldingUncollapse(LCodeFoldingRange, False);
+          CodeFoldingUncollapse(LCodeFoldingRange);
           LCodeFoldingRange.UndoListed := False;
         end;
     end;

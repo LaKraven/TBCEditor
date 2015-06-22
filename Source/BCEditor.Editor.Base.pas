@@ -2719,8 +2719,7 @@ begin
         LEndTextPosition.Char := Length(Lines[LCodeFoldingRange.FromLine - 1]);
         UndoList.AddChange(crDeleteCollapsedFold, LStartTextPosition, LEndTextPosition, '', FSelection.Mode,
           LCodeFoldingRange, i);
-
-        AllCodeFoldingRanges.AllRanges.Delete(i);
+        AllCodeFoldingRanges.Delete(LCodeFoldingRange);
       end;
     end;
     UpdateFoldRanges(AFirstLine, -ACount);

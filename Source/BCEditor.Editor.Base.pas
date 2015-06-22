@@ -310,7 +310,7 @@ type
     procedure TabsChanged(Sender: TObject);
     procedure UndoChanged(Sender: TObject);
     procedure UndoRedoAdded(Sender: TObject);
-    procedure UpdateFoldRangeParents;
+    //procedure UpdateFoldRangeParents;
     procedure UpdateFoldRanges(ACurrentLine, ALineCount: Integer); overload;
     procedure UpdateFoldRanges(AFoldRanges: TBCEditorCodeFoldingRanges; ALineCount: Integer); overload;
     procedure UpdateWordWrapHiddenOffsets;
@@ -2708,7 +2708,7 @@ var
 begin
   if ACount > 0 then
   begin
-    for i := AFirstLine + ACount downto AFirstLine do
+    for i := AFirstLine + ACount - 1 downto AFirstLine do
     begin
       LCodeFoldingRange := CodeFoldingRangeForLine(i);
       if Assigned(LCodeFoldingRange) then
@@ -4676,7 +4676,7 @@ begin
     DoChange;
 end;
 
-procedure TBCBaseEditor.UpdateFoldRangeParents;
+{procedure TBCBaseEditor.UpdateFoldRangeParents;
 var
   i, j: Integer;
   LNearest, LCollapsedFromLine: Integer;
@@ -4725,7 +4725,7 @@ begin
         end;
       end;
   end;
-end;
+end;}
 
 procedure TBCBaseEditor.UpdateFoldRanges(ACurrentLine, ALineCount: Integer);
 var
@@ -12696,7 +12696,7 @@ begin
       FAllCodeFoldingRanges.Free;
       FAllCodeFoldingRanges := nil;
       FAllCodeFoldingRanges := LTemporaryAllCodeFoldingRanges;
-      UpdateFoldRangeParents;
+      //UpdateFoldRangeParents;
     end;
   finally
     CodeFoldingPrepareRangeForLine;

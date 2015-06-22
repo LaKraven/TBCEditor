@@ -6090,7 +6090,7 @@ begin
       RescanCodeFoldingRanges
     else
     case ACommand of
-      ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecClear:
+      ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecDeleteLastChar, ecClear:
         CodeFoldingPrepareRangeForLine;
     end;
   end;

@@ -2703,26 +2703,27 @@ end;
 procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
 var
   i: Integer;
-  StartTextPosition, EndTextPosition: TBCEditorTextPosition;
+  LStartTextPosition, LEndTextPosition: TBCEditorTextPosition;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   if ACount > 0 then
   begin
-    for i := AllCodeFoldingRanges.AllCount - 1 downto 0 do
-    with AllCodeFoldingRanges[i] do
-    if ((ACount <= 1) and (FromLine = AFirstLine)) or
-      ((ACount > 1) and (FromLine >= AFirstLine) and (FromLine <= Pred(AFirstLine + ACount))) then
+    for i := AFirstLine + ACount downto AFirstLine do
     begin
-      StartTextPosition.Line := FromLine;
-      StartTextPosition.Char := 1;
-      EndTextPosition.Line := FromLine;
-      EndTextPosition.Char := Length(Lines[FromLine - 1]);
-      UndoList.AddChange(crDeleteCollapsedFold, StartTextPosition, EndTextPosition, '', FSelection.Mode,
-        AllCodeFoldingRanges[i], i);
+      LCodeFoldingRange := CodeFoldingRangeForLine(i);
+      if Assigned(LCodeFoldingRange) then
+      begin
+        LStartTextPosition.Line := LCodeFoldingRange.FromLine;
+        LStartTextPosition.Char := 1;
+        LEndTextPosition.Line := LCodeFoldingRange.FromLine;
+        LEndTextPosition.Char := Length(Lines[LCodeFoldingRange.FromLine - 1]);
+        UndoList.AddChange(crDeleteCollapsedFold, LStartTextPosition, LEndTextPosition, '', FSelection.Mode,
+          LCodeFoldingRange, i);
 
-      AllCodeFoldingRanges.AllRanges.Delete(i);
+        AllCodeFoldingRanges.AllRanges.Delete(i);
+      end;
     end;
-    if ACount > 0 then
-      UpdateFoldRanges(AFirstLine, -ACount);
+    UpdateFoldRanges(AFirstLine, -ACount);
     LeftMarginChanged(Self);
   end;
 end;
@@ -6090,7 +6091,7 @@ begin
       RescanCodeFoldingRanges
     else
     case ACommand of
-      ecPaste, ecUndo, ecRedo, ecInsertLine, ecLineBreak, ecDeleteLine, ecDeleteLastChar, ecClear:
+      ecInsertLine, ecLineBreak, ecDeleteLine, ecDeleteLastChar, ecClear:
         CodeFoldingPrepareRangeForLine;
     end;
   end;
@@ -6437,8 +6438,7 @@ begin
       TopLine := TopLine;
     if GetWordWrap then
       FWordWrapHelper.Reset;
-    if FMinimap.Visible then
-      SetLength(FCollapsedLinesDifferenceCache, 0);
+    SetLength(FCollapsedLinesDifferenceCache, 0);
   end;
 end;
 

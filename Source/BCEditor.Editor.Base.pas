@@ -647,7 +647,7 @@ implementation
 {$R BCEditor.res}
 
 uses
-  Winapi.ShellAPI, Winapi.Imm, System.WideStrUtils, System.Math, System.Types, Vcl.Clipbrd,
+  Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd,
   Vcl.Menus, BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
   {$IFDEF USE_VCL_STYLES}Vcl.Themes, BCEditor.StyleHooks,{$ENDIF} BCEditor.Highlighter.Rules;
@@ -5610,8 +5610,8 @@ procedure TBCBaseEditor.DoBlockIndent;
 var
   LOldCaretPosition: TBCEditorTextPosition;
   LBlockBeginPosition, LBlockEndPosition: TBCEditorTextPosition;
-  LRun, LStringToInsert: PChar;
-  LEndOfLine, X, i, LInsertStringLength: Integer;
+  LStringToInsert: string;
+  LEndOfLine, LCaretPositionX, i: Integer;
   LSpaces: string;
   LOrgSelectionMode: TBCEditorSelectionMode;
   LInsertionPosition: TBCEditorTextPosition;
@@ -5619,7 +5619,7 @@ begin
   LOrgSelectionMode := FSelection.ActiveMode;
   LOldCaretPosition := CaretPosition;
 
-  LStringToInsert := nil;
+  LStringToInsert := '';
   if SelectionAvailable then
   try
     LBlockBeginPosition := SelectionBeginPosition;
@@ -5628,36 +5628,23 @@ begin
     if LBlockEndPosition.Char = 1 then
     begin
       LEndOfLine := LBlockEndPosition.Line - 1;
-      X := 1;
+      LCaretPositionX := 1;
     end
     else
     begin
       LEndOfLine := LBlockEndPosition.Line;
       if toTabsToSpaces in FTabs.Options then
-        X := CaretX + FTabs.Width
+        LCaretPositionX := CaretX + FTabs.Width
       else
-        X := CaretX + 1;
+        LCaretPositionX := CaretX + 1;
     end;
     if toTabsToSpaces in FTabs.Options then
-    begin
-      LInsertStringLength := (FTabs.Width + 2) * (LEndOfLine - LBlockBeginPosition.Line) + FTabs.Width + 1;
-      LStringToInsert := WStrAlloc(LInsertStringLength);
-      LRun := LStringToInsert;
-      LSpaces := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width);
-    end
+      LSpaces := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width)
     else
-    begin
-      LInsertStringLength := 3 * (LEndOfLine - LBlockBeginPosition.Line) + 2;
-      LStringToInsert := WStrAlloc(LInsertStringLength);
-      LRun := LStringToInsert;
       LSpaces := BCEDITOR_TAB_CHAR;
-    end;
     for I := LBlockBeginPosition.Line to LEndOfLine - 1 do
-    begin
-      WStrCopy(LRun, PChar(LSpaces + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED));
-      Inc(LRun, Length(LSpaces) + 2);
-    end;
-    WStrCopy(LRun, PChar(LSpaces));
+      LStringToInsert := LStringToInsert + LSpaces + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+    LStringToInsert := LStringToInsert + LSpaces;
 
     FUndoList.BeginBlock;
     try
@@ -5666,18 +5653,17 @@ begin
         LInsertionPosition.Char := Min(LBlockBeginPosition.Char, LBlockEndPosition.Char)
       else
         LInsertionPosition.Char := 1;
-      InsertBlock(LInsertionPosition, LInsertionPosition, LStringToInsert, True);
+      InsertBlock(LInsertionPosition, LInsertionPosition, PChar(LStringToInsert), True);
       FUndoList.AddChange(crIndent, LBlockBeginPosition, LBlockEndPosition, '', smColumn);
       FUndoList.AddChange(crIndent, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces), LBlockBeginPosition.Line),
         GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line), '', smColumn);
     finally
       FUndoList.EndBlock;
     end;
-    LOldCaretPosition.Char := X;
+    LOldCaretPosition.Char := LCaretPositionX;
   finally
     if LBlockEndPosition.Char > 1 then
       Inc(LBlockEndPosition.Char, Length(LSpaces));
-    WStrDispose(LStringToInsert);
     SetCaretAndSelection(LOldCaretPosition, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces),
       LBlockBeginPosition.Line), LBlockEndPosition);
     FSelection.ActiveMode := LOrgSelectionMode;
@@ -5688,8 +5674,10 @@ procedure TBCBaseEditor.DoBlockUnindent;
 var
   LOldCaretPosition: TBCEditorTextPosition;
   LBlockBeginPosition, LBlockEndPosition: TBCEditorTextPosition;
-  LLine, LRun, LFullStringToDelete, LStringToDelete: PChar;
-  LLength, X, StringToDeleteLength, i, LDeletionLength, LFirstIndent, LLastIndent, LEndOfLine: Integer;
+  LLine: PChar;
+  LFullStringToDelete: string;
+  LStringToDelete: array of string;
+  LLength, LCaretPositionX, LDeleteIndex, i, j, LDeletionLength, LFirstIndent, LLastIndent, LLastLine: Integer;
   LLineText: string;
   LOldSelectionMode: TBCEditorSelectionMode;
   LSomethingToDelete: Boolean;
@@ -5703,14 +5691,14 @@ var
     if Run[0] = BCEDITOR_TAB_CHAR then
     begin
       Result := 1;
-      LSomethingToDelete := true;
+      LSomethingToDelete := True;
       Exit;
     end;
     while (Run[0] = BCEDITOR_SPACE_CHAR) and (Result < FTabs.Width) do
     begin
       Inc(Result);
       Inc(Run);
-      LSomethingToDelete := true;
+      LSomethingToDelete := True;
     end;
     if (Run[0] = BCEDITOR_TAB_CHAR) and (Result < FTabs.Width) then
       Inc(Result);
@@ -5724,70 +5712,52 @@ begin
   begin
     LBlockBeginPosition := SelectionBeginPosition;
     LBlockEndPosition := SelectionEndPosition;
+
     LOldCaretPosition := CaretPosition;
-    X := FCaretX;
+    LCaretPositionX := FCaretX;
 
     if SelectionEndPosition.Char = 1 then
-      LEndOfLine := LBlockEndPosition.Line - 1
+      LLastLine := LBlockEndPosition.Line - 1
     else
-      LEndOfLine := LBlockEndPosition.Line;
+      LLastLine := LBlockEndPosition.Line;
 
-    StringToDeleteLength := (FTabs.Width + 2) * (LEndOfLine - LBlockBeginPosition.Line) + FTabs.Width + 1;
-    LStringToDelete := WStrAlloc(StringToDeleteLength);
-    LStringToDelete[0] := BCEDITOR_NONE_CHAR;
     LSomethingToDelete := False;
-    for I := LBlockBeginPosition.Line to LEndOfLine - 1 do
+    j := 0;
+    SetLength(LStringToDelete, LLastLine -  LBlockBeginPosition.Line + 1);
+    for I := LBlockBeginPosition.Line to LLastLine do
     begin
       LLine := PChar(Lines[I - 1]);
       if FSelection.ActiveMode = smColumn then
         Inc(LLine, MinIntValue([LBlockBeginPosition.Char - 1, LBlockEndPosition.Char - 1, Length(Lines[I - 1])]));
       LDeletionLength := GetDeletionLength;
-      WStrCat(LStringToDelete, PChar(Copy(LLine, 1, LDeletionLength)));
-      WStrCat(LStringToDelete, PChar(BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED));
-      if (FCaretY = I) and (X <> 1) then
-        X := X - LDeletionLength;
+      LStringToDelete[j] := Copy(LLine, 1, LDeletionLength);
+      Inc(j);
+      if (FCaretY = I) and (LCaretPositionX <> 1) then
+        LCaretPositionX := LCaretPositionX - LDeletionLength;
     end;
-    LLine := PChar(Lines[LEndOfLine - 1]);
-    if FSelection.ActiveMode = smColumn then
-      Inc(LLine, MinIntValue([LBlockBeginPosition.Char - 1, LBlockEndPosition.Char - 1, Length(Lines[LEndOfLine - 1])]));
-    LDeletionLength := GetDeletionLength;
-    WStrCat(LStringToDelete, PChar(Copy(LLine, 1, LDeletionLength)));
-    if (FCaretY = LEndOfLine) and (X <> 1) then
-      X := X - LDeletionLength;
-
     LFirstIndent := -1;
-    LFullStringToDelete := nil;
+    LFullStringToDelete := '';
     if LSomethingToDelete then
     begin
-      LFullStringToDelete := LStringToDelete;
+      for i := 0 to Length(LStringToDelete) - 2 do
+        LFullStringToDelete := LFullStringToDelete + LStringToDelete[i] + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+      LFullStringToDelete := LFullStringToDelete + LStringToDelete[Length(LStringToDelete) - 1];
       InternalCaretY := LBlockBeginPosition.Line;
       if FSelection.ActiveMode <> smColumn then
-        I := 1
+        LDeleteIndex := 1
       else
-        I := Min(LBlockBeginPosition.Char, LBlockEndPosition.Char);
-      repeat
-        LRun := GetEndOfLine(LStringToDelete);
-        if LRun <> LStringToDelete then
-        begin
-          LLength := LRun - LStringToDelete;
-          if LFirstIndent = -1 then
-            LFirstIndent := LLength;
-          if LLength > 0 then
-          begin
-            LLineText := Lines[CaretY - 1];
-            Delete(LLineText, I, LLength);
-            Lines[CaretY - 1] := LLineText;
-          end;
-        end;
-        if LRun^ = BCEDITOR_CARRIAGE_RETURN then
-        begin
-          Inc(LRun);
-          if LRun^ = BCEDITOR_LINEFEED then
-            Inc(LRun);
-          Inc(FCaretY);
-        end;
-        LStringToDelete := LRun;
-      until LRun^ = BCEDITOR_NONE_CHAR;
+        LDeleteIndex := Min(LBlockBeginPosition.Char, LBlockEndPosition.Char);
+      j := 0;
+      for I := LBlockBeginPosition.Line to LLastLine do
+      begin
+        LLength := Length(LStringToDelete[j]);
+        Inc(j);
+        if LFirstIndent = -1 then
+          LFirstIndent := LLength;
+        LLineText := Lines[i - 1];
+        Delete(LLineText, LDeleteIndex, LLength);
+        Lines[i - 1] := LLineText;
+      end;
       LLastIndent := LLength;
       FUndoList.AddChange(crUnindent, LBlockBeginPosition, LBlockEndPosition, LFullStringToDelete, FSelection.ActiveMode);
     end;
@@ -5797,16 +5767,12 @@ begin
       SetCaretAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition)
     else
     begin
-      LOldCaretPosition.Char := X;
+      LOldCaretPosition.Char := LCaretPositionX;
       Dec(LBlockBeginPosition.Char, LFirstIndent);
       Dec(LBlockEndPosition.Char, LLastIndent);
       SetCaretAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition);
     end;
     FSelection.ActiveMode := LOldSelectionMode;
-    if Assigned(LFullStringToDelete) then
-      WStrDispose(LFullStringToDelete)
-    else
-      WStrDispose(LStringToDelete);
   end;
 end;
 
@@ -11941,7 +11907,7 @@ begin
       ecImeStr:
         if not ReadOnly then
         begin
-          SetString(S, PChar(AData), WStrLen(AData));
+          SetString(S, PChar(AData), Length(PChar(AData)));
           if SelectionAvailable then
           begin
             BeginUndoBlock;

@@ -163,7 +163,7 @@ type
     FVisibleLines: Integer;
     FWordWrap: TBCEditorWordWrap;
     FWordWrapHelper: TBCEditorWordWrapHelper;
-    function CodeFoldingCollapsableFoldRangeForLine(ALine: Integer; AFoldCount: PInteger = nil): TBCEditorCodeFoldingRange;
+    function CodeFoldingCollapsableFoldRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingFoldRangeForLineTo(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
@@ -894,39 +894,22 @@ end;
 
 { Private declarations }
 
-function TBCBaseEditor.CodeFoldingCollapsableFoldRangeForLine(ALine: Integer; AFoldCount: PInteger): TBCEditorCodeFoldingRange;
+function TBCBaseEditor.CodeFoldingCollapsableFoldRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
 var
-  i, LLastLine: Integer;
+  i: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   Result := nil;
-  LLastLine := 0;
-
-  if Assigned(AFoldCount) then
-    AFoldCount^ := 1;
 
   for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if Assigned(LCodeFoldingRange) then
-    begin
       if not LCodeFoldingRange.ParentCollapsed and (LCodeFoldingRange.FromLine = ALine) and LCodeFoldingRange.Collapsable then
       begin
         Result := LCodeFoldingRange;
         Break;
       end
-      else
-      if Assigned(AFoldCount) then
-      begin
-        if LLastLine = LCodeFoldingRange.FromLine then
-          Inc(AFoldCount^)
-        else
-        begin
-          LLastLine := LCodeFoldingRange.FromLine;
-          AFoldCount^ := 1;
-        end;
-      end;
-    end;
   end;
 end;
 

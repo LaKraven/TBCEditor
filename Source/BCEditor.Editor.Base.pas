@@ -4725,7 +4725,7 @@ begin
         end;
       end;
   end;
-end;}
+end; }
 
 procedure TBCBaseEditor.UpdateFoldRanges(ACurrentLine, ALineCount: Integer);
 var
@@ -10611,11 +10611,12 @@ begin
     end;
 
     { internal command handler }
-    if (ACommand <> ecNone) and (ACommand < ecUserFirst) then
+    if {(ACommand <> ecNone) and} (ACommand < ecUserFirst) then
       ExecuteCommand(ACommand, AChar, AData);
+
     { notify hooked command handlers after the command was executed inside of the class }
-    if ACommand <> ecNone then
-      NotifyHookedCommandHandlers(True, ACommand, AChar, AData);
+    //if ACommand <> ecNone then
+    NotifyHookedCommandHandlers(True, ACommand, AChar, AData);
   end;
   DoOnCommandProcessed(ACommand, AChar, AData);
 end;
@@ -11625,10 +11626,11 @@ begin
                     else
                       LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
 
-                    InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
+                    InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, FCaretY + 1);
 
-                    for i := 1 to Length(LSpaceBuffer) do
-                      CommandProcessor(ecChar, LSpaceBuffer[i], nil);
+                    FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
+                    //for i := 1 to Length(LSpaceBuffer) do
+                    //  CommandProcessor(ecChar, LSpaceBuffer[i], nil);
                   end
                   else
                     InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
@@ -11702,10 +11704,11 @@ begin
                   else
                     LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
 
-                  InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
+                  InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, FCaretY + 1);
 
-                  for i := 1 to Length(LSpaceBuffer) do
-                    CommandProcessor(ecChar, LSpaceBuffer[i], nil);
+                  FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
+                  //for i := 1 to Length(LSpaceBuffer) do
+                  //  CommandProcessor(ecChar, LSpaceBuffer[i], nil);
                 end
                 else
                   InternalCaretPosition := GetTextPosition(1, FCaretY + 1);

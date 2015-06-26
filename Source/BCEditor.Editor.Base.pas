@@ -7878,47 +7878,15 @@ var
     LAnySelection := False;
     if FSelection.Visible or Focused then
     begin
-      LAnySelection := SelectionAvailable; //True;
-
-      {if FSelectionBeginPosition.Line < FSelectionEndPosition.Line then
-      begin}
+      LAnySelection := SelectionAvailable;
       LStartPosition := GetSelectionBeginPosition;
       LEndPosition := GetSelectionEndPosition;
-      {end
-      else
-      if FSelectionBeginPosition.Line > FSelectionEndPosition.Line then
-      begin
-        LEndPosition := FSelectionBeginPosition;
-        LStartPosition := FSelectionEndPosition;
-      end}
-    {  else
-      if FSelectionBeginPosition.Char <> FSelectionEndPosition.Char then
-      begin
-        LStartPosition.Line := FSelectionBeginPosition.Line;
-        LEndPosition.Line := LStartPosition.Line;
-        if FSelectionBeginPosition.Char < FSelectionEndPosition.Char then
-        begin
-          LStartPosition.Char := FSelectionBeginPosition.Char;
-          LEndPosition.Char := FSelectionEndPosition.Char;
-        end
-        else
-        begin
-          LStartPosition.Char := FSelectionEndPosition.Char;
-          LEndPosition.Char := FSelectionBeginPosition.Char;
-        end;
-      end
-      else
-        LAnySelection := False;  }
       if LAnySelection then
       begin
-        //LAnySelection := (LEndPosition.Line >= LFirstLine) and (LStartPosition.Line <= LLastLine);
-        //if LAnySelection then
-        //begin
-          LSelectionStartPosition := TextToDisplayPosition(LStartPosition, True, False);
-          LSelectionEndPosition := TextToDisplayPosition(LEndPosition, True, False);
-          if (FSelection.ActiveMode = smColumn) and (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
-            SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column);
-        //end;
+        LSelectionStartPosition := TextToDisplayPosition(LStartPosition, True, False);
+        LSelectionEndPosition := TextToDisplayPosition(LEndPosition, False, False);
+        if (FSelection.ActiveMode = smColumn) and (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
+          SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column);
       end;
     end;
   end;

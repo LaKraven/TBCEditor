@@ -29,10 +29,10 @@ type
 
   TBCEditorAllCodeFoldingRanges = class(TBCEditorCodeFoldingRanges)
   strict private
-    FAllRanges: TList;
+    FList: TList;
     function GetAllCount: Integer;
-    function GetAllFoldRange(Index: Integer): TBCEditorCodeFoldingRange;
-    procedure SetAllFoldRange(Index: Integer; Value: TBCEditorCodeFoldingRange);
+    function GetRange(Index: Integer): TBCEditorCodeFoldingRange;
+    procedure SetRange(Index: Integer; Value: TBCEditorCodeFoldingRange);
   public
     constructor Create;
     destructor Destroy; override;
@@ -40,13 +40,13 @@ type
     procedure ClearAll;
     procedure Delete(FoldRange: TBCEditorCodeFoldingRange); overload;
     procedure Delete(AIndex: Integer); overload;
-    procedure Assign(Source: TPersistent); override;
+    //procedure Assign(Source: TPersistent); override;
     procedure UpdateFoldRanges;
     procedure SetParentCollapsedOfSubCodeFoldingRanges(AFoldRange: TBCEditorCodeFoldingRange);
 
     property AllCount: Integer read GetAllCount;
-    property AllCodeFoldingRanges[Index: Integer]: TBCEditorCodeFoldingRange read GetAllFoldRange write SetAllFoldRange; default;
-    property AllRanges: TList read FAllRanges;
+    property Items[Index: Integer]: TBCEditorCodeFoldingRange read GetRange write SetRange; default;
+    property List: TList read FList;
   end;
 
   TBCEditorCodeFoldingRange = class
@@ -101,17 +101,17 @@ constructor TBCEditorAllCodeFoldingRanges.Create;
 begin
   inherited;
 
-  FAllRanges := TList.Create;
+  FList := TList.Create;
 end;
 
 destructor TBCEditorAllCodeFoldingRanges.Destroy;
 begin
-  FreeList(FAllRanges);
+  FreeList(FList);
 
   inherited;
 end;
 
-procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
+{procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
 
   procedure RecursiveAssign(ADestinationCodeFoldingRanges: TBCEditorCodeFoldingRanges; ASourceCodeFoldingRanges: TBCEditorCodeFoldingRanges);
   var
@@ -139,48 +139,49 @@ procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
 begin
   if Assigned(Source) and (Source is TBCEditorAllCodeFoldingRanges) then
     RecursiveAssign(Self, Source as TBCEditorAllCodeFoldingRanges);
-end;
+end; }
 
 procedure TBCEditorAllCodeFoldingRanges.ClearAll;
 begin
-  ClearList(FAllRanges);
+  Clear;
+  ClearList(FList);
 end;
 
 procedure TBCEditorAllCodeFoldingRanges.Delete(FoldRange: TBCEditorCodeFoldingRange);
 var
   i: Integer;
 begin
-  for i := 0 to FAllRanges.Count - 1 do
-  if FAllRanges[i] = FoldRange then
+  for i := 0 to FList.Count - 1 do
+  if FList[i] = FoldRange then
   begin
-    TBCEditorCodeFoldingRange(FAllRanges[i]).Free;
-    FAllRanges[i] := nil;
-    FAllRanges.Delete(i);
+    TBCEditorCodeFoldingRange(FList[i]).Free;
+    FList[i] := nil;
+    FList.Delete(i);
     Break;
   end;
 end;
 
 procedure TBCEditorAllCodeFoldingRanges.Delete(AIndex: Integer);
 begin
-  FAllRanges.Delete(AIndex);
+  FList.Delete(AIndex);
 end;
 
 function TBCEditorAllCodeFoldingRanges.GetAllCount: Integer;
 begin
-  Result := FAllRanges.Count;
+  Result := FList.Count;
 end;
 
-function TBCEditorAllCodeFoldingRanges.GetAllFoldRange(Index: Integer): TBCEditorCodeFoldingRange;
+function TBCEditorAllCodeFoldingRanges.GetRange(Index: Integer): TBCEditorCodeFoldingRange;
 begin
-  if Cardinal(Index) < Cardinal(FAllRanges.Count) then
-    Result := FAllRanges.List[index]
+  if Cardinal(Index) < Cardinal(FList.Count) then
+    Result := FList.List[index]
   else
     Result := nil;
 end;
 
-procedure TBCEditorAllCodeFoldingRanges.SetAllFoldRange(Index: Integer; Value: TBCEditorCodeFoldingRange);
+procedure TBCEditorAllCodeFoldingRanges.SetRange(Index: Integer; Value: TBCEditorCodeFoldingRange);
 begin
-  FAllRanges[index] := Value;
+  FList[Index] := Value;
 end;
 
 procedure TBCEditorAllCodeFoldingRanges.SetParentCollapsedOfSubCodeFoldingRanges(AFoldRange: TBCEditorCodeFoldingRange);
@@ -190,7 +191,7 @@ var
 begin
   for I := 0 to AllCount - 1 do
   begin
-    FoldRange := GetAllFoldRange(I);
+    FoldRange := GetRange(I);
     if FoldRange = AFoldRange then
       Continue;
     if FoldRange.FromLine > AFoldRange.ToLine then
@@ -202,17 +203,17 @@ end;
 
 procedure TBCEditorAllCodeFoldingRanges.UpdateFoldRanges;
 var
-  I: Integer;
+  i: Integer;
   FoldRange: TBCEditorCodeFoldingRange;
 begin
-  for I := 0 to AllCount - 1 do
+  for i := 0 to AllCount - 1 do
   begin
-    FoldRange := GetAllFoldRange(I);
+    FoldRange := GetRange(i);
     FoldRange.ParentCollapsed := False;
   end;
-  for I := 0 to AllCount - 1 do
+  for i := 0 to AllCount - 1 do
   begin
-    FoldRange := GetAllFoldRange(I);
+    FoldRange := GetRange(i);
     if not FoldRange.ParentCollapsed then
       SetParentCollapsedOfSubCodeFoldingRanges(FoldRange);
   end;
@@ -250,7 +251,7 @@ begin
     RegionItem := ARegionItem;
   end;
   FList.Add(Result);
-  AAllCodeFoldingRanges.AllRanges.Add(Result);
+  AAllCodeFoldingRanges.List.Add(Result);
 end;
 
 procedure TBCEditorCodeFoldingRanges.Clear;
@@ -292,6 +293,7 @@ begin;
   FSubCodeFoldingRanges.Clear;
   FSubCodeFoldingRanges.Free;
   FSubCodeFoldingRanges := nil;
+  FCollapsedLines.Clear;
   FCollapsedLines.Free;
   FCollapsedLines := nil;
 
@@ -316,7 +318,7 @@ begin
     begin
       LCodeFoldingRange.MoveChildren(By);
 
-      with FAllCodeFoldingRanges.AllRanges do
+      with FAllCodeFoldingRanges.List do
       if LCodeFoldingRange.FParentCollapsed then
         Move(IndexOf(LCodeFoldingRange), IndexOf(LCodeFoldingRange) + By);
     end;

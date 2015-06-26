@@ -54,7 +54,7 @@ type
     function GetTokenKind: Integer;
     function GetTokenLength: Integer;
     function GetTokenPosition: Integer;
-    procedure AddKeywords(var StringList: TStrings);
+    procedure AddKeywords(var AStringList: TStringList);
     procedure Clear;
     procedure LoadFromFile(AFileName: string);
     procedure Next;
@@ -337,15 +337,15 @@ begin
   FCurrentRange := TBCEditorRange(Value);
 end;
 
-procedure TBCEditorHighlighter.AddKeywords(var StringList: TStrings);
+procedure TBCEditorHighlighter.AddKeywords(var AStringList: TStringList);
 var
   i, j: Integer;
 begin
-  if not Assigned(StringList) then
+  if not Assigned(AStringList) then
     Exit;
   for i := 0 to FMainRules.KeyListCount - 1 do
     for j := 0 to FMainRules.KeyList[i].KeyList.Count - 1 do
-      StringList.Add(FMainRules.KeyList[i].KeyList[j]);
+      AStringList.Add(FMainRules.KeyList[i].KeyList[j]);
 end;
 
 procedure TBCEditorHighlighter.Reset;
@@ -449,7 +449,7 @@ procedure TBCEditorHighlighter.LoadFromFile(AFileName: string);
 var
   LStream: TStream;
   LEditor: TBCBaseEditor;
-  LTempLines: TStrings;
+  LTempLines: TStringList;
   LTopLine: Integer;
 begin
   FLoading := True;

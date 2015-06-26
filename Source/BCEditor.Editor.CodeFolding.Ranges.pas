@@ -11,20 +11,20 @@ type
 
   TBCEditorCodeFoldingRanges = class(TPersistent)
   strict private
-    FRanges: TList;
-    function GetRange(Index: Integer): TBCEditorCodeFoldingRange;
+    FList: TList;
+    function Get(Index: Integer): TBCEditorCodeFoldingRange;
     function GetCount: Integer;
   public
     constructor Create;
     destructor Destroy; override;
 
-    function Add(AAllFold: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
+    function Add(AAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
       AFoldRegion: TBCEditorFoldRegionItem; AToLine: Integer = 0): TBCEditorCodeFoldingRange;
     procedure Clear;
 
     property Count: Integer read GetCount;
-    property FoldRanges[Index: Integer]: TBCEditorCodeFoldingRange read GetRange; default;
-    property Ranges: TList read FRanges;
+    property Items[Index: Integer]: TBCEditorCodeFoldingRange read Get; default;
+    //property List: TList read FList;
   end;
 
   TBCEditorAllCodeFoldingRanges = class(TBCEditorCodeFoldingRanges)
@@ -42,7 +42,7 @@ type
     procedure Delete(AIndex: Integer); overload;
     procedure Assign(Source: TPersistent); override;
     procedure UpdateFoldRanges;
-    procedure SetParentCollapsedOfSubFoldRanges(AFoldRange: TBCEditorCodeFoldingRange);
+    procedure SetParentCollapsedOfSubCodeFoldingRanges(AFoldRange: TBCEditorCodeFoldingRange);
 
     property AllCount: Integer read GetAllCount;
     property AllCodeFoldingRanges[Index: Integer]: TBCEditorCodeFoldingRange read GetAllFoldRange write SetAllFoldRange; default;
@@ -62,7 +62,7 @@ type
     FParentCollapsed: Boolean;
     FUndoListed: Boolean;
     FFoldRangeLevel: Integer;
-    FSubFoldRanges: TBCEditorCodeFoldingRanges;
+    FSubCodeFoldingRanges: TBCEditorCodeFoldingRanges;
     FToLine: Integer;
     FIsExtraTokenFound: Boolean;
   public
@@ -72,7 +72,7 @@ type
     function Collapsable: Boolean;
     procedure MoveBy(LineCount: Integer);
     procedure MoveChildren(By: Integer);
-    procedure SetParentCollapsedOfSubFoldRanges(AParentCollapsed: Boolean; ACollapsedBy: Integer);
+    procedure SetParentCollapsedOfSubCodeFoldingRanges(AParentCollapsed: Boolean; ACollapsedBy: Integer);
     procedure Widen(LineCount: Integer);
     property AllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges read FAllCodeFoldingRanges write FAllCodeFoldingRanges;
     property Collapsed: Boolean read FCollapsed write FCollapsed default False;
@@ -86,7 +86,7 @@ type
     property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
     property UndoListed: Boolean read FUndoListed write FUndoListed default False;
     property FoldRangeLevel: Integer read FFoldRangeLevel write FFoldRangeLevel;
-    property SubFoldRanges: TBCEditorCodeFoldingRanges read FSubFoldRanges;
+    property SubCodeFoldingRanges: TBCEditorCodeFoldingRanges read FSubCodeFoldingRanges;
     property ToLine: Integer read FToLine write FToLine;
   end;
 
@@ -113,27 +113,27 @@ end;
 
 procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
 
-  procedure RecursiveAssign(FoldRanges: TBCEditorCodeFoldingRanges; SrcFoldRanges: TBCEditorCodeFoldingRanges);
+  procedure RecursiveAssign(ADestinationCodeFoldingRanges: TBCEditorCodeFoldingRanges; ASourceCodeFoldingRanges: TBCEditorCodeFoldingRanges);
   var
     i: Integer;
-    LCodeFoldingRange: TBCEditorCodeFoldingRange;
+    LDestinationCodeFoldingRange: TBCEditorCodeFoldingRange;
     LSourceCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
-    if Assigned(SrcFoldRanges) then
-    for i := 0 to SrcFoldRanges.Count - 1 do
+    if Assigned(ASourceCodeFoldingRanges) then
+    for i := 0 to ASourceCodeFoldingRanges.Count - 1 do
     begin
-      LSourceCodeFoldingRange := SrcFoldRanges[i];
+      LSourceCodeFoldingRange := ASourceCodeFoldingRanges[i];
 
-      LCodeFoldingRange := FoldRanges.Add(Self, LSourceCodeFoldingRange.FromLine, LSourceCodeFoldingRange.IndentLevel,
+      LDestinationCodeFoldingRange := ADestinationCodeFoldingRanges.Add(Self, LSourceCodeFoldingRange.FromLine, LSourceCodeFoldingRange.IndentLevel,
         LSourceCodeFoldingRange.FoldRangeLevel, LSourceCodeFoldingRange.FoldRegion, LSourceCodeFoldingRange.ToLine);
-      LCodeFoldingRange.CollapsedBy := LSourceCodeFoldingRange.CollapsedBy;
-      LCodeFoldingRange.Collapsed := LSourceCodeFoldingRange.Collapsed;
-      LCodeFoldingRange.ParentCollapsed := LSourceCodeFoldingRange.ParentCollapsed;
+      LDestinationCodeFoldingRange.CollapsedBy := LSourceCodeFoldingRange.CollapsedBy;
+      LDestinationCodeFoldingRange.Collapsed := LSourceCodeFoldingRange.Collapsed;
+      LDestinationCodeFoldingRange.ParentCollapsed := LSourceCodeFoldingRange.ParentCollapsed;
       if Assigned(LSourceCodeFoldingRange.CollapsedLines) then
-        LCodeFoldingRange.CollapsedLines.Assign(LSourceCodeFoldingRange.CollapsedLines);
-      LCodeFoldingRange.FoldRegion := LSourceCodeFoldingRange.FoldRegion;
+        LDestinationCodeFoldingRange.CollapsedLines.Assign(LSourceCodeFoldingRange.CollapsedLines);
+      LDestinationCodeFoldingRange.FoldRegion := LSourceCodeFoldingRange.FoldRegion;
 
-      RecursiveAssign(LCodeFoldingRange.SubFoldRanges, SrcFoldRanges[i].SubFoldRanges);
+      RecursiveAssign(LDestinationCodeFoldingRange.SubCodeFoldingRanges, LSourceCodeFoldingRange.SubCodeFoldingRanges);
     end;
   end;
 
@@ -184,7 +184,7 @@ begin
   FAllRanges[index] := Value;
 end;
 
-procedure TBCEditorAllCodeFoldingRanges.SetParentCollapsedOfSubFoldRanges(AFoldRange: TBCEditorCodeFoldingRange);
+procedure TBCEditorAllCodeFoldingRanges.SetParentCollapsedOfSubCodeFoldingRanges(AFoldRange: TBCEditorCodeFoldingRange);
 var
 	I: Integer;
   FoldRange: TBCEditorCodeFoldingRange;
@@ -215,7 +215,7 @@ begin
   begin
     FoldRange := GetAllFoldRange(I);
     if not FoldRange.ParentCollapsed then
-      SetParentCollapsedOfSubFoldRanges(FoldRange);
+      SetParentCollapsedOfSubCodeFoldingRanges(FoldRange);
   end;
 end;
 
@@ -225,19 +225,19 @@ constructor TBCEditorCodeFoldingRanges.Create;
 begin
   inherited;
 
-  FRanges := TList.Create;
+  FList := TList.Create;
 end;
 
 destructor TBCEditorCodeFoldingRanges.Destroy;
 begin
-  FRanges.Clear;
-  FRanges.Free;
-  FRanges := nil;
+  FList.Clear;
+  FList.Free;
+  FList := nil;
 
   inherited;
 end;
 
-function TBCEditorCodeFoldingRanges.Add(AAllFold: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
+function TBCEditorCodeFoldingRanges.Add(AAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
   AFoldRegion: TBCEditorFoldRegionItem; AToLine: Integer): TBCEditorCodeFoldingRange;
 begin
   Result := TBCEditorCodeFoldingRange.Create;
@@ -247,26 +247,26 @@ begin
     ToLine := AToLine;
     IndentLevel := AIndentLevel;
     FoldRangeLevel := AFoldRangeLevel;
-    AllCodeFoldingRanges := AAllFold;
+    AllCodeFoldingRanges := AAllCodeFoldingRanges;
     FoldRegion := AFoldRegion;
   end;
-  FRanges.Add(Result);
-  AAllFold.AllRanges.Add(Result);
+  FList.Add(Result);
+  AAllCodeFoldingRanges.AllRanges.Add(Result);
 end;
 
 procedure TBCEditorCodeFoldingRanges.Clear;
 begin
-  FRanges.Clear;
+  FList.Clear;
 end;
 
 function TBCEditorCodeFoldingRanges.GetCount: Integer;
 begin
-  Result := FRanges.Count;
+  Result := FList.Count;
 end;
 
-function TBCEditorCodeFoldingRanges.GetRange(Index: Integer): TBCEditorCodeFoldingRange;
+function TBCEditorCodeFoldingRanges.Get(Index: Integer): TBCEditorCodeFoldingRange;
 begin
-  Result := FRanges[index];
+  Result := FList[index];
 end;
 
 { TBCEditorCodeFoldingRange }
@@ -280,7 +280,7 @@ constructor TBCEditorCodeFoldingRange.Create;
 begin
   inherited;
 
-  FSubFoldRanges := TBCEditorCodeFoldingRanges.Create;
+  FSubCodeFoldingRanges := TBCEditorCodeFoldingRanges.Create;
   FCollapsedLines := TStringList.Create;
   FCollapsed := False;
   FCollapsedBy := -1;
@@ -290,9 +290,9 @@ end;
 
 destructor TBCEditorCodeFoldingRange.Destroy;
 begin;
-  FSubFoldRanges.Clear;
-  FSubFoldRanges.Free;
-  FSubFoldRanges := nil;
+  FSubCodeFoldingRanges.Clear;
+  FSubCodeFoldingRanges.Free;
+  FSubCodeFoldingRanges := nil;
   FCollapsedLines.Free;
   FCollapsedLines := nil;
 
@@ -308,33 +308,40 @@ end;
 procedure TBCEditorCodeFoldingRange.MoveChildren(By: Integer);
 var
   i: Integer;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  for i := 0 to FSubFoldRanges.Count - 1 do
+  for i := 0 to FSubCodeFoldingRanges.Count - 1 do
   begin
-    FSubFoldRanges[i].MoveChildren(By);
+    LCodeFoldingRange := FSubCodeFoldingRanges[i];
+    if Assigned(LCodeFoldingRange) then
+    begin
+      LCodeFoldingRange.MoveChildren(By);
 
-    with FAllCodeFoldingRanges.AllRanges do
-    if FSubFoldRanges[i].FParentCollapsed then
-      Move(IndexOf(FSubFoldRanges[i]), IndexOf(FSubFoldRanges[i]) + By);
+      with FAllCodeFoldingRanges.AllRanges do
+      if LCodeFoldingRange.FParentCollapsed then
+        Move(IndexOf(LCodeFoldingRange), IndexOf(LCodeFoldingRange) + By);
+    end;
   end;
 end;
 
-procedure TBCEditorCodeFoldingRange.SetParentCollapsedOfSubFoldRanges(AParentCollapsed: Boolean; ACollapsedBy: Integer);
+procedure TBCEditorCodeFoldingRange.SetParentCollapsedOfSubCodeFoldingRanges(AParentCollapsed: Boolean; ACollapsedBy: Integer);
 var
   i: Integer;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  for i := 0 to FSubFoldRanges.Count - 1 do
+  for i := 0 to FSubCodeFoldingRanges.Count - 1 do
   begin
-    FSubFoldRanges[i].SetParentCollapsedOfSubFoldRanges(AParentCollapsed, ACollapsedBy);
+    LCodeFoldingRange := FSubCodeFoldingRanges[i];
+    LCodeFoldingRange.SetParentCollapsedOfSubCodeFoldingRanges(AParentCollapsed, ACollapsedBy);
 
-    if (FSubFoldRanges[i].FCollapsedBy = -1) or (FSubFoldRanges[i].FCollapsedBy = ACollapsedBy) then
+    if (LCodeFoldingRange.FCollapsedBy = -1) or (LCodeFoldingRange.FCollapsedBy = ACollapsedBy) then
     begin
-      FSubFoldRanges[i].FParentCollapsed := AParentCollapsed;
+      LCodeFoldingRange.FParentCollapsed := AParentCollapsed;
 
       if not AParentCollapsed then
-        FSubFoldRanges[i].FCollapsedBy := -1
+        LCodeFoldingRange.FCollapsedBy := -1
       else
-        FSubFoldRanges[i].FCollapsedBy := ACollapsedBy;
+        LCodeFoldingRange.FCollapsedBy := ACollapsedBy;
     end;
   end;
 end;

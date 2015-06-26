@@ -10407,7 +10407,6 @@ end;
 
 procedure TBCBaseEditor.ClearCodeFolding;
 begin
-  //FAllCodeFoldingRanges.Clear;
   FAllCodeFoldingRanges.ClearAll;
   SetLength(FCollapsedLinesDifferenceCache, 0);
 end;
@@ -10529,7 +10528,7 @@ begin
   begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
-    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or //(ACommand = ecDeleteLastChar) or
+    if (ACommand = ecCut) or (ACommand = ecDeleteLine) or (ACommand = ecDeleteLastChar) or
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar)) and IsKeywordAtCursorPosition or
       SelectionAvailable and (ACommand = ecLineBreak) or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
@@ -11574,8 +11573,6 @@ begin
                     InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, FCaretY + 1);
 
                     FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
-                    //for i := 1 to Length(LSpaceBuffer) do
-                    //  CommandProcessor(ecChar, LSpaceBuffer[i], nil);
                   end
                   else
                     InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
@@ -11652,8 +11649,6 @@ begin
                   InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, FCaretY + 1);
 
                   FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
-                  //for i := 1 to Length(LSpaceBuffer) do
-                  //  CommandProcessor(ecChar, LSpaceBuffer[i], nil);
                 end
                 else
                   InternalCaretPosition := GetTextPosition(1, FCaretY + 1);

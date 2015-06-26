@@ -648,7 +648,7 @@ implementation
 {$R BCEditor.res}
 
 uses
-  Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd,
+  Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character,
   Vcl.Menus, BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
   {$IFDEF USE_VCL_STYLES}Vcl.Themes, BCEditor.StyleHooks,{$ENDIF} BCEditor.Highlighter.Rules;
@@ -2186,7 +2186,7 @@ end;
 
 function TBCBaseEditor.NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
-  X, Y, LineLength: Integer;
+  X, Y, LLength: Integer;
   LLine: string;
 begin
   X := ATextPosition.Char;
@@ -2196,8 +2196,8 @@ begin
   begin
     LLine := FLines[Y - 1];
 
-    LineLength := Length(LLine);
-    if X >= LineLength then
+    LLength := Length(LLine);
+    if X >= LLength then
     begin
       if Y < FLines.Count then
       begin
@@ -2215,7 +2215,7 @@ begin
       if X > 0 then
         X := StringScan(LLine, X, IsWordChar);
       if X = 0 then
-        X := LineLength + 1;
+        X := LLength + 1;
     end;
   end;
   Result.Char := X;
@@ -2408,7 +2408,7 @@ begin
     else
     if FSelection.ActiveMode = smColumn then
       if LStartTextPosition.Char > LEndTextPosition.Char then
-        SwapInt(Integer(LStartTextPosition.Char), Integer(LEndTextPosition.Char));
+        SwapInt(LStartTextPosition.Char, LEndTextPosition.Char);
     if LIsBackward then
       LCurrentTextPosition := LEndTextPosition
     else
@@ -9900,7 +9900,7 @@ begin
     else
     if FSelection.ActiveMode = smColumn then
       if LStartTextPosition.Char > LEndTextPosition.Char then
-        SwapInt(Integer(LStartTextPosition.Char), Integer(LEndTextPosition.Char));
+        SwapInt(LStartTextPosition.Char, LEndTextPosition.Char);
     if LIsBackward then
       LCurrentTextPosition := LEndTextPosition
     else
@@ -10829,6 +10829,7 @@ var
   S: string;
   LIsJustIndented: Boolean;
   LFoldRange: TBCEditorCodeFoldingRange;
+  LChar: Char;
 begin
   if FCodeFolding.Visible and not (csDestroying in ComponentState) then
   begin
@@ -11136,13 +11137,18 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crSilentDelete, GetTextPosition(FCaretX - 1, FCaretY), LCaretPosition,
-                  Copy(LLineText, FCaretX - 1, 1), smNormal);
+                LChar := LLineText[FCaretX - 1];
+                i := 1;
+                if LChar.IsSurrogate then
+                  i := 2;
+                LHelper := Copy(LLineText, FCaretX - i, i);
+                FUndoList.AddChange(crSilentDelete, GetTextPosition(FCaretX - i, FCaretY), LCaretPosition,
+                  LHelper, smNormal);
 
-                Delete(LLineText, FCaretX - 1, 1);
+                Delete(LLineText, FCaretX - i, i);
                 FLines[FCaretY - 1] := LLineText;
 
-                InternalCaretX := FCaretX - 1;
+                InternalCaretX := FCaretX - i;
               end;
             end;
             if not LIsJustIndented then
@@ -12029,7 +12035,7 @@ begin
     end
     else
     begin
-      if (ALastLine < AFirstLine) then
+      if ALastLine < AFirstLine then
         SwapInt(ALastLine, AFirstLine);
       AFirstLine := Max(LineToRow(AFirstLine), TopLine);
       ALastLine := Min(LineToRow(ALastLine), TopLine + VisibleLines);
@@ -12037,7 +12043,7 @@ begin
         if ALastLine > FLines.Count then
           ALastLine := TopLine + VisibleLines;
 
-      if (ALastLine >= AFirstLine) then
+      if ALastLine >= AFirstLine then
       begin
         LInvalidationRect := Rect(0, LineHeight * (AFirstLine - TopLine), FLeftMargin.GetWidth,
           LineHeight * (ALastLine - TopLine + 1));

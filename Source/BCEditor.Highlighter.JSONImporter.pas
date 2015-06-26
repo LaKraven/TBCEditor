@@ -529,8 +529,8 @@ var
   i: Integer;
   LJsonDataValue: PJsonDataValue;
   LSkipRegionType: TBCEditorSkipRegionItemType;
-  LFoldRegionItem: TBCEditorFoldRegionItem;
-  LFoldRegions: TBCEditorCodeFoldingRegions;
+  LRegionItem: TBCEditorCodeFoldingRegionItem;
+  LRegions: TBCEditorCodeFoldingRegions;
   LSkipRegionItem: TBCEditorSkipRegionItem;
   LFileName: string;
   LEditor: TBCBaseEditor;
@@ -538,7 +538,7 @@ var
   LJSONObject: TJsonObject;
   LOpenToken, LCloseToken: string;
 begin
-  LFoldRegions := FHighlighter.CodeFoldingRegions;
+  LRegions := FHighlighter.CodeFoldingRegions;
   if ACodeFoldingObject.Contains('SkipRegion') then
   for i := 0 to ACodeFoldingObject['SkipRegion'].ArrayValue.Count - 1 do
   begin
@@ -565,22 +565,22 @@ begin
         end;
       end;
       { Skip duplicates }
-      if LFoldRegions.SkipRegions.Contains(LOpenToken, LCloseToken) then
+      if LRegions.SkipRegions.Contains(LOpenToken, LCloseToken) then
         Continue;
     end;
 
     LSkipRegionType := StrToRegionType(LJsonDataValue.ObjectValue['RegionType'].Value);
     if (LSkipRegionType = ritMultiLineComment) and (cfoFoldMultilineComments in TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options) then
     begin
-      LFoldRegionItem := LFoldRegions.Add(LOpenToken, LCloseToken);
-      LFoldRegionItem.NoSubs := True;
+      LRegionItem := LRegions.Add(LOpenToken, LCloseToken);
+      LRegionItem.NoSubs := True;
       FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
       if LCloseToken <> '' then
         FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
     end
     else
     begin
-      LSkipRegionItem := LFoldRegions.SkipRegions.Add(LOpenToken, LCloseToken);
+      LSkipRegionItem := LRegions.SkipRegions.Add(LOpenToken, LCloseToken);
       LSkipRegionItem.RegionType := LSkipRegionType;
       LSkipRegionItem.SkipEmptyChars := LJsonDataValue.ObjectValue.B['SkipEmptyChars'];
       LSkipRegionItem.SkipIfNextCharIsNot := BCEDITOR_NONE_CHAR;
@@ -598,7 +598,7 @@ procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingFoldRegions(ACodeFol
 var
   i: Integer;
   LJsonDataValue: PJsonDataValue;
-  LFoldRegionItem: TBCEditorFoldRegionItem;
+  LRegionItem: TBCEditorCodeFoldingRegionItem;
   LMemberObject: TJsonObject;
   LFoldRegions: TBCEditorCodeFoldingRegions;
   LFileName: string;
@@ -638,26 +638,26 @@ begin
         Continue;
     end;
 
-    LFoldRegionItem := LFoldRegions.Add(LOpenToken, LCloseToken);
+    LRegionItem := LFoldRegions.Add(LOpenToken, LCloseToken);
 
     LMemberObject := LJsonDataValue.ObjectValue['Properties'].ObjectValue;
     if Assigned(LMemberObject) then
     begin
       { Options }
-      LFoldRegionItem.OpenTokenBeginningOfLine := LMemberObject.B['OpenTokenBeginningOfLine'];
-      LFoldRegionItem.CloseTokenBeginningOfLine := LMemberObject.B['CloseTokenBeginningOfLine'];
-      LFoldRegionItem.SharedClose := LMemberObject.B['SharedClose'];
-      LFoldRegionItem.OpenIsClose := LMemberObject.B['OpenIsClose'];
-      LFoldRegionItem.TokenEndIsPreviousLine := LMemberObject.B['TokenEndIsPreviousLine'];
-      LFoldRegionItem.NoSubs := LMemberObject.B['NoSubs'];
-      LFoldRegionItem.SkipIfFoundAfterOpenToken := LMemberObject['SkipIfFoundAfterOpenToken'].Value;
-      LFoldRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
-      LFoldRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
+      LRegionItem.OpenTokenBeginningOfLine := LMemberObject.B['OpenTokenBeginningOfLine'];
+      LRegionItem.CloseTokenBeginningOfLine := LMemberObject.B['CloseTokenBeginningOfLine'];
+      LRegionItem.SharedClose := LMemberObject.B['SharedClose'];
+      LRegionItem.OpenIsClose := LMemberObject.B['OpenIsClose'];
+      LRegionItem.TokenEndIsPreviousLine := LMemberObject.B['TokenEndIsPreviousLine'];
+      LRegionItem.NoSubs := LMemberObject.B['NoSubs'];
+      LRegionItem.SkipIfFoundAfterOpenToken := LMemberObject['SkipIfFoundAfterOpenToken'].Value;
+      LRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
+      LRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
     end;
     if LOpenToken <> '' then
       FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
-    if LFoldRegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
-      FHighlighter.AddKeyChar(ctFoldOpen, LFoldRegionItem.BreakIfNotFoundBeforeNextRegion[1]);
+    if LRegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
+      FHighlighter.AddKeyChar(ctFoldOpen, LRegionItem.BreakIfNotFoundBeforeNextRegion[1]);
     if LCloseToken <> '' then
       FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
   end;

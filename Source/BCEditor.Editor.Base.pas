@@ -2631,12 +2631,12 @@ begin
     Lines.DeleteLines(FromLine, CollapsedLines.Count - 1);
 
     LLineState := Lines.Attributes[FromLine - 1].LineState;
-    if FoldRegion.OpenTokenEnd <> '' then
-      Lines[FromLine - 1] := Copy(Lines[FromLine - 1], 1, Pos(FoldRegion.OpenTokenEnd,
+    if RegionItem.OpenTokenEnd <> '' then
+      Lines[FromLine - 1] := Copy(Lines[FromLine - 1], 1, Pos(RegionItem.OpenTokenEnd,
          UpperCase(Lines[FromLine - 1])))
     else
       Lines[FromLine - 1] := Copy(Lines[FromLine - 1], 1,
-        Length(AFoldRange.FoldRegion.OpenToken) + Pos(AFoldRange.FoldRegion.OpenToken,
+        Length(AFoldRange.RegionItem.OpenToken) + Pos(AFoldRange.RegionItem.OpenToken,
         UpperCase(Lines[FromLine - 1])) - 1);
     Lines[FromLine - 1] := Lines[FromLine - 1] + '..' + Trim(LTextLine);
     Lines.Attributes[FromLine - 1].LineState := LLineState;
@@ -3506,8 +3506,8 @@ begin
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[j];
     if (not LCodeFoldingRange.Collapsed) and (LCodeFoldingRange.ToLine > AFoldRange.FromLine) or
-      (not LCodeFoldingRange.Collapsed) and LCodeFoldingRange.FoldRegion.SharedClose and
-      (AFoldRange.FoldRegion.CloseToken = LCodeFoldingRange.FoldRegion.CloseToken) then
+      (not LCodeFoldingRange.Collapsed) and LCodeFoldingRange.RegionItem.SharedClose and
+      (AFoldRange.RegionItem.CloseToken = LCodeFoldingRange.RegionItem.CloseToken) then
       LCodeFoldingRange.ToLine := LCodeFoldingRange.ToLine + ALineCount;
   end;
   for j := i + 1 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -3691,20 +3691,20 @@ var
       end;
   end;
 
-  function FoldRegionsClose: Boolean;
+  function RegionItemsClose: Boolean;
   var
     i, j: Integer;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
-    LFoldRegionItem: TBCEditorFoldRegionItem;
+    LRegionItem: TBCEditorCodeFoldingRegionItem;
   begin
     Result := False;
     if LOpenTokenFoldRangeList.Count > 0 then
       if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds {and not IsPreviousCharStringEscape(LTextPtr)} ) and CharInSet(UpCase(LTextPtr^), FHighlighter.FoldCloseKeyChars) then
       begin
         LCodeFoldingRange := TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last);
-        if LCodeFoldingRange.FoldRegion.CloseTokenBeginningOfLine and not LBeginningOfLine then
+        if LCodeFoldingRange.RegionItem.CloseTokenBeginningOfLine and not LBeginningOfLine then
           Exit;
-        LKeyWordPtr := PChar(LCodeFoldingRange.FoldRegion.CloseToken);
+        LKeyWordPtr := PChar(LCodeFoldingRange.RegionItem.CloseToken);
         LBookmarkTextPtr := LTextPtr;
         { check if the close keyword found }
         while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
@@ -3714,19 +3714,19 @@ var
         end;
         if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then { if found, pop skip region from the stack }
         begin
-          if (TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).FoldRegion.CloseTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr) then { not interested in partial hits }
+          if (TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).RegionItem.CloseTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr) then { not interested in partial hits }
           begin
             LFoldRange := LOpenTokenFoldRangeList.Last;
             LOpenTokenFoldRangeList.Remove(LFoldRange);
             Dec(LFoldCount);
 
-            if LFoldRange.FoldRegion.BreakIfNotFoundBeforeNextRegion <> '' then
+            if LFoldRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
               if not LFoldRange.IsExtraTokenFound then
               begin
                 LTextPtr := LBookmarkTextPtr;
                 Exit(True);
               end;
-            if LFoldRange.FoldRegion.TokenEndIsPreviousLine then
+            if LFoldRange.RegionItem.TokenEndIsPreviousLine then
               LFoldRange.ToLine := LLine
             else
               LFoldRange.ToLine := LLine + 1; { +1 for not 0-based }
@@ -3734,12 +3734,12 @@ var
             if LOpenTokenFoldRangeList.Count > 0 then
             begin
               LCodeFoldingRange := LOpenTokenFoldRangeList.Last;
-              if Assigned(LCodeFoldingRange.FoldRegion) then
-                if LCodeFoldingRange.FoldRegion.SharedClose and
-                  (LFoldRange.FoldRegion.OpenToken <> LCodeFoldingRange.FoldRegion.OpenToken) and
-                  (LFoldRange.FoldRegion.CloseToken = LCodeFoldingRange.FoldRegion.CloseToken)then
+              if Assigned(LCodeFoldingRange.RegionItem) then
+                if LCodeFoldingRange.RegionItem.SharedClose and
+                  (LFoldRange.RegionItem.OpenToken <> LCodeFoldingRange.RegionItem.OpenToken) and
+                  (LFoldRange.RegionItem.CloseToken = LCodeFoldingRange.RegionItem.CloseToken)then
                 begin
-                  if LFoldRange.FoldRegion.TokenEndIsPreviousLine then
+                  if LFoldRange.RegionItem.TokenEndIsPreviousLine then
                     LCodeFoldingRange.ToLine := LLine
                   else
                     LCodeFoldingRange.ToLine := LLine + 1; { +1 for not 0-based }
@@ -3754,12 +3754,12 @@ var
             j := Highlighter.CodeFoldingRegions.Count - 1;
             for i := 0 to j do
             begin
-              LFoldRegionItem := Highlighter.CodeFoldingRegions[i];
-              if LFoldRegionItem.OpenIsClose then { optimizing... }
+              LRegionItem := Highlighter.CodeFoldingRegions[i];
+              if LRegionItem.OpenIsClose then { optimizing... }
               begin
-                if UpCase(LTextPtr^) = PChar(LFoldRegionItem.OpenToken)^ then { if first character match }
+                if UpCase(LTextPtr^) = PChar(LRegionItem.OpenToken)^ then { if first character match }
                 begin
-                  LKeyWordPtr := PChar(LFoldRegionItem.OpenToken);
+                  LKeyWordPtr := PChar(LRegionItem.OpenToken);
                   { check if open keyword found }
                   while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
                   begin
@@ -3769,7 +3769,7 @@ var
 
                   if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
                   begin
-                    if (LFoldRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr2 - 1, LTextPtr) then { not interested in partial hits }
+                    if (LRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr2 - 1, LTextPtr) then { not interested in partial hits }
                     begin
                       if LOpenTokenFoldRangeList.Count > 0 then
                         LFoldRanges := TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).SubCodeFoldingRanges
@@ -3777,7 +3777,7 @@ var
                         LFoldRanges := ATopFoldRanges;
 
                       LFoldRange := LFoldRanges.Add(ATopFoldRanges, LLine + 1, GetLineIndentChars(AStrings, LLine{ + 1}), LFoldCount,
-                        LFoldRegionItem, LLine + 1);
+                        LRegionItem, LLine + 1);
                       { open keyword found }
                       LOpenTokenFoldRangeList.Add(LFoldRange);
                       Inc(LFoldCount);
@@ -3803,34 +3803,34 @@ var
       end;
   end;
 
-  procedure FoldRegionsOpen;
+  procedure RegionItemsOpen;
   var
     i, j: Integer;
     LSkipIfFoundAfterOpenToken: Boolean;
-    LFoldRegionItem: TBCEditorFoldRegionItem;
+    LRegionItem: TBCEditorCodeFoldingRegionItem;
   begin
-    if (LOpenTokenSkipFoldRangeList.Count = 0) then
-      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds {and not IsPreviousCharStringEscape(LTextPtr)} ) and CharInSet(UpCase(LTextPtr^), FHighlighter.FoldOpenKeyChars) then
+    if LOpenTokenSkipFoldRangeList.Count = 0 then
+      if (not IsValidChar(LTextPtr - 1) or LIsOneCharFolds) and CharInSet(UpCase(LTextPtr^), FHighlighter.FoldOpenKeyChars) then
       begin
         LFoldRange := nil;
         if LOpenTokenFoldRangeList.Count > 0 then
           LFoldRange := LOpenTokenFoldRangeList.Last;
-        if Assigned(LFoldRange) and LFoldRange.FoldRegion.NoSubs then
+        if Assigned(LFoldRange) and LFoldRange.RegionItem.NoSubs then
           Exit;
 
         j := FHighlighter.CodeFoldingRegions.Count - 1;
         for i := 0 to j do
         begin
-          LFoldRegionItem := Highlighter.CodeFoldingRegions[i];
-          if (LFoldRegionItem.OpenTokenBeginningOfLine and LBeginningOfLine) or (not LFoldRegionItem.OpenTokenBeginningOfLine) then
+          LRegionItem := Highlighter.CodeFoldingRegions[i];
+          if (LRegionItem.OpenTokenBeginningOfLine and LBeginningOfLine) or (not LRegionItem.OpenTokenBeginningOfLine) then
           begin
             { check if extra token found }
             if Assigned(LFoldRange) then
             begin
-              if LFoldRange.FoldRegion.BreakIfNotFoundBeforeNextRegion <> '' then
-                if LTextPtr^ = PChar(LFoldRange.FoldRegion.BreakIfNotFoundBeforeNextRegion)^ then { if first character match }
+              if LFoldRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
+                if LTextPtr^ = PChar(LFoldRange.RegionItem.BreakIfNotFoundBeforeNextRegion)^ then { if first character match }
                 begin
-                  LKeyWordPtr := PChar(LFoldRange.FoldRegion.BreakIfNotFoundBeforeNextRegion);
+                  LKeyWordPtr := PChar(LFoldRange.RegionItem.BreakIfNotFoundBeforeNextRegion);
                   LBookmarkTextPtr := LTextPtr;
                   { check if open keyword found }
                   while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and
@@ -3851,9 +3851,9 @@ var
                 end;
             end;
             { First word after newline }
-            if UpCase(LTextPtr^) = PChar(LFoldRegionItem.OpenToken)^ then { if first character match }
+            if UpCase(LTextPtr^) = PChar(LRegionItem.OpenToken)^ then { if first character match }
             begin
-              LKeyWordPtr := PChar(LFoldRegionItem.OpenToken);
+              LKeyWordPtr := PChar(LRegionItem.OpenToken);
               LBookmarkTextPtr := LTextPtr;
               { check if open keyword found }
               while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
@@ -3864,15 +3864,15 @@ var
 
               if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
               begin
-                if (LFoldRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr) then { not interested in partial hits }
+                if (LRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr) then { not interested in partial hits }
                 begin
                   { check if special rule found }
                   LSkipIfFoundAfterOpenToken := False;
-                  if LFoldRegionItem.SkipIfFoundAfterOpenToken <> '' then
+                  if LRegionItem.SkipIfFoundAfterOpenToken <> '' then
                   begin
                     while LTextPtr^ <> BCEDITOR_NONE_CHAR do
                     begin
-                      LKeyWordPtr := PChar(LFoldRegionItem.SkipIfFoundAfterOpenToken);
+                      LKeyWordPtr := PChar(LRegionItem.SkipIfFoundAfterOpenToken);
                       LBookmarkTextPtr2 := LTextPtr;
                       if UpCase(LTextPtr^) = LKeyWordPtr^ then { if first character match }
                       begin
@@ -3898,7 +3898,7 @@ var
                     Continue;
                   end;
 
-                  if Assigned(LFoldRange) and (LFoldRange.FoldRegion.BreakIfNotFoundBeforeNextRegion <> '') and not LFoldRange.IsExtraTokenFound then
+                  if Assigned(LFoldRange) and (LFoldRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '') and not LFoldRange.IsExtraTokenFound then
                     LOpenTokenFoldRangeList.Remove(LOpenTokenFoldRangeList.Last);
 
                   if LOpenTokenFoldRangeList.Count > 0 then
@@ -3907,7 +3907,7 @@ var
                     LFoldRanges := ATopFoldRanges;
 
                   LFoldRange := LFoldRanges.Add(ATopFoldRanges, LLine + 1, GetLineIndentChars(AStrings, LLine{ + 1}), LFoldCount,
-                    LFoldRegionItem, LLine + 1);
+                    LRegionItem, LLine + 1);
                   { open keyword found }
                   LOpenTokenFoldRangeList.Add(LFoldRange);
                   Inc(LFoldCount);
@@ -3926,7 +3926,7 @@ var
   end;
 
 var
-  LFoldRegionItem: TBCEditorFoldRegionItem;
+  LRegionItem: TBCEditorCodeFoldingRegionItem;
 begin
   LFoldCount := 0;
   LOpenTokenSkipFoldRangeList := TList.Create;
@@ -3937,8 +3937,8 @@ begin
     LCount := Highlighter.CodeFoldingRegions.Count - 1;
     for LFold := 0 to LCount do
     begin
-      LFoldRegionItem := Highlighter.CodeFoldingRegions[LFold];
-      if (LFoldRegionItem.OpenTokenLength = 1) and (LFoldRegionItem.CloseTokenLength = 1) then
+      LRegionItem := Highlighter.CodeFoldingRegions[LFold];
+      if (LRegionItem.OpenTokenLength = 1) and (LRegionItem.CloseTokenLength = 1) then
       begin
         LIsOneCharFolds := True;
         Break;
@@ -3961,9 +3961,9 @@ begin
 
         if LOpenTokenSkipFoldRangeList.Count = 0 then
         begin
-          if FoldRegionsClose then
+          if RegionItemsClose then
             Continue; { while TextPtr^ <> BCEDITOR_NONE_CHAR do }
-          FoldRegionsOpen;
+          RegionItemsOpen;
         end;
 
         if LTextPtr^ <> BCEDITOR_NONE_CHAR then
@@ -3986,7 +3986,7 @@ begin
           LFoldRange.ToLine := LLine + 1;
           LOpenTokenFoldRangeList.Remove(LFoldRange);
           Dec(LFoldCount);
-          FoldRegionsClose;
+          RegionItemsClose;
         end;
       end;
     end;
@@ -4735,7 +4735,7 @@ begin
       else
       if LCodeFoldingRange.FromLine = ACurrentLine then
       begin
-        LPosition := Pos(LCodeFoldingRange.FoldRegion.OpenToken, UpperCase(Lines[LCodeFoldingRange.FromLine]));
+        LPosition := Pos(LCodeFoldingRange.RegionItem.OpenToken, UpperCase(Lines[LCodeFoldingRange.FromLine]));
 
         if LPosition > 0 then
         begin
@@ -4751,7 +4751,7 @@ begin
         else
         if LCodeFoldingRange.ToLine = ACurrentLine then
         begin
-          LPosition := Pos(LCodeFoldingRange.FoldRegion.CloseToken, UpperCase(Lines[LCodeFoldingRange.ToLine]));
+          LPosition := Pos(LCodeFoldingRange.RegionItem.CloseToken, UpperCase(Lines[LCodeFoldingRange.ToLine]));
 
           if LPosition > 0 then
             LCodeFoldingRange.Widen(ALineCount);
@@ -8873,15 +8873,15 @@ begin
       if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
-        LTempPosition := Pos(LFoldRange.FoldRegion.OpenToken, UpperCase(FLines[LFoldRange.FromLine - 1]));
-        FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines[LFoldRange.FromLine - 1], LTempPosition, Length(LFoldRange.FoldRegion.OpenToken));
+        LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, UpperCase(FLines[LFoldRange.FromLine - 1]));
+        FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines[LFoldRange.FromLine - 1], LTempPosition, Length(LFoldRange.RegionItem.OpenToken));
         FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine);
         if not LFoldRange.Collapsed then
           LLine := LFoldRange.ToLine
         else
           LLine := LFoldRange.FromLine;
-        LTempPosition := Pos(LFoldRange.FoldRegion.CloseToken, UpperCase(FLines[LLine - 1]));
-        FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines[LLine - 1], LTempPosition, Length(LFoldRange.FoldRegion.CloseToken));
+        LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines[LLine - 1]));
+        FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines[LLine - 1], LTempPosition, Length(LFoldRange.RegionItem.CloseToken));
         FCurrentMatchingPairMatch.CloseTokenPos := GetTextPosition(LTempPosition, LLine);
       end;
     end;

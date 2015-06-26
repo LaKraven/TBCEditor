@@ -8,7 +8,7 @@ uses
 type
   TBCEditorCodeFoldingRegions = class;
 
-  TBCEditorFoldRegionItem = class(TCollectionItem)
+  TBCEditorCodeFoldingRegionItem = class(TCollectionItem)
   strict private
     FOpenTokenBeginningOfLine: Boolean;
     FCloseTokenBeginningOfLine: Boolean;
@@ -21,7 +21,7 @@ type
     FOpenToken: string;
     FOpenTokenEnd: string;
     FOpenTokenLength: Integer;
-    FParentRegion: TBCEditorFoldRegionItem;
+    FParentRegionItem: TBCEditorCodeFoldingRegionItem;
     FSharedClose: Boolean;
     FSkipIfFoundAfterOpenToken: string;
     FTokenEndIsPreviousLine: Boolean;
@@ -37,7 +37,7 @@ type
     property OpenToken: string read FOpenToken write FOpenToken;
     property OpenTokenEnd: string read FOpenTokenEnd write FOpenTokenEnd;
     property OpenTokenLength: Integer read FOpenTokenLength write FOpenTokenLength;
-    property ParentRegion: TBCEditorFoldRegionItem read FParentRegion write FParentRegion;
+    property ParentRegionItem: TBCEditorCodeFoldingRegionItem read FParentRegionItem write FParentRegionItem;
     property SharedClose: Boolean read FSharedClose write FSharedClose default False;
     property SkipIfFoundAfterOpenToken: string read FSkipIfFoundAfterOpenToken write FSkipIfFoundAfterOpenToken;
     property TokenEndIsPreviousLine: Boolean read FTokenEndIsPreviousLine write FTokenEndIsPreviousLine;
@@ -48,13 +48,13 @@ type
     FReverseRegions: TBCEditorCodeFoldingRegions;
     FSkipRegions: TBCEditorSkipRegions;
     FStringEscapeChar: Char;
-    function GetItem(Index: Integer): TBCEditorFoldRegionItem;
+    function GetItem(Index: Integer): TBCEditorCodeFoldingRegionItem;
   public
     constructor Create(ItemClass: TCollectionItemClass);
     destructor Destroy; override;
-    function Add(AOpenToken: string; ACloseToken: string): TBCEditorFoldRegionItem;
+    function Add(AOpenToken: string; ACloseToken: string): TBCEditorCodeFoldingRegionItem;
     function Contains(const AOpenToken, ACloseToken: string): Boolean;
-    property Items[index: Integer]: TBCEditorFoldRegionItem read GetItem; default;
+    property Items[index: Integer]: TBCEditorCodeFoldingRegionItem read GetItem; default;
     property ReverseRegions: TBCEditorCodeFoldingRegions read FReverseRegions write FReverseRegions;
     property SkipRegions: TBCEditorSkipRegions read FSkipRegions;
     property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default BCEDITOR_NONE_CHAR;
@@ -64,9 +64,9 @@ implementation
 
 { TBCEditorCodeFoldingRegions }
 
-function TBCEditorCodeFoldingRegions.Add(AOpenToken: string; ACloseToken: string): TBCEditorFoldRegionItem;
+function TBCEditorCodeFoldingRegions.Add(AOpenToken: string; ACloseToken: string): TBCEditorCodeFoldingRegionItem;
 begin
-  Result := TBCEditorFoldRegionItem(inherited Add);
+  Result := TBCEditorCodeFoldingRegionItem(inherited Add);
   with Result do
   begin
     OpenToken := AOpenToken;
@@ -108,9 +108,9 @@ begin
       Exit(True);
 end;
 
-function TBCEditorCodeFoldingRegions.GetItem(Index: Integer): TBCEditorFoldRegionItem;
+function TBCEditorCodeFoldingRegions.GetItem(Index: Integer): TBCEditorCodeFoldingRegionItem;
 begin
-  Result := TBCEditorFoldRegionItem(inherited Items[index]);
+  Result := TBCEditorCodeFoldingRegionItem(inherited Items[index]);
 end;
 
 end.

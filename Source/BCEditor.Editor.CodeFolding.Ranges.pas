@@ -19,7 +19,7 @@ type
     destructor Destroy; override;
 
     function Add(AAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
-      AFoldRegion: TBCEditorFoldRegionItem; AToLine: Integer = 0): TBCEditorCodeFoldingRange;
+      ARegionItem: TBCEditorCodeFoldingRegionItem; AToLine: Integer = 0): TBCEditorCodeFoldingRange;
     procedure Clear;
 
     property Count: Integer read GetCount;
@@ -56,7 +56,7 @@ type
     FCollapsedBy: Integer;
     FCollapsedLines: TStringList;
     FCollapseMarkRect: TRect;
-    FFoldRegion: TBCEditorFoldRegionItem;
+    FRegionItem: TBCEditorCodeFoldingRegionItem;
     FFromLine: Integer;
     FIndentLevel: Integer;
     FParentCollapsed: Boolean;
@@ -79,7 +79,7 @@ type
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
     property CollapsedLines: TStringList read FCollapsedLines;
     property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
-    property FoldRegion: TBCEditorFoldRegionItem read FFoldRegion write FFoldRegion;
+    property RegionItem: TBCEditorCodeFoldingRegionItem read FRegionItem write FRegionItem;
     property FromLine: Integer read FFromLine write FFromLine;
     property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
     property IndentLevel: Integer read FIndentLevel write FIndentLevel;
@@ -125,13 +125,12 @@ procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
       LSourceCodeFoldingRange := ASourceCodeFoldingRanges[i];
 
       LDestinationCodeFoldingRange := ADestinationCodeFoldingRanges.Add(Self, LSourceCodeFoldingRange.FromLine, LSourceCodeFoldingRange.IndentLevel,
-        LSourceCodeFoldingRange.FoldRangeLevel, LSourceCodeFoldingRange.FoldRegion, LSourceCodeFoldingRange.ToLine);
+        LSourceCodeFoldingRange.FoldRangeLevel, LSourceCodeFoldingRange.RegionItem, LSourceCodeFoldingRange.ToLine);
       LDestinationCodeFoldingRange.CollapsedBy := LSourceCodeFoldingRange.CollapsedBy;
       LDestinationCodeFoldingRange.Collapsed := LSourceCodeFoldingRange.Collapsed;
       LDestinationCodeFoldingRange.ParentCollapsed := LSourceCodeFoldingRange.ParentCollapsed;
       if Assigned(LSourceCodeFoldingRange.CollapsedLines) then
         LDestinationCodeFoldingRange.CollapsedLines.Assign(LSourceCodeFoldingRange.CollapsedLines);
-      LDestinationCodeFoldingRange.FoldRegion := LSourceCodeFoldingRange.FoldRegion;
 
       RecursiveAssign(LDestinationCodeFoldingRange.SubCodeFoldingRanges, LSourceCodeFoldingRange.SubCodeFoldingRanges);
     end;
@@ -238,7 +237,7 @@ begin
 end;
 
 function TBCEditorCodeFoldingRanges.Add(AAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges; AFromLine, AIndentLevel, AFoldRangeLevel: Integer;
-  AFoldRegion: TBCEditorFoldRegionItem; AToLine: Integer): TBCEditorCodeFoldingRange;
+  ARegionItem: TBCEditorCodeFoldingRegionItem; AToLine: Integer): TBCEditorCodeFoldingRange;
 begin
   Result := TBCEditorCodeFoldingRange.Create;
   with Result do
@@ -248,7 +247,7 @@ begin
     IndentLevel := AIndentLevel;
     FoldRangeLevel := AFoldRangeLevel;
     AllCodeFoldingRanges := AAllCodeFoldingRanges;
-    FoldRegion := AFoldRegion;
+    RegionItem := ARegionItem;
   end;
   FList.Add(Result);
   AAllCodeFoldingRanges.AllRanges.Add(Result);

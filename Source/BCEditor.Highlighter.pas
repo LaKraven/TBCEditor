@@ -113,7 +113,7 @@ begin
   FAttributes.Duplicates := dupIgnore;
   FAttributes.Sorted := False;
 
-  FCodeFoldingRegions := TBCEditorCodeFoldingRegions.Create(TBCEditorFoldRegionItem);
+  FCodeFoldingRegions := TBCEditorCodeFoldingRegions.Create(TBCEditorCodeFoldingRegionItem);
   FCompletionProposalSkipRegions := TBCEditorSkipRegions.Create(TBCEditorSkipRegionItem);
 
   FPrepared := False;

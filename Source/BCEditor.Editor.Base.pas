@@ -1822,21 +1822,45 @@ begin
 end;
 
 function TBCBaseEditor.GetSelectionBeginPosition: TBCEditorTextPosition;
+var
+  LChar: Char;
 begin
   if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
     ((FSelectionEndPosition.Line = FSelectionBeginPosition.Line) and (FSelectionEndPosition.Char < FSelectionBeginPosition.Char)) then
     Result := FSelectionEndPosition
   else
     Result := FSelectionBeginPosition;
+
+  if Result.Char <= Length(FLines[Result.Line - 1]) then
+  begin
+    LChar := FLines[Result.Line - 1][Result.Char];
+    if LChar.IsLowSurrogate then
+    begin
+      Dec(Result.Char);
+      InternalCaretX := FCaretX - 1;
+    end;
+  end;
 end;
 
 function TBCBaseEditor.GetSelectionEndPosition: TBCEditorTextPosition;
+var
+  LChar: Char;
 begin
   if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
     ((FSelectionEndPosition.Line = FSelectionBeginPosition.Line) and (FSelectionEndPosition.Char < FSelectionBeginPosition.Char)) then
     Result := FSelectionBeginPosition
   else
     Result := FSelectionEndPosition;
+
+  if Result.Char <= Length(FLines[Result.Line - 1]) then
+  begin
+    LChar := FLines[Result.Line - 1][Result.Char];
+    if LChar.IsLowSurrogate then
+    begin
+      Inc(Result.Char);
+      InternalCaretX := FCaretX + 1;
+    end;
+  end;
 end;
 
 function TBCBaseEditor.GetText: string;
@@ -7885,8 +7909,10 @@ var
       begin
         LSelectionStartPosition := TextToDisplayPosition(LStartPosition, True, False);
         LSelectionEndPosition := TextToDisplayPosition(LEndPosition, False, False);
-        if (FSelection.ActiveMode = smColumn) and (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
-          SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column);
+        {if (FSelection.ActiveMode = smColumn) and
+          (LSelectionStartPosition.Column > LSelectionEndPosition.Column) then
+          SwapInt(LSelectionStartPosition.Column, LSelectionEndPosition.Column); }
+
       end;
     end;
   end;

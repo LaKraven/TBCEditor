@@ -295,6 +295,9 @@ begin
       LEditor.Search.Map.Colors.Foreground := StringToColorDef(LColorsObject['SearchMapForeground'].Value, LEditor.Search.Map.Colors.Foreground);
       LEditor.Selection.Colors.Background := StringToColorDef(LColorsObject['SelectionBackground'].Value, LEditor.Selection.Colors.Background);
       LEditor.Selection.Colors.Foreground := StringToColorDef(LColorsObject['SelectionForeground'].Value, LEditor.Selection.Colors.Foreground);
+      LEditor.WordWrap.Colors.Background := StringToColorDef(LColorsObject['WordWrapIndicatorBackground'].Value, LEditor.WordWrap.Colors.Background);
+      LEditor.WordWrap.Colors.Arrow := StringToColorDef(LColorsObject['WordWrapIndicatorArrow'].Value, LEditor.WordWrap.Colors.Arrow);
+      LEditor.WordWrap.Colors.Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, LEditor.WordWrap.Colors.Lines);
     end;
     LFontsObject := AEditorObject['Fonts'].ObjectValue;
     if Assigned(LFontsObject) then

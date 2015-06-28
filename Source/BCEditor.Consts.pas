@@ -3,7 +3,7 @@ unit BCEditor.Consts;
 interface
 
 uses
-  BCEditor.Types;
+  BCEditor.Types, Vcl.Graphics;
 
 const
   BCEDITOR_WHEEL_DIVISOR = 120;
@@ -71,6 +71,9 @@ const
   clIndent = $00CC9999;
   clMatchingPairUnderline = $00CC9999;
   clMinimapVisibleLines = $00E6FAFF;
+  clWordWrapIndicatorBackground = $00FFFFFF;
+  clWordWrapIndicatorArrow = clNavy;
+  clWordWrapIndicatorLines = clBlack;
 
 implementation
 

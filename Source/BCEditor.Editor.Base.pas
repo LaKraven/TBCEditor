@@ -68,7 +68,7 @@ type
     FHighlighter: TBCEditorHighlighter;
     FHookedCommandHandlers: TObjectList;
     FInsertMode: Boolean;
-    FInternalImage: TBCEditorInternalImage;
+    FInternalBookmarkImage: TBCEditorInternalImage;
     FInvalidateRect: TRect;
     FIsScrolling: Boolean;
     FKeyboardHandler: TBCEditorKeyboardHandler;
@@ -856,7 +856,7 @@ begin
   FMinimap.Free;
   FWordWrap.Free;
   FTextDrawer.Free;
-  FInternalImage.Free;
+  FInternalBookmarkImage.Free;
   FFontDummy.Free;
   FOriginalLines.Free;
   FBufferBmp.Free;
@@ -7377,10 +7377,10 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
     begin
       if ABookMark.ImageIndex in [0 .. 8] then
       begin
-        if not Assigned(FInternalImage) then
-          FInternalImage := TBCEditorInternalImage.Create(HINSTANCE, 'BCEDITORINTERNALIMAGES', 9);
+        if not Assigned(FInternalBookmarkImage) then
+          FInternalBookmarkImage := TBCEditorInternalImage.Create(HINSTANCE, 'BCEDITORBOOKMARKIMAGES', 9);
         if ALeftMarginOffset = 0 then
-          FInternalImage.DrawTransparent(Canvas, ABookMark.ImageIndex, FLeftMargin.Bookmarks.Panel.LeftMargin +
+          FInternalBookmarkImage.DrawTransparent(Canvas, ABookMark.ImageIndex, FLeftMargin.Bookmarks.Panel.LeftMargin +
             ALeftMarginOffset, (aMarkRow - TopLine) * LineHeight, LineHeight, clFuchsia);
         Inc(ALeftMarginOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
       end;

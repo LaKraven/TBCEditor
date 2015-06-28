@@ -123,7 +123,7 @@ begin
         ChangeEndPosition := AEnd;
         ChangeString := ChangeText;
         ChangeData := Data;
-        ChangeIndex := Index;
+        //ChangeIndex := Index;
 
         if FBlockChangeNumber <> 0 then
           ChangeNumber := FBlockChangeNumber

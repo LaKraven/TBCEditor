@@ -2644,7 +2644,6 @@ begin
   ClearMatchingPair;
   SetLength(FCollapsedLinesDifferenceCache, 0);
   FLines.BeginUpdate;
-
   with AFoldRange do
   begin
     LTextLine := FLines[ToLine - 1];
@@ -4675,11 +4674,16 @@ begin
 end;
 
 procedure TBCBaseEditor.UndoRedoAdded(Sender: TObject);
+var
+ LUndoItem: TBCEditorUndoItem;
 begin
+  LUndoItem := nil;
+  if Sender = FUndoList then
+    LUndoItem := FUndoList.PeekItem;
+
   UpdateModifiedStatus;
 
-  if (Sender = FUndoList) and not FUndoList.InsideRedo and (FUndoList.PeekItem <> nil) and
-    (FUndoList.PeekItem.ChangeReason <> crGroupBreak) then
+  if not FUndoList.InsideRedo and Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crGroupBreak) then
     FRedoList.Clear;
 
   if TBCEditorUndoList(Sender).BlockCount = 0 then
@@ -5960,7 +5964,6 @@ begin
     LOldChangeNumber := LUndoItem.ChangeNumber;
     LSaveChangeNumber := FRedoList.BlockChangeNumber;
     FRedoList.BlockChangeNumber := LUndoItem.ChangeNumber;
-
     try
       repeat
         Self.UndoItem;
@@ -7149,7 +7152,7 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   FOldBrushColor: TColor;
 begin
-  if (CaretY = ALine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
+  if (LineToRow(CaretY) = ALine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
   begin
     FOldBrushColor := Canvas.Brush.Color;
     Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
@@ -7396,7 +7399,6 @@ var
   LLastLine: Integer;
   LLastTextLine: Integer;
   LMarkRow: Integer;
-  LLineTop: Integer;
   LTextSize: TSize;
   LLeftMarginWidth: Integer;
   LOldColor: TColor;
@@ -7410,7 +7412,7 @@ begin
   LFirstLine := RowToLine(AFirstRow);
   LLastLine := RowToLine(ALastRow);
   LLastTextLine := RowToLine(ALastTextRow);
-  LActiveLine := (DisplayY - TopLine) * LineHeight;
+  LActiveLine := (LineToRow(CaretY) - TopLine) * LineHeight;
 
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
   Canvas.FillRect(AClipRect); { fill left margin rect }
@@ -7433,14 +7435,8 @@ begin
           FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background)
         else
           FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground);
-        LLineTop := (LineToRow(LLine) - TopLine) * LineHeight;
-        if GetWordWrap then
-        begin
-          LLineRect.Top := LLineRect.Bottom;
-          LLineRect.Bottom := LLineTop;
-          FTextDrawer.ExtTextOut(LLineRect.Left, LLineRect.Top, [tooOpaque], LLineRect, '', 0);
-        end;
-        LLineRect.Top := LLineTop;
+
+        LLineRect.Top := (LineToRow(LLine) - TopLine) * LineHeight;
         LLineRect.Bottom := LLineRect.Top + LineHeight;
 
         LLineNumber := FLeftMargin.FormatLineNumber(LLine);
@@ -7512,7 +7508,7 @@ begin
   Canvas.Brush.Style := bsClear;
   { Word wrap }
   if GetWordWrap and FWordWrap.Indicator.Visible then
-    for LLine := aFirstRow to aLastRow do
+    for LLine := AFirstRow to ALastRow do
       if LineToRow(RowToLine(LLine)) <> LLine then
         FWordWrap.Indicator.Draw(Canvas, FWordWrap.Indicator.Left, (LLine - TopLine) * LineHeight, LineHeight);
   { Border }
@@ -12370,17 +12366,17 @@ procedure TBCBaseEditor.DoInternalRedo;
   procedure RemoveGroupBreak;
   var
     LUndoItem: TBCEditorUndoItem;
-    OldBlockNumber: Integer;
+    LOldBlockNumber: Integer;
   begin
     if FRedoList.LastChangeReason = crGroupBreak then
     begin
-      OldBlockNumber := UndoList.BlockChangeNumber;
+      LOldBlockNumber := UndoList.BlockChangeNumber;
       LUndoItem := FRedoList.PopItem;
       try
         UndoList.BlockChangeNumber := LUndoItem.ChangeNumber;
         FUndoList.AddGroupBreak;
       finally
-        UndoList.BlockChangeNumber := OldBlockNumber;
+        UndoList.BlockChangeNumber := LOldBlockNumber;
         LUndoItem.Free;
       end;
       UpdateModifiedStatus;

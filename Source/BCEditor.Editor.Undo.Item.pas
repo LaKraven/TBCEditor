@@ -6,17 +6,12 @@ uses
   System.Classes, BCEditor.Types;
 
 type
-  TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete,
-    crLineBreak, crLineInsert, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
-    crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll, crWhiteSpaceAdd,
-    {crDeleteCollapsedFold,} crCollapseFold, crUncollapseFold);
-
   TBCEditorUndoItem = class(TPersistent)
   protected
     FChangeCaret: Integer;
     FChangeData: Pointer;
     FChangeEndPosition: TBCEditorTextPosition;
-    FChangeIndex: Integer;
+    //FChangeIndex: Integer;
     FChangeNumber: Integer;
     FChangeReason: TBCEditorChangeReason;
     FChangeSelectionMode: TBCEditorSelectionMode;
@@ -28,7 +23,7 @@ type
     property ChangeCaret: Integer read FChangeCaret write FChangeCaret;
     property ChangeData: Pointer read FChangeData write FChangeData;
     property ChangeEndPosition: TBCEditorTextPosition read FChangeEndPosition write FChangeEndPosition;
-    property ChangeIndex: Integer read FChangeIndex write FChangeIndex;
+    //property ChangeIndex: Integer read FChangeIndex write FChangeIndex;
     property ChangeNumber: Integer read FChangeNumber write FChangeNumber;
     property ChangeReason: TBCEditorChangeReason read FChangeReason write FChangeReason;
     property ChangeSelectionMode: TBCEditorSelectionMode read FChangeSelectionMode write FChangeSelectionMode;

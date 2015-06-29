@@ -16,7 +16,7 @@ const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.0b';
 
 type
-  TMainForm = class(TBCForm)
+  TMainForm = class(TBCBaseForm)
     ActionFileOpen: TAction;
     ActionPreview: TAction;
     ActionSearch: TAction;
@@ -33,10 +33,11 @@ type
     PopupMenuColors: TPopupMenu;
     PopupMenuFile: TPopupMenu;
     PopupMenuHighlighters: TPopupMenu;
-    PopupMenuSkins: TPopupMenu;
     Splitter: TBCSplitter;
     OpenDialog: TsOpenDialog;
     SearchFrame: TBCSearchFrame;
+    MenuItemSkins: TMenuItem;
+    ActionSkins: TAction;
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionPreviewExecute(Sender: TObject);
     procedure ActionSearchExecute(Sender: TObject);
@@ -47,6 +48,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string; var Glyph: TBitmap; var LineVisible: Boolean);
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
+    procedure ActionSkinsExecute(Sender: TObject);
   private
     FStopWatch: TStopWatch;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
@@ -63,7 +65,8 @@ implementation
 {$R *.dfm}
 
 uses
-  BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils;
+  BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
+  BCCommon.Dialogs.SkinSelect;
 
 procedure TMainForm.ActionSelectHighlighterExecute(Sender: TObject);
 begin
@@ -76,15 +79,21 @@ begin
     SetFocus;
   end;
   StatusBar.Panels[3].Text := '';
-  TitleBar.Items[4].Caption := TAction(Sender).Caption;
+  TitleBar.Items[2].Caption := TAction(Sender).Caption;
   Caption := BCEDITORDEMO_CAPTION;
   SearchFrame.ClearText;
+end;
+
+procedure TMainForm.ActionSkinsExecute(Sender: TObject);
+begin
+  inherited;
+  TSkinSelectDialog.ClassShowModal(SkinManager);
 end;
 
 procedure TMainForm.ActionSelectHighlighterColorExecute(Sender: TObject);
 begin
   Editor.Highlighter.Colors.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
-  TitleBar.Items[6].Caption := TAction(Sender).Caption;
+  TitleBar.Items[4].Caption := TAction(Sender).Caption;
   Editor.SetFocus;
 end;
 
@@ -217,7 +226,7 @@ begin
         end;
       end;
     end;
-    TitleBar.Items[3].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, FileName]);
+    TitleBar.Items[1].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, FileName]);
     Editor.LoadFromFile(FileName);
     FStopWatch.Stop;
     StatusBar.Panels[3].Text := 'Load: ' + FormatDateTime('s.zzz "s"', FStopWatch.ElapsedMilliseconds / MSecsPerDay);
@@ -234,8 +243,6 @@ begin
   SearchFrame.SpeedButtonOptions.Images := ImagesDataModule.ImageListSmall;
   PopupMenuFile.Images := ImagesDataModule.ImageList;
   TitleBar.Images := ImagesDataModule.ImageListSmall;
-
-  CreateSkinsMenu(PopupMenuSkins.Items);
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
@@ -329,12 +336,7 @@ procedure TMainForm.SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var Sk
   var Glyph: TBitmap; var LineVisible: Boolean);
 begin
   inherited;
-  if FirstItem = PopupMenuSkins.Items[0] then
-  begin
-    LineVisible := True;
-    Caption := 'Skin';
-  end
-  else
+ 
   if FirstItem = PopupMenuHighlighters.Items[0] then
   begin
     LineVisible := True;

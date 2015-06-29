@@ -140,6 +140,36 @@ inherited MainForm: TMainForm
       WordWrap.Enabled = False
       WordWrap.Position = 80
       WordWrap.Style = wwsClientWidth
+      WordWrap.Indicator.Glyph.Data = {
+        7E030000424D7E0300000000000036000000280000000F0000000E0000000100
+        2000000000004803000000000000000000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000
+        000000000000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0080000000FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0000000000000000000000
+        0000FFFFFF00FFFFFF00FFFFFF00FFFFFF008000000080000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF008000000080000000800000008000000080000000FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF008000000080000000FFFFFF00FFFFFF0080000000FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0080000000FFFFFF00FFFFFF0080000000FFFFFF00FFFF
+        FF00FFFFFF000000000000000000000000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0080000000FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF0080000000FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00800000008000000080000000800000008000
+        00008000000080000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00}
     end
     object PanelSearchFrame: TBCPanel
       Left = 0
@@ -176,6 +206,7 @@ inherited MainForm: TMainForm
           ExplicitWidth = 754
           inherited SpeedButtonSearchClose: TBCSpeedButton
             Left = 733
+            Images = nil
             ExplicitLeft = 733
           end
           inherited PanelRight: TBCPanel
@@ -187,6 +218,20 @@ inherited MainForm: TMainForm
               ExplicitLeft = 388
             end
           end
+          inherited PanelToolBar: TBCPanel
+            inherited SpeedButtonFindPrevious: TBCSpeedButton
+              Images = nil
+            end
+            inherited SpeedButtonFindNext: TBCSpeedButton
+              Images = nil
+            end
+            inherited SpeedButtonOptions: TBCSpeedButton
+              Images = nil
+            end
+          end
+        end
+        inherited ActionList: TActionList
+          Images = nil
         end
       end
     end
@@ -238,33 +283,6 @@ inherited MainForm: TMainForm
         Width = 48
       end
       item
-        FontData.Font.Charset = DEFAULT_CHARSET
-        FontData.Font.Color = clWindowText
-        FontData.Font.Height = -11
-        FontData.Font.Name = 'Tahoma'
-        FontData.Font.Style = []
-        Index = 1
-        Name = 'TitleBarItemSpacing1'
-        ShowHint = False
-        Style = bsSpacing
-        Width = 6
-      end
-      item
-        Caption = 'Skin'
-        DropdownMenu = PopupMenuSkins
-        FontData.Font.Charset = DEFAULT_CHARSET
-        FontData.Font.Color = clWindowText
-        FontData.Font.Height = -11
-        FontData.Font.Name = 'Tahoma'
-        FontData.Font.Style = []
-        Height = 22
-        Index = 2
-        Name = 'TitleBarItemSkins'
-        ShowHint = False
-        Style = bsMenu
-        Width = 52
-      end
-      item
         Align = tbaCenterInSpace
         Caption = 'TBCEditor Control Demo v1.0b'
         FontData.Font.Charset = DEFAULT_CHARSET
@@ -273,7 +291,7 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         Height = 21
-        Index = 3
+        Index = 1
         Name = 'TitleBarItemCaption'
         ShowHint = False
         Style = bsInfo
@@ -289,7 +307,7 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         Height = 22
-        Index = 4
+        Index = 2
         Name = 'TitleBarItemHighlighter'
         ShowHint = False
         Style = bsMenu
@@ -302,7 +320,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Index = 5
+        Index = 3
         Name = 'TitleBarItemSpacing2'
         ShowHint = False
         Style = bsSpacing
@@ -318,7 +336,7 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         Height = 22
-        Index = 6
+        Index = 4
         Name = 'TitleBarItemColors'
         ShowHint = False
         Style = bsMenu
@@ -331,7 +349,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Index = 7
+        Index = 5
         Name = 'TitleBarItemSpacing3'
         ShowHint = False
         Style = bsSpacing
@@ -368,10 +386,11 @@ inherited MainForm: TMainForm
       ImageIndex = 10
       OnExecute = ActionPreviewExecute
     end
-  end
-  object PopupMenuSkins: TPopupMenu
-    Left = 86
-    Top = 338
+    object ActionSkins: TAction
+      Caption = 'Skins...'
+      ImageIndex = 76
+      OnExecute = ActionSkinsExecute
+    end
   end
   object PopupMenuFile: TPopupMenu
     Images = ImagesDataModule.ImageList
@@ -387,6 +406,9 @@ inherited MainForm: TMainForm
     object MenuItemPrintPreview: TMenuItem
       Action = ActionPreview
       RadioItem = True
+    end
+    object MenuItemSkins: TMenuItem
+      Action = ActionSkins
     end
     object MenuItemSeparator2: TMenuItem
       Caption = '-'

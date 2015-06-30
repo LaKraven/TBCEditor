@@ -15,7 +15,7 @@ uses
   BCEditor.Editor.Undo, BCEditor.Editor.Undo.List, BCEditor.Editor.WordWrap, BCEditor.Editor.WordWrap.Helper,
   BCEditor.Highlighter, BCEditor.Highlighter.Attributes, BCEditor.KeyboardHandler, BCEditor.Lines, BCEditor.Search,
   BCEditor.Search.RegularExpressions, BCEditor.Search.WildCard, BCEditor.TextDrawer,
-  BCEditor.Types, BCEditor.Utils;
+  BCEditor.Types, BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
 type
   TBCBaseEditor = class(TCustomControl)
@@ -55,6 +55,9 @@ type
     FCollapsedLinesDifferenceCache: array of Integer;
     FColumnWidths: PIntegerArray;
     FCommandDrop: Boolean;
+    {$IFDEF USE_ALPHASKINS}
+    FCommonData: TsScrollWndData;
+    {$ENDIF}
     FCompletionProposal: TBCEditorCompletionProposal;
     FCompletionProposalTimer: TTimer;
     FCurrentMatchingPair: TBCEditorMatchingTokenResult;
@@ -136,8 +139,12 @@ type
     FRightMarginMovePosition: Integer;
     FSaveSelectionMode: TBCEditorSelectionMode;
     FScroll: TBCEditorScroll;
-    FScrollDeltaX, FScrollDeltaY: Integer;
+    FScrollDeltaX: Integer;
+    FScrollDeltaY: Integer;
     FScrollTimer: TTimer;
+    {$IFDEF USE_ALPHASKINS}
+    FScrollWnd: TacScrollWnd;
+    {$ENDIF}
     FSearch: TBCEditorSearch;
     FSearchEngine: TBCEditorSearchCustom;
     FSearchHighlighterBitmap: TBitmap;
@@ -545,7 +552,7 @@ type
     procedure UnlockUndo;
     procedure UnregisterCommandHandler(AHookedCommandEvent: TBCEditorHookedCommandEvent);
     procedure UpdateCaret;
-    procedure WndProc(var Msg: TMessage); override;
+    procedure WndProc(var Message: TMessage); override;
     property ActiveLine: TBCEditorActiveLine read FActiveLine write SetActiveLine;
     property BackgroundColor: TColor read FBackgroundColor write SetBackgroundColor default clWindow;
     property AllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges read FAllCodeFoldingRanges;
@@ -628,6 +635,9 @@ type
     property SelectionBeginPosition: TBCEditorTextPosition read GetSelectionBeginPosition write SetSelectionBeginPosition;
     property SelectionEndPosition: TBCEditorTextPosition read GetSelectionEndPosition write SetSelectionEndPosition;
     property SelectedText: string read GetSelectedText write SetSelectedText;
+    {$IFDEF USE_ALPHASKINS}
+    property SkinData: TsScrollWndData read FCommonData write FCommonData;
+    {$ENDIF}
     property SpecialChars: TBCEditorSpecialChars read FSpecialChars write SetSpecialChars;
     property Tabs: TBCEditorTabs read FTabs write SetTabs;
     property TabStop default True;
@@ -651,7 +661,8 @@ uses
   Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character,
   Vcl.Menus, BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
-  {$IFDEF USE_VCL_STYLES}Vcl.Themes, BCEditor.StyleHooks,{$ENDIF} BCEditor.Highlighter.Rules;
+  {$IFDEF USE_VCL_STYLES}Vcl.Themes, BCEditor.StyleHooks,{$ENDIF} BCEditor.Highlighter.Rules
+  {$IFDEF USE_ALPHASKINS}, sVCLUtils, sMessages, sConst, sSkinProps{$ENDIF};
 
 var
   ScrollHintWindow, RightMarginHintWindow: THintWindow;
@@ -684,6 +695,13 @@ end;
 constructor TBCBaseEditor.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
+  {$IFDEF USE_ALPHASKINS}
+  FCommonData := TsScrollWndData.Create(Self);
+  FCommonData.COC := COC_TsMemo;
+  if FCommonData.SkinSection = '' then
+    FCommonData.SkinSection := s_Edit;
+  {$ENDIF}
 
   FProcessingMinimap := 0;
 
@@ -828,6 +846,12 @@ end;
 
 destructor TBCBaseEditor.Destroy;
 begin
+  {$IFDEF USE_ALPHASKINS}
+  if FScrollWnd <> nil then
+    FreeAndNil(FScrollWnd);
+  if Assigned(FCommonData) then
+    FreeAndNil(FCommonData);
+  {$ENDIF}
   ClearCodeFolding;
   FCodeFolding.Free;
   FDirectories.Free;
@@ -6558,6 +6582,10 @@ end;
 procedure TBCBaseEditor.Loaded;
 begin
   inherited Loaded;
+  {$IFDEF USE_ALPHASKINS}
+  FCommonData.Loaded;
+  RefreshEditScrolls(SkinData, FScrollWnd);
+  {$ENDIF}
   LeftMarginChanged(Self);
   MinimapChanged(Self);
   UpdateScrollBars;
@@ -12975,30 +13003,116 @@ begin
   Result := (Msg = WM_SETTEXT) or (Msg = WM_GETTEXT) or (Msg = WM_GETTEXTLENGTH);
 end;
 
-procedure TBCBaseEditor.WndProc(var Msg: TMessage);
+procedure TBCBaseEditor.WndProc(var Message: TMessage);
 const
   ALT_KEY_DOWN = $20000000;
+{$IFDEF USE_ALPHASKINS}
+var
+  PS: TPaintStruct;
+{$ENDIF}
 begin
   { Prevent Alt-Backspace from beeping }
-  if (Msg.Msg = WM_SYSCHAR) and (Msg.wParam = VK_BACK) and (Msg.LParam and ALT_KEY_DOWN <> 0) then
-    Msg.Msg := 0;
+  if (Message.Msg = WM_SYSCHAR) and (Message.wParam = VK_BACK) and (Message.LParam and ALT_KEY_DOWN <> 0) then
+    Message.Msg := 0;
 
   { handle direct WndProc calls that could happen through VCL-methods like Perform }
   if HandleAllocated and IsWindowUnicode(Handle) then
+  begin
     if not FWindowProducedMessage then
     begin
       FWindowProducedMessage := True;
-      if IsTextMessage(Msg.Msg) then
+      if IsTextMessage(Message.Msg) then
       begin
-        with Msg do
+        with Message do
           Result := SendMessageA(Handle, Msg, wParam, LParam);
         Exit;
       end;
     end
     else
       FWindowProducedMessage := False;
+  end;
+  {$IFDEF USE_ALPHASKINS}
+  case Message.Msg of
+    SM_ALPHACMD:
+      case Message.WParamHi of
+        AC_CTRLHANDLED:
+          begin
+            Message.Result := 1;
+            Exit;
+          end;
 
+        AC_SETNEWSKIN:
+          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
+          begin
+            CommonWndProc(Message, FCommonData);
+            Exit;
+          end;
+
+        AC_REMOVESKIN:
+          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
+          begin
+            if FScrollWnd <> nil then
+              FreeAndNil(FScrollWnd);
+
+            CommonWndProc(Message, FCommonData);
+            RecreateWnd;
+            Exit;
+          end;
+
+        AC_REFRESH:
+          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
+          begin
+            CommonWndProc(Message, FCommonData);
+            RefreshEditScrolls(SkinData, FScrollWnd);
+            if HandleAllocated and Visible then
+              RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_ERASE or RDW_FRAME);
+
+            Exit;
+          end
+      end;
+
+    CM_FONTCHANGED:
+      if Showing and HandleAllocated then
+        RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_FRAME);
+  end;
+
+  if not ControlIsReady(Self) or not FCommonData.Skinned then
+    inherited
+  else
+  begin
+    case Message.Msg of
+      WM_PAINT:
+        begin
+          if InUpdating(FCommonData) then
+          begin
+            BeginPaint(Handle, PS);
+            EndPaint  (Handle, PS);
+            Exit;
+          end;
+          inherited;
+          Exit;
+        end;
+    end;
+    if CommonWndProc(Message, FCommonData) then
+      Exit;
+
+    inherited;
+
+    case Message.Msg of
+      CM_SHOWINGCHANGED:
+        RefreshEditScrolls(SkinData, FScrollWnd);
+
+      CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
+        FCommonData.Invalidate;
+
+      CM_TEXTCHANGED, CM_CHANGED:
+        if Assigned(FScrollWnd) then
+          UpdateScrolls(FScrollWnd, True);
+    end;
+  end;
+  {$ELSE}
   inherited;
+  {$ENDIF}
 end;
 
 initialization

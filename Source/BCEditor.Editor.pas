@@ -101,6 +101,9 @@ type
     property Search;
     property Selection;
     property ShowHint;
+    {$IFDEF USE_ALPHASKINS}
+    property SkinData;
+    {$ENDIF}
     property SpecialChars;
     property TabOrder;
     property Tabs;

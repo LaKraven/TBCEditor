@@ -521,12 +521,12 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     procedure PasteFromClipboard;
     procedure DoRedo;
-    procedure RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: pointer);
+    procedure RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);
+    procedure RemoveChainedEditor;
     procedure RemoveFocusControl(AControl: TWinControl);
     procedure RemoveKeyDownHandler(AHandler: TKeyEvent);
     procedure RemoveKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
     procedure RemoveKeyUpHandler(AHandler: TKeyEvent);
-    procedure RemoveLinesPointer;
     procedure RemoveMouseCursorHandler(AHandler: TBCEditorMouseCursorEvent);
     procedure RemoveMouseDownHandler(AHandler: TMouseEvent);
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
@@ -541,7 +541,7 @@ type
     procedure Sort(ASortOrder: TBCEditorSortOrder = soToggle);
     procedure ToggleBookmark(AIndex: Integer = -1);
     procedure ToggleSelectedCase(ACase: TBCEditorCase = cNone);
-    procedure UnHookTextBuffer;
+    procedure UnhookLines;
     procedure UnlockUndo;
     procedure UnregisterCommandHandler(AHookedCommandEvent: TBCEditorHookedCommandEvent);
     procedure UpdateCaret;
@@ -835,7 +835,7 @@ begin
   FHighlighter.Free;
   FHighlighter := nil;
   if Assigned(FChainedEditor) or (FLines <> FOriginalLines) then
-    RemoveLinesPointer;
+    RemoveChainedEditor;
 
   { do not use FreeAndNil, it first nils and then freey causing problems with code accessing FHookedCommandHandlers
     while destruction }
@@ -11981,10 +11981,10 @@ begin
   UpdateWordWrap(False);
 
   if Assigned(FChainedEditor) then
-    RemoveLinesPointer
+    RemoveChainedEditor
   else
   if FLines <> FOriginalLines then
-    UnHookTextBuffer;
+    UnhookLines;
 
   FChainListCleared := ABuffer.OnCleared;
   ABuffer.OnCleared := ChainListCleared;
@@ -12237,7 +12237,7 @@ begin
   if Operation = opRemove then
   begin
     if AComponent = FChainedEditor then
-      RemoveLinesPointer;
+      RemoveChainedEditor;
 
     if Assigned(FLeftMargin) then
       if Assigned(FLeftMargin.Bookmarks) then
@@ -12460,6 +12460,15 @@ begin
     FHookedCommandHandlers.Add(TBCEditorHookedCommandHandler.Create(AHookedCommandEvent, AHandlerData))
 end;
 
+procedure TBCBaseEditor.RemoveChainedEditor;
+begin
+  if Assigned(FChainedEditor) then
+    RemoveFreeNotification(FChainedEditor);
+  FChainedEditor := nil;
+
+  UnhookLines;
+end;
+
 procedure TBCBaseEditor.RemoveFocusControl(AControl: TWinControl);
 begin
   FFocusList.Remove(AControl);
@@ -12478,15 +12487,6 @@ end;
 procedure TBCBaseEditor.RemoveKeyUpHandler(AHandler: TKeyEvent);
 begin
   FKeyboardHandler.RemoveKeyUpHandler(AHandler);
-end;
-
-procedure TBCBaseEditor.RemoveLinesPointer;
-begin
-  if Assigned(FChainedEditor) then
-    RemoveFreeNotification(FChainedEditor);
-  FChainedEditor := nil;
-
-  UnHookTextBuffer;
 end;
 
 procedure TBCBaseEditor.RemoveMouseCursorHandler(AHandler: TBCEditorMouseCursorEvent);
@@ -12825,7 +12825,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.UnHookTextBuffer;
+procedure TBCBaseEditor.UnhookLines;
 var
   LOldWrap: Boolean;
 begin

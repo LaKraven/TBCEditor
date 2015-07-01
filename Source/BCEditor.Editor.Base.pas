@@ -512,7 +512,7 @@ type
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer); virtual;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ALine: Integer);
-    procedure HookTextBuffer(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
+    procedure HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
     procedure InitCodeFolding;
     procedure InsertBlock(const BlockBeginPosition, BlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AddToUndoList: Boolean);
     procedure InvalidateLeftMargin;
@@ -548,7 +548,7 @@ type
     procedure Sort(ASortOrder: TBCEditorSortOrder = soToggle);
     procedure ToggleBookmark(AIndex: Integer = -1);
     procedure ToggleSelectedCase(ACase: TBCEditorCase = cNone);
-    procedure UnhookLines;
+    procedure UnhookEditorLines;
     procedure UnlockUndo;
     procedure UnregisterCommandHandler(AHookedCommandEvent: TBCEditorHookedCommandEvent);
     procedure UpdateCaret;
@@ -10386,7 +10386,7 @@ end;
 
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);
 begin
-  HookTextBuffer(AEditor.Lines, AEditor.UndoList, AEditor.RedoList);
+  HookEditorLines(AEditor.Lines, AEditor.UndoList, AEditor.RedoList);
 
   FChainedEditor := AEditor;
   AEditor.FreeNotification(Self);
@@ -11998,7 +11998,7 @@ begin
   EnsureCursorPositionVisible(True);
 end;
 
-procedure TBCBaseEditor.HookTextBuffer(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
+procedure TBCBaseEditor.HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
 var
   LOldWrap: Boolean;
 begin
@@ -12012,7 +12012,7 @@ begin
     RemoveChainedEditor
   else
   if FLines <> FOriginalLines then
-    UnhookLines;
+    UnhookEditorLines;
 
   FChainListCleared := ABuffer.OnCleared;
   ABuffer.OnCleared := ChainListCleared;
@@ -12494,7 +12494,7 @@ begin
     RemoveFreeNotification(FChainedEditor);
   FChainedEditor := nil;
 
-  UnhookLines;
+  UnhookEditorLines;
 end;
 
 procedure TBCBaseEditor.RemoveFocusControl(AControl: TWinControl);
@@ -12853,7 +12853,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.UnhookLines;
+procedure TBCBaseEditor.UnhookEditorLines;
 var
   LOldWrap: Boolean;
 begin

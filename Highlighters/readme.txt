@@ -11,7 +11,6 @@ LaTeX
 Lisp
 Lua
 Makefile
-MATLAB
 Objective-C
 OCaml
 Scala

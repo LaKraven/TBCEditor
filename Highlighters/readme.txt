@@ -10,8 +10,7 @@ Haskell
 LaTeX
 Lisp
 Lua
-Makefile
-Objective-C
+Makefil
 OCaml
 Scala
 TCL

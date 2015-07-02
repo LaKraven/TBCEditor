@@ -10,7 +10,7 @@ Haskell
 LaTeX
 Lisp
 Lua
-Makefil
+Makefile
 OCaml
 Scala
 TCL

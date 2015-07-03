@@ -9,7 +9,6 @@ Groovy
 Haskell
 LaTeX
 Lisp
-Lua
 Makefile
 OCaml
 Scala

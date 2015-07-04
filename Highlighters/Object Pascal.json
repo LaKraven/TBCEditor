@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "14.6.2015",
+                "Date": "4.7.2015",
                 "Sample": [
                     "// Hello World in Pascal\r\n",
                     "\r\n",
@@ -525,7 +525,7 @@
             },
             {
                 "OpenToken": "PROGRAM",
-                "CloseToken": "END",
+                "CloseToken": "END.",
                 "Properties": {
                     "OpenTokenBeginningOfLine": true,
                     "SharedClose": true

@@ -630,9 +630,7 @@ procedure TBCEditorLines.PutRange(Index: Integer; ARange: TBCEditorLinesRange);
 begin
   if (Index < 0) or (Index >= FCount) then
     ListIndexOutOfBounds(Index);
-  BeginUpdate;
   FList^[Index].FRange := ARange;
-  EndUpdate;
 end;
 
 procedure TBCEditorLines.SetCapacity(NewCapacity: Integer);

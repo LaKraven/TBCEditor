@@ -20,7 +20,7 @@ type
   published
     property MaxActions: Integer read FMaxActions write SetMaxActions default BCEDITOR_MAX_UNDO_ACTIONS;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property Options: TBCEditorUndoOptions read FOptions write SetOptions default [uoGroupUndo];
+    property Options: TBCEditorUndoOptions read FOptions write SetOptions default [];
   end;
 
 implementation
@@ -30,7 +30,7 @@ begin
   inherited;
 
   FMaxActions := BCEDITOR_MAX_UNDO_ACTIONS;
-  FOptions := [uoGroupUndo];
+  FOptions := [];
 end;
 
 procedure TBCEditorUndo.DoChange;

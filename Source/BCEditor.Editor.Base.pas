@@ -239,13 +239,13 @@ type
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearSearchLines;
-    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
+    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     //procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
-    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
+    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
     procedure CompletionProposalTimerHandler(Sender: TObject);
     procedure ComputeCaret(X, Y: Integer);
     procedure ComputeScroll(X, Y: Integer);
@@ -439,7 +439,7 @@ type
     procedure SetReadOnly(Value: Boolean); virtual;
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
     procedure SetSelectedTextPrimitive(const Value: string); overload;
-    procedure SetSelectedTextPrimitive(PasteMode: TBCEditorSelectionMode; Value: PChar; AddToUndoList: Boolean); overload;
+    procedure SetSelectedTextPrimitive(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean); overload;
     procedure SetWantReturns(Value: Boolean);
     procedure ShowCaret;
     procedure UndoItem;
@@ -468,7 +468,7 @@ type
     function IsWordChar(AChar: Char): Boolean;
     function LineToRow(ALine: Integer): Integer;
     function ReplaceText(const ASearchText: string; const AReplaceText: string): Integer;
-    function SplitTextIntoWords(AStringList: TStrings; CaseSensitive: Boolean): string;
+    function SplitTextIntoWords(AStringList: TStrings; ACaseSensitive: Boolean): string;
     function TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ACollapsedLineNumber: Boolean = True;
       ARealWidth: Boolean = True): TBCEditorDisplayPosition;
     function TranslateKeyCode(ACode: Word; AShift: TShiftState; var AData: pointer): TBCEditorCommand;
@@ -498,7 +498,7 @@ type
     procedure CodeFoldingCollapseAll;
     procedure CodeFoldingCollapseLevel(ALevel: Integer);
     procedure CodeFoldingUncollapseAll;
-    procedure CodeFoldingUncollapseLevel(ALevel: Integer; NeedInvalidate: Boolean = True);
+    procedure CodeFoldingUncollapseLevel(ALevel: Integer; ANeedInvalidate: Boolean = True);
     procedure CommandProcessor(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
     procedure CopyToClipboard;
     procedure CutToClipboard;
@@ -508,13 +508,13 @@ type
     procedure EndUndoBlock;
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible; overload;
-    procedure EnsureCursorPositionVisible(ForceToMiddle: Boolean; EvenIfVisible: Boolean = False); overload;
+    procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean; AEvenIfVisible: Boolean = False); overload;
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer); virtual;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ALine: Integer);
     procedure HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
     procedure InitCodeFolding;
-    procedure InsertBlock(const BlockBeginPosition, BlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AddToUndoList: Boolean);
+    procedure InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
     procedure InvalidateLeftMargin;
     procedure InvalidateLeftMarginLine(ALine: Integer);
     procedure InvalidateLeftMarginLines(AFirstLine, ALastLine: Integer);
@@ -525,7 +525,7 @@ type
     procedure LeftMarginChanged(Sender: TObject);
     procedure LoadFromFile(const AFileName: String);
     procedure LockUndo;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
     procedure PasteFromClipboard;
     procedure DoRedo;
     procedure RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);
@@ -2659,7 +2659,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
+procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
 var
   i: Integer;
   LLineState: TBCEditorLineState;
@@ -2691,7 +2691,7 @@ begin
     SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
     MoveCodeFoldingRangesAfter(AFoldRange, -CollapsedLines.Count + 1);
   end;
-  if AddToUndoList then
+  if AAddToUndoList then
   begin
     AFoldRange.UndoListed := True;
     FUndoList.AddChange(crCollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
@@ -2803,7 +2803,7 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AddToUndoList: Boolean = True);
+procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
 var
   i: Integer;
 begin
@@ -2821,7 +2821,7 @@ begin
     SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
     CollapsedLines.Clear;
   end;
-  if AddToUndoList then
+  if AAddToUndoList then
   begin
     AFoldRange.UndoListed := True;
     FUndoList.AddChange(crUncollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
@@ -8773,14 +8773,14 @@ begin
             FAllCodeFoldingRanges.AllRanges.Insert(LUndoItem.ChangeIndex, LUndoItem.ChangeData);
           end;
         end;  }
-      crWhiteSpaceAdd:
+      {crWhiteSpaceAdd:
         begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
             LUndoItem.ChangeSelectionMode);
           SetCaretAndSelection(LUndoItem.ChangeEndPosition, LUndoItem.ChangeEndPosition, LUndoItem.ChangeEndPosition);
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), True);
           InternalCaretPosition := LUndoItem.ChangeStartPosition;
-        end;
+        end; }
     end;
   finally
     FUndoList.InsideRedo := False;
@@ -9055,8 +9055,7 @@ begin
   SetSelectedTextPrimitive(FSelection.ActiveMode, PChar(Value), True);
 end;
 
-procedure TBCBaseEditor.SetSelectedTextPrimitive(PasteMode: TBCEditorSelectionMode;
-  Value: PChar; AddToUndoList: Boolean);
+procedure TBCBaseEditor.SetSelectedTextPrimitive(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean);
 var
   LBeginTextPosition, LEndTextPosition: TBCEditorTextPosition;
   LTempString: string;
@@ -9178,17 +9177,17 @@ var
         LWhite := '';
 
       { insert the first line of Value into current line }
-      LStart := PChar(Value);
+      LStart := PChar(AValue);
       P := GetEndOfLine(LStart);
       if P^ <> BCEDITOR_NONE_CHAR then
       begin
-        LStr := LLeftSide + Copy(Value, 1, P - LStart);
+        LStr := LLeftSide + Copy(AValue, 1, P - LStart);
         FLines[FCaretY - 1] := LStr;
         FLines.InsertLines(FCaretY, CountLines(P));
       end
       else
       begin
-        LStr := LLeftSide + Value + LRightSide;
+        LStr := LLeftSide + AValue + LRightSide;
         FLines[FCaretY - 1] := LStr;
       end;
 
@@ -9250,7 +9249,7 @@ var
         LDisplayInsertPosition := Column;
       end;
 
-      LStart := PChar(Value);
+      LStart := PChar(AValue);
       P := nil;
       repeat
         with DisplayToTextPosition(GetDisplayPosition(LDisplayInsertPosition, LFirstLine)) do
@@ -9290,7 +9289,7 @@ var
             FLines.Add('');
 
             { Reflect our changes in undo list }
-            if AddToUndoList then
+            if AAddToUndoList then
             begin
               with LLineBreakPosition do
               begin
@@ -9307,15 +9306,15 @@ var
             if (LLength < LInsertPosition) and (P - LStart > 0) then
             begin
               LTempString := LTempString + StringOfChar(BCEDITOR_SPACE_CHAR, LInsertPosition - LLength - 1) + LStr;
-              FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LLength + 1, LCurrentLine),
-                GetTextPosition(LInsertPosition, LCurrentLine), '', smNormal);
+              //FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LLength + 1, LCurrentLine),
+              //  GetTextPosition(LInsertPosition, LCurrentLine), '', smNormal);
             end
             else
               Insert(LStr, LTempString, LInsertPosition);
           end;
           FLines[LCurrentLine - 1] := LTempString;
 
-          if AddToUndoList then
+          if AAddToUndoList then
             FUndoList.AddChange(crPaste, GetTextPosition(CaretX, CaretY), GetTextPosition(CaretX + (P - LStart), CaretY),
               '', FSelection.ActiveMode);
         end;
@@ -9354,7 +9353,7 @@ var
 
       { Insert strings }
       FCaretX := 1;
-      LStart := PChar(Value);
+      LStart := PChar(AValue);
       repeat
         P := GetEndOfLine(LStart);
         if P <> LStart then
@@ -9395,12 +9394,12 @@ var
     LStartColumn: Integer;
     LInsertedLines: Integer;
   begin
-    if Length(Value) = 0 then
+    if Length(AValue) = 0 then
       Exit;
 
     LStartLine := CaretY;
     LStartColumn := CaretX;
-    case PasteMode of
+    case APasteMode of
       smNormal:
         LInsertedLines := InsertNormal;
       smColumn:
@@ -9416,7 +9415,7 @@ var
       Update marks }
     if LInsertedLines > 0 then
     begin
-      if ((PasteMode = smNormal) and (LStartColumn > 1)) or ((PasteMode = smLine) and (LStartColumn > 1)) then
+      if ((APasteMode = smNormal) and (LStartColumn > 1)) or ((APasteMode = smLine) and (LStartColumn > 1)) then
         Inc(LStartLine);
 
       { Trim trailing spaces }
@@ -9446,7 +9445,7 @@ begin
       SelectionBeginPosition := LBeginTextPosition;
       SelectionEndPosition := LBeginTextPosition;
     end;
-    if Assigned(Value) and (Value[0] <> BCEDITOR_NONE_CHAR) then
+    if Assigned(AValue) and (AValue[0] <> BCEDITOR_NONE_CHAR) then
       InsertText;
     if CaretY < 1 then
       InternalCaretY := 1;
@@ -9577,7 +9576,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition,
             LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode);
         end;
-      crWhiteSpaceAdd:
+      {crWhiteSpaceAdd:
         begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;
@@ -9585,7 +9584,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, LTempText,
             LUndoItem.ChangeSelectionMode);
           InternalCaretPosition := LUndoItem.ChangeStartPosition;
-        end;
+        end;}
       crCollapseFold:
         begin
           LCodeFoldingRange := nil;
@@ -10089,7 +10088,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.SplitTextIntoWords(AStringList: TStrings; CaseSensitive: Boolean): string;
+function TBCBaseEditor.SplitTextIntoWords(AStringList: TStrings; ACaseSensitive: Boolean): string;
 var
   i, Line: Integer;
   LWord, LWordList: string;
@@ -10499,7 +10498,7 @@ begin
   UpdateScrollbars;
 end;
 
-procedure TBCBaseEditor.CodeFoldingUncollapseLevel(ALevel: Integer; NeedInvalidate: Boolean);
+procedure TBCBaseEditor.CodeFoldingUncollapseLevel(ALevel: Integer; ANeedInvalidate: Boolean);
 var
   i: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -10512,7 +10511,7 @@ begin
       not LCodeFoldingRange.ParentCollapsed then
       CodeFoldingUncollapse(LCodeFoldingRange);
   end;
-  if NeedInvalidate then
+  if ANeedInvalidate then
     InvalidateLeftMargin;
 end;
 
@@ -10748,7 +10747,7 @@ begin
   EnsureCursorPositionVisible(False);
 end;
 
-procedure TBCBaseEditor.EnsureCursorPositionVisible(ForceToMiddle: Boolean; EvenIfVisible: Boolean = False);
+procedure TBCBaseEditor.EnsureCursorPositionVisible(AForceToMiddle: Boolean; AEvenIfVisible: Boolean = False);
 var
   LMiddle: Integer;
   LVisibleX: Integer;
@@ -10769,7 +10768,7 @@ begin
       LeftChar := LeftChar;
 
     LCaretRow := DisplayY;
-    if ForceToMiddle then
+    if AForceToMiddle then
     begin
       if LCaretRow < TopLine - 1 then
       begin
@@ -10787,7 +10786,7 @@ begin
       end
       { Forces to middle even if visible in viewport }
       else
-      if EvenIfVisible then
+      if AEvenIfVisible then
       begin
         LMiddle := FVisibleLines div 2;
         TopLine := LCaretRow - LMiddle + 1;
@@ -11155,8 +11154,8 @@ begin
                       if LVisualSpaceCount2 - LLength > 0 then
                         LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
                       Insert(LSpaceBuffer, LLineText, i + 1);
-                      FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(i + 1, FCaretY),
-                        GetTextPosition(i + 1 + Length(LSpaceBuffer), FCaretY), '', smNormal);
+                      //FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(i + 1, FCaretY),
+                      //  GetTextPosition(i + 1 + Length(LSpaceBuffer), FCaretY), '', smNormal);
                     finally
                       FUndoList.EndBlock;
                     end;
@@ -11248,11 +11247,11 @@ begin
                 end;
 
                 if LSpaceCount1 > 0 then
-                begin
+                //begin
                   FUndoList.BeginBlock;
-                  FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LLength + 1, FCaretY),
-                    GetTextPosition(FCaretX, FCaretY), '', smNormal);
-                end;
+                  //FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LLength + 1, FCaretY),
+                  //  GetTextPosition(FCaretX, FCaretY), '', smNormal);
+                //end;
                 LHelper := sLineBreak;
                 FUndoList.AddChange(crSilentDeleteAfterCursor, CaretPosition, LCaretPosition, LHelper, smNormal);
                 if LSpaceCount1 > 0 then
@@ -11708,7 +11707,7 @@ begin
             LLength := Length(LLineText);
 
             LSpaceCount1 := 0;
-            LSpaceCount2 := 0;
+//            LSpaceCount2 := 0;
             if LLength < FCaretX - 1 then
             begin
               if toTabsToSpaces in FTabs.Options then
@@ -11720,7 +11719,7 @@ begin
               else
                 LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FCaretX - LLength - Ord(FInsertMode));
               LSpaceCount1 := Length(LSpaceBuffer);
-              LSpaceCount2 := GetLeadingExpandedLength(LSpaceBuffer, FTabs.Width);
+//              LSpaceCount2 := GetLeadingExpandedLength(LSpaceBuffer, FTabs.Width);
             end;
 
             LBlockStartPosition := CaretPosition;
@@ -11741,8 +11740,8 @@ begin
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LBlockStartPosition.Char - LSpaceCount2, FCaretY),
-                    GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY), '', smNormal);
+                  //FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LBlockStartPosition.Char - LSpaceCount2, FCaretY),
+                  //  GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY), '', smNormal);
 
                   FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY),
                     GetTextPosition(LLength + LSpaceCount1 + 2, FCaretY), '', smNormal);
@@ -11782,8 +11781,8 @@ begin
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LBlockStartPosition.Char - LSpaceCount2 + 1, FCaretY),
-                    GetTextPosition(LLength + LSpaceCount1, FCaretY), '', smNormal);
+                  //FUndoList.AddChange(crWhiteSpaceAdd, GetTextPosition(LBlockStartPosition.Char - LSpaceCount2 + 1, FCaretY),
+                  //  GetTextPosition(LLength + LSpaceCount1, FCaretY), '', smNormal);
 
                   FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1, FCaretY),
                     GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY), '', smNormal);
@@ -12048,11 +12047,11 @@ begin
   CodeFoldingPrepareRangeForLine;
 end;
 
-procedure TBCBaseEditor.InsertBlock(const BlockBeginPosition, BlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AddToUndoList: Boolean);
+procedure TBCBaseEditor.InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
 begin
-  SetCaretAndSelection(BlockBeginPosition, BlockBeginPosition, BlockEndPosition);
+  SetCaretAndSelection(ABlockBeginPosition, ABlockBeginPosition, ABlockEndPosition);
   FSelection.ActiveMode := smColumn;
-  SetSelectedTextPrimitive(smColumn, AChangeStr, AddToUndoList);
+  SetSelectedTextPrimitive(smColumn, AChangeStr, AAddToUndoList);
 end;
 
 procedure TBCBaseEditor.InvalidateLeftMargin;
@@ -12258,11 +12257,11 @@ begin
   FRedoList.Lock;
 end;
 
-procedure TBCBaseEditor.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TBCBaseEditor.Notification(AComponent: TComponent; AOperation: TOperation);
 begin
-  inherited Notification(AComponent, Operation);
+  inherited Notification(AComponent, AOperation);
 
-  if Operation = opRemove then
+  if AOperation = opRemove then
   begin
     if AComponent = FChainedEditor then
       RemoveChainedEditor;

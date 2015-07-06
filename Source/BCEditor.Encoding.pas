@@ -16,6 +16,7 @@ type
   class var
     FUTF8WithoutBOM: TEncoding;
     class function GetUTF8WithoutBOM: TEncoding; static;
+    class destructor Destroy;
   public
     class property UTF8WithoutBOM: TEncoding read GetUTF8WithoutBOM;
   end;
@@ -44,6 +45,11 @@ begin
   Result := FUTF8WithoutBOM;
 end;
 
+class destructor TEncoding.Destroy;
+begin
+  FUTF8WithoutBOM.Free;
+  inherited;
+end;
 
 end.
 

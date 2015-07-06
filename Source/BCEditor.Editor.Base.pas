@@ -1327,7 +1327,7 @@ begin
     Highlighter.SetCurrentLine(LLine);
     LPositionX := ATextPosition.Char;
     if (LPositionX > 0) and (LPositionX <= Length(LLine)) then
-    while not Highlighter.GetEol do
+    while not Highlighter.GetEndOfLine do
     begin
       AStart := Highlighter.GetTokenPosition + 1;
       AToken := Highlighter.GetToken;
@@ -1512,10 +1512,10 @@ begin
       SetCurrentRange(FLines.Ranges[APoint.Line]);
     SetCurrentLine(FLines[APoint.Line]);
 
-    while not GetEol and (APoint.Char >= GetTokenPosition + Length(GetToken)) do
+    while not GetEndOfLine and (APoint.Char >= GetTokenPosition + Length(GetToken)) do
       Next;
 
-    if GetEol then
+    if GetEndOfLine then
       Exit;
 
     if FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT then
@@ -1583,7 +1583,7 @@ begin
       Next;
       while True do
       begin
-        while not GetEol do
+        while not GetEndOfLine do
           if CheckToken then
             Exit;
         Inc(APoint.Line);
@@ -1603,7 +1603,7 @@ begin
       else
         SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
       SetCurrentLine(FLines[APoint.Line]);
-      while not GetEol and (GetTokenPosition < AMatch.CloseTokenPos.Char -1) do
+      while not GetEndOfLine and (GetTokenPosition < AMatch.CloseTokenPos.Char -1) do
         CheckTokenBack;
       if LMatchStackID > -1 then
       begin
@@ -1622,7 +1622,7 @@ begin
           SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
         SetCurrentLine(FLines[APoint.Line]);
         LMatchStackID := -1;
-        while not GetEol do
+        while not GetEndOfLine do
           CheckTokenBack;
         if LDeltaLevel <= LMatchStackID then
         begin
@@ -2365,7 +2365,7 @@ begin
 
   repeat
     FHighlighter.SetCurrentLine(FLines[Result]);
-    FHighlighter.NextToEol;
+    FHighlighter.NextToEndOfLine;
     LCurrentRange := FHighlighter.GetCurrentRange;
     if FLines.Ranges[Result] = LCurrentRange then
       Exit;
@@ -6676,7 +6676,7 @@ begin
       if not (soPastEndOfLine in FScroll.Options) then
         CaretX := CaretX;
     { This is necessary because user could click on trimmed area and caret would appear behind
-      line length when not in eoScrollPastEol mode }
+      line length when not in eoScrollPastEndOfLine mode }
   end;
 
   if X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth then
@@ -8320,7 +8320,7 @@ var
         FHighlighter.SetCurrentLine(LCurrentLineText);
         LTokenHelper.Length := 0;
 
-        while not FHighlighter.GetEol do
+        while not FHighlighter.GetEndOfLine do
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
@@ -8562,11 +8562,11 @@ var
   LLength: Integer;
   LTempString: string;
   LTextPosition: TBCEditorTextPosition;
-  LChangeScrollPastEol: Boolean;
+  LChangeScrollPastEndOfLine: Boolean;
   LBeginX: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  LChangeScrollPastEol := not (soPastEndOfLine in FScroll.Options);
+  LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
   LUndoItem := FRedoList.PopItem;
   if Assigned(LUndoItem) then
   try
@@ -8693,7 +8693,7 @@ begin
     end;
   finally
     FUndoList.InsideRedo := False;
-    if LChangeScrollPastEol then
+    if LChangeScrollPastEndOfLine then
       FScroll.Options := FScroll.Options - [soPastEndOfLine];
     LUndoItem.Free;
     DecPaintLock;
@@ -9343,7 +9343,7 @@ begin
   try
     LBeginTextPosition := SelectionBeginPosition;
     LEndTextPosition := SelectionEndPosition;
-    if SelectionAvailable then
+    if (LBeginTextPosition.Char <> LEndTextPosition.Char) or (LBeginTextPosition.Line <> LEndTextPosition.Line) then
     begin
       DeleteSelection;
       InternalCaretPosition := LBeginTextPosition;
@@ -9356,6 +9356,11 @@ begin
       InternalCaretY := 1;
   finally
     FLines.EndUpdate;
+    if (LBeginTextPosition.Char <> LEndTextPosition.Char) or (LBeginTextPosition.Line <> LEndTextPosition.Line) then
+    begin
+      SelectionBeginPosition := LBeginTextPosition;
+      SelectionEndPosition := CaretPosition;
+    end;
     DecPaintLock;
   end;
 end;
@@ -10511,7 +10516,7 @@ var
   LDoDrop, LDropAfter, LDropMove: Boolean;
   LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
   LDragDropText: string;
-  LChangeScrollPastEol: Boolean;
+  LChangeScrollPastEndOfLine: Boolean;
 begin
   if not ReadOnly and (Source is TBCBaseEditor) and TBCBaseEditor(Source).SelectionAvailable then
   begin
@@ -10559,9 +10564,9 @@ begin
             end;
           end;
 
-          LChangeScrollPastEol := not(soPastEndOfLine in FScroll.Options);
+          LChangeScrollPastEndOfLine := not(soPastEndOfLine in FScroll.Options);
           try
-            if LChangeScrollPastEol then
+            if LChangeScrollPastEndOfLine then
               FScroll.Options := FScroll.Options + [soPastEndOfLine];
             InternalCaretPosition := LNewCaretPosition;
             SelectionBeginPosition := LNewCaretPosition;
@@ -10574,7 +10579,7 @@ begin
               UnlockUndo;
             end;
           finally
-            if LChangeScrollPastEol then
+            if LChangeScrollPastEndOfLine then
               FScroll.Options := FScroll.Options - [soPastEndOfLine];
           end;
           if Source = Self then
@@ -10902,7 +10907,7 @@ begin
             LTabBuffer := FLines.Strings[FCaretY - 1];
             LCaretPosition := CaretPosition;
             LIsJustIndented := False;
-            { Behind EOL? Simply move the cursor }
+            { Behind EndOfLine? Simply move the cursor }
             if CaretX > LLength + 1 then
             begin
               LIsJustIndented := True;

@@ -11,7 +11,6 @@ type
     FChangeCaret: Integer;
     FChangeData: Pointer;
     FChangeEndPosition: TBCEditorTextPosition;
-    //FChangeIndex: Integer;
     FChangeNumber: Integer;
     FChangeReason: TBCEditorChangeReason;
     FChangeSelectionMode: TBCEditorSelectionMode;
@@ -23,7 +22,6 @@ type
     property ChangeCaret: Integer read FChangeCaret write FChangeCaret;
     property ChangeData: Pointer read FChangeData write FChangeData;
     property ChangeEndPosition: TBCEditorTextPosition read FChangeEndPosition write FChangeEndPosition;
-    //property ChangeIndex: Integer read FChangeIndex write FChangeIndex;
     property ChangeNumber: Integer read FChangeNumber write FChangeNumber;
     property ChangeReason: TBCEditorChangeReason read FChangeReason write FChangeReason;
     property ChangeSelectionMode: TBCEditorSelectionMode read FChangeSelectionMode write FChangeSelectionMode;

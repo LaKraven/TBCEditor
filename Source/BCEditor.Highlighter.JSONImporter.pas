@@ -426,7 +426,7 @@ begin
         PropertiesObject := RangeObject['Properties'].ObjectValue;
         if Assigned(PropertiesObject) then
         begin
-          ARange.CloseOnEol := PropertiesObject.B['CloseOnEol'];
+          ARange.CloseOnEndOfLine := PropertiesObject.B['CloseOnEndOfLine'];
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
           ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];

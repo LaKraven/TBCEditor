@@ -27,7 +27,7 @@ type
     FMainRules: TBCEditorRange;
     FName: string;
     FPrepared: Boolean;
-    FPreviousEol: Boolean;
+    FPreviousEndOfLine: Boolean;
     FRunPosition: LongInt;
     FTemporaryCurrentTokens: TList;
     FTokenPosition: Integer;
@@ -48,7 +48,7 @@ type
 
     function GetCurrentRange: Pointer;
     function GetCurrentRangeAttribute: TBCEditorHighlighterAttribute;
-    function GetEol: Boolean;
+    function GetEndOfLine: Boolean;
     function GetToken: string;
     function GetTokenAttribute: TBCEditorHighlighterAttribute;
     function GetTokenKind: Integer;
@@ -58,7 +58,7 @@ type
     procedure Clear;
     procedure LoadFromFile(AFileName: string);
     procedure Next;
-    procedure NextToEol;
+    procedure NextToEndOfLine;
     procedure ResetCurrentRange;
     procedure SetCurrentLine(NewValue: string);
     procedure SetCurrentRange(Value: Pointer);
@@ -124,7 +124,7 @@ begin
 
   FEndOfLine := False;
   FBeginningOfLine := True;
-  FPreviousEol := False;
+  FPreviousEndOfLine := False;
   FCurrentRange := MainRules;
 
   FColors := TBCEditorHighlighterColors.Create(Self);
@@ -182,7 +182,7 @@ begin
   FTokenPosition := 0;
   FEndOfLine := False;
   FBeginningOfLine := True;
-  FPreviousEol := False;
+  FPreviousEndOfLine := False;
   FCurrentToken := nil;
   Next;
 end;
@@ -216,10 +216,10 @@ begin
     FTemporaryCurrentTokens.Delete(0);
   end;
 
-  if FPreviousEol then
+  if FPreviousEndOfLine then
   begin
     if Assigned(FCurrentRange) then
-      if FCurrentRange.CloseOnEol or FCurrentRange.CloseOnTerm then
+      if FCurrentRange.CloseOnEndOfLine or FCurrentRange.CloseOnTerm then
         FCurrentRange := FCurrentRange.Parent;
     FEndOfLine := True;
     Exit;
@@ -286,7 +286,7 @@ begin
         FBeginningOfLine := False;
 
   if FCurrentLine[FRunPosition] = BCEDITOR_NONE_CHAR then
-    FPreviousEol := True;
+    FPreviousEndOfLine := True;
 end;
 
 function TBCEditorHighlighter.GetCurrentRangeAttribute: TBCEditorHighlighterAttribute;
@@ -296,7 +296,7 @@ begin
     Result := FCurrentRange.Attribute;
 end;
 
-function TBCEditorHighlighter.GetEol: Boolean;
+function TBCEditorHighlighter.GetEndOfLine: Boolean;
 begin
   Result := FEndOfLine;
 end;
@@ -501,9 +501,9 @@ begin
   FWordBreakChars := AChars;
 end;
 
-procedure TBCEditorHighlighter.NextToEol;
+procedure TBCEditorHighlighter.NextToEndOfLine;
 begin
-  while not GetEol do
+  while not GetEndOfLine do
     Next;
 end;
 

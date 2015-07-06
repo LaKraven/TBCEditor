@@ -101,7 +101,7 @@ type
     FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
-    FCloseOnEol: Boolean;
+    FCloseOnEndOfLine: Boolean;
     FCloseOnTerm: Boolean;
     FSkipWhitespace: Boolean;
     FCloseParent: Boolean;
@@ -168,7 +168,7 @@ type
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TBCEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
-    property CloseOnEol: Boolean read FCloseOnEol write FCloseOnEol;
+    property CloseOnEndOfLine: Boolean read FCloseOnEndOfLine write FCloseOnEndOfLine;
     property CloseOnTerm: Boolean read FCloseOnTerm write FCloseOnTerm;
     property SkipWhitespace: Boolean read FSkipWhitespace write FSkipWhitespace;
     property CloseParent: Boolean read FCloseParent write FCloseParent;
@@ -987,7 +987,7 @@ begin
   CloseToken.Clear;
   AddTokenRange('', '');
   CloseOnTerm := False;
-  CloseOnEol := False;
+  CloseOnEndOfLine := False;
   CloseParent := False;
   Reset;
   for i := 0 to FRanges.Count - 1 do

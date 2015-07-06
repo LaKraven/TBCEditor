@@ -290,7 +290,7 @@ begin
     while i < FLines.Count do
     begin
       FHighlighter.SetCurrentLine(FLines[i - 1]);
-      FHighlighter.NextToEol;
+      FHighlighter.NextToEndOfLine;
       FLines.Objects[i] := FHighlighter.GetCurrentRange;
       Inc(i);
     end;
@@ -547,7 +547,7 @@ begin
     Token := '';
     TokenStart := 0;
     LCount := 0;
-    while not FHighlighter.GetEol do
+    while not FHighlighter.GetEndOfLine do
     begin
       Token := FHighlighter.GetToken;
       TokenPos := FHighlighter.GetTokenPosition;

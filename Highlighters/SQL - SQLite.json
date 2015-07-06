@@ -44,7 +44,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "--"
@@ -57,7 +57,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -71,7 +71,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "\"",

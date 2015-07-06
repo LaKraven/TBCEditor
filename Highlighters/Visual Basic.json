@@ -37,7 +37,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "'"
@@ -50,7 +50,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -64,7 +64,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "#"
@@ -79,7 +79,7 @@
                         "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
                         "Properties": {
                             "CloseOnTerm": true,
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "0"

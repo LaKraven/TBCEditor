@@ -64,7 +64,7 @@
                         },
                         "Properties": {
                             "CloseOnTerm": true,
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "#",

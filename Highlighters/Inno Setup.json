@@ -31,7 +31,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true,
+                            "CloseOnEndOfLine": true,
                             "OpenBeginningOfLine": true
                         },
                         "TokenRange": {
@@ -45,7 +45,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "[",
@@ -59,7 +59,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "'",
@@ -73,7 +73,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true
+                            "CloseOnEndOfLine": true
                         },
                         "TokenRange": {
                             "Open": "\"",
@@ -87,7 +87,7 @@
                             "ParentBackground": true
                         },
                         "Properties": {
-                            "CloseOnEol": true,
+                            "CloseOnEndOfLine": true,
                             "CloseOnTerm": true
                         },
                         "TokenRange": {

@@ -10178,7 +10178,9 @@ begin
 
     if X > 1 then
       if not IsWordBreakChar(LLine[X - 1]) then
-        X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1;
+        X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1
+      else
+        X := X - 1;
   end;
   Result.Char := X;
   Result.Line := Y;

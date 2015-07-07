@@ -208,7 +208,7 @@ var
 begin
   if Assigned(AInfoObject) then
   begin
-    LHighlighterInfo := TBCBaseEditor(FHighlighter.Editor).Highlighter.Info;
+    LHighlighterInfo := FHighlighter.Info;
     { General }
     GMultiHighlighter := AInfoObject['General'].B['MultiHighlighter'];
     LHighlighterInfo.General.Version := AInfoObject['General']['Version'].Value;
@@ -229,7 +229,7 @@ var
 begin
   if Assigned(AInfoObject) then
   begin
-    LHighlighterInfo := TBCBaseEditor(FHighlighter.Editor).Highlighter.Colors.Info;
+    LHighlighterInfo := FHighlighter.Colors.Info;
     { General }
     LHighlighterInfo.General.Version := AInfoObject['General']['Version'].Value;
     LHighlighterInfo.General.Date := AInfoObject['General']['Date'].Value;

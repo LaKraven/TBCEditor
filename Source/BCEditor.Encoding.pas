@@ -44,4 +44,10 @@ begin
   Result := FUTF8WithoutBOM;
 end;
 
+initialization
+
+finalization
+
+  TEncoding.UTF8WithoutBOM.Free;
+
 end.

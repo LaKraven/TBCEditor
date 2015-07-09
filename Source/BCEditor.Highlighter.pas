@@ -249,7 +249,7 @@ begin
 
   if Assigned(FCurrentRange) then
   begin
-    LParser := FCurrentRange.SymbolList[FCurrentRange.CaseFunct(FCurrentLine[FRunPosition])];
+    LParser := FCurrentRange.SymbolList[AnsiChar(FCurrentRange.CaseFunct(FCurrentLine[FRunPosition]))];
     if not Assigned(LParser) then
       Inc(FRunPosition)
     else
@@ -401,7 +401,7 @@ procedure TBCEditorHighlighter.Prepare;
 begin
   FAttributes.Clear;
   AddAllAttributes(MainRules);
-  FMainRules.Prepare(FMainRules);
+ // FMainRules.Prepare(FMainRules);
 end;
 
 procedure TBCEditorHighlighter.UpdateAttributes(ARange: TBCEditorRange; AParentRange: TBCEditorRange);

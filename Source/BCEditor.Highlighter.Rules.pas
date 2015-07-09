@@ -89,8 +89,8 @@ type
     property CharSet: TBCEditorCharSet read FCharSet write FCharSet;
   end;
 
-  TBCEditorAbstractParserArray = array [Char] of TBCEditorAbstractParser;
-  TBCEditorBooleanArray = array [Char] of Boolean;
+  TBCEditorAbstractParserArray = array [AnsiChar] of TBCEditorAbstractParser;
+  //TBCEditorBooleanArray = array [AnsiChar] of Boolean;
   TBCEditorCaseFunction = function(AChar: Char): Char;
   TBCEditorStringCaseFunction = function(const AString: string): string;
 
@@ -448,9 +448,7 @@ begin
   FAttribute.Free;
   FAttribute := nil;
   FKeyList.Free;
-  FKeyList := nil;
   FSets.Free;
-  FSets := nil;
   FTokens.Free;
   FTokens := nil;
   FRanges.Free;
@@ -565,7 +563,7 @@ begin
   end;
 end;
 
-procedure QuickSortTokenList(const List: TList; const LowerPosition, UpperPosition: Integer);
+procedure QuickSortTokenList(List: TList; const LowerPosition, UpperPosition: Integer);
 var
   i, MiddlePosition: Integer;
   PivotValue: string;
@@ -626,7 +624,8 @@ var
   Range: TBCEditorRange;
   KeyList: TBCEditorKeyList;
   LToken: TBCEditorToken;
-  c: Char;
+  LAnsiChar: AnsiChar;
+  LChar: Char;
 begin
   Reset;
   FDefaultToken := TBCEditorToken.Create(Attribute);
@@ -640,7 +639,7 @@ begin
 
   FDelimiters := FDelimiters + BCEDITOR_ABSOLUTE_DELIMITERS;
 
-  if not Assigned(AParent) then
+  {if not Assigned(AParent) then
     if Assigned(Parent) then
     for j := 0 to OpenToken.SymbolCount - 1 do
     begin
@@ -652,8 +651,9 @@ begin
       Token.Free;
     end
     else
-      FParent := AParent;
+      FParent := AParent;  }
 
+  if Assigned(FRanges) then
   for i := 0 to FRanges.Count - 1 do
   begin
     Range := TBCEditorRange(FRanges[i]);
@@ -672,6 +672,7 @@ begin
     Range.Prepare(Self);
   end;
 
+  if Assigned(FKeyList) then
   for i := 0 to FKeyList.Count - 1 do
   begin
     KeyList := TBCEditorKeyList(FKeyList[i]);
@@ -686,6 +687,8 @@ begin
   end;
 
   QuickSortTokenList(FTokens, 0, FTokens.Count - 1);
+
+  if Assigned(FTokens) then
   for i := 0 to FTokens.Count - 1 do
   begin
     Token := TBCEditorToken(FTokens[i]);
@@ -703,42 +706,46 @@ begin
     else
       BreakType := btTerm;
 
-    c := CaseFunct(FirstChar);
-
-    if not Assigned(SymbolList[c]) then
+    LChar := CaseFunct(FirstChar);
+    if Ord(LChar) < 256 then
     begin
-      if LLength = 1 then
-        FSymbolList[c] := TBCEditorParser.Create(FirstChar, Token, BreakType)
-      else
-        FSymbolList[c] := TBCEditorParser.Create(FirstChar, FDefaultToken, BreakType);
+      LAnsiChar := AnsiChar(LChar);
+      if not Assigned(SymbolList[LAnsiChar]) then
+      begin
+        if LLength = 1 then
+          FSymbolList[LAnsiChar] := TBCEditorParser.Create(FirstChar, Token, BreakType)
+        else
+          FSymbolList[LAnsiChar] := TBCEditorParser.Create(FirstChar, FDefaultToken, BreakType);
+      end;
+      if LLength <> 1 then
+        TBCEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(Symbol, 2, LLength - 1)), Token, BreakType);
     end;
-    if LLength <> 1 then
-      TBCEditorParser(SymbolList[c]).AddTokenNode(StringCaseFunct(Copy(Symbol, 2, LLength - 1)), Token, BreakType);
   end;
 
-  if FSets.Count > 0 then
+  if Assigned(FSets) then
+    if FSets.Count > 0 then
     for i := 0 to 255 do
     begin
-      c := Char(i);
+      LAnsiChar := AnsiChar(CaseFunct(Char(i)));
       for j := 0 to FSets.Count - 1 do
       begin
-        if CharInSet(c, TBCEditorSet(FSets[j]).CharSet) then
-          if not Assigned(SymbolList[CaseFunct(c)]) then
-            FSymbolList[CaseFunct(c)] := TBCEditorParser.Create(TBCEditorSet(FSets[j]))
+        if CharInSet(LAnsiChar, TBCEditorSet(FSets[j]).CharSet) then
+          if not Assigned(SymbolList[LAnsiChar]) then
+            FSymbolList[LAnsiChar] := TBCEditorParser.Create(TBCEditorSet(FSets[j]))
           else
-            TBCEditorParser(SymbolList[CaseFunct(c)]).AddSet(TBCEditorSet(FSets[j]));
+            TBCEditorParser(SymbolList[LAnsiChar]).AddSet(TBCEditorSet(FSets[j]));
       end;
     end;
 
   for i := 0 to 255 do
   begin
-    c := Char(i);
-    if not Assigned(SymbolList[c]) then
+    LAnsiChar := AnsiChar(i);
+    if not Assigned(SymbolList[LAnsiChar]) then
     begin
-      if CharInSet(c, FDelimiters) then
-        FSymbolList[c] := FDefaultTermSymbol
+      if CharInSet(LAnsiChar, FDelimiters) then
+        FSymbolList[LAnsiChar] := FDefaultTermSymbol
       else
-        FSymbolList[c] := FDefaultSymbols;
+        FSymbolList[LAnsiChar] := FDefaultSymbols;
     end;
   end;
 
@@ -748,20 +755,20 @@ end;
 procedure TBCEditorRange.Reset;
 var
   i: Integer;
-  c: Char;
+  LAnsiChar: AnsiChar;
 begin
   if not FPrepared then
     Exit;
   for i := 0 to 255 do
   begin
-    c := Char(i);
-    if Assigned(SymbolList[c]) and (SymbolList[c] <> FDefaultTermSymbol) and (SymbolList[c] <> FDefaultSymbols) then
+    LAnsiChar := AnsiChar(i);
+    if Assigned(SymbolList[LAnsiChar]) and (SymbolList[LAnsiChar] <> FDefaultTermSymbol) and (SymbolList[LAnsiChar] <> FDefaultSymbols) then
     begin
-      FSymbolList[c].Free;
-      FSymbolList[c] := nil;
+      FSymbolList[LAnsiChar].Free;
+      FSymbolList[LAnsiChar] := nil;
     end
     else
-      FSymbolList[c] := nil;
+      FSymbolList[LAnsiChar] := nil;
   end;
   FDefaultToken.Free;
   FDefaultToken := nil;
@@ -769,6 +776,7 @@ begin
   FDefaultTermSymbol := nil;
   FDefaultSymbols.Free;
   FDefaultSymbols := nil;
+  if Assigned(FRanges) then
   for i := 0 to FRanges.Count - 1 do
     TBCEditorRange(FRanges[i]).Reset;
   ClearList(FTokens);
@@ -786,6 +794,7 @@ begin
   CloseOnEndOfLine := False;
   CloseParent := False;
   Reset;
+  if Assigned(FRanges) then
   for i := 0 to FRanges.Count - 1 do
     TBCEditorRange(FRanges[i]).Clear;
   ClearList(FRanges);

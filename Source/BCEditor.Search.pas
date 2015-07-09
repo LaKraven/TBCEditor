@@ -34,7 +34,7 @@ type
     FPatternLength, FPatternLengthSuccessor: Integer;
     FResults: TList;
     FRun: PChar;
-    FShift: array [Char] of Integer;
+    FShift: array [AnsiChar] of Integer;
     FShiftInitialized: Boolean;
     FTextLength: Integer;
     FTextToSearch: string;
@@ -113,7 +113,7 @@ end;
 
 procedure TBCEditorNormalSearch.InitShiftTable;
 var
-  LChar: Char;
+  LAnsiChar: AnsiChar;
   i: Integer;
 begin
   FPatternLength := Length(FPattern);
@@ -121,10 +121,10 @@ begin
     raise Exception.Create('Pattern is empty');
   FPatternLengthSuccessor := FPatternLength + 1;
   FLookAt := 1;
-  for LChar := low(Char) to high(Char) do
-    FShift[LChar] := FPatternLengthSuccessor;
+  for LAnsiChar := Low(AnsiChar) to High(AnsiChar) do
+    FShift[LAnsiChar] := FPatternLengthSuccessor;
   for i := 1 to FPatternLength do
-    FShift[FPattern[i]] := FPatternLengthSuccessor - i;
+    FShift[AnsiChar(FPattern[i])] := FPatternLengthSuccessor - i;
   while FLookAt < FPatternLength do
   begin
     if FPattern[FPatternLength] = FPattern[FPatternLength - FLookAt] then
@@ -165,7 +165,7 @@ begin
   while FRun < FTheEnd do
   begin
     if FPattern[FPatternLength] <> FRun^ then
-      Inc(FRun, FShift[(FRun + 1)^])
+      Inc(FRun, FShift[AnsiChar((FRun + 1)^)])
     else
     begin
       J := FRun - FPatternLength + 1;
@@ -187,7 +187,7 @@ begin
       Inc(FRun, FLookAt);
       if FRun >= FTheEnd then
         break;
-      Inc(FRun, FShift[FRun^] - 1);
+      Inc(FRun, FShift[AnsiChar(FRun^)] - 1);
     end;
   end;
 end;

@@ -3,7 +3,7 @@ unit BCEditor.Editor.WordWrap;
 interface
 
 uses
-  System.Classes, BCEditor.Editor.Glyph, Vcl.Graphics, BCEditor.Editor.WordWrap.Colors, BCEditor.Consts;
+  System.Classes, BCEditor.Editor.Glyph, Vcl.Graphics, BCEditor.Editor.WordWrap.Colors;
 
 type
   TBCEditorWordWrapStyle = (wwsClientWidth, wwsRightMargin, wwsSpecified);

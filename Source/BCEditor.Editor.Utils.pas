@@ -3,7 +3,7 @@ unit BCEditor.Editor.Utils;
 interface
 
 uses
-  System.Classes, BCEditor.Types, System.UITypes;
+  System.Classes, BCEditor.Types;
 
 function AreCaretsEqual(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
 function GetTextPosition(AChar, ALine: Integer): TBCEditorTextPosition;

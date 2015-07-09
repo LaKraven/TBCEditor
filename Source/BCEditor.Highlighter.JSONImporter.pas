@@ -39,8 +39,8 @@ type
 implementation
 
 uses
-  System.SysUtils, Vcl.Graphics, Vcl.Forms, BCEditor.Consts, BCEditor.Utils, BCEditor.Types, Vcl.Dialogs,
-  BCEditor.Highlighter.Token, BCEditor.Language,
+  System.SysUtils, Vcl.Graphics, Vcl.Forms, BCEditor.Consts, BCEditor.Types, Vcl.Dialogs,
+  BCEditor.Highlighter.Token,
    BCEditor.Editor.CodeFolding.Types;
 
 var

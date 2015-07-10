@@ -6712,16 +6712,14 @@ begin
       if FMinimap.Dragging then
       begin
         LTemp := GetDisplayLineCount - FMinimap.VisibleLines;
-        LTemp2 := Y div FMinimap.CharHeight - FMinimapClickOffsetY;
+        LTemp2 := Max(Y div FMinimap.CharHeight - FMinimapClickOffsetY, 0);
         FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2));
         if (FMinimap.TopLine > LTemp) and (LTemp > 0) then
           FMinimap.TopLine := LTemp;
-
         LTopLine := Max(1, FMinimap.TopLine + LTemp2);
         if TopLine <> LTopLine then
         begin
           Inc(FProcessingMinimap);
-          //OutputDebugString(PChar(Format('FProcessingMinimap = %d, Y=%d, TopLine = %d', [FProcessingMinimap, Y, LTopLine])));
           TopLine := LTopLine;
           Paint;
         end;

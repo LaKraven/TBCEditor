@@ -539,7 +539,7 @@ type
     procedure RemoveMouseDownHandler(AHandler: TMouseEvent);
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
     procedure RescanCodeFoldingRanges;
-    procedure SaveToFile(const AFileName: String);
+    procedure SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
     procedure SetCaretAndSelection(const CaretPosition, BlockBeginPosition, BlockEndPosition: TBCEditorTextPosition; ACaret: Integer = -1);
@@ -12509,7 +12509,7 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.SaveToFile(const AFileName: String);
+procedure TBCBaseEditor.SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LUncollapsedLines: TStringList;
 var
@@ -12519,6 +12519,8 @@ begin
   try
     LUncollapsedLines := CreateUncollapsedLines;
     try
+      if Assigned(AEncoding) then
+        FEncoding := AEncoding;
       LUncollapsedLines.SaveToStream(LFileStream, FEncoding);
     finally
       LUncollapsedLines.Free;

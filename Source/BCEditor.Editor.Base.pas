@@ -524,7 +524,7 @@ type
     procedure InvalidateMinimap;
     procedure InvalidateSelection;
     procedure LeftMarginChanged(Sender: TObject);
-    procedure LoadFromFile(const AFileName: String);
+    procedure LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
     procedure LockUndo;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
     procedure PasteFromClipboard;
@@ -3266,12 +3266,13 @@ begin
 
   LTempBitmap := Vcl.Graphics.TBitmap.Create;
   try
-    LTempBitmap.Width := FCharWidth;
-    LTempBitmap.Height := LineHeight;
     { Background }
     LTempBitmap.Canvas.Pen.Color := FCaret.NonBlinking.Colors.Background;
     LTempBitmap.Canvas.Brush.Color := FCaret.NonBlinking.Colors.Background;
-    LTempBitmap.Canvas.Rectangle(0, 0, LTempBitmap.Width, LTempBitmap.Height);
+    { Size }
+    LTempBitmap.Width := FCharWidth;
+    LTempBitmap.Height := LineHeight;
+    //LTempBitmap.Canvas.Rectangle(0, 0, LTempBitmap.Width, LTempBitmap.Height);
     { Character }
     LTempBitmap.Canvas.Brush.Style := bsClear;
     LTempBitmap.Canvas.Font.Name := Font.Name;
@@ -12071,7 +12072,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.LoadFromFile(const AFileName: String);
+procedure TBCBaseEditor.LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LFileStream: TFileStream;
   LBuffer: TBytes;
@@ -12086,6 +12087,9 @@ begin
   ClearBookmarks;
   LFileStream := TFileStream.Create(AFileName, fmOpenRead);
   try
+    if Assigned(AEncoding) then
+      FEncoding := AEncoding
+    else
     { Identify encoding }
     if IsUTF8(LFileStream, LWithBOM) then
     begin

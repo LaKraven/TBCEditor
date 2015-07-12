@@ -181,8 +181,8 @@ type
     function GetDisplayName: string; override;
   public
     procedure Assign(Source: TPersistent); override;
-    property Key: word read FKey write SetKey;
-    property Key2: word read FKey2 write SetKey2;
+    property Key: Word read FKey write SetKey;
+    property Key2: Word read FKey2 write SetKey2;
     property ShiftState: TShiftState read FShiftState write SetShiftState;
     property ShiftState2: TShiftState read FShiftState2 write SetShiftState2;
   published
@@ -223,7 +223,7 @@ uses
   Winapi.Windows, BCEditor.Language;
 
 type
-  TBCEditorCommandString = record
+  TBCEditorCommandString = recOrd
     Value: TBCEditorCommand;
     Name: string;
   end;
@@ -449,7 +449,7 @@ begin
   begin
     Duplicate := TBCEditorKeyCommands(Collection).FindShortcut2(Value, ShortCut2);
     if (Duplicate <> -1) and (Duplicate <> Self.Index) then
-      raise Exception.Create(SBCEditorDuplicateShortcut);
+      raise Exception.Create(SBCEditOrduplicateShortcut);
   end;
 
   Vcl.Menus.ShortCutToKey(Value, NewKey, NewShiftState);
@@ -482,7 +482,7 @@ begin
   begin
     Dup := TBCEditorKeyCommands(Collection).FindShortcut2(ShortCut, Value);
     if (Dup <> -1) and (Dup <> Self.Index) then
-      raise Exception.Create(SBCEditorDuplicateShortcut);
+      raise Exception.Create(SBCEditOrduplicateShortcut);
   end;
 
   Vcl.Menus.ShortCutToKey(Value, NewKey, NewShiftState);
@@ -672,48 +672,48 @@ begin
   { Help }
   AddKey(ecContextHelp, VK_F1, []);
   { Standard edit commands }
-  AddKey(ecUndo, ord('Z'), [ssCtrl]);
-  AddKey(ecRedo, ord('Z'), [ssCtrl, ssShift]);
-  AddKey(ecCut, ord('X'), [ssCtrl]);
-  AddKey(ecCopy, ord('C'), [ssCtrl]);
-  AddKey(ecPaste, ord('V'), [ssCtrl]);
-  AddKey(ecSelectAll, ord('A'), [ssCtrl]);
+  AddKey(ecUndo, Ord('Z'), [ssCtrl]);
+  AddKey(ecRedo, Ord('Z'), [ssCtrl, ssShift]);
+  AddKey(ecCut, Ord('X'), [ssCtrl]);
+  AddKey(ecCopy, Ord('C'), [ssCtrl]);
+  AddKey(ecPaste, Ord('V'), [ssCtrl]);
+  AddKey(ecSelectAll, Ord('A'), [ssCtrl]);
   { Block commands }
-  AddKey(ecBlockIndent, ord('I'), [ssCtrl, ssShift]);
-  AddKey(ecBlockUnindent, ord('U'), [ssCtrl, ssShift]);
+  AddKey(ecBlockIndent, Ord('I'), [ssCtrl, ssShift]);
+  AddKey(ecBlockUnindent, Ord('U'), [ssCtrl, ssShift]);
   { Fragment deletion }
-  AddKey(ecDeleteWord, ord('T'), [ssCtrl]);
+  AddKey(ecDeleteWord, Ord('T'), [ssCtrl]);
   { Line operations }
-  AddKey(ecInsertLine, ord('M'), [ssCtrl]);
+  AddKey(ecInsertLine, Ord('M'), [ssCtrl]);
   AddKey(ecMoveLineUp, VK_UP, [ssCtrl, ssAlt]);
   AddKey(ecMoveLineDown, VK_DOWN, [ssCtrl, ssAlt]);
-  AddKey(ecDeleteLine, ord('Y'), [ssCtrl]);
-  AddKey(ecDeleteEndOfLine, ord('Y'), [ssCtrl, ssShift]);
+  AddKey(ecDeleteLine, Ord('Y'), [ssCtrl]);
+  AddKey(ecDeleteEndOfLine, Ord('Y'), [ssCtrl, ssShift]);
   AddKey(ecMoveCharLeft, VK_LEFT, [ssAlt, ssCtrl]);
   AddKey(ecMoveCharRight, VK_RIGHT, [ssAlt, ssCtrl]);
   { Bookmarks }
-  AddKey(ecGotoBookmark1, ord('1'), [ssCtrl]);
-  AddKey(ecGotoBookmark2, ord('2'), [ssCtrl]);
-  AddKey(ecGotoBookmark3, ord('3'), [ssCtrl]);
-  AddKey(ecGotoBookmark4, ord('4'), [ssCtrl]);
-  AddKey(ecGotoBookmark5, ord('5'), [ssCtrl]);
-  AddKey(ecGotoBookmark6, ord('6'), [ssCtrl]);
-  AddKey(ecGotoBookmark7, ord('7'), [ssCtrl]);
-  AddKey(ecGotoBookmark8, ord('8'), [ssCtrl]);
-  AddKey(ecGotoBookmark9, ord('9'), [ssCtrl]);
-  AddKey(ecSetBookmark1, ord('1'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark2, ord('2'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark3, ord('3'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark4, ord('4'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark5, ord('5'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark6, ord('6'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark7, ord('7'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark8, ord('8'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark9, ord('9'), [ssCtrl, ssShift]);
+  AddKey(ecGotoBookmark1, Ord('1'), [ssCtrl]);
+  AddKey(ecGotoBookmark2, Ord('2'), [ssCtrl]);
+  AddKey(ecGotoBookmark3, Ord('3'), [ssCtrl]);
+  AddKey(ecGotoBookmark4, Ord('4'), [ssCtrl]);
+  AddKey(ecGotoBookmark5, Ord('5'), [ssCtrl]);
+  AddKey(ecGotoBookmark6, Ord('6'), [ssCtrl]);
+  AddKey(ecGotoBookmark7, Ord('7'), [ssCtrl]);
+  AddKey(ecGotoBookmark8, Ord('8'), [ssCtrl]);
+  AddKey(ecGotoBookmark9, Ord('9'), [ssCtrl]);
+  AddKey(ecSetBookmark1, Ord('1'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark2, Ord('2'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark3, Ord('3'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark4, Ord('4'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark5, Ord('5'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark6, Ord('6'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark7, Ord('7'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark8, Ord('8'), [ssCtrl, ssShift]);
+  AddKey(ecSetBookmark9, Ord('9'), [ssCtrl, ssShift]);
   { Selection modes }
-  AddKey(ecNormalSelect, ord('N'), [ssCtrl,ssAlt]);
-  AddKey(ecColumnSelect, ord('C'), [ssCtrl,ssAlt]);
-  AddKey(ecLineSelect, ord('L'), [ssCtrl,ssAlt]);
+  AddKey(ecNormalSelect, Ord('N'), [ssCtrl,ssAlt]);
+  AddKey(ecColumnSelect, Ord('C'), [ssCtrl,ssAlt]);
+  AddKey(ecLineSelect, Ord('L'), [ssCtrl,ssAlt]);
 end;
 
 procedure TBCEditorKeyCommands.SetItem(Index: Integer; Value: TBCEditorKeyCommand);

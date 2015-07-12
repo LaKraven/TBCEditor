@@ -449,7 +449,9 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-
+    {$IFDEF USE_ALPHASKINS}
+    procedure AfterConstruction; override;
+    {$ENDIF}
     function CaretInView: Boolean;
     function CreateFileStream(AFileName: string): TStream; virtual;
     function CreateUncollapsedLines: TStringList;
@@ -696,7 +698,7 @@ begin
   inherited Create(AOwner);
 
   {$IFDEF USE_ALPHASKINS}
-  FCommonData := TsScrollWndData.Create(Self);
+  FCommonData := TsScrollWndData.Create(Self, True);
   FCommonData.COC := COC_TsMemo;
   if FCommonData.SkinSection = '' then
     FCommonData.SkinSection := s_Edit;
@@ -6509,6 +6511,14 @@ begin
       FScroll.MaxWidth := LLength;
   end;
 end;
+
+{$IFDEF USE_ALPHASKINS}
+procedure TBCBaseEditor.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FCommonData.Loaded;
+end;
+{$ENDIF}
 
 procedure TBCBaseEditor.Loaded;
 begin
@@ -12844,10 +12854,6 @@ end;
 procedure TBCBaseEditor.WndProc(var Message: TMessage);
 const
   ALT_KEY_DOWN = $20000000;
-{$IFDEF USE_ALPHASKINS}
-var
-  PS: TPaintStruct;
-{$ENDIF}
 begin
   { Prevent Alt-Backspace from beeping }
   if (Message.Msg = WM_SYSCHAR) and (Message.wParam = VK_BACK) and (Message.LParam and ALT_KEY_DOWN <> 0) then
@@ -12880,14 +12886,13 @@ begin
           end;
 
         AC_SETNEWSKIN:
-          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
           begin
             CommonWndProc(Message, FCommonData);
             Exit;
           end;
 
         AC_REMOVESKIN:
-          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
+          if not (csDestroying in ComponentState) then
           begin
             if FScrollWnd <> nil then
               FreeAndNil(FScrollWnd);
@@ -12898,41 +12903,42 @@ begin
           end;
 
         AC_REFRESH:
-          if ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager) then
+          if Visible then
           begin
             CommonWndProc(Message, FCommonData);
+            SendMessage(Handle, WM_NCPaint, 0, 0);
             RefreshEditScrolls(SkinData, FScrollWnd);
-            if HandleAllocated and Visible then
-              RedrawWindow(Handle, nil, 0, RDW_INVALIDATE or RDW_ERASE or RDW_FRAME);
-
             Exit;
           end
       end;
-
-    CM_FONTCHANGED:
-      if Showing and HandleAllocated then
-        RedrawWindow(Handle, nil, 0, RDW_ERASE or RDW_INVALIDATE or RDW_FRAME);
   end;
 
-  if not ControlIsReady(Self) or not FCommonData.Skinned then
+  if not ControlIsReady(Self) or not Assigned(FCommonData) or not FCommonData.Skinned then
     inherited
   else
   begin
     case Message.Msg of
-      WM_PAINT:
-        begin
-          if InUpdating(FCommonData) then
-          begin
-            BeginPaint(Handle, PS);
-            EndPaint  (Handle, PS);
-            Exit;
-          end;
-          inherited;
-          Exit;
+      SM_ALPHACMD:
+        case Message.WParamHi of
+          AC_ENDPARENTUPDATE:
+            if FCommonData.Updating then
+            begin
+              FCommonData.Updating := False;
+              Perform(WM_NCPAINT, 0, 0); Exit
+            end;
         end;
+
+      WM_PRINT:
+      begin
+        Perform(WM_PAINT, Message.WParam, Message.LParam);
+        Perform(WM_NCPAINT, Message.WParam, Message.LParam);
+        Exit;
+      end;
+
+      WM_ENABLE:
+        Exit;
     end;
-    if CommonWndProc(Message, FCommonData) then
-      Exit;
+    CommonWndProc(Message, FCommonData);
 
     inherited;
 
@@ -12940,12 +12946,12 @@ begin
       CM_SHOWINGCHANGED:
         RefreshEditScrolls(SkinData, FScrollWnd);
 
-      CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
+     { CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
         FCommonData.Invalidate;
 
       CM_TEXTCHANGED, CM_CHANGED:
         if Assigned(FScrollWnd) then
-          UpdateScrolls(FScrollWnd, True);
+          UpdateScrolls(FScrollWnd, True);   }
     end;
   end;
   {$ELSE}

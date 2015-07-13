@@ -3316,7 +3316,7 @@ begin
     LKeyword := UpperCase(LKeyword);
   for i := 0 to FLines.Count - 1 do
   begin
-    LLine := FLines[i-1];
+    LLine := FLines[i];
     if not (soCaseSensitive in FSearch.Options) then
       LLine := UpperCase(LLine);
     LTextPtr := PChar(LLine);
@@ -9804,13 +9804,25 @@ begin
   Result := 0;
   if Length(ASearchText) = 0 then
     Exit;
+
   LIsBackward := roBackwards in FReplace.Options;
   LIsPrompt := roPrompt in FReplace.Options;
   LIsReplaceAll := roReplaceAll in FReplace.Options;
   LIsDeleteLine := eraDeleteLine = FReplace.Action;
   LIsFromCursor := not (roEntireScope in FReplace.Options);
+
+  FSearchEngine.Pattern := ASearchText;
+  case FReplace.Engine of
+    seNormal:
+    begin
+      TBCEditorNormalSearch(FSearchEngine).CaseSensitive := roCaseSensitive in FReplace.Options;
+      TBCEditorNormalSearch(FSearchEngine).WholeWordsOnly := roWholeWordsOnly in FReplace.Options;
+    end;
+  end;
+
   if not SelectionAvailable then
     FReplace.Options := FReplace.Options - [roSelectedOnly];
+
   if roSelectedOnly in FReplace.Options then
   begin
     LStartTextPosition := SelectionBeginPosition;
@@ -9824,10 +9836,6 @@ begin
     if FSelection.ActiveMode = smColumn then
       if LStartTextPosition.Char > LEndTextPosition.Char then
         SwapInt(LStartTextPosition.Char, LEndTextPosition.Char);
-    if LIsBackward then
-      LCurrentTextPosition := LEndTextPosition
-    else
-      LCurrentTextPosition := LStartTextPosition;
   end
   else
   begin
@@ -9840,19 +9848,13 @@ begin
         LEndTextPosition := CaretPosition
       else
         LStartTextPosition := CaretPosition;
-    if LIsBackward then
-      LCurrentTextPosition := LEndTextPosition
-    else
-      LCurrentTextPosition := LStartTextPosition;
   end;
-  FSearchEngine.Pattern := ASearchText;
-  case FReplace.Engine of
-    seNormal:
-    begin
-      TBCEditorNormalSearch(FSearchEngine).CaseSensitive := roCaseSensitive in FReplace.Options;
-      TBCEditorNormalSearch(FSearchEngine).WholeWordsOnly := roWholeWordsOnly in FReplace.Options;
-    end;
-  end;
+
+  if LIsBackward then
+    LCurrentTextPosition := LEndTextPosition
+  else
+    LCurrentTextPosition := LStartTextPosition;
+
   LReplaceLength := 0;
   if LIsReplaceAll and not LIsPrompt then
   begin
@@ -9862,15 +9864,18 @@ begin
   end
   else
     LIsEndUndoBlock := False;
+
   try
     while (LCurrentTextPosition.Line >= LStartTextPosition.Line) and (LCurrentTextPosition.Line <= LEndTextPosition.Line) do
     begin
       LCurrentLine := FSearchEngine.FindAll(Lines[LCurrentTextPosition.Line - 1]);
       LResultOffset := 0;
+
       if LIsBackward then
         LSearchIndex := Pred(FSearchEngine.ResultCount)
       else
         LSearchIndex := 0;
+
       while LCurrentLine > 0 do
       begin
         LFound := FSearchEngine.Results[LSearchIndex] + LResultOffset;

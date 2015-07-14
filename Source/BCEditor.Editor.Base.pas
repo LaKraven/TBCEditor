@@ -6945,7 +6945,7 @@ procedure TBCBaseEditor.Paint;
 var
   LClipRect, DrawRect: TRect;
   LLine1, LLine2, LLine3, LColumn1, LColumn2, LTemp: Integer;
-//  LHandle: HDC;
+  LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
   LClipRect := Canvas.ClipRect;

@@ -32,7 +32,7 @@ type
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
     FBreakWhitespace: Boolean;
- //   FBufferBmp: Vcl.Graphics.TBitmap;
+    FBufferBmp: Vcl.Graphics.TBitmap;
     FCaret: TBCEditorCaret;
     FCaretAtEndOfLine: Boolean;
     FCaretOffset: TPoint;
@@ -775,7 +775,7 @@ begin
   FMarkList := TBCEditorBookmarkList.Create(Self);
   FMarkList.OnChange := MarkListChange;
   { Painting }
- // FBufferBmp := Vcl.Graphics.TBitmap.Create;
+  FBufferBmp := Vcl.Graphics.TBitmap.Create;
   FMinimapBufferBmp := Vcl.Graphics.TBitmap.Create;
   FTextDrawer := TBCEditorTextDrawer.Create([fsBold], FFontDummy);
   Font.Assign(FFontDummy);
@@ -884,7 +884,7 @@ begin
   FInternalBookmarkImage.Free;
   FFontDummy.Free;
   FOriginalLines.Free;
- // FBufferBmp.Free;
+  FBufferBmp.Free;
   FMinimapBufferBmp.Free;
   FActiveLine.Free;
   FRightMargin.Free;
@@ -6962,16 +6962,15 @@ begin
   LLine3 := FTopLine + LTemp;
 
   HideCaret;
- // FBufferBmp.Width := Width;
- // FBufferBmp.Height := Height;
+  FBufferBmp.Width := Width;
+  FBufferBmp.Height := Height;
 
-  {LHandle := Canvas.Handle;
+  LHandle := Canvas.Handle;
   Canvas.Handle := FBufferBmp.Canvas.Handle;
-  FBufferBmp.Canvas.Handle := LHandle;   }
-  //LHandle := Canvas.Handle; { important, don't remove }
+  FBufferBmp.Canvas.Handle := LHandle;   
+  LHandle := Canvas.Handle; { important, don't remove }
 
-  //FTextDrawer.BeginDrawing(LHandle);
-  FTextDrawer.BeginDrawing(Canvas.Handle);
+  FTextDrawer.BeginDrawing(LHandle);
   try
     { Paint the text area if it was (partly) invalidated }
     if LClipRect.Right > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
@@ -7069,9 +7068,9 @@ begin
     FLastTopLine := FTopLine;
     FLastDisplayLineCount := DisplayLineCount;
     FTextDrawer.EndDrawing;
-    {FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
+    FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
     FBufferBmp.Canvas.Handle := Canvas.Handle;
-    Canvas.Handle := LHandle;  }
+    Canvas.Handle := LHandle;  
     UpdateCaret;
   end;
 end;

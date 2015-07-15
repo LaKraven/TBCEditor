@@ -401,7 +401,7 @@ procedure TBCEditorHighlighter.Prepare;
 begin
   FAttributes.Clear;
   AddAllAttributes(MainRules);
- // FMainRules.Prepare(FMainRules);
+  FMainRules.Prepare(FMainRules);
 end;
 
 procedure TBCEditorHighlighter.UpdateAttributes(ARange: TBCEditorRange; AParentRange: TBCEditorRange);
@@ -451,6 +451,7 @@ var
   LEditor: TBCBaseEditor;
   LTempLines: TStringList;
   LTopLine: Integer;
+  LCaretPosition: TBCEditorTextPosition;
 begin
   FLoading := True;
   FFileName := AFileName;
@@ -463,7 +464,8 @@ begin
     LStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(AFileName));
     try
       LTopLine := LEditor.TopLine;
-      LTempLines.Assign(LEditor.Lines);
+      LCaretPosition := LEditor.CaretPosition;
+      LTempLines.Text := LEditor.Lines.Text;
       LEditor.Lines.Clear;
       LEditor.ClearCodeFolding;
       with TBCEditorHighlighterJSONImporter.Create(Self) do
@@ -472,8 +474,9 @@ begin
       finally
         Free;
       end;
-      LEditor.Lines.Assign(LTempLines);
+      LEditor.Lines.Text := LTempLines.Text;
       LEditor.TopLine := LTopLine;
+      LEditor.CaretPosition := LCaretPosition;
       LEditor.InitCodeFolding;
     finally
       LStream.Free;

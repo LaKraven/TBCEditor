@@ -90,7 +90,7 @@ type
   end;
 
   TBCEditorAbstractParserArray = array [AnsiChar] of TBCEditorAbstractParser;
-  //TBCEditorBooleanArray = array [AnsiChar] of Boolean;
+
   TBCEditorCaseFunction = function(AChar: Char): Char;
   TBCEditorStringCaseFunction = function(const AString: string): string;
 
@@ -695,6 +695,7 @@ begin
     LLength := Length(Token.Symbol);
     if LLength < 1 then
       Continue;
+
     Symbol := Token.Symbol;
     FirstChar := Symbol[1];
 

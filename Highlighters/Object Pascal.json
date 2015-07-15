@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "4.7.2015",
+                "Date": "15.7.2015",
                 "Sample": [
                     "// Hello World in Pascal\r\n",
                     "\r\n",
@@ -251,6 +251,31 @@
                         "TokenRange": {
                             "Open": "@"
                         }
+                    },
+                    {
+                        "Attributes": {
+                            "Element": "Editor"
+                        },
+                        "TokenRange": {
+                            "Open": "property",
+                            "Close": ";"
+                        },
+                        "SubRules": {
+                           "KeyList": [
+                              {
+                                  "Type": "ReservedWord",
+                                  "Words": [
+                                      "index",
+                                      "read",
+                                      "write"
+                                  ],
+                                  "Attributes": {
+                                      "Element": "ReservedWord",
+                                      "ParentBackground": true
+                                  }
+                              }
+                           ]
+                        }
                     }
                 ],
                 "KeyList": [
@@ -328,7 +353,6 @@
                             "public",
                             "published",
                             "raise",
-                            "read",
                             "record",
                             "register",
                             "reintroduce",
@@ -356,7 +380,6 @@
                             "while",
                             "virtual",
                             "with",
-                            "write",
                             "writeonly",
                             "xor"
                         ],

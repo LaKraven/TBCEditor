@@ -241,7 +241,6 @@ type
     procedure ClearSearchLines;
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
     procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
-    //procedure CodeFoldingExpandCollapsedLines(const AFirst, ALast: Integer);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
@@ -9027,8 +9026,6 @@ var
             LDisplayDeletePositionEnd := Column;
           end;
 
-          //CodeFoldingExpandCollapsedLines(LBeginTextPosition.Line, LEndTextPosition.Line);
-
           for i := LFirstLine to LLastLine do
           begin
             with DisplayToTextPosition(GetDisplayPosition(LDisplayDeletePosition, i)) do
@@ -12250,7 +12247,8 @@ begin
   end;
 
   EnsureCursorPositionVisible;
-  RescanCodeFoldingRanges;
+  if FCodeFolding.Visible then
+    RescanCodeFoldingRanges;
   Invalidate;
 end;
 
@@ -12676,6 +12674,8 @@ begin
         Text := s;
     finally
       LStringList.Free;
+      if FCodeFolding.Visible then
+        RescanCodeFoldingRanges;
     end;
   end;
 end;

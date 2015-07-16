@@ -9,6 +9,7 @@ type
   TBCEditorBookmark = class
   protected
     FChar: Integer;
+    FData: Pointer;
     FEdit: TCustomControl;
     FImage: Integer;
     FIndex: Integer;
@@ -26,6 +27,7 @@ type
     constructor Create(AOwner: TCustomControl);
 
     property Char: Integer read FChar write SetChar;
+    property Data: Pointer read FData write FData;
     property ImageIndex: Integer read FImage write SetImage;
     property Index: Integer read FIndex write FIndex;
     property InternalImage: Boolean read FInternalImage write SetInternalImage;

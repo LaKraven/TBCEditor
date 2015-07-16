@@ -5397,7 +5397,7 @@ end;
 
 function TBCBaseEditor.DoSearchMatchNotFoundWraparoundDialog: Boolean;
 begin
-  Result := MessageDialog(SBCEditorSearchMatchNotFound, mtConfirmation, [mbYes, mbNo]) = MrYes;
+  Result := MessageDialog(Format(SBCEditorSearchMatchNotFound, [SLineBreak + SLineBreak]), mtConfirmation, [mbYes, mbNo]) = MrYes;
 end;
 
 function TBCBaseEditor.GetReadOnly: Boolean;

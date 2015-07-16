@@ -10,7 +10,7 @@ resourcestring
   SBCEditorScrollInfoTopLine = 'Top Line: %d';
   SBCEditorScrollInfo = '%d - %d';
   SBCEditorSearchStringNotFound = 'Search string ''%s'' not found';
-  SBCEditorSearchMatchNotFound = 'Search match not found.' + SLineBreak + SLineBreak + 'Restart search from the beginning of the file?';
+  SBCEditorSearchMatchNotFound = 'Search match not found.%sRestart search from the beginning of the file?';
   SBCEditorRightMarginPosition = 'Position: %d';
 
   { BCEditor.Editor.KeyCommands }

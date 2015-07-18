@@ -52,7 +52,7 @@ type
     FCodeFolding: TBCEditorCodeFolding;
     FCodeFoldingHintForm: TBCEditorCompletionProposalForm;
     FCodeFoldingRangeForLine: array of TBCEditorCodeFoldingRange;
-    FCollapsedLinesDifferenceCache: array of Integer;
+    //FCollapsedLinesDifferenceCache: array of Integer;
     FColumnWidths: PIntegerArray;
     FCommandDrop: Boolean;
     {$IFDEF USE_ALPHASKINS}
@@ -88,6 +88,7 @@ type
     FLeftMargin: TBCEditorLeftMargin;
     FLeftMarginCharWidth: Integer;
     FLines: TBCEditorLines;
+    FLinesCodeFoldingCollapsedCache: array of Boolean;
     FLinespacing: TBCEditorLineSpacing;
     FMarkList: TBCEditorBookmarkList;
     FMatchingPair: TBCEditorMatchingPair;
@@ -187,7 +188,8 @@ type
     function GetCanUndo: Boolean;
     function GetCaretPosition: TBCEditorTextPosition;
     function GetClipboardText: string;
-    function GetCollapsedLineNumber(ALine: Integer): Integer;
+    function GetCollapsedLineCount(ABeforeLine: Integer = -1): Integer;
+    //function GetCollapsedLineNumber(ALine: Integer): Integer;
     function GetDisplayLineCount: Integer;
     function GetDisplayPosition: TBCEditorDisplayPosition; overload;
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
@@ -210,8 +212,8 @@ type
     function GetSelectionBeginPosition: TBCEditorTextPosition;
     function GetSelectionEndPosition: TBCEditorTextPosition;
     function GetText: string;
-    function GetUncollapsedLineNumber(ALine: Integer): Integer;
-    function GetUncollapsedLineNumberDifference(ALine: Integer): Integer;
+    function GetRealLineNumber(ALine: Integer): Integer;
+//    function GetUncollapsedLineNumberDifference(ALine: Integer): Integer;
     function GetWordAtCursor: string;
     function GetWordAtMouse: string;
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
@@ -239,12 +241,12 @@ type
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearSearchLines;
-    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
-    procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
+    procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
+    //procedure CodeFoldingExpandCollapsedLine(const ALine: Integer);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingPrepareRangeForLine;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
-    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
+    procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CompletionProposalTimerHandler(Sender: TObject);
     procedure ComputeCaret(X, Y: Integer);
     procedure ComputeScroll(X, Y: Integer);
@@ -453,7 +455,7 @@ type
     {$ENDIF}
     function CaretInView: Boolean;
     function CreateFileStream(AFileName: string): TStream; virtual;
-    function CreateUncollapsedLines: TStringList;
+    //function CreateUncollapsedLines: TStringList;
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
     function GetColorsFileName(AFileName: string): string;
     function GetHighlighterFileName(AFileName: string): string;
@@ -492,6 +494,7 @@ type
     procedure ClearBookmark(ABookmark: Integer);
     procedure ClearBookmarks;
     procedure ClearCodeFolding;
+    procedure ClearMarks;
     procedure ClearMatchingPair;
     procedure ClearSelection;
     procedure ClearUndo;
@@ -1019,7 +1022,7 @@ begin
   ABackground := clNone;
   ALine := RowToLine(ALine);
   if FCodeFolding.Visible then
-    ALine := GetUncollapsedLineNumber(ALine);
+    ALine := GetRealLineNumber(ALine);
   if Assigned(FOnCustomLineColors) then
     FOnCustomLineColors(Self, ALine, Result, AForeground, ABackground);
 end;
@@ -1198,7 +1201,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.CreateUncollapsedLines: TStringList;
+(*function TBCBaseEditor.CreateUncollapsedLines: TStringList;
 var
   i, j, k: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -1216,33 +1219,38 @@ begin
         Result.Insert(i - 1, LCodeFoldingRange.CollapsedLines.Strings[k]);
     end;
   end;
-end;
+end; *)
 
-function TBCBaseEditor.GetCollapsedLineNumber(ALine: Integer): Integer;
+(*function TBCBaseEditor.GetCollapsedLineNumber(ALine: Integer): Integer;
 var
   LDifference, i: Integer;
   LCodeFoldingRangeForLine: TBCEditorCodeFoldingRange;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  LDifference := 0;
-  LCodeFoldingRangeForLine := CodeFoldingRangeForLine(ALine);
   Result := ALine;
 
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+  if FCodeFolding.Visible then
   begin
-    LCodeFoldingRange := FAllCodeFoldingRanges[i];
-    if Assigned(LCodeFoldingRange) then
-      if LCodeFoldingRange.ToLine < ALine then
-      begin
-        if (LCodeFoldingRange <> LCodeFoldingRangeForLine) and not LCodeFoldingRange.ParentCollapsed then
-          Inc(LDifference, Max(LCodeFoldingRange.CollapsedLines.Count - 1, 0))
-      end
-      else
-        Break;
-  end;
+    todo
+    {LDifference := 0;
+    LCodeFoldingRangeForLine := CodeFoldingRangeForLine(ALine);
 
-  Dec(Result, LDifference);
-end;
+    for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+    begin
+      LCodeFoldingRange := FAllCodeFoldingRanges[i];
+      if Assigned(LCodeFoldingRange) then
+        if LCodeFoldingRange.ToLine < ALine then
+        begin
+          if (LCodeFoldingRange <> LCodeFoldingRangeForLine) and not LCodeFoldingRange.ParentCollapsed then
+            Inc(LDifference, Max(LCodeFoldingRange.CollapsedLines.Count - 1, 0))
+        end
+        else
+          Break;
+    end;
+
+    Dec(Result, LDifference);   }
+  end;
+end;   *)
 
 function TBCBaseEditor.GetDisplayLineCount: Integer;
 begin
@@ -1250,6 +1258,7 @@ begin
     Result := FLines.Count
   else
     Result := FWordWrapHelper.GetRowCount;
+  Result := Result - GetCollapsedLineCount;
 end;
 
 function TBCBaseEditor.GetDisplayPosition: TBCEditorDisplayPosition;
@@ -1282,7 +1291,7 @@ end;
 function TBCBaseEditor.GetDisplayY: Integer;
 begin
   if not GetWordWrap then
-    Result := GetCollapsedLineNumber(CaretY)
+    Result := GetRealLineNumber(CaretY) // GetCollapsedLineNumber(CaretY)
   else
     Result := DisplayPosition.Row;
 end;
@@ -1723,7 +1732,7 @@ function TBCBaseEditor.GetSelectedText: string;
     LTextPosition: TBCEditorTextPosition;
     LDisplayPosition: TBCEditorDisplayPosition;
     LTrimCount: Integer;
-    LUncollapsedLines: TStringList;
+    //LUncollapsedLines: TStringList;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     LColumnFrom := SelectionBeginPosition.Char;
@@ -1734,43 +1743,43 @@ function TBCBaseEditor.GetSelectedText: string;
     case FSelection.ActiveMode of
       smNormal:
         begin
-          LFirst := GetUncollapsedLineNumber(LFirst);
-          LLast := GetUncollapsedLineNumber(LLast);
+          LFirst := GetRealLineNumber(LFirst);
+          LLast := GetRealLineNumber(LLast);
           LCodeFoldingRange := CodeFoldingRangeForLine(LLast);
           if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
             LLast := LCodeFoldingRange.ToLine;
 
-          LUncollapsedLines := CreateUncollapsedLines;
-          try
-            if LFirst = LLast then
-              Result := Copy(LUncollapsedLines[LFirst - 1], LColumnFrom, LColumnTo - LColumnFrom)
-            else
+          //LUncollapsedLines := CreateUncollapsedLines;
+          //try
+          if LFirst = LLast then
+            Result := Copy(Lines{LUncollapsedLines}[LFirst - 1], LColumnFrom, LColumnTo - LColumnFrom)
+          else
+          begin
+            // step1: calculate total length of result string
+            LTotalLength := Max(0, Length(Lines{LUncollapsedLines}[LFirst - 1]) - LColumnFrom + 1);
+            Inc(LTotalLength, Length(SLineBreak));
+            for i := LFirst to LLast - 2 do
             begin
-              // step1: calculate total length of result string
-              LTotalLength := Max(0, Length(LUncollapsedLines[LFirst - 1]) - LColumnFrom + 1);
+              Inc(LTotalLength, Length(Lines{LUncollapsedLines}[i]));
               Inc(LTotalLength, Length(SLineBreak));
-              for i := LFirst to LLast - 2 do
-              begin
-                Inc(LTotalLength, Length(LUncollapsedLines[i]));
-                Inc(LTotalLength, Length(SLineBreak));
-              end;
-              Inc(LTotalLength, LColumnTo - 1);
-              //Inc(LTotalLength, Length(SLineBreak) * (LLast - LFirst));
-              // step2: build up result string
-              SetLength(Result, LTotalLength);
-              P := PChar(Result);
-              CopyAndForward(LUncollapsedLines[LFirst - 1], LColumnFrom, MaxInt, P);
-              CopyAndForward(SLineBreak, 1, MaxInt, P);
-              for i := LFirst to LLast - 2 do
-              begin
-                CopyAndForward(LUncollapsedLines[i], 1, MaxInt, P);
-                CopyAndForward(SLineBreak, 1, MaxInt, P);
-              end;
-              CopyAndForward(LUncollapsedLines[LLast - 1], 1, LColumnTo - 1, P);
             end;
-          finally
-            LUncollapsedLines.Free;
+            Inc(LTotalLength, LColumnTo - 1);
+            //Inc(LTotalLength, Length(SLineBreak) * (LLast - LFirst));
+            // step2: build up result string
+            SetLength(Result, LTotalLength);
+            P := PChar(Result);
+            CopyAndForward(Lines{LUncollapsedLines}[LFirst - 1], LColumnFrom, MaxInt, P);
+            CopyAndForward(SLineBreak, 1, MaxInt, P);
+            for i := LFirst to LLast - 2 do
+            begin
+              CopyAndForward(Lines{LUncollapsedLines}[i], 1, MaxInt, P);
+              CopyAndForward(SLineBreak, 1, MaxInt, P);
+            end;
+            CopyAndForward(Lines{LUncollapsedLines}[LLast - 1], 1, LColumnTo - 1, P);
           end;
+          //finally
+          //  LUncollapsedLines.Free;
+          //end;
         end;
       smColumn:
         begin
@@ -1813,22 +1822,20 @@ function TBCBaseEditor.GetSelectedText: string;
         end;
       smLine:
         begin
-          LUncollapsedLines := CreateUncollapsedLines;
-          for i := GetUncollapsedLineNumber(LFirst) - 1 to GetUncollapsedLineNumber(LLast + 1) - 2 do
-          begin
-            Inc(LTotalLength, Length(TrimRight(LUncollapsedLines[i])) + Length(sLineBreak));
-          end;
+          //LUncollapsedLines := CreateUncollapsedLines;
+          for i := GetRealLineNumber(LFirst) - 1 to GetRealLineNumber(LLast + 1) - 2 do
+            Inc(LTotalLength, Length(TrimRight(Lines{LUncollapsedLines}[i])) + Length(sLineBreak));
           if LLast - 1 = FLines.Count then
             Dec(LTotalLength, Length(sLineBreak));
 
           SetLength(Result, LTotalLength);
           P := PChar(Result);
-          for i := GetUncollapsedLineNumber(LFirst) - 1 to GetUncollapsedLineNumber(LLast + 1) - 2 do
+          for i := GetRealLineNumber(LFirst) - 1 to GetRealLineNumber(LLast + 1) - 2 do
           begin
-            CopyAndForward(TrimRight(LUncollapsedLines[i]), 1, MaxInt, P);
+            CopyAndForward(TrimRight(Lines{LUncollapsedLines}[i]), 1, MaxInt, P);
             CopyAndForward(sLineBreak, 1, MaxInt, P);
           end;
-          LUncollapsedLines.Free;
+          //LUncollapsedLines.Free;
         end;
     end;
   end;
@@ -1892,12 +1899,53 @@ begin
   Result := FLines.Text;
 end;
 
-function TBCBaseEditor.GetUncollapsedLineNumber(ALine: Integer): Integer;
+// TODO: Move into right place
+function TBCBaseEditor.GetCollapsedLineCount(ABeforeLine: Integer = -1): Integer;
+var
+  i: Integer;
 begin
-  Result := ALine;
-  Inc(Result, GetUncollapsedLineNumberDifference(ALine));
+  Result := 0;
+  if FCodeFolding.Visible and (Length(FLinesCodeFoldingCollapsedCache) > 0) then
+  begin
+    if ABeforeLine = -1 then
+      ABeforeLine := Length(FLinesCodeFoldingCollapsedCache);
+    for i := 0 to ABeforeLine - 1 do
+      if FLinesCodeFoldingCollapsedCache[i] then
+        Inc(Result);
+  end;
 end;
 
+function TBCBaseEditor.GetRealLineNumber(ALine: Integer): Integer;
+var
+  i, j{, LFromLine}: Integer;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
+begin
+  Result := ALine;
+  if FCodeFolding.Visible then
+  begin
+    if Length(FLinesCodeFoldingCollapsedCache) = 0 then
+    begin
+      { create cache }
+      SetLength(FLinesCodeFoldingCollapsedCache, Lines.Count + 1);
+      for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+      begin
+        LCodeFoldingRange := FAllCodeFoldingRanges[i];
+        if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed then
+        begin
+         { LFromLine := LCodeFoldingRange.FromLine;
+          if not LCodeFoldingRange.ParentCollapsed then
+            LFromLine := LFromLine + 1; }
+          for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine do
+            FLinesCodeFoldingCollapsedCache[j] := True;
+        end;
+      end;
+    end;
+    { find the first uncollapsed line }
+    while (Result <= Lines.Count) and FLinesCodeFoldingCollapsedCache[Result] do
+      Inc(Result);
+  end;
+end;
+{
 function TBCBaseEditor.GetUncollapsedLineNumberDifference(ALine: Integer): Integer;
 var
   i: Integer;
@@ -1930,7 +1978,7 @@ begin
   end;
 
   FCollapsedLinesDifferenceCache[ALine] := Result+1;
-end;
+end;  }
 
 function TBCBaseEditor.GetWordAtCursor: string;
 begin
@@ -1989,12 +2037,15 @@ begin
 end;
 
 function TBCBaseEditor.IsLineInsideCollapsedCodeFolding(ALine: Integer): Boolean;
-var
+{var
   i: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange; }
 begin
   Result := False;
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+  if FCodeFolding.Visible then
+    Result := (Length(FLinesCodeFoldingCollapsedCache) > 0) and FLinesCodeFoldingCollapsedCache[ALine];
+
+ { for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if LCodeFoldingRange.FromLine > ALine then
@@ -2003,7 +2054,7 @@ begin
     if (LCodeFoldingRange.FromLine <= ALine) and (ALine <= LCodeFoldingRange.ToLine) then
       if LCodeFoldingRange.Collapsed or LCodeFoldingRange.ParentCollapsed then
         Exit(True);
-  end;
+  end; }
 end;
 
 function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
@@ -2659,50 +2710,47 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
+procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
 var
   i: Integer;
-  LLineState: TBCEditorLineState;
-  LTextLine: string;
+//  LLineState: TBCEditorLineState;
+  //LTextLine: string;
 begin
   ClearMatchingPair;
-  SetLength(FCollapsedLinesDifferenceCache, 0);
-  FLines.BeginUpdate;
+  //SetLength(FCollapsedLinesDifferenceCache, 0);
+  SetLength(FLinesCodeFoldingCollapsedCache, 0);
+  //FLines.BeginUpdate;
   with AFoldRange do
   begin
-    LTextLine := FLines[ToLine - 1];
+    //LTextLine := FLines[ToLine - 1];
 
     for i := FromLine - 1 to ToLine - 1 do
       CollapsedLines.AddObject(FLines[i], TObject(PInteger(FLines.Attributes[i].LineState)));
 
-    FLines.DeleteLines(FromLine, CollapsedLines.Count - 1);
+    //FLines.DeleteLines(FromLine, CollapsedLines.Count - 1);
 
-    LLineState := FLines.Attributes[FromLine - 1].LineState;
-    if RegionItem.OpenTokenEnd <> '' then
+  //  LLineState := FLines.Attributes[FromLine - 1].LineState;
+   { if RegionItem.OpenTokenEnd <> '' then
       FLines[FromLine - 1] := Copy(FLines[FromLine - 1], 1, Pos(RegionItem.OpenTokenEnd,
          UpperCase(FLines[FromLine - 1])))
     else
       FLines[FromLine - 1] := Copy(FLines[FromLine - 1], 1,
         Length(AFoldRange.RegionItem.OpenToken) + Pos(AFoldRange.RegionItem.OpenToken,
         UpperCase(FLines[FromLine - 1])) - 1);
-    FLines[FromLine - 1] := FLines[FromLine - 1] + '..' + Trim(LTextLine);
-    FLines.Attributes[FromLine - 1].LineState := LLineState;
+    FLines[FromLine - 1] := FLines[FromLine - 1] + '..' + Trim(LTextLine);  }
+   // FLines.Attributes[FromLine - 1].LineState := LLineState;
     Collapsed := True;
     SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
     MoveCodeFoldingRangesAfter(AFoldRange, -CollapsedLines.Count + 1);
   end;
-  if AAddToUndoList then
-  begin
-    AFoldRange.UndoListed := True;
-    FUndoList.AddChange(crCollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
-  end;
-  CheckIfAtMatchingKeywords;
-  FLines.EndUpdate;
 
+  CheckIfAtMatchingKeywords;
+  //FLines.EndUpdate;
   UpdateScrollbars;
+  Paint;
 end;
 
-procedure TBCBaseEditor.CodeFoldingExpandCollapsedLine(const ALine: Integer);
+{procedure TBCBaseEditor.CodeFoldingExpandCollapsedLine(const ALine: Integer);
 var
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
@@ -2716,7 +2764,7 @@ begin
     UpdateFoldRanges;
     UpdateWordWrapHiddenOffsets;
   end;
-end;
+end;  }
 
 procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
 var
@@ -2785,33 +2833,31 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange; AAddToUndoList: Boolean = True);
-var
-  i: Integer;
+procedure TBCBaseEditor.CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
+//var
+//  i: Integer;
 begin
   ClearMatchingPair;
-  SetLength(FCollapsedLinesDifferenceCache, 0);
-  FLines.BeginUpdate;
+  //SetLength(FCollapsedLinesDifferenceCache, 0);
+  SetLength(FLinesCodeFoldingCollapsedCache, 0);
+ // FLines.BeginUpdate;
   with AFoldRange do
   begin
-    FLines.Delete(FromLine - 1); { open..close [...] }
-    FLines.InsertStrings(FromLine - 1, CollapsedLines);
-    for i := 0 to CollapsedLines.Count - 1 do
-      FLines.Attributes[FromLine - 1 + i].LineState := TBCEditorLineState(PInteger(CollapsedLines.Objects[i]));
+  //  FLines.Delete(FromLine - 1); { open..close [...] }
+  //  FLines.InsertStrings(FromLine - 1, CollapsedLines);
+  //  for i := 0 to CollapsedLines.Count - 1 do
+  //    FLines.Attributes[FromLine - 1 + i].LineState := TBCEditorLineState(PInteger(CollapsedLines.Objects[i]));
     Collapsed := False;
     MoveCodeFoldingRangesAfter(AFoldRange, CollapsedLines.Count - 1);
     SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
     CollapsedLines.Clear;
   end;
-  if AAddToUndoList then
-  begin
-    AFoldRange.UndoListed := True;
-    FUndoList.AddChange(crUncollapseFold, CaretPosition, CaretPosition, '', FSelection.ActiveMode, AFoldRange);
-  end;
+
   CheckIfAtMatchingKeywords;
-  FLines.EndUpdate;
+  //FLines.EndUpdate;
 
   UpdateScrollbars;
+  Paint;
 end;
 
 procedure TBCBaseEditor.CompletionProposalTimerHandler(Sender: TObject);
@@ -5901,7 +5947,6 @@ var
   LIsAutoComplete: Boolean;
   LIsPasteAction: Boolean;
   LIsKeepGoing: Boolean;
-  LIsCodeFoldingAction: Boolean;
 begin
   if ReadOnly then
     Exit;
@@ -5912,7 +5957,6 @@ begin
   LLastChangeString := FUndoList.LastChangeString;
   LIsAutoComplete := LLastChangeReason = crAutoCompleteEnd;
   LIsPasteAction := LLastChangeReason = crPaste;
-  LIsCodeFoldingAction := FCodeFolding.Visible and (LLastChangeReason in [crCollapseFold, crUncollapseFold]);
 
   LUndoItem := FUndoList.PeekItem;
   if Assigned(LUndoItem) then
@@ -5933,9 +5977,6 @@ begin
           else
           if LIsPasteAction then
             LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
-          else
-          if LIsCodeFoldingAction then
-            LIsKeepGoing := False
           else
           if LUndoItem.ChangeNumber = LOldChangeNumber then
             LIsKeepGoing := True
@@ -6372,7 +6413,8 @@ begin
       TopLine := TopLine;
     if GetWordWrap then
       FWordWrapHelper.Reset;
-    SetLength(FCollapsedLinesDifferenceCache, 0);
+    //SetLength(FCollapsedLinesDifferenceCache, 0);
+    SetLength(FLinesCodeFoldingCollapsedCache, 0);
   end;
 end;
 
@@ -7356,7 +7398,7 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
 
 var
   LLine: Integer;
-  LUncollapsedLineNumber: Integer;
+  LRealLineNumber: Integer;
   i: Integer;
   LLineRect: TRect;
   LLeftMarginOffsets: PIntegerArray;
@@ -7408,11 +7450,11 @@ begin
 
         LLineNumber := FLeftMargin.FormatLineNumber(LLine);
 
-        LUncollapsedLineNumber := LLine;
+        LRealLineNumber := LLine;
         if FCodeFolding.Visible then
         begin
-          LUncollapsedLineNumber := GetUncollapsedLineNumber(LLine);
-          LLineNumber := FLeftMargin.FormatLineNumber(LUncollapsedLineNumber);
+          LRealLineNumber := GetRealLineNumber(LLine);
+          LLineNumber := FLeftMargin.FormatLineNumber(LRealLineNumber);
         end;
 
         if (lnoIntens in LeftMargin.LineNumbers.Options) and (LLine <> CaretY) and (LLineNumber[Length(LLineNumber)] <> '0') and
@@ -7421,7 +7463,7 @@ begin
           LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
           LOldColor := Canvas.Pen.Color;
           Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
-          if (LUncollapsedLineNumber mod 5) = 0 then
+          if (LRealLineNumber mod 5) = 0 then
           begin
             Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
             Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
@@ -7568,7 +7610,7 @@ begin
       begin
         i := RowToLine(LLine);
         if FCodeFolding.Visible then
-          i := GetUncollapsedLineNumber(i);
+          i := GetRealLineNumber(i);
         LLineRect.Left := LPanelRect.Left;
         LLineRect.Right := LPanelRect.Right;
         LLineRect.Top := (LLine - TopLine) * LineHeight;
@@ -8236,10 +8278,13 @@ var
     end;
 
     LScrolledXBy := (FLeftChar - 1) * FCharWidth;
+    LCurrentLine := LFirstLine;
+   // LCollapsedLineCount := GetCollapsedLineCountBeforeLine(LCurrentLine);
+    //LCurrentLine := LCurrentLine - LCollapsedLineCount;
 
     for i := LFirstLine to LLastLine do
     begin
-      LCurrentLine := i;
+      LCurrentLine := GetRealLineNumber(LCurrentLine);
 
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];
@@ -8465,6 +8510,7 @@ var
         if Assigned(FOnAfterLinePaint) then
           FOnAfterLinePaint(Self, Canvas, LLineRect, RowToLine(LCurrentLine), AMinimap);
       end;
+      Inc(LCurrentLine);
     end;
     LIsCurrentLine := False;
   end;
@@ -8573,7 +8619,6 @@ var
   LTextPosition: TBCEditorTextPosition;
   LChangeScrollPastEndOfLine: Boolean;
   LBeginX: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
   LUndoItem := FRedoList.PopItem;
@@ -8674,30 +8719,6 @@ begin
           end;
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition,
             LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode);
-        end;
-      crCollapseFold:
-        begin
-          LCodeFoldingRange := nil;
-          if Assigned(LUndoItem.ChangeData) then
-            LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine > 0) then
-          begin
-            CodeFoldingUncollapse(LCodeFoldingRange, False);
-            FUndoList.AddChange(crUncollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
-              LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
-          end;
-        end;
-      crUncollapseFold:
-        begin
-          LCodeFoldingRange := nil;
-          if Assigned(LUndoItem.ChangeData) then
-            LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine > 0) then
-          begin
-            CodeFoldingCollapse(LCodeFoldingRange, False);
-            FUndoList.AddChange(crCollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
-              LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
-          end;
         end;
     end;
   finally
@@ -9033,7 +9054,7 @@ var
               LDeletePosition := Char;
               LCurrentLine := Line;
             end;
-            CodeFoldingExpandCollapsedLine(LCurrentLine);
+            //CodeFoldingExpandCollapsedLine(LCurrentLine);
 
             LDeletePositionEnd := DisplayToTextPosition(GetDisplayPosition(LDisplayDeletePositionEnd, i)).Char;
             LTempString := FLines.List[LCurrentLine - 1].fString;
@@ -9386,7 +9407,6 @@ var
   LTempText: string;
   LChangeScrollPastEndOfLine: Boolean;
   LBeginX: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
   LUndoItem := FUndoList.PopItem;
@@ -9486,30 +9506,6 @@ begin
           SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition,
             LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode);
-        end;
-      crCollapseFold:
-        begin
-          LCodeFoldingRange := nil;
-          if Assigned(LUndoItem.ChangeData) then
-            LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine > 0) then
-          begin
-            CodeFoldingUncollapse(LCodeFoldingRange, False);
-            FRedoList.AddChange(crUncollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
-              LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
-          end;
-        end;
-      crUncollapseFold:
-        begin
-          LCodeFoldingRange := nil;
-          if Assigned(LUndoItem.ChangeData) then
-            LCodeFoldingRange := TBCEditorCodeFoldingRange(LUndoItem.ChangeData);
-          if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.FromLine > 0) then
-          begin
-            CodeFoldingCollapse(LCodeFoldingRange, False);
-            FRedoList.AddChange(crCollapseFold, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
-              LUndoItem.ChangeSelectionMode, LCodeFoldingRange);
-          end;
         end;
     end;
   finally
@@ -10114,9 +10110,9 @@ begin
 
   if not GetWordWrap then
   begin
-    if ACollapsedLineNumber then
-      Result.Row := GetCollapsedLineNumber(Result.Row)
-    else
+    //if ACollapsedLineNumber then
+    //  Result.Row := GetRealLineNumber(Result.Row)
+    //else
       Result.Row := ATextPosition.Line
   end;
 
@@ -10299,10 +10295,23 @@ begin
       ClearBookmark(i);
 end;
 
+procedure TBCBaseEditor.ClearMarks;
+var
+  i: Integer;
+begin
+  i := 0;
+  while i < Marks.Count do
+  if not Marks.Items[i].IsBookmark then
+    Marks.Delete(i)
+  else
+    Inc(i);
+end;
+
 procedure TBCBaseEditor.ClearCodeFolding;
 begin
   FAllCodeFoldingRanges.ClearAll;
-  SetLength(FCollapsedLinesDifferenceCache, 0);
+  //SetLength(FCollapsedLinesDifferenceCache, 0);
+  SetLength(FLinesCodeFoldingCollapsedCache, 0);
 end;
 
 procedure TBCBaseEditor.ClearMatchingPair;
@@ -10360,9 +10369,9 @@ var
   LBlockBeginPosition, LBlockEndPosition: TBCEditorTextPosition;
 begin
   LBlockBeginPosition.Char := FSelectionBeginPosition.Char;
-  LBlockBeginPosition.Line := GetUncollapsedLineNumber(FSelectionBeginPosition.Line);
+  LBlockBeginPosition.Line := GetRealLineNumber(FSelectionBeginPosition.Line);
   LBlockEndPosition.Char := FSelectionEndPosition.Char;
-  LBlockEndPosition.Line := GetUncollapsedLineNumber(FSelectionEndPosition.Line);
+  LBlockEndPosition.Line := GetRealLineNumber(FSelectionEndPosition.Line);
 
   FLines.BeginUpdate;
   for i := 0 to 9 do
@@ -10380,7 +10389,8 @@ var
   i: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  SetLength(FCollapsedLinesDifferenceCache, 0);
+  //SetLength(FCollapsedLinesDifferenceCache, 0);
+  SetLength(FLinesCodeFoldingCollapsedCache, 0);
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
@@ -10410,7 +10420,6 @@ var
         begin
           Result := LCodeFoldingRange.CollapsedLines.Count - 1;
           CodeFoldingUncollapse(LCodeFoldingRange);
-          LCodeFoldingRange.UndoListed := False;
         end;
     end;
   end;
@@ -10757,6 +10766,7 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LChar: Char;
 begin
+  { Command not processed for collapsed line }
   if FCodeFolding.Visible and not (csDestroying in ComponentState) then
   begin
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(CaretY);
@@ -10765,7 +10775,7 @@ begin
         (ACommand = ecTab) or (ACommand = ecShiftTab) or (ACommand = ecString) then
         Exit;
   end;
-{ Process a comand }
+  { Process a command }
   LHelper := '';
   IncPaintLock;
   try
@@ -11907,7 +11917,6 @@ end;
 procedure TBCBaseEditor.InitCodeFolding;
 begin
   ClearCodeFolding;
-  SetLength(FCollapsedLinesDifferenceCache, 0);
   ScanCodeFoldingRanges(FAllCodeFoldingRanges, FLines);
   CodeFoldingPrepareRangeForLine;
 end;
@@ -12161,6 +12170,7 @@ var
 begin
   if FCodeFolding.Visible then
   begin
+    // TODO: Needed?
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(CaretY);
     if Assigned(LFoldRange) and LFoldRange.Collapsed then
       Exit;
@@ -12288,7 +12298,6 @@ var
   LAutoComplete: Boolean;
   LPasteAction: Boolean;
   LKeepGoing: Boolean;
-  LCodeFoldingAction: Boolean;
 begin
   if ReadOnly then
     Exit;
@@ -12297,7 +12306,6 @@ begin
   LLastChangeString := FRedoList.LastChangeString;
   LAutoComplete := LLastChangeReason = crAutoCompleteBegin;
   LPasteAction := LLastChangeReason = crPaste;
-  LCodeFoldingAction := FCodeFolding.Visible and (LLastChangeReason in [crCollapseFold, crUncollapseFold]);
 
   LUndoItem := FRedoList.PeekItem;
   if Assigned(LUndoItem) then
@@ -12318,9 +12326,6 @@ begin
           else
           if LPasteAction then
             LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
-          else
-          if LCodeFoldingAction then
-            LKeepGoing := False
           else
           if LUndoItem.ChangeNumber = LOldChangeNumber then
             LKeepGoing := True
@@ -12412,14 +12417,13 @@ var
 begin
   FNeedToRescanCodeFolding := False;
 
-  { Delete all uncollapsed folds, if not in redo list }
+  { Delete all uncollapsed folds }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if Assigned(LCodeFoldingRange) then
     begin
-      if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
-        not LCodeFoldingRange.UndoListed then
+      if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed then
       begin
         FreeAndNil(LCodeFoldingRange);
         FAllCodeFoldingRanges.List.Delete(i);
@@ -12513,20 +12517,20 @@ end;
 
 procedure TBCBaseEditor.SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
 var
-  LUncollapsedLines: TStringList;
-var
+//  LUncollapsedLines: TStringList;
   LFileStream: TFileStream;
 begin
   LFileStream := TFileStream.Create(AFileName, fmCreate);
   try
-    LUncollapsedLines := CreateUncollapsedLines;
-    try
-      if Assigned(AEncoding) then
-        FEncoding := AEncoding;
-      LUncollapsedLines.SaveToStream(LFileStream, FEncoding);
-    finally
-      LUncollapsedLines.Free;
-    end;
+    //LUncollapsedLines := CreateUncollapsedLines;
+    //try
+    if Assigned(AEncoding) then
+      FEncoding := AEncoding;
+    //  LUncollapsedLines.SaveToStream(LFileStream, FEncoding);
+    FLines.SaveToStream(LFileStream, FEncoding);
+    //finally
+    //  LUncollapsedLines.Free;
+    //end;
     FModified := False;
   finally
     LFileStream.Free;

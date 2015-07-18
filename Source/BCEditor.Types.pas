@@ -229,7 +229,7 @@ type
 
   TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete,
     crLineBreak, crLineInsert, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
-    crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll, crCollapseFold, crUncollapseFold);
+    crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll);
 
 implementation
 

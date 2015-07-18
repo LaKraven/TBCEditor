@@ -60,7 +60,6 @@ type
     FFromLine: Integer;
     FIndentLevel: Integer;
     FParentCollapsed: Boolean;
-    FUndoListed: Boolean;
     FFoldRangeLevel: Integer;
     FSubCodeFoldingRanges: TBCEditorCodeFoldingRanges;
     FToLine: Integer;
@@ -84,7 +83,6 @@ type
     property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
     property IndentLevel: Integer read FIndentLevel write FIndentLevel;
     property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
-    property UndoListed: Boolean read FUndoListed write FUndoListed default False;
     property FoldRangeLevel: Integer read FFoldRangeLevel write FFoldRangeLevel;
     property SubCodeFoldingRanges: TBCEditorCodeFoldingRanges read FSubCodeFoldingRanges;
     property ToLine: Integer read FToLine write FToLine;
@@ -285,7 +283,6 @@ begin
   FCollapsed := False;
   FCollapsedBy := -1;
   FIsExtraTokenFound := False;
-  FUndoListed := False;
 end;
 
 destructor TBCEditorCodeFoldingRange.Destroy;

@@ -11,6 +11,7 @@ type
     FColors: TBCEditorCodeFoldingHintColors;
     FCursor: TCursor;
     FFont: TFont;
+    FRowCount: Integer;
     FVisible: Boolean;
   public
     constructor Create;
@@ -20,6 +21,7 @@ type
     property Colors: TBCEditorCodeFoldingHintColors read FColors write FColors;
     property Cursor: TCursor read FCursor write FCursor default crHelp;
     property Font: TFont read FFont write FFont;
+    property RowCount: Integer read FRowCount write FRowCount default 40;
     property Visible: Boolean read FVisible write FVisible default True;
   end;
 
@@ -31,6 +33,7 @@ begin
 
   FColors := TBCEditorCodeFoldingHintColors.Create;
   FCursor := crHelp;
+  FRowCount := 40;
   FVisible := True;
   FFont := TFont.Create;
   FFont.Name := 'Courier New';

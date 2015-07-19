@@ -24,7 +24,6 @@ type
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TBCEditorCodeFoldingRange read Get; default;
-    //property List: TList read FList;
   end;
 
   TBCEditorAllCodeFoldingRanges = class(TBCEditorCodeFoldingRanges)
@@ -54,7 +53,6 @@ type
     FAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges;
     FCollapsed: Boolean;
     FCollapsedBy: Integer;
-    FCollapsedLines: TStringList;
     FCollapseMarkRect: TRect;
     FRegionItem: TBCEditorCodeFoldingRegionItem;
     FFromLine: Integer;
@@ -77,7 +75,6 @@ type
     property AllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges read FAllCodeFoldingRanges write FAllCodeFoldingRanges;
     property Collapsed: Boolean read FCollapsed write FCollapsed default False;
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
-    property CollapsedLines: TStringList read FCollapsedLines;
     property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
     property RegionItem: TBCEditorCodeFoldingRegionItem read FRegionItem write FRegionItem;
     property FromLine: Integer read FFromLine write FFromLine;
@@ -281,7 +278,6 @@ begin
   inherited;
 
   FSubCodeFoldingRanges := TBCEditorCodeFoldingRanges.Create;
-  FCollapsedLines := TStringList.Create;
   FCollapsed := False;
   FCollapsedBy := -1;
   FIsExtraTokenFound := False;
@@ -293,9 +289,6 @@ begin;
   FSubCodeFoldingRanges.Clear;
   FSubCodeFoldingRanges.Free;
   FSubCodeFoldingRanges := nil;
-  FCollapsedLines.Clear;
-  FCollapsedLines.Free;
-  FCollapsedLines := nil;
 
   inherited;
 end;

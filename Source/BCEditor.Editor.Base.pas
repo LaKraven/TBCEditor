@@ -199,6 +199,8 @@ type
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
       var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
+    function GetInternalCaretY: Integer;
+    function GetInternalCaretPosition: TBCEditorTextPosition;
     function GetLeadingWhite(const ALine: string): string;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineHeight: Integer;
@@ -286,6 +288,7 @@ type
     procedure SetInsertMode(const Value: Boolean);
     procedure SetInternalCaretX(Value: Integer);
     procedure SetInternalCaretY(Value: Integer);
+    procedure SetInternalCaretPosition(const Value: TBCEditorTextPosition);
     procedure SetInternalDisplayPosition(const ADisplayPosition: TBCEditorDisplayPosition);
     procedure SetKeyCommands(const Value: TBCEditorKeyCommands);
     procedure SetLeftChar(Value: Integer);
@@ -431,7 +434,6 @@ type
     procedure SetBreakWhitespace(Value: Boolean);
     procedure SetCaretPosition(const Value: TBCEditorTextPosition); overload;
     procedure SetCaretPosition(CallEnsureCursorPositionVisible: Boolean; Value: TBCEditorTextPosition); overload;
-    procedure SetInternalCaretPosition(const Value: TBCEditorTextPosition);
     procedure SetName(const Value: TComponentName); override;
     procedure SetReadOnly(Value: Boolean); virtual;
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
@@ -441,9 +443,9 @@ type
     procedure ShowCaret;
     procedure UndoItem;
     procedure UpdateMouseCursor;
-    property InternalCaretPosition: TBCEditorTextPosition write SetInternalCaretPosition;
+    property InternalCaretPosition: TBCEditorTextPosition read GetInternalCaretPosition write SetInternalCaretPosition;
     property InternalCaretX: Integer write SetInternalCaretX;
-    property InternalCaretY: Integer write SetInternalCaretY;
+    property InternalCaretY: Integer read GetInternalCaretY write SetInternalCaretY;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -1025,8 +1027,10 @@ var
   LCollapseMarkRect: TRect;
 begin
   Result := True;
+
   LDisplayPosition := PixelsToNearestRowColumn(X, Y);
-  LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(LDisplayPosition.Row));
+  CaretY := LDisplayPosition.Row;
+  LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(GetRealLineNumber(LDisplayPosition.Row)));
 
   if Assigned(LFoldRange) and LFoldRange.Collapsed then
   begin
@@ -1300,6 +1304,17 @@ begin
     Result := 0;
 end;
 
+function TBCBaseEditor.GetInternalCaretY: Integer;
+begin
+  Result := GetRealLineNumber(CaretY);
+end;
+
+function TBCBaseEditor.GetInternalCaretPosition: TBCEditorTextPosition;
+begin
+  Result := CaretPosition;
+  Result.Line := GetRealLineNumber(Result.Line);
+end;
+
 function TBCBaseEditor.GetLeadingWhite(const ALine: string): string;
 var
   i: Integer;
@@ -1357,7 +1372,7 @@ function TBCBaseEditor.GetLineText: string;
 var
   LLine: Integer;
 begin
-  LLine := GetRealLineNumber(CaretY);
+  LLine := InternalCaretY;
   if (LLine >= 1) and (LLine <= FLines.Count) then
     Result := FLines[LLine - 1]
   else
@@ -1793,6 +1808,8 @@ begin
   else
     Result := FSelectionBeginPosition;
 
+  Result.Line := GetRealLineNumber(Result.Line);
+
   if Result.Char <= Length(FLines[Result.Line - 1]) then
   begin
     LChar := FLines[Result.Line - 1][Result.Char];
@@ -1813,6 +1830,8 @@ begin
     Result := FSelectionBeginPosition
   else
     Result := FSelectionEndPosition;
+
+  Result.Line := GetRealLineNumber(Result.Line);
 
   if Result.Char <= Length(FLines[Result.Line - 1]) then
   begin
@@ -1854,6 +1873,8 @@ var
 begin
   if FResetLineNumbersCache then
   begin
+    if FAllCodeFoldingRanges.AllCount = 0 then
+      Exit;
     FResetLineNumbersCache := False;
     SetLength(LCollapsedCodeFolding, Lines.Count + 1);
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -1883,7 +1904,7 @@ end;
 
 function TBCBaseEditor.GetRealLineNumber(ALine: Integer): Integer;
 begin
-  Result := 0;
+  Result := ALine;
   CreateLineNumbersCache;
   if ALine <= Length(FLineNumbersCache) then
     Result := FLineNumbersCache[ALine];
@@ -1891,7 +1912,7 @@ end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
 begin
-  Result := GetWordAtRowColumn(GetTextPosition(CaretX, CaretY));
+  Result := GetWordAtRowColumn(InternalCaretPosition);
 end;
 
 function TBCBaseEditor.GetWordAtMouse: string;
@@ -2555,16 +2576,21 @@ procedure TBCBaseEditor.CheckIfAtMatchingKeywords;
 var
   LNewFoldRange: TBCEditorCodeFoldingRange;
   LIsKeyWord, LOpenKeyWord: Boolean;
+  LLine: Integer;
 
   function HighlightIndentGuide: Boolean;
+  var
+    LLine: Integer;
   begin
     Result := False;
 
+    LLine := InternalCaretY;
+
     if LIsKeyWord and LOpenKeyWord then
-      FHighlightedFoldRange := CodeFoldingRangeForLine(CaretY)
+      FHighlightedFoldRange := CodeFoldingRangeForLine(LLine)
     else
     if LIsKeyWord and not LOpenKeyWord then
-      FHighlightedFoldRange := CodeFoldingFoldRangeForLineTo(CaretY);
+      FHighlightedFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
 
     if Assigned(FHighlightedFoldRange) then
       Exit(True);
@@ -2583,11 +2609,13 @@ begin
   begin
     LNewFoldRange := nil;
 
+    LLine := InternalCaretY;
+
     if LIsKeyWord and LOpenKeyWord then
-      LNewFoldRange := CodeFoldingRangeForLine(CaretY)
+      LNewFoldRange := CodeFoldingRangeForLine(LLine)
     else
     if LIsKeyWord and not LOpenKeyWord then
-      LNewFoldRange := CodeFoldingFoldRangeForLineTo(CaretY);
+      LNewFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
 
     if LNewFoldRange <> FHighlightedFoldRange then
     begin
@@ -2862,8 +2890,8 @@ procedure TBCBaseEditor.DoEndKey(ASelection: Boolean);
       Result := True
     else
     begin
-      LLastRow := LineToRow(CaretY + 1) - 1;
-      while (LLastRow > 1) and (FWordWrapHelper.GetRowLength(LLastRow) = 0) and (RowToLine(LLastRow) = CaretY) do
+      LLastRow := LineToRow(InternalCaretY + 1) - 1;
+      while (LLastRow > 1) and (FWordWrapHelper.GetRowLength(LLastRow) = 0) and (RowToLine(LLastRow) = InternalCaretY) do
         Dec(LLastRow);
       Result := DisplayY = LLastRow;
     end;
@@ -2890,7 +2918,7 @@ begin
     SetInternalDisplayPosition(LNewCaretPosition);
   end
   else
-    MoveCaretAndSelection(CaretPosition, GetTextPosition(Length(LineText) + 1, CaretY), ASelection);
+    MoveCaretAndSelection(CaretPosition, GetTextPosition(Length(LineText) + 1, InternalCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoHomeKey(ASelection: Boolean);
@@ -2900,11 +2928,11 @@ begin
   if GetWordWrap then
   begin
     LNewPosition.Row := DisplayY;
-    LNewPosition.Column := TextToDisplayPosition(GetTextPosition(1, CaretY)).Column;
+    LNewPosition.Column := TextToDisplayPosition(GetTextPosition(1, InternalCaretY)).Column;
     MoveCaretAndSelection(CaretPosition, DisplayToTextPosition(LNewPosition), ASelection);
   end
   else
-    MoveCaretAndSelection(CaretPosition, GetTextPosition(1, CaretY), ASelection);
+    MoveCaretAndSelection(CaretPosition, GetTextPosition(1, InternalCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoLinesDeleted(AFirstLine, ACount: Integer; AddToUndoList: Boolean);
@@ -2960,7 +2988,7 @@ begin
 
   if LNewX <> 1 then
   begin
-    LLineNumber := CaretY - 1;
+    LLineNumber := InternalCaretY - 1;
     if (LLineNumber > 0) and (LLineNumber < FLines.Count) then
     begin
       Dec(LLineNumber);
@@ -3007,14 +3035,14 @@ begin
 
   if LNewX <> CaretX then
   begin
-    SetSelectionBeginPosition(GetTextPosition(LNewX, CaretY));
+    SetSelectionBeginPosition(GetTextPosition(LNewX, InternalCaretY));
     SetSelectionEndPosition(CaretPosition);
     LOldCaretPosition := CaretPosition;
 
     LOldSelectedText := SelectedText;
     SetSelectedTextPrimitive('');
 
-    FUndoList.AddChange(crSilentDelete, GetTextPosition(LNewX, CaretY), LOldCaretPosition, LOldSelectedText, smNormal);
+    FUndoList.AddChange(crSilentDelete, GetTextPosition(LNewX, InternalCaretY), LOldCaretPosition, LOldSelectedText, smNormal);
 
     LChangeScroll := not (soPastEndOfLine in FScroll.Options);
     try
@@ -3318,7 +3346,7 @@ begin
   LZeroPosition := CaretPosition;
   LDestinationPosition := LZeroPosition;
 
-  LCurrentLineLength := FLines.AccessStringLength(FCaretY - 1);
+  LCurrentLineLength := FLines.AccessStringLength(InternalCaretY - 1);
   LChangeY := not (soPastEndOfLine in FScroll.Options);
 
   if LChangeY and (X = -1) and (LZeroPosition.Char = 1) and (LZeroPosition.Line > 1) then
@@ -3353,7 +3381,7 @@ begin
   if GetWordWrap and (X > 0) and (CaretX < Length(LineText)) then
   begin
     LCaretRowColumn := DisplayPosition;
-    if (LCaretRowColumn.Column = 1) and (LineToRow(CaretY) <> LCaretRowColumn.Row) then
+    if (LCaretRowColumn.Column = 1) and (LineToRow(InternalCaretY) <> LCaretRowColumn.Row) then
       FCaretAtEndOfLine := True
     else
     if LCaretRowColumn.Column > CharsInWindow + 1 then
@@ -3923,7 +3951,7 @@ begin
     LDisplayPosition.Row := MinMax(Y, 1, DisplayLineCount);
   end;
   LTextPosition := DisplayToTextPosition(LDisplayPosition);
-  if (CaretX <> LTextPosition.Char) or (CaretY <> LTextPosition.Line) then
+  if (CaretX <> LTextPosition.Char) or (InternalCaretY <> LTextPosition.Line) then
   begin
     IncPaintLock;
     try
@@ -4202,7 +4230,7 @@ procedure TBCBaseEditor.SetLineText(Value: string);
 var
   LLine: Integer;
 begin
-  LLine := GetRealLineNumber(CaretY);
+  LLine := InternalCaretY;
   if (LLine >= 1) and (LLine <= Max(1, FLines.Count)) then
     FLines[LLine - 1] := Value;
 end;
@@ -5568,7 +5596,7 @@ begin
       LDeletionLength := GetDeletionLength;
       LStringToDelete[j] := Copy(LLine, 1, LDeletionLength);
       Inc(j);
-      if (FCaretY = i) and (LCaretPositionX <> 1) then
+      if (CaretY = i) and (LCaretPositionX <> 1) then
         LCaretPositionX := LCaretPositionX - LDeletionLength;
     end;
     LFirstIndent := -1;
@@ -5873,12 +5901,15 @@ begin
 end;
 
 procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
+var
+  LInternalCaretY: Integer;
 begin
   if FCodeFolding.Visible then
   begin
+    LInternalCaretY := InternalCaretY;
     if FNeedToRescanCodeFolding or
-      ((ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(FCaretY) or
-      ((ACommand = ecLineBreak) and IsKeywordAtLine(FCaretY - 1)) or { the caret is already in the new line }
+      ((ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(LInternalCaretY) or
+      ((ACommand = ecLineBreak) and IsKeywordAtLine(LInternalCaretY - 1)) or { the caret is already in the new line }
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
     else
@@ -6043,9 +6074,12 @@ begin
 end;
 
 procedure TBCBaseEditor.DoTripleClick;
+var
+  LInternalCaretY: Integer;
 begin
-  SelectionBeginPosition := GetTextPosition(0, CaretY);
-  SelectionEndPosition := GetTextPosition(0, CaretY + 1);
+  LInternalCaretY := InternalCaretY;
+  SelectionBeginPosition := GetTextPosition(0, LInternalCaretY);
+  SelectionEndPosition := GetTextPosition(0, LInternalCaretY + 1);
   FLastDblClick := 0;
 end;
 
@@ -6471,7 +6505,7 @@ begin
   end;
 
   { Move caret }
-  LOldCaretY := FCaretY;
+  LOldCaretY := InternalCaretY;
   if (Button in [mbLeft, mbRight]) and (X > LLeftMarginWidth) then
   begin
     if Button = mbRight then
@@ -6543,7 +6577,7 @@ begin
   if not (ssShift in Shift) then
   begin
     DoTrimTrailingSpaces(LOldCaretY);
-    if DoTrimTrailingSpaces(FCaretY) > 0 then
+    if DoTrimTrailingSpaces(InternalCaretY) > 0 then
       if not (soPastEndOfLine in FScroll.Options) then
         CaretX := CaretX;
     { This is necessary because user could click on trimmed area and caret would appear behind line length when not in
@@ -6953,7 +6987,7 @@ begin
 
   LFoldRange := nil;
   if cfoHighlightFoldingLine in FCodeFolding.Options then
-    LFoldRange := CodeFoldingLineInsideRange(RowToLine(CaretY));
+    LFoldRange := CodeFoldingLineInsideRange(RowToLine(InternalCaretY));
 
   for i := AFirstRow to ALastRow do
   begin
@@ -7109,7 +7143,7 @@ begin
   if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
     ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
-    LLine := GetRealLineNumber(CaretY);
+    LLine := InternalCaretY;
     for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];
@@ -8512,9 +8546,9 @@ begin
               LLength := LRun - LStrToDelete;
               if LLength > 0 then
               begin
-                LTempString := FLines[CaretY - 1];
+                LTempString := FLines[InternalCaretY - 1];
                 Delete(LTempString, LBeginX, LLength);
-                FLines[CaretY - 1] := LTempString;
+                FLines[InternalCaretY - 1] := LTempString;
               end;
             end
             else
@@ -8645,7 +8679,7 @@ begin
     end;
   if cfoHighlightMatchingPair in FCodeFolding.Options then
   begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(CaretY));
+    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(RowToLine(InternalCaretY));
     if Assigned(LFoldRange) then
     begin
       if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
@@ -8741,14 +8775,14 @@ begin
   if Value.Char < 1 then
     Value.Char := 1;
 
-  if (Value.Char <> FCaretX) or (Value.Line <> FCaretY) then
+  if (Value.Char <> FCaretX) or (Value.Line <> CaretY) then
   begin
     FLastDisplayY := DisplayY;
     IncPaintLock;
     try
       if FCaretX <> Value.Char then
         FCaretX := Value.Char;
-      if FCaretY <> Value.Line then
+      if CaretY <> Value.Line then
       begin
         if ActiveLine.Color <> clNone then
         begin
@@ -8928,7 +8962,7 @@ var
 
       LIndented := False;
       if (FLines.Count > 0) and (eoAutoIndent in fOptions) then
-        LWhite := GetLeadingWhite(FLines.List^[Pred(FCaretY)].fString)
+        LWhite := GetLeadingWhite(FLines.List^[Pred(InternalCaretY)].fString)
       else
         LWhite := '';
 
@@ -8982,7 +9016,7 @@ var
 
         Inc(Result);
       end;
-      FCaretX := 1 + Length(FLines[GetRealLineNumber(CaretY) - 1]) - Length(LRightSide);
+      FCaretX := 1 + Length(FLines[InternalCaretY - 1]) - Length(LRightSide);
     end;
 
     function InsertColumn: Integer;
@@ -9067,7 +9101,7 @@ var
           FLines[LCurrentLine - 1] := LTempString;
 
           if AAddToUndoList then
-            FUndoList.AddChange(crPaste, GetTextPosition(CaretX, CaretY), GetTextPosition(CaretX + (P - LStart), CaretY),
+            FUndoList.AddChange(crPaste, InternalCaretPosition, GetTextPosition(CaretX + (P - LStart), InternalCaretY),
               '', FSelection.ActiveMode);
         end;
 
@@ -9099,8 +9133,8 @@ var
       if FCaretX = 1 then
         LIsAfterLine := False
       else
-        LIsAfterLine := FCaretX > FLines.AccessStringLength(FCaretY - 1);
-      LDoReplace := FLines.AccessStringLength(FCaretY - 1) = 0;
+        LIsAfterLine := FCaretX > FLines.AccessStringLength(InternalCaretY - 1);
+      LDoReplace := FLines.AccessStringLength(InternalCaretY - 1) = 0;
       LDoCaretFix := False;
 
       { Insert strings }
@@ -9124,7 +9158,7 @@ var
         end
         else
         begin
-          FLines.Insert(FCaretY - 1 + Ord(LIsAfterLine), S);
+          FLines.Insert(InternalCaretY - 1 + Ord(LIsAfterLine), S);
           Inc(Result);
         end;
 
@@ -9293,15 +9327,15 @@ begin
           InternalCaretPosition := LUndoItem.ChangeStartPosition;
           if CaretY > 0 then
           begin
-            LTempText := FLines.Strings[CaretY - 1];
+            LTempText := FLines.Strings[InternalCaretY - 1];
             if (Length(LTempText) < CaretX - 1) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
               LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, CaretX - 1 - Length(LTempText));
-            ProperSetLine(CaretY - 1, LTempText + LUndoItem.ChangeString);
+            ProperSetLine(InternalCaretY - 1, LTempText + LUndoItem.ChangeString);
             FLines.Delete(LUndoItem.ChangeEndPosition.Line);
           end
           else
-            ProperSetLine(CaretY - 1, LUndoItem.ChangeString);
-          DoLinesDeleted(CaretY + 1, 1, True);
+            ProperSetLine(InternalCaretY - 1, LUndoItem.ChangeString);
+          DoLinesDeleted(InternalCaretY + 1, 1, True);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition, '',
             LUndoItem.ChangeSelectionMode);
         end;
@@ -9470,7 +9504,7 @@ begin
       Beep;
     SelectionBeginPosition := SelectionEndPosition;
     CaretPosition := SelectionBeginPosition;
-    if (CaretX = 1) and (CaretY = 1) then
+    if (CaretX = 1) and (InternalCaretY = 1) then
     begin
       if soShowStringNotFound in FSearch.Options then
         DoSearchStringNotFoundDialog;
@@ -9753,7 +9787,7 @@ begin
           if (LSearchLength <> LReplaceLength) and (LActionReplace <> raSkip) then
           begin
             Inc(LResultOffset, LReplaceLength - LSearchLength);
-            if (FSelection.ActiveMode <> smColumn) and (CaretY = LEndTextPosition.Line) then
+            if (FSelection.ActiveMode <> smColumn) and (InternalCaretY = LEndTextPosition.Line) then
             begin
               Inc(LEndTextPosition.Char, LReplaceLength - LSearchLength);
               SelectionEndPosition := LEndTextPosition;
@@ -9937,7 +9971,7 @@ begin
 
   if ATextPosition.Line - 1 < FLines.Count then
   begin
-    s := FLines[ATextPosition.Line - 1];
+    s := FLines[GetRealLineNumber(ATextPosition.Line) - 1];
     l := Length(s);
     X := 0;
     for i := 1 to ATextPosition.Char - 1 do
@@ -10271,7 +10305,7 @@ begin
           // TODO: If last line was folded, set the selection char
         end
         else
-          CodeFoldingUncollapseLine(CaretY);
+          CodeFoldingUncollapseLine(InternalCaretY);
     end;
 
     { internal command handler }
@@ -10586,7 +10620,7 @@ begin
   { Command not processed for collapsed line }
   if FCodeFolding.Visible and not (csDestroying in ComponentState) then
   begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(CaretY);
+    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(InternalCaretY);
     if Assigned(LFoldRange) and (LFoldRange.Collapsed) then
       if ((ACommand >= ecDeleteLastChar) and (ACommand < ecUndo)) or
         (ACommand = ecTab) or (ACommand = ecShiftTab) or (ACommand = ecString) then
@@ -10740,7 +10774,7 @@ begin
           begin
             LLineText := LineText;
             LLength := Length(LLineText);
-            LTabBuffer := FLines.Strings[FCaretY - 1];
+            LTabBuffer := FLines.Strings[InternalCaretY - 1];
             LCaretPosition := CaretPosition;
             LIsJustIndented := False;
             { Behind EndOfLine? Simply move the cursor }
@@ -10759,7 +10793,7 @@ begin
                 { unindent }
                 if LSpaceCount1 > 0 then
                 begin
-                  LBackCounter := CaretY - 2;
+                  LBackCounter := InternalCaretY - 2;
                   { It's better not to have if statement inside loop }
                   if (eoTrimTrailingSpaces in Options) and (LLength = 0) then
                   while LBackCounter >= 0 do
@@ -10795,12 +10829,12 @@ begin
                 if CaretY > 1 then
                 begin
                   InternalCaretY := CaretY - 1;
-                  InternalCaretX := Length(Lines[CaretY - 1]) + 1;
+                  InternalCaretX := Length(Lines[InternalCaretY - 1]) + 1;
 
                   FUndoList.AddChange(crSilentDelete, CaretPosition, LCaretPosition, sLineBreak, smNormal);
 
-                  FLines.delete(CaretY);
-                  DoLinesDeleted(CaretY, 1, True);
+                  FLines.Delete(InternalCaretY);
+                  DoLinesDeleted(InternalCaretY, 1, True);
                   if eoTrimTrailingSpaces in Options then
                     LLineText := TrimRight(LLineText);
 
@@ -10818,7 +10852,7 @@ begin
                   { Unindent, count visual whitespace on current previous lines }
                   LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText, FTabs.Width);
                   LVisualSpaceCount2 := 0;
-                  LBackCounter := FCaretY - 2;
+                  LBackCounter := InternalCaretY - 2;
                   while LBackCounter >= 0 do
                   begin
                     LVisualSpaceCount2 := GetLeadingExpandedLength(FLines[LBackCounter], FTabs.Width);
@@ -10849,7 +10883,7 @@ begin
                     Delete(LLineText, i + 1, LSpaceCount1 - i);
                     FUndoList.BeginBlock;
                     try
-                      FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, FCaretY), LCaretPosition, LHelper, smNormal);
+                      FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, InternalCaretY), InternalCaretPosition, LHelper, smNormal);
 
                       { If there's visual diffirence after deletion, that
                         means there are BCEDITOR_SPACE_CHAR spaces chars which we need to
@@ -10880,7 +10914,7 @@ begin
 
                     LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
                     Delete(LLineText, i + 1, LSpaceCount1 - i);
-                    FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, FCaretY),  LCaretPosition, LHelper, smNormal);
+                    FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, InternalCaretY), InternalCaretPosition, LHelper, smNormal);
                     FCaretX := i + 1;
                   end;
                 FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
@@ -10893,7 +10927,7 @@ begin
                 if LChar.IsSurrogate then
                   i := 2;
                 LHelper := Copy(LLineText, FCaretX - i, i);
-                FUndoList.AddChange(crSilentDelete, GetTextPosition(FCaretX - i, FCaretY), LCaretPosition,
+                FUndoList.AddChange(crSilentDelete, GetTextPosition(FCaretX - i, InternalCaretY), InternalCaretPosition,
                   LHelper, smNormal);
 
                 Delete(LLineText, FCaretX - i, i);
@@ -10903,7 +10937,7 @@ begin
               end;
             end;
             if not LIsJustIndented then
-              FLines.Attributes[FCaretY - 1].LineState := lsModified;
+              FLines.Attributes[InternalCaretY - 1].LineState := lsModified;
           end;
         end;
       { Delete command }
@@ -10925,12 +10959,12 @@ begin
               LCaretPosition.Char := CaretX + LCounter;
               LCaretPosition.Line := CaretY;
               Delete(LLineText, CaretX, LCounter);
-              ProperSetLine(CaretY - 1, LLineText);
+              ProperSetLine(InternalCaretY - 1, LLineText);
               FUndoList.AddChange(crSilentDeleteAfterCursor, CaretPosition, LCaretPosition, LHelper, smNormal);
             end
             else
             begin
-              if CaretY < FLines.Count then
+              if InternalCaretY < FLines.Count then
               begin
                 LSpaceCount1 := FCaretX - 1 - LLength;
                 if toTabsToSpaces in FTabs.Options then
@@ -10945,20 +10979,20 @@ begin
                 with LCaretPosition do
                 begin
                   Char := 1;
-                  Line := FCaretY + 1;
+                  Line := InternalCaretY + 1;
                 end;
 
                 if LSpaceCount1 > 0 then
                   FUndoList.BeginBlock;
                 LHelper := sLineBreak;
-                FUndoList.AddChange(crSilentDeleteAfterCursor, CaretPosition, LCaretPosition, LHelper, smNormal);
+                FUndoList.AddChange(crSilentDeleteAfterCursor, InternalCaretPosition, LCaretPosition, LHelper, smNormal);
                 if LSpaceCount1 > 0 then
                   FUndoList.EndBlock;
 
                 FLines[GetRealLineNumber(FCaretY) - 1] := LLineText + LSpaceBuffer + FLines[GetRealLineNumber(FCaretY)];
                 FLines.Attributes[GetRealLineNumber(Pred(FCaretY))].LineState := lsModified;
-                FLines.Delete(CaretY);
-                DoLinesDeleted(CaretY, 1, True);
+                FLines.Delete(InternalCaretY);
+                DoLinesDeleted(InternalCaretY, 1, True);
               end;
             end;
           end;
@@ -10985,10 +11019,10 @@ begin
                 Inc(LWordPosition.Char);
             end
             else
-            if (LWordPosition.Char = FCaretX) and (LWordPosition.Line = FCaretY) then
+            if (LWordPosition.Char = FCaretX) and (LWordPosition.Line = InternalCaretY) then
             begin
               LWordPosition.Char := LLength + 1;
-              LWordPosition.Line := FCaretY;
+              LWordPosition.Line := InternalCaretY;
             end;
             if LLineText <> '' then
               while LLineText[LWordPosition.Char] = BCEDITOR_SPACE_CHAR do
@@ -10997,9 +11031,9 @@ begin
           else
           begin
             LWordPosition.Char := LLength + 1;
-            LWordPosition.Line := CaretY;
+            LWordPosition.Line := InternalCaretY;
           end;
-          if (LWordPosition.Char <> CaretX) or (LWordPosition.Line <> CaretY) then
+          if (LWordPosition.Char <> CaretX) or (LWordPosition.Line <> InternalCaretY) then
           begin
             SetSelectionBeginPosition(CaretPosition);
             SetSelectionEndPosition(LWordPosition);
@@ -11018,9 +11052,9 @@ begin
           else
           begin
             LWordPosition.Char := 1;
-            LWordPosition.Line := CaretY;
+            LWordPosition.Line := InternalCaretY;
           end;
-          if (LWordPosition.Char <> CaretX) or (LWordPosition.Line <> CaretY) then
+          if (LWordPosition.Char <> CaretX) or (LWordPosition.Line <> InternalCaretY) then
           begin
             LOldSelectionMode := FSelection.Mode;
             try
@@ -11038,24 +11072,24 @@ begin
           end;
         end;
       ecDeleteLine:
-        if not ReadOnly and (Lines.Count > 0) and not ((CaretY = FLines.Count) and (Length(Lines[CaretY - 1]) = 0)) then
+        if not ReadOnly and (Lines.Count > 0) and not ((InternalCaretY = FLines.Count) and (Length(Lines[InternalCaretY - 1]) = 0)) then
         begin
           if SelectionAvailable then
             SetSelectionBeginPosition(CaretPosition);
           LHelper := LineText;
-          if CaretY = FLines.Count then
+          if InternalCaretY = FLines.Count then
           begin
-            FLines[CaretY - 1] := '';
-            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, CaretY),
-              GetTextPosition(Length(LHelper) + 1, CaretY), LHelper, smNormal);
+            FLines[InternalCaretY - 1] := '';
+            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, InternalCaretY),
+              GetTextPosition(Length(LHelper) + 1, InternalCaretY), LHelper, smNormal);
           end
           else
           begin
-            FLines.Delete(CaretY - 1);
+            FLines.Delete(InternalCaretY - 1);
             LHelper := LHelper + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
-            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, CaretY), GetTextPosition(1, CaretY + 1),
+            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, InternalCaretY), GetTextPosition(1, InternalCaretY + 1),
               LHelper, smNormal);
-            DoLinesDeleted(CaretY - 1, 1, True);
+            DoLinesDeleted(InternalCaretY - 1, 1, True);
           end;
           InternalCaretPosition := GetTextPosition(1, CaretY);
         end;
@@ -11192,9 +11226,9 @@ begin
 
                   LLineText := Copy(LLineText, FCaretX, MaxInt);
                   if (eoAutoIndent in FOptions) and (LSpaceCount1 > 0) then
-                    FLines.Insert(FCaretY, LSpaceBuffer + LLineText)
+                    FLines.Insert(InternalCaretY, LSpaceBuffer + LLineText)
                   else
-                    FLines.Insert(FCaretY, LLineText);
+                    FLines.Insert(InternalCaretY, LLineText);
 
                   if (eoTrimTrailingSpaces in FOptions) and (LTabBuffer <> '') then
                     FUndoList.AddChange(crLineBreak, LCaretPosition, LCaretPosition, LTabBuffer + LLineText, smNormal)
@@ -11209,31 +11243,31 @@ begin
 
                   if ACommand = ecLineBreak then
                     if toTabsToSpaces in FTabs.Options then
-                      InternalCaretPosition := GetTextPosition(LSpaceCount2 + 1, FCaretY + 1)
+                      InternalCaretPosition := GetTextPosition(LSpaceCount2 + 1, CaretY + 1)
                     else
-                      InternalCaretPosition := GetTextPosition(LSpaceCount1 + 1, FCaretY + 1);
+                      InternalCaretPosition := GetTextPosition(LSpaceCount1 + 1, CaretY + 1);
                 end
                 else
                 begin
-                  FLines.Insert(FCaretY - 1, '');
+                  FLines.Insert(InternalCaretY - 1, '');
 
                   FUndoList.AddChange(crLineInsert, LCaretPosition, LCaretPosition, '', smNormal);
 
                   with FLines do
                   begin
-                    Attributes[FCaretY - 1].LineState := lsModified;
-                    Attributes[FCaretY].LineState := lsModified;
+                    Attributes[InternalCaretY - 1].LineState := lsModified;
+                    Attributes[InternalCaretY].LineState := lsModified;
                   end;
 
                   if ACommand = ecLineBreak then
-                    InternalCaretY := FCaretY + 1;
+                    CaretY := CaretY + 1;
                 end;
               end
               else
               begin
                 LSpaceCount1 := 0;
                 LSpaceCount2 := 0;
-                LBackCounter := FCaretY;
+                LBackCounter := InternalCaretY;
                 if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) then
                 begin
                   repeat
@@ -11251,9 +11285,9 @@ begin
                     end;
                   until LBackCounter = 0;
 
-                  if (LSpaceCount1 = 0) and (FCaretY < FLines.Count) then
+                  if (LSpaceCount1 = 0) and (InternalCaretY < FLines.Count) then
                   begin
-                    LBackCounter := FCaretY - 1;
+                    LBackCounter := InternalCaretY - 1;
                     repeat
                       Inc(LBackCounter);
                       if FLines.AccessStringLength(LBackCounter) > 0 then
@@ -11272,14 +11306,14 @@ begin
                     until LBackCounter = FLines.Count - 1;
                   end;
                 end;
-                FLines.Insert(FCaretY, '');
+                FLines.Insert(InternalCaretY, '');
 
-                FUndoList.AddChange(crLineBreak, LCaretPosition, LCaretPosition, '', smNormal);
+                FUndoList.AddChange(crLineBreak, InternalCaretPosition, InternalCaretPosition, '', smNormal);
 
                 with FLines do
                 begin
-                  Attributes[FCaretY - 1].LineState := lsModified;
-                  Attributes[FCaretY].LineState := lsModified;
+                  Attributes[InternalCaretY - 1].LineState := lsModified;
+                  Attributes[InternalCaretY].LineState := lsModified;
                 end;
 
                 if ACommand = ecLineBreak then
@@ -11291,12 +11325,12 @@ begin
                     else
                       LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
 
-                    InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, FCaretY + 1);
+                    InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, CaretY + 1);
 
                     FLines[GetRealLineNumber(FCaretY) - 1] := LSpaceBuffer + FLines[GetRealLineNumber(FCaretY) - 1];
                   end
                   else
-                    InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
+                    InternalCaretPosition := GetTextPosition(1, CaretY + 1);
                 end;
               end;
             end
@@ -11307,7 +11341,7 @@ begin
 
               LSpaceCount1 := 0;
               LSpaceCount2 := 0;
-              LBackCounter := FCaretY;
+              LBackCounter := InternalCaretY;
 
               if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) and (FLines.Count > 1) then
               begin
@@ -11326,9 +11360,9 @@ begin
                   end;
                 until LBackCounter = 0;
 
-                if (LSpaceCount1 = 0) and (FCaretY < FLines.Count) then
+                if (LSpaceCount1 = 0) and (InternalCaretY < FLines.Count) then
                 begin
-                  LBackCounter := FCaretY - 1;
+                  LBackCounter := InternalCaretY - 1;
                   repeat
                     Inc(LBackCounter);
                     if FLines.AccessStringLength(LBackCounter) > 0 then
@@ -11348,14 +11382,14 @@ begin
                 end;
               end;
 
-              FLines.Insert(FCaretY - 1, '');
+              FLines.Insert(InternalCaretY - 1, '');
 
               FUndoList.AddChange(crLineBreak, CaretPosition, CaretPosition, '', smNormal);
 
               with FLines do
               begin
-                Attributes[FCaretY - 1].LineState := lsModified;
-                Attributes[FCaretY].LineState := lsModified;
+                Attributes[InternalCaretY - 1].LineState := lsModified;
+                Attributes[InternalCaretY].LineState := lsModified;
               end;
 
               if ACommand = ecLineBreak then
@@ -11367,17 +11401,17 @@ begin
                   else
                     LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
 
-                  InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, FCaretY + 1);
+                  InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, CaretY + 1);
 
                   FLines[GetRealLineNumber(FCaretY) - 1] := LSpaceBuffer + FLines[GetRealLineNumber(FCaretY) - 1];
                 end
                 else
-                  InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
+                  InternalCaretPosition := GetTextPosition(1, CaretY + 1);
               end;
             end;
             DoTrimTrailingSpaces(LCaretPosition.Line);
 
-            DoLinesInserted(CaretY - LInsertDelta, LInsertCount);
+            DoLinesInserted(InternalCaretY - LInsertDelta, LInsertCount);
             SelectionBeginPosition := CaretPosition;
             SelectionEndPosition := CaretPosition;
             EnsureCursorPositionVisible;
@@ -11430,15 +11464,15 @@ begin
               else
                 Insert(AChar, LLineText, FCaretX);
 
-              FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
+              FLines[InternalCaretY - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY),
-                    GetTextPosition(LLength + LSpaceCount1 + 2, FCaretY), '', smNormal);
-                  FLines.Attributes[FCaretY - 1].LineState := lsModified;
+                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1 + 1, InternalCaretY),
+                    GetTextPosition(LLength + LSpaceCount1 + 2, InternalCaretY), '', smNormal);
+                  FLines.Attributes[InternalCaretY - 1].LineState := lsModified;
 
                   InternalCaretX := LLength + LSpaceCount1 + 2;
                 finally
@@ -11447,8 +11481,8 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, FCaretY), '', smNormal);
-                FLines.Attributes[FCaretY - 1].LineState := lsModified;
+                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, InternalCaretY), '', smNormal);
+                FLines.Attributes[InternalCaretY - 1].LineState := lsModified;
 
                 InternalCaretX := FCaretX + 1;
               end;
@@ -11474,9 +11508,9 @@ begin
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1, FCaretY),
-                    GetTextPosition(LLength + LSpaceCount1 + 1, FCaretY), '', smNormal);
-                  FLines.Attributes[FCaretY - 1].LineState := lsModified;
+                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1, InternalCaretY),
+                    GetTextPosition(LLength + LSpaceCount1 + 1, InternalCaretY), '', smNormal);
+                  FLines.Attributes[InternalCaretY - 1].LineState := lsModified;
 
                   InternalCaretX := LLength + LSpaceCount1 + 1;
                 finally
@@ -11485,8 +11519,8 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, FCaretY), LHelper, smNormal);
-                FLines.Attributes[FCaretY - 1].LineState := lsModified;
+                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FCaretX + 1, InternalCaretY), LHelper, smNormal);
+                FLines.Attributes[InternalCaretY - 1].LineState := lsModified;
 
                 InternalCaretX := FCaretX + 1;
               end;
@@ -11627,7 +11661,7 @@ begin
               end;
               Insert(S, LLineText, CaretX);
               InternalCaretX := (CaretX + LLength);
-              ProperSetLine(CaretY - 1, LLineText);
+              ProperSetLine(InternalCaretY - 1, LLineText);
               if FInsertMode then
                 LHelper := '';
               FUndoList.AddChange(crInsert, LBlockStartPosition, CaretPosition, LHelper, smNormal);
@@ -11658,7 +11692,7 @@ begin
     if SelectionAvailable then
       InvalidateSelection;
     FSelectionBeginPosition.Char := FCaretX;
-    FSelectionBeginPosition.Line := FCaretY;
+    FSelectionBeginPosition.Line := InternalCaretY;
     FSelectionEndPosition := FSelectionBeginPosition;
   end;
 end;
@@ -11682,7 +11716,7 @@ begin
   if SelectionAvailable then
     InvalidateSelection;
   FSelectionBeginPosition.Char := FCaretX;
-  FSelectionBeginPosition.Line := FCaretY;
+  FSelectionBeginPosition.Line := InternalCaretY;
   FSelectionEndPosition := FSelectionBeginPosition;
   EnsureCursorPositionVisible(True);
 end;
@@ -11987,7 +12021,7 @@ begin
   if FCodeFolding.Visible then
   begin
     // TODO: Needed?
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(CaretY);
+    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(InternalCaretY);
     if Assigned(LFoldRange) and LFoldRange.Collapsed then
       Exit;
   end;
@@ -12501,24 +12535,24 @@ begin
   if AIndex <> -1 then
   begin
     if not GetBookmark(AIndex, X, Y) then
-      SetBookmark(AIndex, CaretX, CaretY)
+      SetBookmark(AIndex, CaretX, InternalCaretY)
     else
       ClearBookmark(AIndex);
   end
   else
   begin
     for i := 0 to Marks.Count - 1 do
-      if CaretY = Marks[i].Line then
+      if InternalCaretY = Marks[i].Line then
       begin
         ClearBookmark(Marks[i].Index);
         Exit;
       end;
     X := CaretX;
-    Y := CaretY;
+    Y := InternalCaretY;
     for i := 0 to 8 do
       if not GetBookmark(i, X, Y) then { variables used because X and Y are var parameters }
       begin
-        SetBookmark(i, CaretX, CaretY);
+        SetBookmark(i, CaretX, InternalCaretY);
         Exit;
       end;
   end;
@@ -12665,7 +12699,7 @@ begin
     ImmSetCompositionWindow(ImmGetContext(Handle), @LCompositionForm);
 
     if Assigned(FOnCaretChanged) then
-      FOnCaretChanged(Self, CaretX, CaretY);
+      FOnCaretChanged(Self, CaretX, InternalCaretY);
   end;
 end;
 

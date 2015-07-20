@@ -1228,7 +1228,7 @@ end;
 function TBCBaseEditor.GetDisplayY: Integer;
 begin
   if not GetWordWrap then
-    Result := GetRealLineNumber(CaretY)
+    Result := CaretY
   else
     Result := DisplayPosition.Row;
 end;
@@ -1354,9 +1354,12 @@ begin
 end;
 
 function TBCBaseEditor.GetLineText: string;
+var
+  LLine: Integer;
 begin
-  if (CaretY >= 1) and (CaretY <= FLines.Count) then
-    Result := FLines[CaretY - 1]
+  LLine := GetRealLineNumber(CaretY);
+  if (LLine >= 1) and (LLine <= FLines.Count) then
+    Result := FLines[LLine - 1]
   else
     Result := '';
 end;
@@ -2613,8 +2616,8 @@ begin
   end;
 
   CheckIfAtMatchingKeywords;
-  UpdateScrollbars;
   Paint;
+  UpdateScrollbars;
 end;
 
 procedure TBCBaseEditor.CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
@@ -2693,11 +2696,9 @@ begin
     Collapsed := False;
     SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
   end;
-
   CheckIfAtMatchingKeywords;
-
-  UpdateScrollbars;
   Paint;
+  UpdateScrollbars;
 end;
 
 procedure TBCBaseEditor.CompletionProposalTimerHandler(Sender: TObject);
@@ -4193,13 +4194,17 @@ procedure TBCBaseEditor.SetLines(Value: TBCEditorLines);
 begin
   ClearBookmarks;
   FLines.Assign(Value);
+  CreateLineNumbersCache;
   SizeOrFontChanged(True);
 end;
 
 procedure TBCBaseEditor.SetLineText(Value: string);
+var
+  LLine: Integer;
 begin
-  if (CaretY >= 1) and (CaretY <= Max(1, FLines.Count)) then
-    FLines[CaretY - 1] := Value;
+  LLine := GetRealLineNumber(CaretY);
+  if (LLine >= 1) and (LLine <= Max(1, FLines.Count)) then
+    FLines[LLine - 1] := Value;
 end;
 
 procedure TBCBaseEditor.SetModified(Value: Boolean);
@@ -6805,6 +6810,7 @@ var
   LSelectionAvailable: Boolean;
 begin
   LClipRect := Canvas.ClipRect;
+  //{$IFDEF DEBUG}OutputDebugString(PChar(Format('DisplayCount = %d', [GetDisplayLineCount])));{$ENDIF}
 
   LColumn1 := FLeftChar;
   LTemp := FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2;
@@ -7092,7 +7098,7 @@ end;
 
 procedure TBCBaseEditor.PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
 var
-  i, X, Y: Integer;
+  i, X, Y, LLine: Integer;
   LOldColor, LTempColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -7103,12 +7109,13 @@ begin
   if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
     ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
+    LLine := GetRealLineNumber(CaretY);
     for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];
       if Assigned(LCodeFoldingRange) then
-        if (LCodeFoldingRange.IndentLevel > LDeepestLevel) and (CaretY >= LCodeFoldingRange.FromLine) and
-          (CaretY <= LCodeFoldingRange.ToLine) then
+        if (LCodeFoldingRange.IndentLevel > LDeepestLevel) and (LLine >= LCodeFoldingRange.FromLine) and
+          (LLine <= LCodeFoldingRange.ToLine) then
           LDeepestLevel := LCodeFoldingRange.IndentLevel;
     end;
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -7133,7 +7140,7 @@ begin
             LTempColor := Canvas.Pen.Color;
             Canvas.Pen.Color := FBackgroundColor;
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
-              (CaretY >= LCodeFoldingRange.FromLine) and (CaretY <= LCodeFoldingRange.ToLine) then
+              (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
               if cfoHighlightIndentGuides in FCodeFolding.Options then
                 Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
             Y := ALineRect.Top;
@@ -8545,13 +8552,12 @@ end;
 
 procedure TBCBaseEditor.RepaintGuides;
 var
-  LCurrentLine, LScrolledXBy: Integer;
+  LCurrentLine, LScrolledXBy, LTopLine: Integer;
   LLineRect: TRect;
 begin
   if csDestroying in ComponentState then
     Exit;
-  if not FCodeFolding.Visible then
-    Exit;
+  if FCodeFolding.Visible then
   try
     HideCaret;
     LLineRect.Left := FLeftMargin.GetWidth + FCodeFolding.Width;
@@ -8559,7 +8565,9 @@ begin
     LLineRect.Top := 0;
     LLineRect.Bottom := GetLineHeight;
     LScrolledXBy := (LeftChar - 1) * CharWidth;
-    for LCurrentLine := RowToLine(TopLine) to RowToLine(TopLine) + VisibleLines do
+    LTopLine := RowToLine(TopLine);
+    LTopLine := GetRealLineNumber(LTopLine);
+    for LCurrentLine := LTopLine to LTopLine + VisibleLines do
     begin
       PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, False);
       LLineRect.Top := LLineRect.Bottom;
@@ -8930,13 +8938,13 @@ var
       if P^ <> BCEDITOR_NONE_CHAR then
       begin
         LStr := LLeftSide + Copy(AValue, 1, P - LStart);
-        FLines[FCaretY - 1] := LStr;
-        FLines.InsertLines(FCaretY, CountLines(P));
+        FLines[GetRealLineNumber(FCaretY) - 1] := LStr;
+        FLines.InsertLines(GetRealLineNumber(FCaretY), CountLines(P));
       end
       else
       begin
         LStr := LLeftSide + AValue + LRightSide;
-        FLines[FCaretY - 1] := LStr;
+        FLines[GetRealLineNumber(FCaretY) - 1] := LStr;
       end;
 
       { insert left lines of Value }
@@ -8966,15 +8974,15 @@ var
         if (not IsStringAllWhite(LStr) and (GetLeadingExpandedLength(LStr, FTabs.Width) < GetLeadingExpandedLength(LWhite,
           FTabs.Width))) or LIndented then
         begin
-          FLines[FCaretY - 1] := LWhite + LStr;
+          FLines[GetRealLineNumber(FCaretY) - 1] := LWhite + LStr;
           LIndented := True;
         end
         else
-          FLines[FCaretY - 1] := LStr;
+          FLines[GetRealLineNumber(FCaretY) - 1] := LStr;
 
         Inc(Result);
       end;
-      FCaretX := 1 + Length(FLines[CaretY - 1]) - Length(LRightSide);
+      FCaretX := 1 + Length(FLines[GetRealLineNumber(CaretY) - 1]) - Length(LRightSide);
     end;
 
     function InsertColumn: Integer;
@@ -9111,7 +9119,7 @@ var
         if LDoReplace then
         begin
           LDoReplace := False;
-          FLines[FCaretY - 1] := S;
+          FLines[GetRealLineNumber(FCaretY) - 1] := S;
           LDoCaretFix := True;
         end
         else
@@ -10875,7 +10883,7 @@ begin
                     FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, FCaretY),  LCaretPosition, LHelper, smNormal);
                     FCaretX := i + 1;
                   end;
-                FLines[FCaretY - 1] := LLineText;
+                FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end
               else
@@ -10889,7 +10897,7 @@ begin
                   LHelper, smNormal);
 
                 Delete(LLineText, FCaretX - i, i);
-                FLines[FCaretY - 1] := LLineText;
+                FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
 
                 InternalCaretX := FCaretX - i;
               end;
@@ -10947,8 +10955,8 @@ begin
                 if LSpaceCount1 > 0 then
                   FUndoList.EndBlock;
 
-                FLines[FCaretY - 1] := LLineText + LSpaceBuffer + FLines[FCaretY];
-                FLines.Attributes[Pred(FCaretY)].LineState := lsModified;
+                FLines[GetRealLineNumber(FCaretY) - 1] := LLineText + LSpaceBuffer + FLines[GetRealLineNumber(FCaretY)];
+                FLines.Attributes[GetRealLineNumber(Pred(FCaretY))].LineState := lsModified;
                 FLines.Delete(CaretY);
                 DoLinesDeleted(CaretY, 1, True);
               end;
@@ -11180,7 +11188,7 @@ begin
                       LSpaceBuffer := Copy(LLineText, 1, LSpaceCount1);
                   end;
 
-                  FLines[FCaretY - 1] := Copy(LLineText, 1, FCaretX - 1);
+                  FLines[GetRealLineNumber(FCaretY) - 1] := Copy(LLineText, 1, FCaretX - 1);
 
                   LLineText := Copy(LLineText, FCaretX, MaxInt);
                   if (eoAutoIndent in FOptions) and (LSpaceCount1 > 0) then
@@ -11285,7 +11293,7 @@ begin
 
                     InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, FCaretY + 1);
 
-                    FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
+                    FLines[GetRealLineNumber(FCaretY) - 1] := LSpaceBuffer + FLines[GetRealLineNumber(FCaretY) - 1];
                   end
                   else
                     InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
@@ -11361,7 +11369,7 @@ begin
 
                   InternalCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, FCaretY + 1);
 
-                  FLines[FCaretY - 1] := LSpaceBuffer + FLines[FCaretY - 1];
+                  FLines[GetRealLineNumber(FCaretY) - 1] := LSpaceBuffer + FLines[GetRealLineNumber(FCaretY) - 1];
                 end
                 else
                   InternalCaretPosition := GetTextPosition(1, FCaretY + 1);
@@ -11422,7 +11430,7 @@ begin
               else
                 Insert(AChar, LLineText, FCaretX);
 
-              FLines[FCaretY - 1] := LLineText;
+              FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin
@@ -11460,7 +11468,7 @@ begin
               end
               else
                 LLineText := LLineText + AChar;
-              FLines[FCaretY - 1] := LLineText;
+              FLines[GetRealLineNumber(FCaretY) - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin
@@ -11924,6 +11932,7 @@ begin
     end;
     LFileStream.Position := 0;
     FLines.LoadFromStream(LFileStream, FEncoding);
+    CreateLineNumbersCache;
   finally
     LFileStream.Free;
   end;

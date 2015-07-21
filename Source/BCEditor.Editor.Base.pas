@@ -2962,7 +2962,10 @@ begin
       Marks[i].Line := Marks[i].Line + ACount;
 
   if FCodeFolding.Visible then
+  begin
     UpdateFoldRanges(AFirstLine, ACount);
+    FResetLineNumbersCache := True;
+  end;
 end;
 
 procedure TBCBaseEditor.DoShiftTabKey;
@@ -3036,8 +3039,8 @@ begin
   if LNewX <> CaretX then
   begin
     SetSelectionBeginPosition(GetTextPosition(LNewX, InternalCaretY));
-    SetSelectionEndPosition(CaretPosition);
-    LOldCaretPosition := CaretPosition;
+    SetSelectionEndPosition(InternalCaretPosition);
+    LOldCaretPosition := InternalCaretPosition;
 
     LOldSelectedText := SelectedText;
     SetSelectedTextPrimitive('');
@@ -3077,7 +3080,7 @@ begin
       FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode);
       SetSelectedTextPrimitive('');
     end;
-    LBlockStartPosition := CaretPosition;
+    LBlockStartPosition := InternalCaretPosition;
 
     if toTabsToSpaces in FTabs.Options then
     begin
@@ -3111,7 +3114,7 @@ begin
 
     SetSelectedTextPrimitive(LSpaces);
     if FSelection.ActiveMode <> smColumn then
-      FUndoList.AddChange(crInsert, LBlockStartPosition, CaretPosition, GetSelectedText,
+      FUndoList.AddChange(crInsert, LBlockStartPosition, InternalCaretPosition, GetSelectedText,
         FSelection.ActiveMode );
   finally
     FUndoList.EndBlock;
@@ -8485,7 +8488,7 @@ begin
     case LUndoItem.ChangeReason of
       crCaret:
         begin
-          FUndoList.AddChange(LUndoItem.ChangeReason, CaretPosition, CaretPosition, '', FSelection.ActiveMode);
+          FUndoList.AddChange(LUndoItem.ChangeReason, InternalCaretPosition, InternalCaretPosition, '', FSelection.ActiveMode);
           InternalCaretPosition := LUndoItem.ChangeStartPosition;
         end;
       crSelection:
@@ -9045,7 +9048,7 @@ var
         with DisplayToTextPosition(GetDisplayPosition(LDisplayInsertPosition, LFirstLine)) do
         begin
           LInsertPosition := Char;
-          LCurrentLine := FCaretY;
+          LCurrentLine := InternalCaretY;
         end;
         if IsWrappedRow(LCurrentLine, LFirstLine) then
         begin
@@ -10775,7 +10778,7 @@ begin
             LLineText := LineText;
             LLength := Length(LLineText);
             LTabBuffer := FLines.Strings[InternalCaretY - 1];
-            LCaretPosition := CaretPosition;
+            LCaretPosition := InternalCaretPosition;
             LIsJustIndented := False;
             { Behind EndOfLine? Simply move the cursor }
             if CaretX > LLength + 1 then
@@ -10831,7 +10834,7 @@ begin
                   InternalCaretY := CaretY - 1;
                   InternalCaretX := Length(Lines[InternalCaretY - 1]) + 1;
 
-                  FUndoList.AddChange(crSilentDelete, CaretPosition, LCaretPosition, sLineBreak, smNormal);
+                  FUndoList.AddChange(crSilentDelete, InternalCaretPosition, LCaretPosition, sLineBreak, smNormal);
 
                   FLines.Delete(InternalCaretY);
                   DoLinesDeleted(InternalCaretY, 1, True);
@@ -10957,10 +10960,10 @@ begin
               LCounter := 1;
               LHelper := Copy(LLineText, CaretX, LCounter);
               LCaretPosition.Char := CaretX + LCounter;
-              LCaretPosition.Line := CaretY;
+              LCaretPosition.Line := InternalCaretY;
               Delete(LLineText, CaretX, LCounter);
               ProperSetLine(InternalCaretY - 1, LLineText);
-              FUndoList.AddChange(crSilentDeleteAfterCursor, CaretPosition, LCaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crSilentDeleteAfterCursor, InternalCaretPosition, LCaretPosition, LHelper, smNormal);
             end
             else
             begin
@@ -11040,7 +11043,7 @@ begin
             FSelection.ActiveMode := smNormal;
             LHelper := SelectedText;
             SetSelectedTextPrimitive(StringOfChar(' ', CaretX - SelectionBeginPosition.Char));
-            FUndoList.AddChange(crSilentDeleteAfterCursor, CaretPosition, LWordPosition, LHelper, smNormal);
+            FUndoList.AddChange(crSilentDeleteAfterCursor, InternalCaretPosition, LWordPosition, LHelper, smNormal);
             InternalCaretPosition := CaretPosition;
           end;
         end;
@@ -11063,7 +11066,7 @@ begin
               SetSelectionEndPosition(LWordPosition);
               LHelper := SelectedText;
               SetSelectedTextPrimitive('');
-              FUndoList.AddChange(crSilentDelete, LWordPosition, CaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crSilentDelete, LWordPosition, InternalCaretPosition, LHelper, smNormal);
               InternalCaretPosition := LWordPosition;
             finally
               FSelection.Mode := LOldSelectionMode;
@@ -11191,7 +11194,7 @@ begin
             LInsertDelta := Ord(CaretX = 1);
             LLength := Length(LLineText);
 
-            LCaretPosition := CaretPosition;
+            LCaretPosition := InternalCaretPosition;
 
             if LLength > 0 then
             begin
@@ -11384,7 +11387,7 @@ begin
 
               FLines.Insert(InternalCaretY - 1, '');
 
-              FUndoList.AddChange(crLineBreak, CaretPosition, CaretPosition, '', smNormal);
+              FUndoList.AddChange(crLineBreak, InternalCaretPosition, InternalCaretPosition, '', smNormal);
 
               with FLines do
               begin
@@ -11452,7 +11455,7 @@ begin
               LSpaceCount1 := Length(LSpaceBuffer);
             end;
 
-            LBlockStartPosition := CaretPosition;
+            LBlockStartPosition := InternalCaretPosition;
 
             if FInsertMode then
             begin
@@ -11664,7 +11667,7 @@ begin
               ProperSetLine(InternalCaretY - 1, LLineText);
               if FInsertMode then
                 LHelper := '';
-              FUndoList.AddChange(crInsert, LBlockStartPosition, CaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crInsert, LBlockStartPosition, InternalCaretPosition, LHelper, smNormal);
               if CaretX >= LeftChar + FCharsInWindow then
                 LeftChar := LeftChar + Min(25, FCharsInWindow - 1);
             finally
@@ -12087,7 +12090,7 @@ begin
         LStartPositionOfBlock.Char := 1;
     end
     else
-      LStartPositionOfBlock := CaretPosition;
+      LStartPositionOfBlock := InternalCaretPosition;
 
     SetSelectedTextPrimitive(LPasteMode, PChar(GetClipboardText), True);
     LEndPositionOfBlock := SelectionEndPosition;

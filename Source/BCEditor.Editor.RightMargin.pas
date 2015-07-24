@@ -3,12 +3,13 @@ unit BCEditor.Editor.RightMargin;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, BCEditor.Editor.RightMargin.Colors, BCEditor.Types;
+  System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Editor.RightMargin.Colors, BCEditor.Types;
 
 type
   TBCEditorRightMargin = class(TPersistent)
   strict private
     FColors: TBCEditorRightMarginColors;
+    FCursor: TCursor;
     FMouseOver: Boolean;
     FMoving: Boolean;
     FOnChange: TNotifyEvent;
@@ -28,6 +29,7 @@ type
     property MouseOver: Boolean read FMouseOver write FMouseOver;
   published
     property Colors: TBCEditorRightMarginColors read FColors write SetColors;
+    property Cursor: TCursor read FCursor write FCursor default crHSplit;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
     property Options: TBCEditorRightMarginOptions read FOptions write FOptions default [rmoMouseMove, rmoShowMovingHint];
     property Position: Integer read FPosition write SetPosition;
@@ -48,6 +50,7 @@ begin
   FOptions := [rmoMouseMove, rmoShowMovingHint];
   FMoving := False;
   FMouseOver := False;
+  FCursor := crHSplit;
 end;
 
 destructor TBCEditorRightMargin.Destroy;
@@ -71,6 +74,7 @@ begin
     Self.FPosition := FPosition;
     Self.FColors.Assign(fColors);
     Self.FOptions := FOptions;
+    Self.FCursor := FCursor;
     Self.DoChange;
   end
   else

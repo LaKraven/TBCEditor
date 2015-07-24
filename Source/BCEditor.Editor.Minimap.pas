@@ -3,7 +3,7 @@ unit BCEditor.Editor.Minimap;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, BCEditor.Types, BCEditor.Editor.Minimap.Colors;
+  System.Classes, System.UITypes, Vcl.Graphics, BCEditor.Types, BCEditor.Editor.Minimap.Colors;
 
 type
   TBCEditorMinimap = class(TPersistent)
@@ -12,6 +12,7 @@ type
     FCharWidth: Integer;
     FClicked: Boolean;
     FColors: TBCEditorMinimapColors;
+    FCursor: TCursor;
     FDragging: Boolean;
     FFont: TFont;
     FOnChange: TNotifyEvent;
@@ -40,6 +41,7 @@ type
     property VisibleLines: Integer read FVisibleLines write FVisibleLines;
   published
     property Colors: TBCEditorMinimapColors read FColors write SetColors;
+    property Cursor: TCursor read FCursor write FCursor default crArrow;
     property Font: TFont read FFont write SetFont;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
     property Options: TBCEditorMinimapOptions read FOptions write FOptions default [];
@@ -67,6 +69,7 @@ begin
   FWidth := 140;
   FDragging := False;
   FOptions := [];
+  FCursor := crArrow;
 
   FClicked := False;
 
@@ -92,6 +95,7 @@ begin
     Self.FOptions := FOptions;
     Self.FVisible := FVisible;
     Self.FWidth := FWidth;
+    Self.FCursor := FCursor;
   end
   else
     inherited;

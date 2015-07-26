@@ -3878,8 +3878,6 @@ begin
     for i := 1 to Length(FLineNumbersCache) - 1 do
     begin
       LLine := FLineNumbersCache[i];
-      if LLine = 0 then
-        Continue;
       LTextPtr := PChar(AStrings[LLine - 1]); { 0-based }
       LBeginningOfLine := True;
       while LTextPtr^ <> BCEDITOR_NONE_CHAR do
@@ -5970,7 +5968,7 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
 begin
-  CaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
+  InternalCaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
   CaretX := 0;
   if (X < LeftMargin.Bookmarks.Panel.Width) and (Y div LineHeight <= CaretY - TopLine) and
      LeftMargin.Bookmarks.Visible and
@@ -12269,14 +12267,11 @@ begin
         FreeAndNil(LCodeFoldingRange);
         FAllCodeFoldingRanges.List.Delete(i);
       end
-      else
-        FLineNumbersCache[LCodeFoldingRange.FromLine] := 0; { beginning of the fold is not scanned }
     end;
   end;
 
   ScanCodeFoldingRanges(FAllCodeFoldingRanges, FLines);
 
-  FResetLineNumbersCache := True;
   CodeFoldingPrepareRangeForLine;
   Invalidate;
 end;

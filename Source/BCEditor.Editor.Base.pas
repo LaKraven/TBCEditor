@@ -188,7 +188,6 @@ type
     function GetCanUndo: Boolean;
     function GetCaretPosition: TBCEditorTextPosition;
     function GetClipboardText: string;
-    //function GetCollapsedLineCount(ABeforeLine: Integer = -1): Integer;
     function GetDisplayLineCount: Integer;
     function GetDisplayLineNumber(const ATextLineNumber: Integer): Integer;
     function GetDisplayPosition: TBCEditorDisplayPosition; overload;
@@ -220,7 +219,6 @@ type
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
     function GetWordWrap: Boolean;
     function GetWrapAtColumn: Integer;
-    //function IsLineInsideCollapsedCodeFolding(ALine: Integer): Boolean;
     function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
     function IsKeywordAtLine(ALine: Integer): Boolean;
     function IsStringAllWhite(const ALine: string): Boolean;
@@ -289,7 +287,6 @@ type
     procedure SetInsertMode(const Value: Boolean);
     procedure SetInternalCaretX(Value: Integer);
     procedure SetInternalCaretY(Value: Integer);
-    //procedure SetInternalCaretPosition(const Value: TBCEditorTextPosition);
     procedure SetInternalDisplayPosition(const ADisplayPosition: TBCEditorDisplayPosition);
     procedure SetKeyCommands(const Value: TBCEditorKeyCommands);
     procedure SetLeftChar(Value: Integer);
@@ -445,7 +442,6 @@ type
     procedure ShowCaret;
     procedure UndoItem;
     procedure UpdateMouseCursor;
-    //property InternalCaretPosition: TBCEditorTextPosition write SetInternalCaretPosition;
     property InternalCaretX: Integer write SetInternalCaretX;
     property InternalCaretY: Integer write SetInternalCaretY;
   public
@@ -544,7 +540,7 @@ type
     procedure SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
-    procedure SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; ACaret: Integer = -1);
+    procedure SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition);
     procedure SetFocus; override;
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
     procedure SetLineColorToDefault(ALine: Integer);
@@ -1415,7 +1411,6 @@ end;
 function TBCBaseEditor.GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
 var
   i, j: Integer;
-//  LPLine: PChar;
   LTokenMatch: PBCEditorMatchingPairToken;
   LToken, OriginalToken: string;
   LLevel, LDeltaLevel: Integer;
@@ -1735,8 +1730,6 @@ function TBCBaseEditor.GetSelectedText: string;
     case FSelection.ActiveMode of
       smNormal:
         begin
-          //LFirst := GetTextLineNumber(LFirst);
-          //LLast := GetTextLineNumber(LLast);
           LCodeFoldingRange := CodeFoldingRangeForLine(LLast);
           if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
             LLast := LCodeFoldingRange.ToLine;
@@ -1745,7 +1738,7 @@ function TBCBaseEditor.GetSelectedText: string;
             Result := Copy(Lines[LFirst - 1], LColumnFrom, LColumnTo - LColumnFrom)
           else
           begin
-            // step1: calculate total length of result string
+            { Calculate total length of result string }
             LTotalLength := Max(0, Length(Lines[LFirst - 1]) - LColumnFrom + 1);
             Inc(LTotalLength, Length(SLineBreak));
             for i := LFirst to LLast - 2 do
@@ -1754,7 +1747,7 @@ function TBCBaseEditor.GetSelectedText: string;
               Inc(LTotalLength, Length(SLineBreak));
             end;
             Inc(LTotalLength, LColumnTo - 1);
-            // step2: build up result string
+            { Build up result string }
             SetLength(Result, LTotalLength);
             P := PChar(Result);
             CopyAndForward(Lines[LFirst - 1], LColumnFrom, MaxInt, P);
@@ -1891,8 +1884,6 @@ var
 begin
   if FResetLineNumbersCache then
   begin
-    //if FAllCodeFoldingRanges.AllCount = 0 then
-    //  Exit;
     FResetLineNumbersCache := False;
     SetLength(LCollapsedCodeFolding, Lines.Count + 1);
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -6353,11 +6344,9 @@ begin
     if FLines.Count > 0 then
     begin
       LRunner := RescanHighlighterRangesFrom(Pred(AIndex));
-      { This is necessary because a line can be deleted with ecDeleteChar
-        command and above, what've done, is rescanned a line joined with deleted
-        one. But if range on that line hadn't changed, it still could've been
-        changed on lines below. In case if range on line with join had changed
-        the above rescan already did the job }
+      { This is necessary because a line can be deleted with ecDeleteChar command and above, what've done, is rescanned
+        a line joined with deleted one. But if range on that line hadn't changed, it still could've been changed on
+        lines below. In case if range on line with join had changed the above rescan already did the job. }
       if LRunner = Pred(AIndex) then
         RescanHighlighterRangesFrom(AIndex);
     end;
@@ -6465,12 +6454,9 @@ procedure TBCBaseEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y
 var
   LWasSelected: Boolean;
   LStartDrag: Boolean;
-//  LBeginPosition, LEndPosition: TBCEditorTextPosition;
   LOldCaretY: Integer;
   LLeftMarginWidth: Integer;
 begin
-  //LBeginPosition := FSelectionBeginPosition;
-  //LEndPosition := FSelectionEndPosition;
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
   LWasSelected := False;
@@ -6556,12 +6542,6 @@ begin
 
   if Button = mbLeft then
   begin
-    { I couldn't track down why, but sometimes (and definately not all the time)
-      the block positioning is lost.  This makes sure that the block is
-      maintained in case they started a drag operation on the block }
-    //FSelectionBeginPosition := LBeginPosition;
-    //FSelectionEndPosition := LEndPosition;
-
     MouseCapture := True;
     { if mousedown occurred in selected block begin drag operation }
     Exclude(FStateFlags, sfWaitForDragging);
@@ -6611,7 +6591,7 @@ begin
       if not (soPastEndOfLine in FScroll.Options) then
         CaretX := CaretX;
     { This is necessary because user could click on trimmed area and caret would appear behind line length when not in
-      eoScrollPastEndOfLine mode }
+      eoScrollPastEndOfLine mode. TODO: Needed? }
   end;
 
   if X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth then
@@ -6874,7 +6854,6 @@ var
   LSelectionAvailable: Boolean;
 begin
   LClipRect := Canvas.ClipRect;
-  //{$IFDEF DEBUG}OutputDebugString(PChar(Format('DisplayCount = %d', [GetDisplayLineCount])));{$ENDIF}
 
   LColumn1 := FLeftChar;
   LTemp := FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2;
@@ -7276,7 +7255,6 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
 
 var
   LLine: Integer;
-  //LRealLineNumber: Integer;
   i: Integer;
   LLineRect: TRect;
   LLeftMarginOffsets: PIntegerArray;
@@ -8174,8 +8152,8 @@ var
       end;
       InitColumnWidths(PChar(LCurrentLineText), FTextDrawer.CharWidth, Length(LCurrentLineText));
       LIsCurrentLine := CaretY = i;
-      LStartRow := Max(LineToRow({LCurrentLine}i), AFirstRow);
-      LEndRow := LineToRow({LCurrentLine}i + 1) - 1; // Min(LineToRow(LCurrentLine + 1) - 1, ALastRow);
+      LStartRow := Max(LineToRow(i), AFirstRow);
+      LEndRow := LineToRow(i + 1) - 1;
       LTokenPosition := 0;
       LTokenLength := 0;
 
@@ -8642,9 +8620,6 @@ var
   LCaretStyle: TBCEditorCaretStyle;
   LWidth, LHeight: Integer;
 begin
-  { CreateCaret automatically destroys the previous one, so we don't have to
-    worry about cleaning up the old one here with DestroyCaret.
-    Ideally, we will have properties that control what these two carets look like. }
   if InsertMode then
     LCaretStyle := FCaret.Styles.Insert
   else
@@ -8827,11 +8802,6 @@ begin
     end;
   end;
 end;
-
-{procedure TBCBaseEditor.SetInternalCaretPosition(const Value: TBCEditorTextPosition);
-begin
-  SetCaretPosition(True, Value);
-end; }
 
 procedure TBCBaseEditor.SetName(const Value: TComponentName);
 var
@@ -9017,7 +8987,7 @@ var
           Inc(P);
         if P^ = BCEDITOR_LINEFEED then
           Inc(P);
-        //Inc(FCaretY);
+
         LStart := P;
         P := GetEndOfLine(LStart);
         if P = LStart then
@@ -9037,11 +9007,11 @@ var
         if (not IsStringAllWhite(LStr) and
           (GetLeadingExpandedLength(LStr, FTabs.Width) < GetLeadingExpandedLength(LWhite, FTabs.Width))) or LIndented then
         begin
-          FLines[{GetTextCaretY - 1}i] := LWhite + LStr;
+          FLines[i] := LWhite + LStr;
           LIndented := True;
         end
         else
-          FLines[{GetTextCaretY - 1}i] := LStr;
+          FLines[i] := LStr;
 
         Inc(Result);
         Inc(i);
@@ -9354,7 +9324,6 @@ begin
         end;
       crLineBreak:
         begin
-          //InternalCaretPosition := LUndoItem.ChangeStartPosition;
           TextCaretPosition := LUndoItem.ChangeStartPosition;
           if CaretY > 0 then
           begin
@@ -10342,11 +10311,10 @@ begin
     end;
 
     { internal command handler }
-    if {(ACommand <> ecNone) and} (ACommand < ecUserFirst) then
+    if ACommand < ecUserFirst then
       ExecuteCommand(ACommand, AChar, AData);
 
     { notify hooked command handlers after the command was executed inside of the class }
-    //if ACommand <> ecNone then
     NotifyHookedCommandHandlers(True, ACommand, AChar, AData);
   end;
   DoOnCommandProcessed(ACommand, AChar, AData);
@@ -10981,7 +10949,7 @@ begin
             SetSelectedTextEmpty
           else
           begin
-            LCaretNewPosition := CaretPosition; // ?
+           // LCaretNewPosition := CaretPosition; // ?
 
             LLineText := LineText;
             LLength := Length(LLineText);
@@ -11724,9 +11692,7 @@ begin
     EnsureCursorPositionVisible(True);
     if SelectionAvailable then
       InvalidateSelection;
-    //FSelectionBeginPosition.Char := FCaretX;
-    //FSelectionBeginPosition.Line := FCaretY;
-    FSelectionBeginPosition := CaretPosition;
+    FSelectionBeginPosition := TextCaretPosition;
     FSelectionEndPosition := FSelectionBeginPosition;
   end;
 end;
@@ -11749,9 +11715,7 @@ begin
   SetCaretPosition(False, GetTextPosition(1, ATextLine));
   if SelectionAvailable then
     InvalidateSelection;
-  //FSelectionBeginPosition.Char := FCaretX;
-  //FSelectionBeginPosition.Line := GetTextCaretY;
-  FSelectionBeginPosition := CaretPosition;
+  FSelectionBeginPosition := TextCaretPosition;
   FSelectionEndPosition := FSelectionBeginPosition;
   EnsureCursorPositionVisible(True);
 end;
@@ -12376,17 +12340,15 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; ACaret: Integer = -1);
+procedure TBCBaseEditor.SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition);
 var
   LOldSelectionMode: TBCEditorSelectionMode;
 begin
   LOldSelectionMode := FSelection.ActiveMode;
   IncPaintLock;
   try
-    TextCaretPosition := CaretPosition;
-    ABlockBeginPosition.Line := GetDisplayLineNumber(ABlockBeginPosition.Line);
+    TextCaretPosition := ACaretPosition;
     SetSelectionBeginPosition(ABlockBeginPosition);
-    ABlockEndPosition.Line := GetDisplayLineNumber(ABlockEndPosition.Line);
     SetSelectionEndPosition(ABlockEndPosition);
   finally
     FSelection.ActiveMode := LOldSelectionMode;

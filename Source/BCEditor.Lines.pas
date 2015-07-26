@@ -562,14 +562,14 @@ begin
       SetLength(LBuffer, LSize);
       Stream.Read(LBuffer[0], LSize);
       LSize := TEncoding.GetBufferEncoding(LBuffer, Encoding);
-      SetTextStr(Encoding.GetString(LBuffer, LSize, Length(LBuffer) - LSize));
+      LStrBuffer := Encoding.GetString(LBuffer, LSize, Length(LBuffer) - LSize);
     end
     else
     begin
       SetLength(LStrBuffer, LSize shr 1);
       Stream.ReadBuffer(LStrBuffer[1], LSize);
-      SetTextStr(LStrBuffer);
     end;
+    SetTextStr(LStrBuffer);
   finally
     EndUpdate;
   end;

@@ -475,7 +475,7 @@ begin
       LEvent.Initialize(Command, AChar, Data);
       FEvents.Add(LEvent);
       if SaveMarkerPos and (Command >= ecSetBookmark1) and (Command <= ecSetBookmark9) and not Assigned(Data) then
-        TBCEditorPositionEvent(LEvent).Position := FCurrentEditor.CaretPosition;
+        TBCEditorPositionEvent(LEvent).Position := FCurrentEditor.TextCaretPosition;
     end;
   end
   else

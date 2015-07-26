@@ -8,7 +8,6 @@ uses
   function CeilOfIntDiv(ADividend: Cardinal; ADivisor: Word): Word;
   function DeleteWhiteSpace(const AStr: string): string;
   function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
-  function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
   function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
   function MessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer;
   function MinMax(Value, MinValue, MaxValue: Integer): Integer;
@@ -132,31 +131,6 @@ end;
 function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
 begin
   Result := TBCEditorTabConvertProc(@ConvertTabs);
-end;
-
-function GetLeadingExpandedLength(const AStr: string; ATabWidth: Integer; ABorder: Integer = 0): Integer;
-var
-  iRun: PChar;
-  Len: Integer;
-begin
-  Result := 0;
-  iRun := PChar(AStr);
-  if ABorder > 0 then
-    Len := Min(PInteger(iRun - 2)^, ABorder)
-  else
-    Len := PInteger(iRun - 2)^;
-  while Len > 0 do
-  begin
-    if iRun^ = BCEDITOR_TAB_CHAR then
-      Inc(Result, ATabWidth - (Result mod ATabWidth))
-    else
-    if iRun^ = BCEDITOR_SPACE_CHAR then
-      Inc(Result)
-    else
-      Exit;
-    Inc(iRun);
-    Dec(Len);
-  end;
 end;
 
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;

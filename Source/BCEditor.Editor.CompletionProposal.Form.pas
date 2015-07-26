@@ -322,8 +322,8 @@ begin
               if Assigned(Owner) then
                 with Owner as TBCBaseEditor do
                 begin
-                  if CaretX <= Length(LineText) then
-                    LChar := LineText[CaretX]
+                  if DisplayCaretX <= Length(LineText) then
+                    LChar := LineText[DisplayCaretX]
                   else
                     LChar := BCEDITOR_SPACE_CHAR;
 
@@ -1020,12 +1020,12 @@ begin
     BeginUndoBlock;
     try
       if FAdjustCompletionStart then
-        FCompletionStart := GetTextPosition(FCompletionStart, CaretY).Char;
-      SelectionBeginPosition := GetTextPosition(FCompletionStart, CaretY);
+        FCompletionStart := GetTextPosition(FCompletionStart, DisplayCaretY).Char;
+      SelectionBeginPosition := GetTextPosition(FCompletionStart, DisplayCaretY);
       if EndToken = BCEDITOR_NONE_CHAR then
-        SelectionEndPosition := GetTextPosition(WordEnd.Char, CaretY)
+        SelectionEndPosition := GetTextPosition(WordEnd.Char, DisplayCaretY)
       else
-        SelectionEndPosition := GetTextPosition(CaretX, CaretY);
+        SelectionEndPosition := GetTextPosition(DisplayCaretX, DisplayCaretY);
 
       if FAssignedList.Count > Position then
         Value := FAssignedList[Position]
@@ -1041,8 +1041,8 @@ begin
         if CanFocus then
           SetFocus;
         EnsureCursorPositionVisible;
-        CaretPosition := SelectionEndPosition;
-        SelectionBeginPosition := CaretPosition;
+        TextCaretPosition := SelectionEndPosition;
+        SelectionBeginPosition := TextCaretPosition;
       end;
     finally
       EndUndoBlock;
@@ -1098,7 +1098,7 @@ begin
   Result := '';
   Editor := Owner as TBCBaseEditor;
   S := Editor.LineText;
-  i := Editor.CaretX - 1;
+  i := Editor.DisplayCaretX - 1;
   if i <= Length(S) then
   begin
     FAdjustCompletionStart := False;
@@ -1106,7 +1106,7 @@ begin
       Dec(i);
 
     FCompletionStart := i + 1;
-    Result := Copy(S, i + 1, Editor.CaretX - i - 1);
+    Result := Copy(S, i + 1, Editor.DisplayCaretX - i - 1);
   end
   else
     FAdjustCompletionStart := True;

@@ -51,7 +51,9 @@ type
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
     FCodeFoldingHintForm: TBCEditorCompletionProposalForm;
-    FCodeFoldingRangeForLine: array of TBCEditorCodeFoldingRange;
+    FCodeFoldingRangeFromLine: array of TBCEditorCodeFoldingRange;
+    FCodeFoldingRangeToLine: array of TBCEditorCodeFoldingRange;
+    FCodeFoldingTreeLine: array of Boolean;
     FColumnWidths: PIntegerArray;
     FCommandDrop: Boolean;
     {$IFDEF USE_ALPHASKINS}
@@ -244,7 +246,7 @@ type
     procedure ClearSearchLines;
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
-    procedure CodeFoldingPrepareRangeForLine;
+    procedure CodeFoldingResetCaches;
     procedure CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
     procedure CodeFoldingUncollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CompletionProposalTimerHandler(Sender: TObject);
@@ -959,54 +961,34 @@ var
   LLength: Integer;
 begin
   Result := nil;
-  LLength := Length(FCodeFoldingRangeForLine) - 1;
+  LLength := Length(FCodeFoldingRangeFromLine) - 1;
   if ALine > LLength then
     ALine := LLength;
-  while (ALine > 0) and not Assigned(FCodeFoldingRangeForLine[ALine]) do
+  while (ALine > 0) and not Assigned(FCodeFoldingRangeFromLine[ALine]) do
     Dec(ALine);
-  if (ALine > 0) and Assigned(FCodeFoldingRangeForLine[ALine]) then
-    Result := FCodeFoldingRangeForLine[ALine]
+  if (ALine > 0) and Assigned(FCodeFoldingRangeFromLine[ALine]) then
+    Result := FCodeFoldingRangeFromLine[ALine]
 end;
 
 function TBCBaseEditor.CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
 begin
   Result := nil;
-  if (ALine > 0) and (ALine < Length(FCodeFoldingRangeForLine)) then
-    Result := FCodeFoldingRangeForLine[ALine]
+  if (ALine > 0) and (ALine < Length(FCodeFoldingRangeFromLine)) then
+    Result := FCodeFoldingRangeFromLine[ALine]
 end;
 
 function TBCBaseEditor.CodeFoldingTreeEndForLine(ALine: Integer): Boolean;
-var
-  i: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   Result := False;
-  // TODO: cache?
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
-  begin
-    LCodeFoldingRange := FAllCodeFoldingRanges[i];
-    if Assigned(LCodeFoldingRange) then
-      if (LCodeFoldingRange.ToLine = ALine) and LCodeFoldingRange.Collapsable and
-        not LCodeFoldingRange.ParentCollapsed and not LCodeFoldingRange.Collapsed then
-        Exit(True);
-  end;
+  if (ALine > 0) and (ALine < Length(FCodeFoldingRangeToLine)) then
+    Result := Assigned(FCodeFoldingRangeToLine[ALine]);
 end;
 
 function TBCBaseEditor.CodeFoldingTreeLineForLine(ALine: Integer): Boolean;
-var
-  i: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   Result := False;
-   // TODO: cache?
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
-  begin
-    LCodeFoldingRange := FAllCodeFoldingRanges[i];
-    if Assigned(LCodeFoldingRange) then
-      if (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) and
-        not LCodeFoldingRange.ParentCollapsed and not LCodeFoldingRange.Collapsed and LCodeFoldingRange.Collapsable then
-        Exit(True);
-  end;
+  if (ALine > 0) and (ALine < Length(FCodeFoldingTreeLine)) then
+    Result := FCodeFoldingTreeLine[ALine]
 end;
 
 function TBCBaseEditor.DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
@@ -2712,30 +2694,50 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.CodeFoldingPrepareRangeForLine;
+procedure TBCBaseEditor.CodeFoldingResetCaches;
 var
-  i: Integer;
-  LMaxFromLine: Integer;
+  i, j: Integer;
+  LMaxFromLine, LMaxToLine: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   LMaxFromLine := 0;
+  LMaxToLine := 0;
 
-  SetLength(FCodeFoldingRangeForLine, 0); { empty }
-  SetLength(FCodeFoldingRangeForLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingTreeLine, 0); { empty }
+  SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeFromLine, 0); { empty }
+  SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeToLine, 0); { empty }
+  SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if Assigned(LCodeFoldingRange) then
+    begin
       if not LCodeFoldingRange.ParentCollapsed then
       begin
         if LCodeFoldingRange.FromLine >= LMaxFromLine then
           LMaxFromLine := LCodeFoldingRange.FromLine;
-        FCodeFoldingRangeForLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
+        FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
+
+        if LCodeFoldingRange.Collapsable and not LCodeFoldingRange.Collapsed then
+        begin
+          for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
+            FCodeFoldingTreeLine[j] := True;
+
+          if LCodeFoldingRange.ToLine >= LMaxToLine then
+            LMaxToLine := LCodeFoldingRange.ToLine;
+          FCodeFoldingRangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
+        end;
       end;
+    end;
   end;
 
   if FAllCodeFoldingRanges.AllCount > 0 then
-    SetLength(FCodeFoldingRangeForLine, LMaxFromLine + 1); { actual size }
+  begin
+    SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
+    SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
+  end;
 end;
 
 procedure TBCBaseEditor.CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
@@ -5971,7 +5973,7 @@ begin
     else
     case ACommand of
       ecInsertLine, ecLineBreak, ecDeleteLine, ecDeleteLastChar, ecClear:
-        CodeFoldingPrepareRangeForLine;
+        CodeFoldingResetCaches;
     end;
   end;
 
@@ -10302,9 +10304,9 @@ var
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     Result := 0;
-    if ALine < Length(FCodeFoldingRangeForLine) then
+    if ALine < Length(FCodeFoldingRangeFromLine) then
     begin
-      LCodeFoldingRange := FCodeFoldingRangeForLine[ALine];
+      LCodeFoldingRange := FCodeFoldingRangeFromLine[ALine];
       if Assigned(LCodeFoldingRange) then
         if LCodeFoldingRange.Collapsed then
         begin
@@ -11819,7 +11821,7 @@ begin
   CreateLineNumbersCache;
   ClearCodeFolding;
   ScanCodeFoldingRanges;
-  CodeFoldingPrepareRangeForLine;
+  CodeFoldingResetCaches;
 end;
 
 procedure TBCBaseEditor.InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
@@ -12327,7 +12329,7 @@ begin
 
   ScanCodeFoldingRanges;
 
-  CodeFoldingPrepareRangeForLine;
+  CodeFoldingResetCaches;
   Invalidate;
 end;
 

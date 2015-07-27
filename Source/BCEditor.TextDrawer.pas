@@ -16,7 +16,7 @@ type
   TBCEditorFontData = record
     Style: TFontStyles;
     Handle: HFont;
-    CharAdv: Integer;
+    CharAdvance: Integer;
     CharHeight: Integer;
   end;
   PBCEditorFontData = ^TBCEditorFontData;
@@ -67,7 +67,7 @@ type
     function GetBaseFont: TFont;
     function GetIsTrueType: Boolean;
   protected
-    function CalcFontAdvance(AHandle: HDC; pCharHeight: PInteger): Integer; virtual;
+    function CalculateFontAdvance(AHandle: HDC; ACharHeight: PInteger): Integer; virtual;
     function GetCharAdvance: Integer; virtual;
     function GetCharHeight: Integer; virtual;
     function GetFontData(Index: Integer): PBCEditorFontData; virtual;
@@ -249,13 +249,13 @@ var
   i: Integer;
 begin
   with SharedFontsInfo^ do
-    for i := Low(TBCEditorStockFontPatterns) to High(TBCEditorStockFontPatterns) do
-      with FontsData[i] do
-        if Handle <> 0 then
-        begin
-          DeleteObject(Handle);
-          Handle := 0;
-        end;
+  for i := Low(TBCEditorStockFontPatterns) to High(TBCEditorStockFontPatterns) do
+  with FontsData[i] do
+  if Handle <> 0 then
+  begin
+    DeleteObject(Handle);
+    Handle := 0;
+  end;
 end;
 
 function TBCEditorFontsInfoManager.FindFontsInfo(const LogFont: TLogFont): PBCEditorSharedFontsInfo;
@@ -301,7 +301,6 @@ begin
     else
     begin
       FFontsInfo.Remove(SharedFontsInfo);
-      // free all objects
       BaseFont.Free;
       Dispose(SharedFontsInfo);
     end;
@@ -325,7 +324,7 @@ end;
 
 { TFontStock }
 
-function TBCEditorFontStock.CalcFontAdvance(AHandle: HDC; pCharHeight: PInteger): Integer;
+function TBCEditorFontStock.CalculateFontAdvance(AHandle: HDC; ACharHeight: PInteger): Integer;
 var
   LTextMetric: TTextMetric;
   LCharInfo: TABC;
@@ -346,8 +345,8 @@ begin
 
   with LCharInfo do
     Result := abcA + Integer(abcB) + abcC + LTextMetric.tmOverhang;
-  if Assigned(pCharHeight) then
-    pCharHeight^ := Abs(LTextMetric.tmHeight)
+  if Assigned(ACharHeight) then
+    ACharHeight^ := Abs(LTextMetric.tmHeight)
 end;
 
 constructor TBCEditorFontStock.Create(InitialFont: TFont);
@@ -372,7 +371,7 @@ end;
 
 function TBCEditorFontStock.GetCharAdvance: Integer;
 begin
-  Result := FPCurrentFontData^.CharAdv;
+  Result := FPCurrentFontData^.CharAdvance;
 end;
 
 function TBCEditorFontStock.GetCharHeight: Integer;
@@ -492,12 +491,12 @@ begin
 
   FPCurrentFontData := FontDataPointer;
   with FontDataPointer^ do
-    if Handle <> 0 then
-    begin
-      FCurrentFont := Handle;
-      FCurrentStyle := Style;
-      Exit;
-    end;
+  if Handle <> 0 then
+  begin
+    FCurrentFont := Handle;
+    FCurrentStyle := Style;
+    Exit;
+  end;
 
   FCurrentFont := InternalCreateFont(Value);
   LHandle := InternalGetHandle;
@@ -506,7 +505,7 @@ begin
   with FPCurrentFontData^ do
   begin
     Handle := FCurrentFont;
-    CharAdv := CalcFontAdvance(LHandle, @CharHeight);
+    CharAdvance := CalculateFontAdvance(LHandle, @CharHeight);
   end;
 
   SelectObject(LHandle, OldFont);

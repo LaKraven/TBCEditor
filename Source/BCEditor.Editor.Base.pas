@@ -7895,7 +7895,7 @@ var
       end
       else
       begin
-        LCharsToPaint := Min(ALast - AFirst + 1, ATokenLength - AFirst + 1);
+        LCharsToPaint := Min(ALast - AFirst, ATokenLength - AFirst + 1);
 
         if GetWordWrap then
         while X + FTextDrawer.CharWidth * LCharsToPaint > ClientWidth do

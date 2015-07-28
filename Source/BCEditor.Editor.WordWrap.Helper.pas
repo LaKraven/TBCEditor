@@ -35,7 +35,7 @@ type
     procedure SetEmpty;
   protected
     function GetRealRowCount: Integer;
-    function ReWrapLine(AIndex: TBCEditorLineIndex): Integer;
+    function RewrapLine(AIndex: TBCEditorLineIndex): Integer;
     procedure TrimArrays;
     procedure WrapLines;
     property Editor: TCustomControl read FEditor;
@@ -253,7 +253,7 @@ begin
   for Line := AIndex to AIndex + ACount - 1 do
     FLineOffsets[Line] := PrevOffset;
   for Line := AIndex to AIndex + ACount - 1 do
-    Inc(Result, ReWrapLine(Line));
+    Inc(Result, RewrapLine(Line));
 end;
 
 function TBCEditorWordWrapHelper.LinesPutted(AIndex: Integer; ACount: Integer): Integer;
@@ -267,7 +267,7 @@ begin
   Assert(ACount >= 1);
   Assert(AIndex + ACount <= LineCount);
   for Line := AIndex to AIndex + ACount - 1 do
-    Inc(Result, ReWrapLine(Line));
+    Inc(Result, RewrapLine(Line));
 end;
 
 function TBCEditorWordWrapHelper.LinesUnfolded(AFromLine, AToLine: Integer): Integer;
@@ -411,7 +411,7 @@ begin
   WrapLines;
 end;
 
-function TBCEditorWordWrapHelper.ReWrapLine(AIndex: TBCEditorLineIndex): Integer;
+function TBCEditorWordWrapHelper.RewrapLine(AIndex: TBCEditorLineIndex): Integer;
 var
   MaxNewRows: Cardinal;
   LineText: string;

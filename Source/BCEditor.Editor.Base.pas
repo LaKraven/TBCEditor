@@ -190,6 +190,8 @@ type
     function GetCanUndo: Boolean;
     function GetClipboardText: string;
     function GetDisplayCaretPosition: TBCEditorDisplayPosition;
+    function GetDisplayCaretX: Integer;
+    function GetDisplayCaretY: Integer;
     function GetDisplayLineCount: Integer;
     function GetDisplayLineNumber(const ATextLineNumber: Integer): Integer;
     //function GetDisplayPosition: TBCEditorDisplayPosition; overload;
@@ -566,9 +568,9 @@ type
     property CanUndo: Boolean read GetCanUndo;
     property Canvas;
     property Caret: TBCEditorCaret read FCaret write FCaret;
-    property DisplayCaretX: Integer read FDisplayCaretX write SetDisplayCaretX;
+    property DisplayCaretX: Integer read GetDisplayCaretX write SetDisplayCaretX;
     property DisplayCaretPosition: TBCEditorDisplayPosition read GetDisplayCaretPosition write SetDisplayCaretPosition;
-    property DisplayCaretY: Integer read FDisplayCaretY write SetDisplayCaretY;
+    property DisplayCaretY: Integer read GetDisplayCaretY write SetDisplayCaretY;
     property CharsInWindow: Integer read FCharsInWindow;
     property CharWidth: Integer read FCharWidth;
     property CodeFolding: TBCEditorCodeFolding read FCodeFolding write SetCodeFolding;
@@ -1107,8 +1109,19 @@ end;
 
 function TBCBaseEditor.GetDisplayCaretPosition: TBCEditorDisplayPosition;
 begin
-  Result.Column := DisplayCaretX;
-  Result.Row := DisplayCaretY;
+  Result.Column := FDisplayCaretX;
+  Result.Row := FDisplayCaretY;
+  if GetWordWrap and FCaretAtEndOfLine then
+  begin
+    if Result.Column = 1 then
+    begin
+      if Result.Row > 0 then
+        Dec(Result.Row);
+      Result.Column := FWordWrapHelper.GetRowLength(Result.Row) + 1;
+    end
+    else
+      FCaretAtEndOfLine := False;
+  end;
 end;
 
 function TBCBaseEditor.GetClipboardText: string;
@@ -1177,6 +1190,22 @@ begin
   finally
     Clipboard.Close;
   end;
+end;
+
+function TBCBaseEditor.GetDisplayCaretX: Integer;
+begin
+  if not GetWordWrap then
+    Result := FDisplayCaretX
+  else
+    Result := DisplayCaretPosition.Column;
+end;
+
+function TBCBaseEditor.GetDisplayCaretY: Integer;
+begin
+  if not GetWordWrap then
+    Result := FDisplayCaretY
+  else
+    Result := DisplayCaretPosition.Row;
 end;
 
 function TBCBaseEditor.GetDisplayLineCount: Integer;
@@ -1650,7 +1679,7 @@ end;
 
 function TBCBaseEditor.GetTextCaretY: Integer;
 begin
-  Result := GetTextLineNumber(DisplayCaretY);
+  Result := GetTextLineNumber(RowToLine(DisplayCaretY));
 end;
 
 function TBCBaseEditor.GetSelectionAvailable: Boolean;
@@ -3366,7 +3395,7 @@ begin
     end
     else
     begin
-      if (not FCaretAtEndOfLine) and (DisplayCaretX > 1) and (DisplayCaretX = 1) then
+      if (not FCaretAtEndOfLine) and (DisplayCaretX > 1) {and (DisplayCaretX = 1)} then
       begin
         FCaretAtEndOfLine := True;
         if FWordWrap.Style = wwsRightMargin then
@@ -7014,14 +7043,14 @@ begin
     FTextDrawer.EndDrawing;
     FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
     FBufferBmp.Canvas.Handle := Canvas.Handle;
-    Canvas.Handle := LHandle;  
+    Canvas.Handle := LHandle;
     UpdateCaret;
   end;
 end;
 
 procedure TBCBaseEditor.PaintCodeFolding(AClipRect: TRect; AFirstRow, ALastRow: Integer);
 var
-  i, LLine: Integer;
+  i, LLine, LCurrentRow, LStartRow, LEndRow: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
   LOldBrushColor, LOldPenColor: TColor;
 begin
@@ -7040,26 +7069,33 @@ begin
   for i := AFirstRow to ALastRow do
   begin
     LLine := GetTextLineNumber(i);
-    LLine := RowToLine(LLine);
-    AClipRect.Top := (i - FTopLine) * LineHeight;
-    AClipRect.Bottom := AClipRect.Top + LineHeight;
+    //LLine := RowToLine(LLine);
 
-    if (LineToRow(DisplayCaretY) = i) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
+    LStartRow := Max(LineToRow(i), AFirstRow);
+    LEndRow := LineToRow(i + 1) - 1;
+
+    for LCurrentRow := LStartRow to LEndRow do
     begin
-      Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
-      Canvas.FillRect(AClipRect); { active line background }
+      AClipRect.Top := (LCurrentRow - FTopLine) * LineHeight;
+      AClipRect.Bottom := AClipRect.Top + LineHeight;
+
+      if (DisplayCaretY >= LStartRow) and (DisplayCaretY <= LEndRow) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
+      begin
+        Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
+        Canvas.FillRect(AClipRect); { active line background }
+      end;
+      if Assigned(LFoldRange) and (LLine >= LFoldRange.FromLine) and (LLine <= LFoldRange.ToLine) then
+      begin
+        Canvas.Brush.Color := CodeFolding.Colors.FoldingLineHighlight;
+        Canvas.Pen.Color := CodeFolding.Colors.FoldingLineHighlight;
+      end
+      else
+      begin
+        Canvas.Brush.Color := CodeFolding.Colors.FoldingLine;
+        Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
+      end;
+      PaintCodeFoldingLine(AClipRect, LLine);
     end;
-    if Assigned(LFoldRange) and (LLine >= LFoldRange.FromLine) and (LLine <= LFoldRange.ToLine) then
-    begin
-      Canvas.Brush.Color := CodeFolding.Colors.FoldingLineHighlight;
-      Canvas.Pen.Color := CodeFolding.Colors.FoldingLineHighlight;
-    end
-    else
-    begin
-      Canvas.Brush.Color := CodeFolding.Colors.FoldingLine;
-      Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
-    end;
-    PaintCodeFoldingLine(AClipRect, LLine);
   end;
   Canvas.Brush.Color := LOldBrushColor;
   Canvas.Pen.Color := LOldPenColor;
@@ -7294,7 +7330,7 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
 
 var
   LLine: Integer;
-  i: Integer;
+  i, j: Integer;
   LLineRect: TRect;
   LLeftMarginOffsets: PIntegerArray;
   LHasOtherMarks: Boolean;
@@ -7312,11 +7348,15 @@ var
   LPEditorLineAttribute: PBCEditorLineAttribute;
   LBookmark: TBCEditorBookmark;
   LActiveLine: Integer;
+  LCurrentRow, LStartRow, LEndRow: Integer;
 begin
+  // TODO: Separate into smaller parts: PaintLineNumbers, PaintBookmarkPanel, PaintWordWrapIndicator, PaintBorder,
+  // PaintBookmarks, PaintActiveLineIndicator, PaintLineState, PaintBookmarkPanelLine
+
   LFirstLine := RowToLine(AFirstRow);
   LLastLine := RowToLine(ALastRow);
   LLastTextLine := RowToLine(ALastTextRow);
-  LActiveLine := (LineToRow(DisplayCaretY) - TopLine) * LineHeight;
+  LActiveLine := (DisplayCaretY - TopLine) * LineHeight;
 
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
   Canvas.FillRect(AClipRect); { fill left margin rect }
@@ -7336,42 +7376,54 @@ begin
       for i := LFirstLine to LLastTextLine do
       begin
         LLine := GetTextLineNumber(i);
-        LLine := RowToLine(LLine);
-        if (i <> DisplayCaretY) or (FLeftMargin.Colors.ActiveLineBackground = clNone) then
-          FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background)
-        else
-          FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground);
+        //LLine := RowToLine(LLine);
 
-        LLineRect.Top := (i - TopLine) * LineHeight;
-        LLineRect.Bottom := LLineRect.Top + LineHeight;
+        LStartRow := Max(LineToRow(i), LFirstLine);
+        LEndRow := LineToRow(i + 1) - 1;
 
-        LLineNumber := FLeftMargin.FormatLineNumber(LLine);
-
-        if (lnoIntens in LeftMargin.LineNumbers.Options) and (i <> DisplayCaretY) and (LLineNumber[Length(LLineNumber)] <> '0') and
-          (LLine <> LeftMargin.LineNumbers.StartFrom) then
+        for LCurrentRow := LStartRow to LEndRow do
         begin
-          LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
-          LOldColor := Canvas.Pen.Color;
-          Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
-          if (LLine mod 5) = 0 then
-          begin
-            Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-            Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-          end
+          if (DisplayCaretY >= LStartRow) and (DisplayCaretY <= LEndRow) and (FLeftMargin.Colors.ActiveLineBackground <> clNone) then
+            FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground)
           else
+            FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background);
+
+          LLineRect.Top := (LCurrentRow - TopLine) * LineHeight;
+          LLineRect.Bottom := LLineRect.Top + LineHeight;
+
+          LLineNumber := '';
+          if LCurrentRow = LStartRow then
           begin
-            Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 2) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-            Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
+            LLineNumber := FLeftMargin.FormatLineNumber(LLine);
+            if (DisplayCaretY < LStartRow) or (DisplayCaretY > LEndRow) then
+
+              if (lnoIntens in LeftMargin.LineNumbers.Options) and // (LCurrentRow <> DisplayCaretY) and
+                (LLineNumber[Length(LLineNumber)] <> '0') and (LCurrentRow <> LeftMargin.LineNumbers.StartFrom) then
+              begin
+                LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
+                LOldColor := Canvas.Pen.Color;
+                Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
+                if (LLine mod 5) = 0 then
+                begin
+                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
+                  Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
+                end
+                else
+                begin
+                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 2) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
+                  Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
+                end;
+                Canvas.Pen.Color := LOldColor;
+
+                Continue;
+              end;
           end;
-          Canvas.Pen.Color := LOldColor;
 
-          Continue;
+          GetTextExtentPoint32(Canvas.Handle, PChar(LLineNumber), Length(LLineNumber), LTextSize);
+          Winapi.Windows.ExtTextOut(Canvas.Handle, (FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 2) - LTextSize.cx,
+            LLineRect.Top + ((LineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, PChar(LLineNumber),
+            Length(LLineNumber), nil);
         end;
-
-        GetTextExtentPoint32(Canvas.Handle, PChar(LLineNumber), Length(LLineNumber), LTextSize);
-        Winapi.Windows.ExtTextOut(Canvas.Handle, (FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 2) - LTextSize.cx,
-          LLineRect.Top + ((LineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, PChar(LLineNumber),
-          Length(LLineNumber), nil);
       end;
       FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background);
       { erase the remaining area }
@@ -8190,7 +8242,7 @@ var
         end;
       end;
       InitColumnWidths(PChar(LCurrentLineText), FTextDrawer.CharWidth, Length(LCurrentLineText));
-      LIsCurrentLine := DisplayCaretY = i;
+
       LStartRow := Max(LineToRow(i), AFirstRow);
       LEndRow := LineToRow(i + 1) - 1;
       LTokenPosition := 0;
@@ -8198,6 +8250,7 @@ var
 
       for LCurrentRow := LStartRow to LEndRow do
       begin
+        LIsCurrentLine := (DisplayCaretY >= LStartRow) and (DisplayCaretY <= LEndRow);
         LForegroundColor := Font.Color;
         LBackgroundColor := GetBackgroundColor;
         LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
@@ -8814,8 +8867,8 @@ begin
   if (Value.Row > LMaxX) and (not (soPastEndOfLine in FScroll.Options) or not (soAutosizeMaxWidth in FScroll.Options)) then
     Value.Row := LMaxX;
 
-  //if Value.Row < 1 then
-  //  Value.Row := 1;
+  if Value.Row < 1 then
+    Value.Row := 1;
 
   if (Value.Column <> FDisplayCaretX) or (Value.Row <> DisplayCaretY) then
   begin
@@ -9645,7 +9698,7 @@ end;
 
 function TBCBaseEditor.IsWordChar(AChar: Char): Boolean;
 begin
-  Result :=not IsWordBreakChar(AChar);
+  Result := not IsWordBreakChar(AChar);
 end;
 
 function TBCBaseEditor.LineToRow(ALine: Integer): Integer;

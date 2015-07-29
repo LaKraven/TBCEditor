@@ -3477,7 +3477,7 @@ begin
   Inc(LDestinationPosition.Row, Y);
   if Y >= 0 then
   begin
-    if RowToLine(LDestinationPosition.Row) > FLines.Count then
+    if RowToLine(LDestinationPosition.Row) > DisplayLineCount then // FLines.Count then
       LDestinationPosition.Row := Max(1, DisplayLineCount);
   end
   else
@@ -4203,15 +4203,6 @@ begin
   TextCaretPosition := LTextPosition;
 end;
 
-{procedure TBCBaseEditor.SetInternalDisplayPosition(const ADisplayPosition: TBCEditorDisplayPosition);
-begin
-  IncPaintLock;
-  DisplayCaretPosition := ADisplayPosition);
-  FCaretAtEndOfLine := GetWordWrap and (ADisplayPosition.Row <= FWordWrapHelper.GetRowCount) and
-    (ADisplayPosition.Column > FWordWrapHelper.GetRowLength(ADisplayPosition.Row)) and (DisplayCaretY <> ADisplayPosition.Row);
-  DecPaintLock;
-end; }
-
 procedure TBCBaseEditor.SetKeyCommands(const Value: TBCEditorKeyCommands);
 begin
   if not Assigned(Value) then
@@ -4345,12 +4336,12 @@ begin
 end;
 
 procedure TBCBaseEditor.SetTextCaretPosition(Value: TBCEditorTextPosition);
-var
-  LLine: Integer;
+//var
+//  LLine: Integer;
 begin
-  LLine := GetDisplayLineNumber(Value.Line);
-  if LLine <> -1 then
-    SetDisplayCaretPosition(True, TextToDisplayPosition(Value));
+  //LLine := GetDisplayLineNumber(Value.Line);
+  //if LLine <> -1 then
+  SetDisplayCaretPosition(True, TextToDisplayPosition(Value));
 end;
 
 procedure TBCBaseEditor.SetRightMargin(const Value: TBCEditorRightMargin);
@@ -4915,7 +4906,7 @@ begin
 
     if soPastEndOfLine in FScroll.Options then
     begin
-      //TextCaretPosition := TextCaretPosition; // ?
+      TextCaretPosition := TextCaretPosition; // ?
       SetSelectionBeginPosition(SelectionBeginPosition);
       SetSelectionEndPosition(SelectionEndPosition);
     end;
@@ -5335,11 +5326,15 @@ begin
 end;
 
 procedure TBCBaseEditor.WordWrapChanged(Sender: TObject);
+var
+  LOldTextCaretPosition: TBCEditorTextPosition;
 begin
+  LOldTextCaretPosition := TextCaretPosition;
   if GetWordWrap <> FWordWrap.Enabled then
     UpdateWordWrap(FWordWrap.Enabled);
   if GetWordWrap then
     FWordWrapHelper.DisplayChanged;
+  TextCaretPosition := LOldTextCaretPosition;
   if not (csLoading in ComponentState) then
     Invalidate;
 end;
@@ -6476,10 +6471,8 @@ begin
       LLineEnd := MaxInt;
   end;
   if GetWordWrap then
-  begin
     if FWordWrapHelper.LinesPutted(Index, ACount) <> 0 then
       InvalidateLeftMarginLines(Index + 1, LLineEnd);
-  end;
   InvalidateLines(Index + 1, LLineEnd);
 
   if Assigned(FOnLinesPutted) then
@@ -7330,7 +7323,7 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
 
 var
   LLine: Integer;
-  i, j: Integer;
+  i: Integer;
   LLineRect: TRect;
   LLeftMarginOffsets: PIntegerArray;
   LHasOtherMarks: Boolean;
@@ -7347,7 +7340,7 @@ var
   LPanelActiveLineRect: TRect;
   LPEditorLineAttribute: PBCEditorLineAttribute;
   LBookmark: TBCEditorBookmark;
-  LActiveLine: Integer;
+  //LActiveLine: Integer;
   LCurrentRow, LStartRow, LEndRow: Integer;
 begin
   // TODO: Separate into smaller parts: PaintLineNumbers, PaintBookmarkPanel, PaintWordWrapIndicator, PaintBorder,
@@ -7356,7 +7349,6 @@ begin
   LFirstLine := RowToLine(AFirstRow);
   LLastLine := RowToLine(ALastRow);
   LLastTextLine := RowToLine(ALastTextRow);
-  LActiveLine := (DisplayCaretY - TopLine) * LineHeight;
 
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
   Canvas.FillRect(AClipRect); { fill left margin rect }
@@ -7449,9 +7441,21 @@ begin
     end;
     if FLeftMargin.Colors.ActiveLineBackground <> clNone then
     begin
-      LPanelActiveLineRect := System.Types.Rect(0, LActiveLine, FLeftMargin.Bookmarks.Panel.Width, LActiveLine + LineHeight);
-      Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
-      Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
+      for i := LFirstLine to LLastTextLine do
+      begin
+        LStartRow := Max(LineToRow(i), LFirstLine);
+        LEndRow := LineToRow(i + 1) - 1;
+        for LCurrentRow := LStartRow to LEndRow do
+        begin
+          if (DisplayCaretY >= LStartRow) and (DisplayCaretY <= LEndRow) then
+          begin
+            LPanelActiveLineRect := System.Types.Rect(0, (LCurrentRow - 1) * LineHeight, FLeftMargin.Bookmarks.Panel.Width,
+              LCurrentRow * LineHeight);
+            Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
+            Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
+          end;
+        end;
+      end;
     end;
     if Assigned(FBeforeBookmarkPanelPaint) then
       FBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
@@ -7520,8 +7524,9 @@ begin
     end;
   end;
   { Active Line Indicator }
+  //LActiveLine := (DisplayCaretY {- TopLine}) * LineHeight;
   if FActiveLine.Visible and FActiveLine.Indicator.Visible then
-    FActiveLine.Indicator.Draw(Canvas, FActiveLine.Indicator.Left, LActiveLine, LineHeight);
+    FActiveLine.Indicator.Draw(Canvas, FActiveLine.Indicator.Left, DisplayCaretY * LineHeight, LineHeight);
   { Line state }
   if FLeftMargin.LineState.Enabled then
   begin
@@ -8842,7 +8847,7 @@ end;
 
 procedure TBCBaseEditor.SetDisplayCaretPosition(CallEnsureCursorPositionVisible: Boolean; Value: TBCEditorDisplayPosition);
 var
-  LMaxX: Integer;
+  LMaxX, LLineCount: Integer;
 begin
   FCaretAtEndOfLine := False;
 
@@ -8851,8 +8856,12 @@ begin
   else
     LMaxX := FScroll.MaxWidth + 1;
 
-  if Value.Row > Length(FLineNumbersCache) - 1 then
-    Value.Row := Length(FLineNumbersCache) - 1;
+  if GetWordWrap then
+    LLineCount := FWordWrapHelper.RealLineCount
+  else
+    LLineCount := Length(FLineNumbersCache) - 1;
+  if Value.Row > LLineCount then
+    Value.Row := LLineCount;
 
   if Value.Row < 1 then
   begin
@@ -10054,7 +10063,8 @@ var
   L, X: Integer;
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
-  Result.Row := GetDisplayLineNumber(Result.Row);
+  if not GetWordWrap then
+    Result.Row := GetDisplayLineNumber(Result.Row);
   {if not GetWordWrap then
   begin
     if ACollapsedLineNumber then

@@ -91,7 +91,7 @@ begin
   FBitmap := Vcl.Graphics.TBitmap.Create;
   with FBitmap do
   begin
-    Canvas.Brush.Color := FColors.Background;
+    Canvas.Brush.Color := clFuchsia;
     Width := 15;
     Height := 14;
     Canvas.Pen.Color := FColors.Arrow;
@@ -115,6 +115,7 @@ begin
     Canvas.MoveTo(2, 12);
     Canvas.LineTo(7, 12);
   end;
+  FIndicator.MaskColor := clFuchsia;
   FIndicator.Glyph.Handle := FBitmap.Handle;
 end;
 

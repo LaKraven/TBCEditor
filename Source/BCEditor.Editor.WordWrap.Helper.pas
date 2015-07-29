@@ -62,6 +62,7 @@ type
     procedure DisplayChanged;
     procedure Reset;
     property LineCount: Integer read FLineCount;
+    property RealLineCount: Integer read GetRealRowCount;
   end;
 
 implementation

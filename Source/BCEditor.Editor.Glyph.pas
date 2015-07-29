@@ -117,7 +117,7 @@ begin
   else
     Exit;
 
-  if aLineHeight >= GlyphBitmap.Height then
+  if ALineHeight >= GlyphBitmap.Height then
   begin
     SourceRect := Rect(0, 0, GlyphBitmap.Width, GlyphBitmap.Height);
     Inc(Y, (aLineHeight - GlyphBitmap.Height) div 2);

@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"28.6.2015"
+            "Date":"29.7.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -50,7 +50,6 @@
             "SearchMapForeground":"$0078AAFF",
             "SelectionBackground":"$00A56D53",
             "SelectionForeground":"clHighlightText",
-            "WordWrapIndicatorBackground": "clWindow",
             "WordWrapIndicatorArrow": "$00333333",
             "WordWrapIndicatorLines": "$009f6f2f"
          },

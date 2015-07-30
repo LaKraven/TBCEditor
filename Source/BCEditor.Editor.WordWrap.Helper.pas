@@ -50,7 +50,7 @@ type
     function GetRowCount(ALine: Integer): Integer; overload;
     function GetRowLength(ARow: Integer): Integer;
     function LinesDeleted(AIndex: Integer; ACount: Integer): Integer;
-    function LinesFolded(AFromLine, AToLine: Integer): Integer;
+    //function LinesFolded(AFromLine, AToLine: Integer): Integer;
     function LinesInserted(AIndex: Integer; ACount: Integer): Integer;
     function LinesPutted(AIndex: Integer; ACount: Integer): Integer;
     function LinesUnFolded(AFromLine, AToLine: Integer): Integer;
@@ -223,10 +223,10 @@ begin
     Dec(FLineOffsets[Line], Result);
 end;
 
-function TBCEditorWordWrapHelper.LinesFolded(AFromLine, AToLine: Integer): Integer;
+{function TBCEditorWordWrapHelper.LinesFolded(AFromLine, AToLine: Integer): Integer;
 begin
   Result := 0;
-end;
+end; }
 
 function TBCEditorWordWrapHelper.LinesInserted(AIndex: Integer; ACount: Integer): Integer;
 var

@@ -34,7 +34,7 @@ type
     FBreakWhitespace: Boolean;
     FBufferBmp: Vcl.Graphics.TBitmap;
     FCaret: TBCEditorCaret;
-    FCaretAtEndOfLine: Boolean;
+  //  FCaretAtEndOfLine: Boolean;
     FCaretOffset: TPoint;
     FDisplayCaretX: Integer;
     FDisplayCaretY: Integer;
@@ -326,7 +326,7 @@ type
     procedure UndoRedoAdded(Sender: TObject);
     procedure UpdateFoldRanges(ACurrentLine, ALineCount: Integer); overload;
     procedure UpdateFoldRanges(AFoldRanges: TBCEditorCodeFoldingRanges; ALineCount: Integer); overload;
-    procedure UpdateWordWrapHiddenOffsets;
+    //procedure UpdateWordWrapHiddenOffsets;
     procedure UpdateModifiedStatus;
     procedure UpdateScrollBars;
     procedure UpdateWordWrap(const Value: Boolean);
@@ -1111,7 +1111,7 @@ function TBCBaseEditor.GetDisplayCaretPosition: TBCEditorDisplayPosition;
 begin
   Result.Column := FDisplayCaretX;
   Result.Row := FDisplayCaretY;
-  if GetWordWrap and FCaretAtEndOfLine then
+  {if GetWordWrap and FCaretAtEndOfLine then
   begin
     if Result.Column = 1 then
     begin
@@ -1121,7 +1121,7 @@ begin
     end
     else
       FCaretAtEndOfLine := False;
-  end;
+  end; }
 end;
 
 function TBCBaseEditor.GetClipboardText: string;
@@ -3382,7 +3382,7 @@ var
   LCaretRowColumn: TBCEditorDisplayPosition;
 begin
   if GetWordWrap then
-    if X > 0 then
+    {if X > 0 then
     begin
       if FCaretAtEndOfLine then
       begin
@@ -3393,11 +3393,11 @@ begin
         Exit;
       end;
     end
-    else
+    else }
     begin
-      if (not FCaretAtEndOfLine) and (DisplayCaretX > 1) {and (DisplayCaretX = 1)} then
+      if {(not FCaretAtEndOfLine) and} (DisplayCaretX > 1) {and (DisplayCaretX = 1)} then
       begin
-        FCaretAtEndOfLine := True;
+        //FCaretAtEndOfLine := True;
         if FWordWrap.Style = wwsRightMargin then
           LBorder := FRightMargin.Position
         else
@@ -3455,9 +3455,9 @@ begin
   if GetWordWrap and (X > 0) and (DisplayCaretX < Length(ExpandedLineText)) then
   begin
     LCaretRowColumn := DisplayCaretPosition;
-    if (LCaretRowColumn.Column = 1) and (LineToRow(GetTextCaretY) <> LCaretRowColumn.Row) then
-      FCaretAtEndOfLine := True
-    else
+    //if (LCaretRowColumn.Column = 1) and (LineToRow(GetTextCaretY) <> LCaretRowColumn.Row) then
+    //  FCaretAtEndOfLine := True
+    //else
     if LCaretRowColumn.Column > CharsInWindow + 1 then
     begin
       Inc(LCaretRowColumn.Row);
@@ -3503,7 +3503,7 @@ begin
   if GetWordWrap then
   begin
     LEndOfLinePosition := TextToDisplayPosition(LDestinationLineChar);
-    FCaretAtEndOfLine := (LEndOfLinePosition.Column = 1) and (LEndOfLinePosition.Row <> LDestinationPosition.Row);
+    //FCaretAtEndOfLine := (LEndOfLinePosition.Column = 1) and (LEndOfLinePosition.Row <> LDestinationPosition.Row);
   end;
   DecPaintLock;
 end;
@@ -4338,10 +4338,16 @@ end;
 procedure TBCBaseEditor.SetTextCaretPosition(Value: TBCEditorTextPosition);
 //var
 //  LLine: Integer;
+var
+  LDisplayPosition: TBCEditorDisplayPosition;
 begin
   //LLine := GetDisplayLineNumber(Value.Line);
   //if LLine <> -1 then
-  SetDisplayCaretPosition(True, TextToDisplayPosition(Value));
+  LDisplayPosition := TextToDisplayPosition(Value);
+  SetDisplayCaretPosition(True, LDisplayPosition);
+
+  //FCaretAtEndOfLine := GetWordWrap and (LDisplayPosition.Row <= FWordWrapHelper.GetRowCount) and
+  //  (LDisplayPosition.Column > FWordWrapHelper.GetRowLength(LDisplayPosition.Row)) and (DisplayCaretY <> LDisplayPosition.Row);
 end;
 
 procedure TBCBaseEditor.SetRightMargin(const Value: TBCEditorRightMargin);
@@ -4588,6 +4594,8 @@ begin
 end;
 
 procedure TBCBaseEditor.SizeOrFontChanged(const FontChanged: Boolean);
+var
+  LOldTextCaretPosition: TBCEditorTextPosition;
 begin
   if HandleAllocated and (FCharWidth <> 0) then
   begin
@@ -4597,7 +4605,9 @@ begin
 
     if GetWordWrap then
     begin
+      LOldTextCaretPosition := TextCaretPosition;
       FWordWrapHelper.DisplayChanged;
+      TextCaretPosition := LOldTextCaretPosition;
       Invalidate;
     end;
     if FontChanged then
@@ -4731,11 +4741,11 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.UpdateWordWrapHiddenOffsets;
+{procedure TBCBaseEditor.UpdateWordWrapHiddenOffsets;
 begin
   if GetWordWrap then
     FWordWrapHelper.LinesFolded(-1, -1);
-end;
+end;  }
 
 procedure TBCBaseEditor.UpdateModifiedStatus;
 begin
@@ -6031,8 +6041,12 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
 begin
-  TextCaretY := DisplayToTextPosition(PixelsToRowColumn(X, Y)).Line;
-  DisplayCaretX := 0;
+  DisplayCaretX := 1;
+  DisplayCaretY := PixelsToRowColumn(X, Y).Row;
+  { Clear selection }
+  FSelectionBeginPosition := TextCaretPosition;
+  FSelectionEndPosition := FSelectionBeginPosition;
+
   if (X < LeftMargin.Bookmarks.Panel.Width) and (Y div LineHeight <= DisplayCaretY - TopLine) and
      LeftMargin.Bookmarks.Visible and
     (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
@@ -8849,7 +8863,7 @@ procedure TBCBaseEditor.SetDisplayCaretPosition(CallEnsureCursorPositionVisible:
 var
   LMaxX, LLineCount: Integer;
 begin
-  FCaretAtEndOfLine := False;
+  //FCaretAtEndOfLine := False;
 
   if GetWordWrap then
     LMaxX := MaxInt
@@ -8871,7 +8885,7 @@ begin
   end
   else
   if not (soPastEndOfLine in FScroll.Options) then
-    LMaxX := Length(Lines[GetTextLineNumber(Value.Row) - 1]) + 1;
+    LMaxX := Length(Lines[GetTextLineNumber(Value.Row) - 1]) + 1; // TODO: GetTextCaretY?
 
   if (Value.Row > LMaxX) and (not (soPastEndOfLine in FScroll.Options) or not (soAutosizeMaxWidth in FScroll.Options)) then
     Value.Row := LMaxX;
@@ -10223,7 +10237,7 @@ end;
 
 procedure TBCBaseEditor.Clear;
 begin
-  UpdateWordWrapHiddenOffsets;
+  //UpdateWordWrapHiddenOffsets;
   FLines.Clear;
   FMarkList.Clear;
   FillChar(FBookmarks, SizeOf(FBookmarks), 0);
@@ -11020,7 +11034,7 @@ begin
                     FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, GetTextCaretY), TextCaretPosition, LHelper, smNormal);
                     FDisplayCaretX := i + 1;
                   end;
-                FLines[GetTextLineNumber(FDisplayCaretY) - 1] := LLineText;
+                FLines[GetTextCaretY - 1] := LLineText;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end
               else
@@ -11034,7 +11048,7 @@ begin
                   LHelper, smNormal);
 
                 Delete(LLineText, FDisplayCaretX - i, i);
-                FLines[GetTextLineNumber(FDisplayCaretY) - 1] := LLineText;
+                FLines[GetTextCaretY - 1] := LLineText;
 
                 TextCaretX := FDisplayCaretX - i;
               end;
@@ -11092,8 +11106,8 @@ begin
                 if LSpaceCount1 > 0 then
                   FUndoList.EndBlock;
 
-                FLines[GetTextLineNumber(FDisplayCaretY) - 1] := LLineText + LSpaceBuffer + FLines[GetTextLineNumber(FDisplayCaretY)];
-                FLines.Attributes[GetTextLineNumber(Pred(FDisplayCaretY))].LineState := lsModified;
+                FLines[GetTextCaretY - 1] := LLineText + LSpaceBuffer + FLines[GetTextCaretY];
+                FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
                 FLines.Delete(GetTextCaretY);
                 DoLinesDeleted(GetTextCaretY, 1, True);
               end;
@@ -11620,7 +11634,7 @@ begin
               end
               else
                 LLineText := LLineText + AChar;
-              FLines[GetTextLineNumber(FDisplayCaretY) - 1] := LLineText;
+              FLines[GetTextCaretY - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin

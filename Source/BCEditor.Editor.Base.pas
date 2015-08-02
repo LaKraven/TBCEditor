@@ -132,7 +132,6 @@ type
     FOriginalUndoList: TBCEditorUndoList;
     FPaintLock: Integer;
     FPlugins: TList;
-    FProcessingMinimap: Integer;
     FReadOnly: Boolean;
     FRedoList: TBCEditorUndoList;
     FReplace: TBCEditorReplace;
@@ -693,7 +692,6 @@ begin
     FCommonData.SkinSection := s_Edit;
   {$ENDIF}
 
-  FProcessingMinimap := 0;
   FResetLineNumbersCache := True;
 
   FBackgroundColor := clWindow;
@@ -1182,6 +1180,15 @@ begin
       begin
         LFound  := True;
         Result := LPivot;
+        if FWordWrap.Enabled then
+        begin
+          Dec(LPivot);
+          while FLineNumbersCache[LPivot] = ATextLineNumber do
+          begin
+            Result := LPivot;
+            Dec(LPivot);
+          end;
+        end;
       end
       else
       if FLineNumbersCache[LPivot] > ATextLineNumber then
@@ -3238,6 +3245,8 @@ procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
 begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
+  if FMinimap.Visible and (FDisplayLineCount > 0) then
+    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / FDisplayLineCount))), 1);
   Invalidate;
   if not (csLoading in ComponentState) then
     InvalidateMinimap;
@@ -3350,9 +3359,9 @@ begin
     FSelectionBeginPosition := TextCaretPosition;
 
   { Set caret and block begin / end }
-  IncPaintLock;
+  //IncPaintLock;
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationLineChar, SelectionCommand);
-  DecPaintLock;
+  //DecPaintLock;
 end;
 
 procedure TBCBaseEditor.OpenLink(AURI: string; ALinkType: Integer);
@@ -6360,7 +6369,8 @@ begin
       FMinimapBufferBmp.Height := 0;
   end;
 
-  if not FMinimap.Dragging and FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  if not FMinimap.Dragging and FMinimap.Visible and
+    (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     DoOnMinimapClick(Button, X, Y);
     Exit;
@@ -6523,7 +6533,6 @@ begin
         LTopLine := Max(1, FMinimap.TopLine + LTemp2);
         if TopLine <> LTopLine then
         begin
-          Inc(FProcessingMinimap);
           TopLine := LTopLine;
           Paint;
         end;
@@ -8686,11 +8695,11 @@ begin
   if not (soPastEndOfLine in FScroll.Options) then
     LMaxX := Length(Lines[GetTextLineNumber(Value.Row) - 1]) + 1; // TODO: GetTextCaretY?
 
-  if (Value.Row > LMaxX) and (not (soPastEndOfLine in FScroll.Options) or not (soAutosizeMaxWidth in FScroll.Options)) then
-    Value.Row := LMaxX;
+  if (Value.Column > LMaxX) and (not (soPastEndOfLine in FScroll.Options) or not (soAutosizeMaxWidth in FScroll.Options)) then
+    Value.Column := LMaxX;
 
-  if Value.Row < 1 then
-    Value.Row := 1;
+  if Value.Column < 1 then
+    Value.Column := 1;
 
   IncPaintLock;
   try
@@ -9870,7 +9879,7 @@ var
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
 
-  Result.Row := GetDisplayLineNumber(Result.Row);
+  Result.Row := GetDisplayLineNumber(ATextPosition.Line); // Result.Row);
 
   LTextLine := FLines[ATextPosition.Line - 1];
   LLength := Length(LTextLine);

@@ -417,7 +417,7 @@ type
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
-    procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow, AFirstColumn, ALastColumn: Integer; AMinimap: Boolean);
+    procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure RecalculateCharExtent;
     procedure RedoItem;
     procedure RepaintGuides;
@@ -1835,6 +1835,7 @@ end;
 procedure TBCBaseEditor.CreateLineNumbersCache;
 var
   i, j, k: Integer;
+  LAdded: Boolean;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
   LCollapsedCodeFolding: array of Boolean;
   LLineNumbersCacheLength, LStringLength: Integer;
@@ -1873,19 +1874,21 @@ begin
         Inc(j);
       if j > Lines.Count then
         Break;
-
-      LStringLength := FLines.ExpandedStringLengths[j - 1]; { this is slow in debug with FastMM }
-      if FWordWrap.Enabled and (LStringLength > FVisibleChars) and (FVisibleChars > 0) then
+      LAdded := False;
+      if FWordWrap.Enabled then
       begin
+        LStringLength := FLines.ExpandedStringLengths[j - 1]; { this is for some reason slow with FastMM }
+        if (LStringLength > FVisibleChars) and (FVisibleChars > 0) then
         while LStringLength > 0 do
         begin
+          LAdded := True;
           FLineNumbersCache[k] := j;
           Inc(k);
           ResizeCacheArray;
           Dec(LStringLength, FVisibleChars);
         end;
-      end
-      else
+      end;
+      if not LAdded then
       begin
         FLineNumbersCache[k] := j;
         Inc(k);
@@ -3321,7 +3324,7 @@ begin
   begin
     LCaretRowColumn := DisplayCaretPosition;
 
-    if LCaretRowColumn.Column > FVisibleChars + 1 then
+    if LCaretRowColumn.Column > FVisibleChars {+ 1} then
     begin
       Inc(LCaretRowColumn.Row);
       LCaretRowColumn.Column := 1;
@@ -6748,17 +6751,11 @@ end;
 procedure TBCBaseEditor.Paint;
 var
   LClipRect, DrawRect: TRect;
-  LLine1, LLine2, LLine3, LColumn1, LColumn2, LTemp: Integer;
+  LLine1, LLine2, LLine3, LTemp: Integer;
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
   LClipRect := Canvas.ClipRect;
-
-  LColumn1 := FLeftChar;
-  LTemp := FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2;
-  if LClipRect.Left > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2 then
-    Inc(LColumn1, (LClipRect.Left - LTemp) div FCharWidth);
-  LColumn2 := FLeftChar + (LClipRect.Right - LTemp + FCharWidth - 1) div FCharWidth;
 
   LLine1 := FTopLine;
   LTemp := (LClipRect.Bottom + FTextHeight - 1) div LineHeight;
@@ -6785,7 +6782,7 @@ begin
       DeflateMinimapRect(DrawRect);
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
-      PaintTextLines(DrawRect, LLine1, LLine2, LColumn1, LColumn2, False);
+      PaintTextLines(DrawRect, LLine1, LLine2, False);
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
     end;
@@ -6844,10 +6841,7 @@ begin
           LLine2 := Min(FDisplayLineCount, LLine1 + (LClipRect.Height div FMinimap.CharHeight) - 1);
         end;
 
-        LColumn1 := 1;
-        LColumn2 := FMinimap.GetWidth div FTextDrawer.CharWidth;
-
-        PaintTextLines(DrawRect, LLine1, LLine2, LColumn1, LColumn2, True);
+        PaintTextLines(DrawRect, LLine1, LLine2, True);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
@@ -7273,8 +7267,8 @@ begin
 
         if LLine = GetTextCaretY then
         begin
-          LPanelActiveLineRect := System.Types.Rect(0, (i - 1) * LineHeight, FLeftMargin.Bookmarks.Panel.Width,
-            i * LineHeight);
+          LPanelActiveLineRect := System.Types.Rect(0, (i - TopLine) * LineHeight, FLeftMargin.Bookmarks.Panel.Width,
+            (i - TopLine + 1) * LineHeight);
           Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
           Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
         end;
@@ -7634,7 +7628,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow, AFirstColumn, ALastColumn: Integer;
+procedure TBCBaseEditor.PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer;
   AMinimap: Boolean);
 var
   LAnySelection: Boolean;
@@ -7654,6 +7648,7 @@ var
   LCustomForegroundColor: TColor;
   LCustomBackgroundColor: TColor;
   LIsCustomBackgroundColor: Boolean;
+  LFirstChar, LLastChar: Integer;
 
   function GetBackgroundColor: TColor;
   var
@@ -7814,8 +7809,8 @@ var
     X1, X2: Integer;
   begin
     { Compute some helper variables. }
-    LFirstColumn := Max(AFirstColumn, LTokenHelper.CharsBefore + 1);
-    LLastColumn := Min(ALastColumn, LTokenHelper.CharsBefore + LTokenHelper.Length + 1);
+    LFirstColumn := Max(LFirstChar, LTokenHelper.CharsBefore + 1);
+    LLastColumn := Min(LLastChar, LTokenHelper.CharsBefore + LTokenHelper.Length + 1);
     if LIsComplexLine then
     begin
       LFirstUnselectedPartOfToken := LFirstColumn < LLineSelectionStart;
@@ -8015,14 +8010,13 @@ var
   procedure PaintLines;
   var
     i, j: Integer;
+    LFirstColumn, LLastColumn: Integer;
     LCurrentLineText: string;
     LCurrentRow, LPreviousRow: Integer;
     LDisplayPosition: TBCEditorDisplayPosition;
     //LEndRow: Integer;
-    LFirstChar: Integer;
     LFoldRange: TBCEditorCodeFoldingRange;
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
-    LLastChar: Integer;
     LScrolledXBy: Integer;
     //LStartRow: Integer;
     LTokenText: string;
@@ -8080,29 +8074,25 @@ var
       LCurrentRow := LCurrentLine;
       while LCurrentRow = LCurrentLine do
       begin
-        LIsCurrentLine := GetTextCaretY = LCurrentLine; //(DisplayCaretY >= LStartRow) and (DisplayCaretY <= LEndRow);
+        LIsCurrentLine := GetTextCaretY = LCurrentLine;
         LForegroundColor := Font.Color;
         LBackgroundColor := GetBackgroundColor;
         LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
 
+        LFirstColumn := LFirstChar;
+        LLastColumn := LLastChar;
+
         if FWordWrap.Enabled then
         begin
-          LFirstChar := AFirstColumn;
-          LLastChar := ALastColumn;
           j := i - 1;
           LPreviousRow := GetTextLineNumber(j);
           while LCurrentRow = LPreviousRow do
           begin
-            Inc(LFirstChar, FVisibleChars);
-            Inc(LLastChar, FVisibleChars); // TODO: end to a word, not a char
+            Inc(LFirstColumn, FVisibleChars);
+            Inc(LLastColumn, FVisibleChars);
             Dec(j);
             LPreviousRow := GetTextLineNumber(j);
           end;
-        end
-        else
-        begin
-          LFirstChar := AFirstColumn;
-          LLastChar := ALastColumn;
         end;
 
         LIsComplexLine := False;
@@ -8111,18 +8101,18 @@ var
 
         if LAnySelection and (LCurrentRow >= LSelectionStartPosition.Row) and (LCurrentRow <= LSelectionEndPosition.Row) then
         begin
-          LLineSelectionStart := AFirstColumn;
-          LLineSelectionEnd := ALastColumn + 1;
+          LLineSelectionStart := LFirstColumn; // AFirstColumn;
+          LLineSelectionEnd := LLastColumn + 1; // ALastColumn + 1;
           if (FSelection.ActiveMode = smColumn) or
             ((FSelection.ActiveMode = smNormal) and (LCurrentRow = LSelectionStartPosition.Row)) then
           begin
-            if LSelectionStartPosition.Column > ALastColumn then
+            if LSelectionStartPosition.Column > LLastColumn then // ALastColumn then
             begin
               LLineSelectionStart := 0;
               LLineSelectionEnd := 0;
             end
             else
-            if LSelectionStartPosition.Column > AFirstColumn then
+            if LSelectionStartPosition.Column > LFirstColumn then // AFirstColumn then
             begin
               LLineSelectionStart := LSelectionStartPosition.Column;
               LIsComplexLine := True;
@@ -8131,13 +8121,13 @@ var
           if (FSelection.ActiveMode = smColumn) or
             ((FSelection.ActiveMode = smNormal) and (LCurrentRow = LSelectionEndPosition.Row)) then
           begin
-            if LSelectionEndPosition.Column < AFirstColumn then
+            if LSelectionEndPosition.Column < LFirstColumn then // AFirstColumn then
             begin
               LLineSelectionStart := 0;
               LLineSelectionEnd := 0;
             end
             else
-            if LSelectionEndPosition.Column < ALastColumn then
+            if LSelectionEndPosition.Column < LLastColumn then // ALastColumn then
             begin
               LLineSelectionEnd := LSelectionEndPosition.Column;
               LIsComplexLine := True;
@@ -8166,18 +8156,19 @@ var
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
           LTokenLength := Length(LTokenText);
-          if LTokenPosition + LTokenLength >= LFirstChar then
+          if LTokenPosition + LTokenLength >= LFirstColumn then // LFirstChar then
           begin
-            if LTokenPosition + LTokenLength > LLastChar then
-            begin
-              if LTokenPosition > LLastChar then
+            if FWordWrap.Enabled then
+              if LTokenPosition + LTokenLength > LLastColumn then // LLastChar then
+              //begin
+              //if LTokenPosition > LLastChar then
                 Break;
-              if FWordWrap.Enabled then
+              {if FWordWrap.Enabled then
                 LTokenLength := LLastChar - LTokenPosition - 1
               else
-                LTokenLength := LLastChar - LTokenPosition;
-            end;
-            Dec(LTokenPosition, LFirstChar - AFirstColumn);
+                LTokenLength := LLastChar - LTokenPosition;}
+           // end;
+            Dec(LTokenPosition, LFirstChar - LFirstColumn); // LFirstChar); // AFirstColumn);
             LHighlighterAttribute := FHighlighter.GetTokenAttribute;
             if Assigned(LHighlighterAttribute) then
             begin
@@ -8304,9 +8295,24 @@ begin
   LFirstLine := AFirstRow;
   LLastLine := ALastRow;
 
-  { WordWrap always start from first column }
-  if FWordWrap.Enabled then
-    AFirstColumn := 1;
+  if AMinimap then
+  begin
+    LFirstChar := 1;
+    LLastChar := FMinimap.GetWidth div FTextDrawer.CharWidth;
+  end
+  else
+  begin
+    if FWordWrap.Enabled then
+    begin
+      LFirstChar := 1;
+      LLastChar := FVisibleChars
+    end
+    else
+    begin
+      LFirstChar := FLeftChar;
+      LLastChar := FLeftChar + FVisibleChars + 1;
+    end;
+  end;
 
   FTextOffset := FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2 - (LeftChar - 1) * FCharWidth;
 

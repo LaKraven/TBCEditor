@@ -193,24 +193,18 @@ procedure TBCEditorMultiToken.DeleteSymbol(Index: Integer);
 begin
   if (Index > -1) and (Index < FSymbols.Count) then
     FSymbols.Delete(Index)
-  //else
-  //  raise Exception.Create(Format('%s.DeleteSymbol: Index out of bounds', [ClassName]));
 end;
 
 function TBCEditorMultiToken.GetSymbol(Index: Integer): string;
 begin
   if (Index > -1) and (Index < FSymbols.Count) then
     Result := FSymbols[Index]
-  //else
-  //  raise Exception.Create(Format('%s.GetSymbol: Index out of bounds', [ClassName]));
 end;
 
 procedure TBCEditorMultiToken.SetSymbol(Index: Integer; ASymbol: string);
 begin
   if (Index > -1) and (Index < FSymbols.Count) then
     FSymbols[Index] := ASymbol
-  //else
-  //  raise Exception.Create(Format('%s.SetSymbol: Index out of bounds', [ClassName]));
 end;
 
 function TBCEditorMultiToken.SymbolCount: Integer;

@@ -172,6 +172,7 @@ type
     FVisibleChars: Integer;
     FVisibleLines: Integer;
     FWordWrap: TBCEditorWordWrap;
+    FWordWrapLineLengths: array of Integer;
     function CodeFoldingCollapsableFoldRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingFoldRangeForLineTo(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCodeFoldingRange;
@@ -1835,13 +1836,20 @@ end;
 
 procedure TBCBaseEditor.CreateLineNumbersCache;
 var
-  i, j, k, l: Integer;
+  i, j, k: Integer;
   LAdded: Boolean;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
   LCollapsedCodeFolding: array of Boolean;
   LLineNumbersCacheLength, LStringLength: Integer;
   LTextLine: string;
-  LStringList: TStringList;
+  LRowBegin: PChar;
+  LLineEnd: PChar;
+  LRowEnd: PChar;
+  LRunner: PChar;
+  LRowMinEnd: PChar;
+//  LLastVisibleChar: PChar;
+  LMinRowLength: Word;
+  LMaxRowLength: Word;
 
   procedure ResizeCacheArray;
   begin
@@ -1849,68 +1857,103 @@ var
     begin
       Inc(LLineNumbersCacheLength, 256);
       SetLength(FLineNumbersCache, LLineNumbersCacheLength);
+      if FWordWrap.Enabled then
+        SetLength(FWordWrapLineLengths, LLineNumbersCacheLength);
     end;
+  end;
+
+  procedure AddLineNumberIntoCache;
+  begin
+    FLineNumbersCache[k] := j;
+    Inc(k);
+    ResizeCacheArray;
   end;
 
 begin
   if FResetLineNumbersCache then
   begin
-    LStringList := TStringList.Create;
-    try
-      FResetLineNumbersCache := False;
-      SetLength(LCollapsedCodeFolding, Lines.Count + 1);
-      for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
-      begin
-        LCodeFoldingRange := FAllCodeFoldingRanges[i];
-        if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed then
-          for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine do
-            LCollapsedCodeFolding[j] := True;
-      end;
-      SetLength(FLineNumbersCache, 0);
-      LLineNumbersCacheLength := Lines.Count + 1;
+    FResetLineNumbersCache := False;
+    SetLength(LCollapsedCodeFolding, Lines.Count + 1);
+    for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
+    begin
+      LCodeFoldingRange := FAllCodeFoldingRanges[i];
+      if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed then
+        for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine do
+          LCollapsedCodeFolding[j] := True;
+    end;
+    SetLength(FLineNumbersCache, 0);
+    SetLength(FWordWrapLineLengths, 0);
+    LLineNumbersCacheLength := Lines.Count + 1;
+    if FWordWrap.Enabled then
+    begin
+      Inc(LLineNumbersCacheLength, 256);
+      SetLength(FWordWrapLineLengths, LLineNumbersCacheLength);
+    end;
+    SetLength(FLineNumbersCache, LLineNumbersCacheLength);
+    j := 1;
+    k := 1;
+    for i := 1 to Lines.Count do
+    begin
+      while (j <= Lines.Count) and LCollapsedCodeFolding[j] do { skip collapsed lines }
+        Inc(j);
+      if j > Lines.Count then
+        Break;
+
+      LAdded := False;
+
       if FWordWrap.Enabled then
-        Inc(LLineNumbersCacheLength, 256);
-      SetLength(FLineNumbersCache, LLineNumbersCacheLength);
-      j := 1;
-      k := 1;
-      for i := 1 to Lines.Count do
       begin
-        while (j <= Lines.Count) and LCollapsedCodeFolding[j] do { skip collapsed lines }
-          Inc(j);
-        if j > Lines.Count then
-          Break;
-        LAdded := False;
-        if FWordWrap.Enabled then
+        LTextLine := FLines.ExpandedStrings[j - 1];
+        LStringLength := Length(LTextLine);
+        if (LStringLength > FVisibleChars) and (FVisibleChars > 0) then
         begin
-          LTextLine := FLines.ExpandedStrings[j - 1];
-          LStringLength := Length(LTextLine); { this is for some reason slow with FastMM }
-          if (LStringLength > FVisibleChars) and (FVisibleChars > 0) then
+          LRowBegin := PChar(LTextLine);
+          LMaxRowLength := GetWrapAtColumn;
+          LMinRowLength := Max(LMaxRowLength div 3, 1);
+          LRowEnd := LRowBegin + LMaxRowLength;
+          LLineEnd := LRowBegin + LStringLength;
+          while LRowEnd < LLineEnd do
           begin
-            LStringList.Text := WrapText(LTextLine, FVisibleChars);
-            for l := 0 to LStringList.Count - 1 do
+            LRowMinEnd := LRowBegin + LMinRowLength;
+            LRunner := LRowEnd;
+            while LRunner > LRowMinEnd do
             begin
-              LAdded := True;
-              FLineNumbersCache[k] := j;
-              Inc(k);
-              ResizeCacheArray;
+              if IsWordBreakChar(LRunner^) then
+              begin
+                LRowEnd := LRunner;
+                Break;
+              end;
+              Dec(LRunner);
             end;
+
+            LAdded := True;
+            FWordWrapLineLengths[k] := LRowEnd - LRowBegin;
+            AddLineNumberIntoCache;
+
+            LRowBegin := LRowEnd;
+            Inc(LRowEnd, LMaxRowLength);
+          end;
+          if LLineEnd > LRowBegin then
+          begin
+            FWordWrapLineLengths[k] := LLineEnd - LRowBegin;
+            AddLineNumberIntoCache;
           end;
         end;
-        if not LAdded then
-        begin
-          FLineNumbersCache[k] := j;
-          Inc(k);
-          ResizeCacheArray;
-        end;
-        Inc(j);
       end;
-      if k <> Length(FLineNumbersCache) then
-        SetLength(FLineNumbersCache, k);
-      SetLength(LCollapsedCodeFolding, 0);
-      FDisplayLineCount := Length(FLineNumbersCache) - 1;
-    finally
-      LStringList.Free;
+
+      if not LAdded then
+        AddLineNumberIntoCache;
+      Inc(j);
     end;
+
+    if k <> Length(FLineNumbersCache) then
+    begin
+      SetLength(FLineNumbersCache, k);
+      if FWordWrap.Enabled then
+        SetLength(FWordWrapLineLengths, k);
+    end;
+    SetLength(LCollapsedCodeFolding, 0);
+    FDisplayLineCount := Length(FLineNumbersCache) - 1;
   end;
 end;
 
@@ -2752,6 +2795,10 @@ var
 begin
   LCaretNearestPosition := PixelsToNearestRowColumn(X, Y);
   LCaretNearestPosition.Row := MinMax(LCaretNearestPosition.Row, 1, DisplayLineCount);
+  // TODO:
+  if FWordWrap.Enabled then
+    if FWordWrapLineLengths[LCaretNearestPosition.Row] <> 0 then
+      LCaretNearestPosition.Column := MinMax(LCaretNearestPosition.Column, 1, FWordWrapLineLengths[LCaretNearestPosition.Row]);
   SetDisplayCaretPosition(LCaretNearestPosition);
 end;
 
@@ -3340,11 +3387,13 @@ begin
   begin
     LCaretRowColumn := DisplayCaretPosition;
 
-    if LCaretRowColumn.Column > FVisibleChars {+ 1} then
+    if (FWordWrapLineLengths[LCaretRowColumn.Row] = 0) and (LCaretRowColumn.Column > FVisibleChars) or
+      (FWordWrapLineLengths[LCaretRowColumn.Row] <> 0) and (LCaretRowColumn.Column > FWordWrapLineLengths[LCaretRowColumn.Row]) then
     begin
       Inc(LCaretRowColumn.Row);
       LCaretRowColumn.Column := 1;
-      TextCaretPosition := DisplayToTextPosition(LCaretRowColumn);
+      DisplayCaretPosition := LCaretRowColumn;
+      //TextCaretPosition := DisplayToTextPosition(LCaretRowColumn);
     end;
   end;
 end;
@@ -3406,13 +3455,9 @@ end;
 
 procedure TBCBaseEditor.RightMarginChanged(Sender: TObject);
 begin
-  {if FWordWrap.Style = wwsRightMargin then
-    FWordWrapHelper.DisplayChanged;
   if FWordWrap.Enabled then
     if FWordWrap.Style = wwsRightMargin then
-      FWordWrapHelper.Reset;
-  TODO: Reset line numbers
-  }
+      FResetLineNumbersCache := True;
 
   if not (csLoading in ComponentState) then
     Invalidate;
@@ -4155,9 +4200,8 @@ begin
     if HandleAllocated then
     begin
       FVisibleChars := Max(ClientWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2, 0) div FCharWidth;
-      //if FWordWrap.Enabled and (FWordWrap.Style = wwsclientWidth) then
-      //  FWordWrapHelper.DisplayChanged;
-      // TODO: Reset line numbers
+      if FWordWrap.Enabled then
+        FResetLineNumbersCache := True;
       UpdateScrollBars;
       Invalidate;
     end;
@@ -4466,7 +4510,7 @@ procedure TBCBaseEditor.SizeOrFontChanged(const FontChanged: Boolean);
 var
   LOldTextCaretPosition: TBCEditorTextPosition;
 begin
-  if HandleAllocated and (FCharWidth <> 0) then
+  if Visible and HandleAllocated and (FCharWidth <> 0) then
   begin
     FVisibleChars := Max(ClientWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2 - FMinimap.GetWidth -
       FSearch.Map.GetWidth, 0) div FCharWidth;
@@ -4520,8 +4564,8 @@ begin
   Invalidate;
   if FWordWrap.Enabled then
   begin
-    //FWordWrapHelper.Reset;
-    //TODO: Reset line numbers
+    if FWordWrap.Enabled then
+      FResetLineNumbersCache := True;
     InvalidateLeftMargin;
   end;
 end;
@@ -4774,7 +4818,7 @@ begin
 
     if soPastEndOfLine in FScroll.Options then
     begin
-      TextCaretPosition := TextCaretPosition; // ?
+      //TextCaretPosition := TextCaretPosition; // ?
       SetSelectionBeginPosition(SelectionBeginPosition);
       SetSelectionEndPosition(SelectionEndPosition);
     end;
@@ -5197,6 +5241,8 @@ procedure TBCBaseEditor.WordWrapChanged(Sender: TObject);
 var
   LOldTextCaretPosition: TBCEditorTextPosition;
 begin
+  if not Visible then
+    Exit;
   LOldTextCaretPosition := TextCaretPosition;
   FResetLineNumbersCache := True;
   CreateLineNumbersCache;
@@ -6203,7 +6249,7 @@ var
   LOldMode: TBCEditorSelectionMode;
 begin
   Exclude(FStateFlags, sfLinesChanging);
-  if HandleAllocated then
+  if Visible and HandleAllocated then
   begin
     FResetLineNumbersCache := True;
     UpdateScrollBars;
@@ -6279,6 +6325,9 @@ begin
     end;
   end;
 
+  if FWordWrap.Enabled then
+    FResetLineNumbersCache := True;
+
   InvalidateLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
   InvalidateLeftMarginLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
 end;
@@ -6299,6 +6348,9 @@ begin
         Inc(LLastScan);
       until LLastScan >= Index + ACount;
     end;
+
+  if FWordWrap.Enabled then
+    FResetLineNumbersCache := True;
 
   if FLeftMargin.LineNumbers.Visible and FLeftMargin.Autosize then
     FLeftMargin.AutosizeDigitCount(Lines.Count);
@@ -6330,6 +6382,8 @@ begin
     if FLines <> FOriginalLines then
       LLineEnd := MaxInt;
   end;
+  if FWordWrap.Enabled then
+    FResetLineNumbersCache := True;
   InvalidateLines(Index + 1, LLineEnd);
 
   if Assigned(FOnLinesPutted) then
@@ -8088,6 +8142,9 @@ var
 
       LFirstColumn := LFirstChar;
       LLastColumn := LLastChar;
+      if FWordWrap.Enabled then
+        if FWordWrapLineLengths[i] <> 0 then
+          LLastColumn := FWordWrapLineLengths[i];
 
       while LCurrentRow = LCurrentLine do
       begin
@@ -8161,9 +8218,9 @@ var
           begin
             if FWordWrap.Enabled then
             begin
-              if LTokenPosition + LTokenLength >= LLastColumn then
+              if LTokenPosition + LTokenLength > LLastColumn then
               begin
-                LFirstColumn := LTokenPosition;
+                LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
                 LLastColumn := LFirstColumn + FVisibleChars;
                 Break;
               end;
@@ -8660,8 +8717,7 @@ begin
     FBreakWhitespace := Value;
     if FWordWrap.Enabled then
     begin
-      //FWordWrapHelper.Reset;
-      //TODO: Reset line numbers
+      FResetLineNumbersCache := True;
       Invalidate;
     end;
   end;
@@ -8674,9 +8730,9 @@ begin
     SetDisplayCaretPosition(True, Value);
     if SelectionAvailable then
       InvalidateSelection;
-    {FSelectionBeginPosition.Char := FDisplayCaretX;
+    FSelectionBeginPosition.Char := FDisplayCaretX;
     FSelectionBeginPosition.Line := FDisplayCaretY;
-    FSelectionEndPosition := FSelectionBeginPosition;  }
+    FSelectionEndPosition := FSelectionBeginPosition;
   finally
     DecPaintLock;
   end;
@@ -8886,7 +8942,7 @@ var
 
       LIndented := False;
       if (FLines.Count > 0) and (eoAutoIndent in fOptions) then
-        LWhite := GetLeadingWhite(FLines.List^[Pred(GetTextCaretY)].fString)
+        LWhite := GetLeadingWhite(FLines.List^[GetTextCaretY - 1].fString)
       else
         LWhite := '';
 
@@ -9349,9 +9405,12 @@ function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDi
 var
   LTextLine: string;
   i, LLength, LChar, LPreviousLine, LRow: Integer;
+  test: Boolean;
 begin
   Result := TBCEditorTextPosition(ADisplayPosition);
   Result.Line := GetTextLineNumber(Result.Line);
+
+  test := True;
 
   if FWordWrap.Enabled then
   begin
@@ -9359,29 +9418,33 @@ begin
     LPreviousLine := GetTextLineNumber(LRow);
     while LPreviousLine = Result.Line do
     begin
-      Result.Char := Result.Char + FVisibleChars; // TODO
+      test := False;
+      Result.Char := Result.Char + FWordWrapLineLengths[LRow]; // FVisibleChars; // TODO
       Dec(LRow);
       LPreviousLine := GetTextLineNumber(LRow);
     end;
   end;
 
-  LTextLine := FLines[Result.Line - 1];
-  LLength := Length(LTextLine);
-  LChar := 0;
-  i := 0;
-
-  while LChar < Result.Char  do
+  if test then
   begin
-    Inc(i);
-    if (i <= LLength) and (LTextLine[i] = #9) then
-      Inc(LChar, FTabs.Width)
-    else
-    if i <= LLength then
-      Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
-    else
-      Inc(LChar);
+    LTextLine := FLines[Result.Line - 1];
+    LLength := Length(LTextLine);
+    LChar := 0;
+    i := 0;
+
+    while LChar < Result.Char  do
+    begin
+      Inc(i);
+      if (i <= LLength) and (LTextLine[i] = #9) then
+        Inc(LChar, FTabs.Width)
+      else
+      if i <= LLength then
+        Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      else
+        Inc(LChar);
+    end;
+    Result.Char := i;
   end;
-  Result.Char := i;
 end;
 
 function TBCBaseEditor.GetColorsFileName(AFileName: string): string;
@@ -9882,35 +9945,43 @@ var
   i: Integer;
   LTextLine: string;
   LLength, LChar: Integer;
+  Test: Boolean;
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
-
   Result.Row := GetDisplayLineNumber(ATextPosition.Line); // Result.Row);
 
-  LTextLine := FLines[ATextPosition.Line - 1];
-  LLength := Length(LTextLine);
-  LChar := 0;
-  for i := 1 to ATextPosition.Char - 1 do
-  begin
-    if (i <= LLength) and (LTextLine[i] = BCEDITOR_TAB_CHAR) then
-      Inc(LChar, FTabs.Width)
-    else
-    if ARealWidth and (i <= LLength) and (LTextLine[i] <> BCEDITOR_SPACE_CHAR) and (LTextLine[i] <> '') then
-      Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
-    else
-      Inc(LChar);
-  end;
-  Result.Column := LChar + 1;
-
+  Test := True;
   if FWordWrap.Enabled then
   begin
     if FVisibleChars > 0 then
     while Result.Column > FVisibleChars do
     begin
+      Test := False;
+      Dec(Result.Column, FWordWrapLineLengths[Result.Row]);
       Inc(Result.Row);
-      Dec(Result.Column, FVisibleChars);
+      //Dec(Result.Column, FVisibleChars);
     end;
   end;
+
+  if Test then
+  begin
+    LTextLine := FLines[ATextPosition.Line - 1];
+    LLength := Length(LTextLine);
+    LChar := 0;
+    for i := 1 to ATextPosition.Char - 1 do
+    begin
+      if (i <= LLength) and (LTextLine[i] = BCEDITOR_TAB_CHAR) then
+        Inc(LChar, FTabs.Width)
+      else
+      if ARealWidth and (i <= LLength) and (LTextLine[i] <> BCEDITOR_SPACE_CHAR) and (LTextLine[i] <> '') then
+        Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      else
+        Inc(LChar);
+    end;
+    Result.Column := LChar + 1;
+  end;
+
+  {$IFDEF DEBUG}OutputDebugString(PChar(Format('X, Y = %d, %d', [Result.Column, Result.Row])));{$ENDIF}
 end;
 
 function TBCBaseEditor.WordEnd: TBCEditorTextPosition;
@@ -11397,7 +11468,7 @@ begin
               if LSpaceCount1 > 0 then
                 LLineText := LLineText + LSpaceBuffer + AChar
               else
-                Insert(AChar, LLineText, FDisplayCaretX);
+                Insert(AChar, LLineText, TextCaretPosition.Char);
 
               FLines[GetTextCaretY - 1] := LLineText;
 
@@ -11698,7 +11769,8 @@ end;
 
 procedure TBCBaseEditor.InitCodeFolding;
 begin
-  CreateLineNumbersCache;
+  if Visible then
+    CreateLineNumbersCache;
   ClearCodeFolding;
   ScanCodeFoldingRanges;
   CodeFoldingResetCaches;
@@ -11900,7 +11972,8 @@ begin
     end;
     LFileStream.Position := 0;
     FLines.LoadFromStream(LFileStream, FEncoding);
-    CreateLineNumbersCache;
+    if Visible then
+      CreateLineNumbersCache;
   finally
     LFileStream.Free;
   end;
@@ -12514,6 +12587,7 @@ var
   X, Y: Integer;
   LClientRect: TRect;
   LCaretDisplayPosition: TBCEditorDisplayPosition;
+  LCaretTextPosition: TBCEditorTextPosition;
   LCaretPoint: TPoint;
   LCompositionForm: TCompositionForm;
 begin
@@ -12523,8 +12597,17 @@ begin
   begin
     Exclude(FStateFlags, sfCaretChanged);
     LCaretDisplayPosition := DisplayCaretPosition;
-    if FWordWrap.Enabled and (LCaretDisplayPosition.Column > FVisibleChars + 1) then
-      LCaretDisplayPosition.Column := FVisibleChars + 1;
+    if FWordWrap.Enabled then
+    begin
+      if FWordWrapLineLengths[LCaretDisplayPosition.Row] = 0 then
+      begin
+        if LCaretDisplayPosition.Column > FVisibleChars + 1 then
+          LCaretDisplayPosition.Column := FVisibleChars + 1;
+      end
+      else
+      if LCaretDisplayPosition.Column > FWordWrapLineLengths[LCaretDisplayPosition.Row] + 1 then
+        LCaretDisplayPosition.Column := FWordWrapLineLengths[LCaretDisplayPosition.Row] + 1;
+    end;
     LCaretPoint := RowColumnToPixels(LCaretDisplayPosition);
     X := LCaretPoint.X + FCaretOffset.X;
     Y := LCaretPoint.Y + FCaretOffset.Y;
@@ -12546,8 +12629,9 @@ begin
     LCompositionForm.ptCurrentPos := Point(X, Y);
     ImmSetCompositionWindow(ImmGetContext(Handle), @LCompositionForm);
 
+    LCaretTextPosition := TextCaretPosition;
     if Assigned(FOnCaretChanged) then
-      FOnCaretChanged(Self, DisplayCaretX, GetTextCaretY);
+      FOnCaretChanged(Self, LCaretTextPosition.Char, LCaretTextPosition.Line);
   end;
 end;
 

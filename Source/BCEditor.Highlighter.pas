@@ -464,7 +464,8 @@ begin
     LStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(AFileName));
     try
       LTopLine := LEditor.TopLine;
-      LCaretPosition := LEditor.TextCaretPosition;
+      if LEditor.Visible then
+        LCaretPosition := LEditor.TextCaretPosition;
       LTempLines.Text := LEditor.Lines.Text;
       LEditor.Lines.Clear;
       LEditor.ClearCodeFolding;
@@ -476,7 +477,8 @@ begin
       end;
       LEditor.Lines.Text := LTempLines.Text;
       LEditor.TopLine := LTopLine;
-      LEditor.TextCaretPosition := LCaretPosition;
+      if LEditor.Visible then
+        LEditor.TextCaretPosition := LCaretPosition;
       LEditor.InitCodeFolding;
     finally
       LStream.Free;

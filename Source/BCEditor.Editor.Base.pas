@@ -1905,7 +1905,7 @@ begin
       begin
         LTextLine := FLines.ExpandedStrings[j - 1];
         LStringLength := Length(LTextLine);
-        if (LStringLength > FVisibleChars) and (FVisibleChars > 0) then
+        if (LStringLength > GetWrapAtColumn) and (GetWrapAtColumn > 0) then
         begin
           LRowBegin := PChar(LTextLine);
           LMaxRowLength := GetWrapAtColumn;
@@ -3387,7 +3387,7 @@ begin
   begin
     LCaretRowColumn := DisplayCaretPosition;
 
-    if (FWordWrapLineLengths[LCaretRowColumn.Row] = 0) and (LCaretRowColumn.Column > FVisibleChars) or
+    if (FWordWrapLineLengths[LCaretRowColumn.Row] = 0) and (LCaretRowColumn.Column > GetWrapAtColumn) or
       (FWordWrapLineLengths[LCaretRowColumn.Row] <> 0) and (LCaretRowColumn.Column > FWordWrapLineLengths[LCaretRowColumn.Row]) then
     begin
       Inc(LCaretRowColumn.Row);
@@ -4199,7 +4199,8 @@ begin
     FTextOffset := GetTextOffset;
     if HandleAllocated then
     begin
-      FVisibleChars := Max(ClientWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2, 0) div FCharWidth;
+      FVisibleChars := Max(ClientWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2 - FMinimap.GetWidth -
+        FSearch.Map.GetWidth, 0) div FCharWidth;
       if FWordWrap.Enabled then
         FResetLineNumbersCache := True;
       UpdateScrollBars;
@@ -7792,9 +7793,9 @@ var
       LCharWidth := FTextDrawer.CharWidth;
 
     if ARealWidth then
-      Result := Result + FColumnWidths[Pred(AColumn)]
+      Result := Result + FColumnWidths[AColumn - 1]
     else
-      Result := Result + LCharWidth * Pred(AColumn);
+      Result := Result + LCharWidth * (AColumn - 1);
   end;
 
   procedure PaintToken(AToken: string; ATokenLength, ACharsBefore, AFirst, ALast: Integer);
@@ -9954,7 +9955,7 @@ begin
   if FWordWrap.Enabled then
   begin
     if FVisibleChars > 0 then
-    while Result.Column > FVisibleChars do
+    while Result.Column > GetWrapAtColumn do
     begin
       Test := False;
       Dec(Result.Column, FWordWrapLineLengths[Result.Row]);
@@ -10605,21 +10606,12 @@ var
   LCaretRow: Integer;
   S: string;
   LIsJustIndented: Boolean;
-  LFoldRange: TBCEditorCodeFoldingRange;
   LChar: Char;
 begin
-  { Command not processed for collapsed line }
-  if FCodeFolding.Visible and not (csDestroying in ComponentState) then
-  begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY);
-    if Assigned(LFoldRange) and (LFoldRange.Collapsed) then
-      if ((ACommand >= ecDeleteLastChar) and (ACommand < ecUndo)) or
-        (ACommand = ecTab) or (ACommand = ecShiftTab) or (ACommand = ecString) then
-        Exit;
-  end;
   { Process a command }
   LHelper := '';
   IncPaintLock;
+  LCaretPosition := TextCaretPosition;
   try
     case ACommand of
       { Horizontal caret movement or selection }
@@ -10659,13 +10651,13 @@ begin
       ecPageTop, ecSelectionPageTop:
         begin
           LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine));
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageTop);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageTop);
           Update;
         end;
       ecPageBottom, ecSelectionPageBottom:
         begin
           LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine + VisibleLines - 1));
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageBottom);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageBottom);
           Update;
         end;
       ecEditorTop, ecSelectionEditorTop:
@@ -10675,7 +10667,7 @@ begin
             Char := 1;
             Line := 1;
           end;
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorTop);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorTop);
           Update;
         end;
       ecEditorBottom, ecSelectionEditorBottom:
@@ -10687,14 +10679,14 @@ begin
             if Line > 0 then
               Char := Length(Lines[Line - 1]) + 1;
           end;
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
           Update;
         end;
       { Go to the given line / column position }
       ecGotoXY, ecSelectionGotoXY:
         if Assigned(AData) then
         begin
-          MoveCaretAndSelection(TextCaretPosition, TBCEditorTextPosition(AData^), ACommand = ecSelectionGotoXY);
+          MoveCaretAndSelection(LCaretPosition, TBCEditorTextPosition(AData^), ACommand = ecSelectionGotoXY);
           Update;
         end;
       { Go by given line / column offset }
@@ -10702,13 +10694,14 @@ begin
         if Assigned(AData) then
         begin
           LCaretNewPosition := TBCEditorTextPosition(AData^);
-          LCaretNewPosition := GetTextPosition(TextCaretPosition.Char + LCaretNewPosition.Char, TextCaretPosition.Line + LCaretNewPosition.Line);
+          LCaretNewPosition := GetTextPosition(LCaretPosition.Char + LCaretNewPosition.Char,
+            LCaretPosition.Line + LCaretNewPosition.Line);
           with LCaretNewPosition do
           begin
             Char := Max(Char, 1);
             Line := MinMax(Line, 1, FLines.Count);
           end;
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelOffsetCaret);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelOffsetCaret);
           Update;
         end;
       ecGotoBookmark1 .. ecGotoBookmark9:
@@ -10722,9 +10715,7 @@ begin
           begin
             i := ACommand - ecSetBookmark1;
             if Assigned(AData) then
-              LCaretPosition := TBCEditorTextPosition(AData^)
-            else
-              LCaretPosition := TextCaretPosition;
+              LCaretPosition := TBCEditorTextPosition(AData^);
             if Assigned(FBookmarks[i]) then
             begin
               LMoveBookmark := FBookmarks[i].Line <> LCaretPosition.Line;
@@ -10740,16 +10731,16 @@ begin
       ecWordLeft, ecSelectionWordLeft:
         begin
           LCaretNewPosition := WordStart;
-          if AreCaretsEqual(LCaretNewPosition, TextCaretPosition) then
+          if AreCaretsEqual(LCaretNewPosition, LCaretPosition) then
             LCaretNewPosition := PreviousWordPosition;
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordLeft);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordLeft);
         end;
       ecWordRight, ecSelectionWordRight:
         begin
           LCaretNewPosition := WordEnd;
-          if AreCaretsEqual(LCaretNewPosition, TextCaretPosition) then
+          if AreCaretsEqual(LCaretNewPosition, LCaretPosition) then
             LCaretNewPosition := NextWordPosition;
-          MoveCaretAndSelection(TextCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordRight);
+          MoveCaretAndSelection(LCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordRight);
         end;
       ecSelectionWord:
         SetSelectedWord;
@@ -10765,11 +10756,10 @@ begin
           begin
             LLineText := ExpandedLineText;
             LLength := Length(LLineText);
-            LTabBuffer := FLines.Strings[GetTextCaretY - 1];
-            LCaretPosition := TextCaretPosition;
+            LTabBuffer := FLines.Strings[LCaretPosition.Line - 1];
             LIsJustIndented := False;
             { Behind EndOfLine? Simply move the cursor }
-            if DisplayCaretX > LLength + 1 then
+            if LCaretPosition.Char > LLength + 1 then
             begin
               LIsJustIndented := True;
               LHelper := '';
@@ -10779,12 +10769,12 @@ begin
               else
               begin
                 { move it as if there were normal spaces there }
-                LSpaceCount1 := DisplayCaretX - 1;
+                LSpaceCount1 := LCaretPosition.Char - 1;
                 LSpaceCount2 := 0;
                 { unindent }
                 if LSpaceCount1 > 0 then
                 begin
-                  LBackCounter := GetTextCaretY - 2;
+                  LBackCounter := LCaretPosition.Line - 2;
                   { It's better not to have if statement inside loop }
                   if (eoTrimTrailingSpaces in Options) and (LLength = 0) then
                   while LBackCounter >= 0 do
@@ -10808,19 +10798,19 @@ begin
                 if LSpaceCount2 = LSpaceCount1 then
                   LSpaceCount2 := 0;
                 { Move caret }
-                FDisplayCaretX := FDisplayCaretX - (LSpaceCount1 - LSpaceCount2);
+                SetTextCaretX(LCaretPosition.Char - (LSpaceCount1 - LSpaceCount2));
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end;
             end
             else
               { Deleting while on beginning of line? }
-              if DisplayCaretX = 1 then
+              if LCaretPosition.Char = 1 then
               begin
                 { join this line with the last line if possible }
-                if DisplayCaretY > 1 then
+                if LCaretPosition.Line > 1 then
                 begin
-                  SetTextCaretY(GetTextCaretY - 1);
-                  SetTextCaretX(Length(Lines[GetTextCaretY - 1]) + 1);
+                  SetTextCaretY(LCaretPosition.Line - 1);
+                  SetTextCaretX(Length(Lines[LCaretPosition.Line - 1]) + 1);
 
                   FUndoList.AddChange(crSilentDelete, TextCaretPosition, LCaretPosition, sLineBreak, smNormal);
 
@@ -10838,7 +10828,7 @@ begin
                 { Delete text before the caret }
                 LSpaceCount1 := LeftSpaceCount(LLineText);
                 LSpaceCount2 := 0;
-                if (LLineText[DisplayCaretX - 1] <= BCEDITOR_SPACE_CHAR) and (LSpaceCount1 = DisplayCaretX - 1) then
+                if (LLineText[LCaretPosition.Char - 1] <= BCEDITOR_SPACE_CHAR) and (LSpaceCount1 = LCaretPosition.Char - 1) then
                 begin
                   { Unindent, count visual whitespace on current previous lines }
                   LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText);
@@ -10862,7 +10852,7 @@ begin
 
                   if LSpaceCount2 > 0 then
                   begin
-                    i := FDisplayCaretX - 2;
+                    i := LCaretPosition.Char - 2;
                     LLength := GetLeadingExpandedLength(LLineText, i);
                     while LLength > LVisualSpaceCount2 do
                     begin
@@ -10874,7 +10864,7 @@ begin
                     Delete(LLineText, i + 1, LSpaceCount1 - i);
                     FUndoList.BeginBlock;
                     try
-                      FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, GetTextCaretY), TextCaretPosition, LHelper, smNormal);
+                      FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, LCaretPosition.Line), LCaretPosition, LHelper, smNormal);
 
                       { If there's visual diffirence after deletion, that
                         means there are BCEDITOR_SPACE_CHAR spaces chars which we need to
@@ -10886,7 +10876,7 @@ begin
                     finally
                       FUndoList.EndBlock;
                     end;
-                    FDisplayCaretX := i + Length(LSpaceBuffer) + 1;
+                    SetTextCaretX(i + Length(LSpaceBuffer) + 1);
                   end
                   else
                   begin
@@ -10895,7 +10885,7 @@ begin
                     if LVisualSpaceCount2 = LVisualSpaceCount1 then
                       LVisualSpaceCount2 := Max(LVisualSpaceCount2 - FTabs.Width, 0);
 
-                    i := FDisplayCaretX - 2;
+                    i := LCaretPosition.Char - 2;
                     LLength := GetLeadingExpandedLength(LLineText, i);
                     while (i > 0) and (LLength > LVisualSpaceCount2) do
                     begin
@@ -10905,30 +10895,30 @@ begin
 
                     LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
                     Delete(LLineText, i + 1, LSpaceCount1 - i);
-                    FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, GetTextCaretY), TextCaretPosition, LHelper, smNormal);
-                    FDisplayCaretX := i + 1;
+                    FUndoList.AddChange(crSilentDelete, GetTextPosition(i + 1, LCaretPosition.Line), LCaretPosition, LHelper, smNormal);
+                    SetTextCaretX(i + 1);
                   end;
                 FLines[GetTextCaretY - 1] := LLineText;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end
               else
               begin
-                LChar := LLineText[FDisplayCaretX - 1];
+                LChar := LLineText[LCaretPosition.Char - 1];
                 i := 1;
                 if LChar.IsSurrogate then
                   i := 2;
-                LHelper := Copy(LLineText, FDisplayCaretX - i, i);
-                FUndoList.AddChange(crSilentDelete, GetTextPosition(FDisplayCaretX - i, GetTextCaretY), TextCaretPosition,
+                LHelper := Copy(LLineText, LCaretPosition.Char - i, i);
+                FUndoList.AddChange(crSilentDelete, GetTextPosition(LCaretPosition.Char - i, LCaretPosition.Line), LCaretPosition,
                   LHelper, smNormal);
 
-                Delete(LLineText, FDisplayCaretX - i, i);
+                Delete(LLineText, LCaretPosition.Char - i, i);
                 FLines[GetTextCaretY - 1] := LLineText;
 
-                SetTextCaretX(FDisplayCaretX - i);
+                SetTextCaretX(LCaretPosition.Char - i);
               end;
             end;
             if not LIsJustIndented then
-              FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
+              FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
           end;
         end;
       { Delete command }
@@ -10939,25 +10929,22 @@ begin
             SetSelectedTextEmpty
           else
           begin
-           // LCaretNewPosition := CaretPosition; // ?
-
             LLineText := ExpandedLineText;
             LLength := Length(LLineText);
-            if DisplayCaretX <= LLength then
+            if LCaretPosition.Char <= LLength then
             begin
               LCounter := 1;
-              LHelper := Copy(LLineText, DisplayCaretX, LCounter);
-              LCaretPosition.Char := DisplayCaretX + LCounter;
-              LCaretPosition.Line := GetTextCaretY;
-              Delete(LLineText, DisplayCaretX, LCounter);
-              ProperSetLine(GetTextCaretY - 1, LLineText);
+              LHelper := Copy(LLineText, LCaretPosition.Char, LCounter);
+              LCaretPosition.Char := LCaretPosition.Char + LCounter;
+              Delete(LLineText, LCaretPosition.Char, LCounter);
+              ProperSetLine(LCaretPosition.Line - 1, LLineText);
               FUndoList.AddChange(crSilentDeleteAfterCursor, TextCaretPosition, LCaretPosition, LHelper, smNormal);
             end
             else
             begin
-              if GetTextCaretY < FLines.Count then
+              if LCaretPosition.Line < FLines.Count then
               begin
-                LSpaceCount1 := FDisplayCaretX - 1 - LLength;
+                LSpaceCount1 := LCaretPosition.Char - 1 - LLength;
                 if toTabsToSpaces in FTabs.Options then
                   LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1)
                 else
@@ -10970,7 +10957,7 @@ begin
                 with LCaretPosition do
                 begin
                   Char := 1;
-                  Line := GetTextCaretY + 1;
+                  Line := Line + 1;
                 end;
 
                 if LSpaceCount1 > 0 then
@@ -10980,10 +10967,10 @@ begin
                 if LSpaceCount1 > 0 then
                   FUndoList.EndBlock;
 
-                FLines[GetTextCaretY - 1] := LLineText + LSpaceBuffer + FLines[GetTextCaretY];
-                FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
-                FLines.Delete(GetTextCaretY);
-                DoLinesDeleted(GetTextCaretY, 1, True);
+                FLines[LCaretPosition.Line - 1] := LLineText + LSpaceBuffer + FLines[GetTextCaretY];
+                FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
+                FLines.Delete(LCaretPosition.Line);
+                DoLinesDeleted(LCaretPosition.Line, 1, True);
               end;
             end;
           end;
@@ -10997,7 +10984,7 @@ begin
           begin
             LWordPosition := WordEnd;
             LLineText := ExpandedLineText;
-            if (LWordPosition.Char < DisplayCaretX) or ((LWordPosition.Char = DisplayCaretX) and (LWordPosition.Line < FLines.Count)) then
+            if (LWordPosition.Char < LCaretPosition.Char) or ((LWordPosition.Char = LCaretPosition.Char) and (LWordPosition.Line < FLines.Count)) then
             begin
               if LWordPosition.Char > LLength then
               begin
@@ -11010,10 +10997,10 @@ begin
                 Inc(LWordPosition.Char);
             end
             else
-            if (LWordPosition.Char = FDisplayCaretX) and (LWordPosition.Line = GetTextCaretY) then
+            if (LWordPosition.Char = LCaretPosition.Char) and (LWordPosition.Line = LCaretPosition.Line) then
             begin
               LWordPosition.Char := LLength + 1;
-              LWordPosition.Line := GetTextCaretY;
+              LWordPosition.Line := LCaretPosition.Line;
             end;
             if LLineText <> '' then
               while LLineText[LWordPosition.Char] = BCEDITOR_SPACE_CHAR do
@@ -11022,17 +11009,16 @@ begin
           else
           begin
             LWordPosition.Char := LLength + 1;
-            LWordPosition.Line := GetTextCaretY;
+            LWordPosition.Line := LCaretPosition.Line;
           end;
-          if (LWordPosition.Char <> DisplayCaretX) or (LWordPosition.Line <> GetTextCaretY) then
+          if (LWordPosition.Char <> LCaretPosition.Char) or (LWordPosition.Line <> LCaretPosition.Line) then
           begin
-            SetSelectionBeginPosition(TextCaretPosition);
+            SetSelectionBeginPosition(LCaretPosition);
             SetSelectionEndPosition(LWordPosition);
             FSelection.ActiveMode := smNormal;
             LHelper := SelectedText;
-            SetSelectedTextPrimitive(StringOfChar(' ', DisplayCaretX - SelectionBeginPosition.Char));
-            FUndoList.AddChange(crSilentDeleteAfterCursor, TextCaretPosition, LWordPosition, LHelper, smNormal);
-            //TextCaretPosition := TextCaretPosition; ?
+            SetSelectedTextPrimitive(StringOfChar(' ', LCaretPosition.Char - SelectionBeginPosition.Char));
+            FUndoList.AddChange(crSilentDeleteAfterCursor, LCaretPosition, LWordPosition, LHelper, smNormal);
           end;
         end;
       ecDeleteLastWord, ecDeleteBeginningOfLine:
@@ -11043,46 +11029,45 @@ begin
           else
           begin
             LWordPosition.Char := 1;
-            LWordPosition.Line := GetTextCaretY;
+            LWordPosition.Line := LCaretPosition.Line;
           end;
-          if (LWordPosition.Char <> DisplayCaretX) or (LWordPosition.Line <> GetTextCaretY) then
+          if (LWordPosition.Char <> LCaretPosition.Char) or (LWordPosition.Line <> LCaretPosition.Line) then
           begin
             LOldSelectionMode := FSelection.Mode;
             try
               FSelection.Mode := smNormal;
-              SetSelectionBeginPosition(TextCaretPosition);
+              SetSelectionBeginPosition(LCaretPosition);
               SetSelectionEndPosition(LWordPosition);
               LHelper := SelectedText;
               SetSelectedTextPrimitive('');
-              FUndoList.AddChange(crSilentDelete, LWordPosition, TextCaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crSilentDelete, LWordPosition, LCaretPosition, LHelper, smNormal);
               DisplayCaretPosition := TextToDisplayPosition(LWordPosition);
             finally
               FSelection.Mode := LOldSelectionMode;
             end;
-            //DisplayCaretPosition := LWordPosition;
           end;
         end;
       ecDeleteLine:
-        if not ReadOnly and (Lines.Count > 0) and not ((GetTextCaretY = FLines.Count) and (Length(Lines[GetTextCaretY - 1]) = 0)) then
+        if not ReadOnly and (Lines.Count > 0) and not ((LCaretPosition.Line = FLines.Count) and (Length(Lines[LCaretPosition.Line - 1]) = 0)) then
         begin
           if SelectionAvailable then
-            SetSelectionBeginPosition(TextCaretPosition);
+            SetSelectionBeginPosition(LCaretPosition);
           LHelper := ExpandedLineText;
-          if GetTextCaretY = FLines.Count then
+          if LCaretPosition.Line = FLines.Count then
           begin
-            FLines[GetTextCaretY - 1] := '';
-            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, GetTextCaretY),
-              GetTextPosition(Length(LHelper) + 1, GetTextCaretY), LHelper, smNormal);
+            FLines[LCaretPosition.Line - 1] := '';
+            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, LCaretPosition.Line),
+              GetTextPosition(Length(LHelper) + 1, LCaretPosition.Line), LHelper, smNormal);
           end
           else
           begin
-            FLines.Delete(GetTextCaretY - 1);
+            FLines.Delete(LCaretPosition.Line - 1);
             LHelper := LHelper + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
-            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, GetTextCaretY), GetTextPosition(1, GetTextCaretY + 1),
+            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, LCaretPosition.Line), GetTextPosition(1, LCaretPosition.Line + 1),
               LHelper, smNormal);
-            DoLinesDeleted(GetTextCaretY - 1, 1, True);
+            DoLinesDeleted(LCaretPosition.Line - 1, 1, True);
           end;
-          DisplayCaretPosition := GetDisplayPosition(1, DisplayCaretY);
+          DisplayCaretPosition := GetDisplayPosition(1, LCaretPosition.Line);
         end;
       { Moving }
       ecMoveLineUp:
@@ -11179,19 +11164,17 @@ begin
               SetSelectedTextEmpty;
             end;
             LLineText := ExpandedLineText;
-            LInsertDelta := Ord(DisplayCaretX = 1);
+            LInsertDelta := Ord(LCaretPosition.Char = 1);
             LLength := Length(LLineText);
-
-            LCaretPosition := TextCaretPosition;
 
             if LLength > 0 then
             begin
-              if LLength >= FDisplayCaretX then
+              if LLength >= LCaretPosition.Char then
               begin
-                if FDisplayCaretX > 1 then
+                if LCaretPosition.Char > 1 then
                 begin
                   if eoTrimTrailingSpaces in FOptions then
-                    LTabBuffer := SaveTrimmedWhitespace(LLineText, FDisplayCaretX);
+                    LTabBuffer := SaveTrimmedWhitespace(LLineText, LCaretPosition.Char);
 
                   LSpaceCount2 := 0;
                   if eoAutoIndent in FOptions then
@@ -11213,13 +11196,13 @@ begin
                       LSpaceBuffer := Copy(LLineText, 1, LSpaceCount1);
                   end;
 
-                  FLines[GetTextCaretY - 1] := Copy(LLineText, 1, FDisplayCaretX - 1);
+                  FLines[LCaretPosition.Line - 1] := Copy(LLineText, 1, LCaretPosition.Char - 1);
 
-                  LLineText := Copy(LLineText, FDisplayCaretX, MaxInt);
+                  LLineText := Copy(LLineText, LCaretPosition.Char, MaxInt);
                   if (eoAutoIndent in FOptions) and (LSpaceCount1 > 0) then
-                    FLines.Insert(GetTextCaretY, LSpaceBuffer + LLineText)
+                    FLines.Insert(LCaretPosition.Line, LSpaceBuffer + LLineText)
                   else
-                    FLines.Insert(GetTextCaretY, LLineText);
+                    FLines.Insert(LCaretPosition.Line, LLineText);
 
                   if (eoTrimTrailingSpaces in FOptions) and (LTabBuffer <> '') then
                     FUndoList.AddChange(crLineBreak, LCaretPosition, LCaretPosition, LTabBuffer + LLineText, smNormal)
@@ -11243,14 +11226,14 @@ begin
                 end
                 else
                 begin
-                  FLines.Insert(GetTextCaretY - 1, '');
+                  FLines.Insert(LCaretPosition.Line - 1, '');
 
                   FUndoList.AddChange(crLineInsert, LCaretPosition, LCaretPosition, '', smNormal);
 
                   with FLines do
                   begin
-                    Attributes[GetTextCaretY - 1].LineState := lsModified;
-                    Attributes[GetTextCaretY].LineState := lsModified;
+                    Attributes[LCaretPosition.Line - 1].LineState := lsModified;
+                    Attributes[LCaretPosition.Line].LineState := lsModified;
                   end;
 
                   if ACommand = ecLineBreak then
@@ -11261,7 +11244,7 @@ begin
               begin
                 LSpaceCount1 := 0;
                 LSpaceCount2 := 0;
-                LBackCounter := GetTextCaretY;
+                LBackCounter := LCaretPosition.Line;
                 if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) then
                 begin
                   repeat
@@ -11279,9 +11262,9 @@ begin
                     end;
                   until LBackCounter = 0;
 
-                  if (LSpaceCount1 = 0) and (GetTextCaretY < FLines.Count) then
+                  if (LSpaceCount1 = 0) and (LCaretPosition.Line < FLines.Count) then
                   begin
-                    LBackCounter := GetTextCaretY - 1;
+                    LBackCounter := LCaretPosition.Line - 1;
                     repeat
                       Inc(LBackCounter);
                       if FLines.AccessStringLength(LBackCounter) > 0 then
@@ -11300,14 +11283,14 @@ begin
                     until LBackCounter = FLines.Count - 1;
                   end;
                 end;
-                FLines.Insert(GetTextCaretY, '');
+                FLines.Insert(LCaretPosition.Line, '');
 
-                FUndoList.AddChange(crLineBreak, TextCaretPosition, TextCaretPosition, '', smNormal);
+                FUndoList.AddChange(crLineBreak, LCaretPosition, LCaretPosition, '', smNormal);
 
                 with FLines do
                 begin
-                  Attributes[GetTextCaretY - 1].LineState := lsModified;
-                  Attributes[GetTextCaretY].LineState := lsModified;
+                  Attributes[LCaretPosition.Line - 1].LineState := lsModified;
+                  Attributes[LCaretPosition.Line].LineState := lsModified;
                 end;
 
                 if ACommand = ecLineBreak then
@@ -11321,7 +11304,7 @@ begin
 
                     //TextCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, GetTextCaretY + 1);
 
-                    FLines[GetTextCaretY] := LSpaceBuffer + FLines[GetTextCaretY];
+                    FLines[LCaretPosition.Line] := LSpaceBuffer + FLines[LCaretPosition.Line];
                   end;
                   DisplayCaretY := FDisplayCaretY + 1;
                   if LSpaceCount1 > 0 then
@@ -11340,7 +11323,7 @@ begin
 
               LSpaceCount1 := 0;
               LSpaceCount2 := 0;
-              LBackCounter := GetTextCaretY;
+              LBackCounter := LCaretPosition.Line;
 
               if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) and (FLines.Count > 1) then
               begin
@@ -11359,9 +11342,9 @@ begin
                   end;
                 until LBackCounter = 0;
 
-                if (LSpaceCount1 = 0) and (GetTextCaretY < FLines.Count) then
+                if (LSpaceCount1 = 0) and (LCaretPosition.Line < FLines.Count) then
                 begin
-                  LBackCounter := GetTextCaretY - 1;
+                  LBackCounter := LCaretPosition.Line - 1;
                   repeat
                     Inc(LBackCounter);
                     if FLines.AccessStringLength(LBackCounter) > 0 then
@@ -11381,14 +11364,14 @@ begin
                 end;
               end;
 
-              FLines.Insert(GetTextCaretY - 1, '');
+              FLines.Insert(LCaretPosition.Line - 1, '');
 
-              FUndoList.AddChange(crLineBreak, TextCaretPosition, TextCaretPosition, '', smNormal);
+              FUndoList.AddChange(crLineBreak, LCaretPosition, LCaretPosition, '', smNormal);
 
               with FLines do
               begin
-                Attributes[GetTextCaretY - 1].LineState := lsModified;
-                Attributes[GetTextCaretY].LineState := lsModified;
+                Attributes[LCaretPosition.Line - 1].LineState := lsModified;
+                Attributes[LCaretPosition.Line].LineState := lsModified;
               end;
 
               if ACommand = ecLineBreak then
@@ -11402,7 +11385,7 @@ begin
 
                   //TextCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, GetTextCaretY + 1);
 
-                  FLines[GetTextCaretY] := LSpaceBuffer + FLines[GetTextCaretY];
+                  FLines[LCaretPosition.Line] := LSpaceBuffer + FLines[LCaretPosition.Line];
                 end;
 
                 DisplayCaretY := FDisplayCaretY + 1;
@@ -11417,9 +11400,9 @@ begin
             end;
             DoTrimTrailingSpaces(LCaretPosition.Line);
 
-            DoLinesInserted(GetTextCaretY - LInsertDelta, LInsertCount);
-            SelectionBeginPosition := TextCaretPosition;
-            SelectionEndPosition := TextCaretPosition;
+            DoLinesInserted(LCaretPosition.Line - LInsertDelta, LInsertCount);
+            SelectionBeginPosition := LCaretPosition;
+            SelectionEndPosition := LCaretPosition;
             EnsureCursorPositionVisible;
           finally
             UndoList.EndBlock;
@@ -11439,22 +11422,20 @@ begin
             SetSelectedTextEmpty(AChar)
           else
           begin
-            //LCaretPosition := CaretPosition;  // ?
-
             LLineText := ExpandedLineText;
             LLength := Length(LLineText);
 
             LSpaceCount1 := 0;
-            if LLength < FDisplayCaretX - 1 then
+            if LLength < LCaretPosition.Char - 1 then
             begin
               if toTabsToSpaces in FTabs.Options then
-                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FDisplayCaretX - LLength - Ord(FInsertMode))
+                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LCaretPosition.Char - LLength - Ord(FInsertMode))
               else
               if AllWhiteUpToCaret(LLineText, LLength) then
-                LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, (FDisplayCaretX - LLength - Ord(FInsertMode)) div FTabs.Width) +
-                  StringOfChar(BCEDITOR_SPACE_CHAR, (FDisplayCaretX - LLength - Ord(FInsertMode)) mod FTabs.Width)
+                LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, (LCaretPosition.Char - LLength - Ord(FInsertMode)) div FTabs.Width) +
+                  StringOfChar(BCEDITOR_SPACE_CHAR, (LCaretPosition.Char - LLength - Ord(FInsertMode)) mod FTabs.Width)
               else
-                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, FDisplayCaretX - LLength - Ord(FInsertMode));
+                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LCaretPosition.Char - LLength - Ord(FInsertMode));
               LSpaceCount1 := GetExpandedLength(LSpaceBuffer);
             end;
 
@@ -11468,17 +11449,17 @@ begin
               if LSpaceCount1 > 0 then
                 LLineText := LLineText + LSpaceBuffer + AChar
               else
-                Insert(AChar, LLineText, TextCaretPosition.Char);
+                Insert(AChar, LLineText, LCaretPosition.Char);
 
-              FLines[GetTextCaretY - 1] := LLineText;
+              FLines[LCaretPosition.Line - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1 + 1, GetTextCaretY),
-                    GetTextPosition(LLength + LSpaceCount1 + 2, GetTextCaretY), '', smNormal);
-                  FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
+                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1 + 1, LCaretPosition.Line),
+                    GetTextPosition(LLength + LSpaceCount1 + 2, LCaretPosition.Line), '', smNormal);
+                  FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
 
                   DisplayCaretX := LLength + LSpaceCount1 + 2;
                 finally
@@ -11487,19 +11468,19 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FDisplayCaretX + 1, GetTextCaretY), '', smNormal);
-                FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
+                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(LCaretPosition.Char + 1, LCaretPosition.Line), '', smNormal);
+                FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
 
                 DisplayCaretX := FDisplayCaretX + 1;
               end;
             end
             else
             begin
-              if FDisplayCaretX <= LLength then
-                LHelper := Copy(LLineText, FDisplayCaretX, 1);
+              if LCaretPosition.Char <= LLength then
+                LHelper := Copy(LLineText, LCaretPosition.Char, 1);
 
-              if FDisplayCaretX <= LLength then
-                LLineText[FDisplayCaretX] := AChar
+              if LCaretPosition.Char <= LLength then
+                LLineText[LCaretPosition.Char] := AChar
               else
               if LSpaceCount1 > 0 then
               begin
@@ -11508,15 +11489,15 @@ begin
               end
               else
                 LLineText := LLineText + AChar;
-              FLines[GetTextCaretY - 1] := LLineText;
+              FLines[LCaretPosition.Line - 1] := LLineText;
 
               if LSpaceCount1 > 0 then
               begin
                 BeginUndoBlock;
                 try
-                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1, GetTextCaretY),
-                    GetTextPosition(LLength + LSpaceCount1 + 1, GetTextCaretY), '', smNormal);
-                  FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
+                  FUndoList.AddChange(crInsert, GetTextPosition(LLength + LSpaceCount1, LCaretPosition.Line),
+                    GetTextPosition(LLength + LSpaceCount1 + 1, LCaretPosition.Line), '', smNormal);
+                  FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
 
                   DisplayCaretX := LLength + LSpaceCount1 + 1;
                 finally
@@ -11525,8 +11506,8 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FDisplayCaretX + 1, GetTextCaretY), LHelper, smNormal);
-                FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
+                FUndoList.AddChange(crInsert, LBlockStartPosition, GetTextPosition(FDisplayCaretX + 1, LCaretPosition.Line), LHelper, smNormal);
+                FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
 
                 DisplayCaretX := FDisplayCaretX + 1;
               end;
@@ -11652,26 +11633,26 @@ begin
           begin
             LLineText := ExpandedLineText;
             LLength := Length(LLineText);
-            if LLength < DisplayCaretX then
-              LLineText := LLineText + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - LLength - 1);
+            if LLength < LCaretPosition.Char then
+              LLineText := LLineText + StringOfChar(BCEDITOR_SPACE_CHAR, LCaretPosition.Char - LLength - 1);
             LChangeScroll := not (soPastEndOfLine in FScroll.Options);
             try
               if LChangeScroll then
                 FScroll.Options := FScroll.Options + [soPastEndOfLine];
-              LBlockStartPosition := TextCaretPosition;
+              LBlockStartPosition := LCaretPosition;
               LLength := Length(S);
               if not FInsertMode then
               begin
-                LHelper := Copy(LLineText, DisplayCaretX, LLength);
-                Delete(LLineText, DisplayCaretX, LLength);
+                LHelper := Copy(LLineText, LCaretPosition.Char, LLength);
+                Delete(LLineText, LCaretPosition.Char, LLength);
               end;
-              Insert(S, LLineText, DisplayCaretX);
-              DisplayCaretX := (DisplayCaretX + LLength);
-              ProperSetLine(GetTextCaretY - 1, LLineText);
+              Insert(S, LLineText, LCaretPosition.Char);
+              DisplayCaretX := LCaretPosition.Char + LLength;
+              ProperSetLine(LCaretPosition.Line - 1, LLineText);
               if FInsertMode then
                 LHelper := '';
               FUndoList.AddChange(crInsert, LBlockStartPosition, TextCaretPosition, LHelper, smNormal);
-              if DisplayCaretX >= LeftChar + FVisibleChars then
+              if LCaretPosition.Char >= LeftChar + FVisibleChars then
                 LeftChar := LeftChar + Min(25, FVisibleChars - 1);
             finally
               if LChangeScroll then
@@ -11972,8 +11953,7 @@ begin
     end;
     LFileStream.Position := 0;
     FLines.LoadFromStream(LFileStream, FEncoding);
-    if Visible then
-      CreateLineNumbersCache;
+    CreateLineNumbersCache;
   finally
     LFileStream.Free;
   end;

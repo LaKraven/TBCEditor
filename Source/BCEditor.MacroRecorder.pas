@@ -324,7 +324,7 @@ end;
 
 procedure ReleasePluginCommand(ACommand: TBCEditorCommand);
 begin
-  if ACommand = Pred(GCurrentCommand) then
+  if ACommand = GCurrentCommand - 1 then
     GCurrentCommand := ACommand;
 end;
 

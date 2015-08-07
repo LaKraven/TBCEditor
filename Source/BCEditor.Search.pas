@@ -100,7 +100,7 @@ var
 begin
   if (Delta <> 0) and (FResults.Count > 0) then
   begin
-    i := Pred(FResults.Count);
+    i := FResults.Count - 1;
     while i >= 0 do
     begin
       if Integer(FResults[i]) <= First then

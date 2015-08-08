@@ -1905,7 +1905,7 @@ begin
       begin
         LTextLine := FLines.ExpandedStrings[j - 1];
         LStringLength := Length(LTextLine);
-        if (LStringLength >= GetWrapAtColumn) and (GetWrapAtColumn > 0) then
+        if (LStringLength > GetWrapAtColumn) and (GetWrapAtColumn > 0) then
         begin
           LRowBegin := PChar(LTextLine);
           LMaxRowLength := GetWrapAtColumn;
@@ -4525,7 +4525,7 @@ begin
     begin
       LOldTextCaretPosition := TextCaretPosition;
       FResetLineNumbersCache := True;
-      //CreateLineNumbersCache;
+      CreateLineNumbersCache;
       TextCaretPosition := LOldTextCaretPosition;
       Invalidate;
     end;
@@ -7709,7 +7709,7 @@ end;
 procedure TBCBaseEditor.PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
 var
   LAnySelection: Boolean;
-  LCurrentLine: Integer;
+  LDisplayLine, LCurrentLine: Integer;
   LFirstLine: Integer;
   LForegroundColor, LBackgroundColor: TColor;
   LIsComplexLine: Boolean;
@@ -7780,8 +7780,8 @@ var
         SetForegroundColor(LForegroundColor);
         LColor := LBackgroundColor;
       end;
-      SetBackgroundColor(LColor); { for the text... }
-      Canvas.Brush.Color := LColor; { and for the rest of the line }
+      SetBackgroundColor(LColor); { Text}
+      Canvas.Brush.Color := LColor; { Rest of the line }
     end;
   end;
 
@@ -7894,7 +7894,7 @@ var
       FTextDrawer.SetStyle(LTokenHelper.FontStyle);
 
       if AMinimap then
-        if (LCurrentLine >= TopLine) and (LCurrentLine < TopLine + VisibleLines) then
+        if ({LCurrentLine} LDisplayLine >= TopLine) and ({LCurrentLine} LDisplayLine < TopLine + VisibleLines) then
           LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
@@ -7940,7 +7940,7 @@ var
     begin
       LBackgroundColor := GetBackgroundColor;
       if AMinimap then
-        if (LCurrentLine >= TopLine) and (LCurrentLine < TopLine + VisibleLines) then
+        if ({LCurrentLine}LDisplayLine >= TopLine) and ({LCurrentLine}LDisplayLine < TopLine + VisibleLines) then
           LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
@@ -8069,7 +8069,6 @@ var
 
   procedure PaintLines;
   var
-    i, j: Integer;
     LFirstColumn, LLastColumn: Integer;
     LCurrentLineText: string;
     LCurrentRow, LPreviousRow: Integer;
@@ -8099,10 +8098,10 @@ var
     end;
 
     LScrolledXBy := (FLeftChar - 1) * FCharWidth;
-    i := LFirstLine;
-    while i <= LLastLine do
+    LDisplayLine := LFirstLine;
+    while LDisplayLine <= LLastLine do
     begin
-      LCurrentLine := GetTextLineNumber(i);
+      LCurrentLine := GetTextLineNumber(LDisplayLine);
 
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];
@@ -8134,8 +8133,8 @@ var
       LFirstColumn := LFirstChar;
       LLastColumn := LLastChar;
       if FWordWrap.Enabled then
-        if FWordWrapLineLengths[i] <> 0 then
-          LLastColumn := FWordWrapLineLengths[i];
+        if FWordWrapLineLengths[LDisplayLine] <> 0 then
+          LLastColumn := FWordWrapLineLengths[LDisplayLine];
 
       while LCurrentRow = LCurrentLine do
       begin
@@ -8204,14 +8203,14 @@ var
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
-          LTokenLength := FHighlighter.GetTokenLength; // Length(LTokenText);
+          LTokenLength := Length(LTokenText); //FHighlighter.GetTokenLength; // Length(LTokenText);
           if LTokenPosition + LTokenLength > LFirstColumn then
           begin
             if FWordWrap.Enabled then
             begin
               if LTokenPosition + LTokenLength > LLastColumn then
               begin
-                LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
+                LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
                 LLastColumn := LFirstColumn + FVisibleChars;
                 Break;
               end;
@@ -8331,8 +8330,8 @@ var
 
         if Assigned(FOnAfterLinePaint) then
           FOnAfterLinePaint(Self, Canvas, LLineRect, LCurrentLine, AMinimap);
-        Inc(i);
-        LCurrentRow := GetTextLineNumber(i);
+        Inc(LDisplayLine);
+        LCurrentRow := GetTextLineNumber(LDisplayLine);
       end;
     end;
     LIsCurrentLine := False;
@@ -8353,7 +8352,7 @@ begin
     if FWordWrap.Enabled then
     begin
       LFirstChar := 1;
-      LLastChar := FVisibleChars
+      LLastChar := FVisibleChars + 1
     end
     else
     begin
@@ -9943,11 +9942,17 @@ begin
   LIsWrapped := False;
   if FWordWrap.Enabled then
   begin
+    LLength := GetWrapAtColumn;
+    if FWordWrapLineLengths[Result.Row] <> 0 then
+      LLength := FWordWrapLineLengths[Result.Row];
     if FVisibleChars > 0 then
-    while Result.Column > GetWrapAtColumn do
+    while Result.Column - 1 > LLength do
     begin
       LIsWrapped := True;
-      Dec(Result.Column, FWordWrapLineLengths[Result.Row]);
+      if FWordWrapLineLengths[Result.Row] <> 0  then
+        Dec(Result.Column, FWordWrapLineLengths[Result.Row])
+      else
+        Result.Column := 1;
       Inc(Result.Row);
     end;
   end;
@@ -9970,7 +9975,7 @@ begin
     Result.Column := LChar + 1;
   end;
 
-  {$IFDEF DEBUG}OutputDebugString(PChar(Format('X, Y = %d, %d', [Result.Column, Result.Row])));{$ENDIF}
+  {$IFDEF DEBUG}OutputDebugString(PChar(Format('TextToDisplayPosition X, Y = %d, %d', [Result.Column, Result.Row])));{$ENDIF}
 end;
 
 function TBCBaseEditor.WordEnd: TBCEditorTextPosition;

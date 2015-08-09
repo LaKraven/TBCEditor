@@ -65,7 +65,11 @@ type
   TBCEditorTabOptions = set of TBCEditorTabOption;
 
   PBCEditorSelectionMode = ^TBCEditorSelectionMode;
-  TBCEditorSelectionMode = (smNormal, smLine, smColumn);
+  TBCEditorSelectionMode = (
+    smNormal,
+    smLine,
+    smColumn
+  );
 
   TBCEditorSelectionOption = (
     soALTSetsColumnMode,
@@ -75,7 +79,11 @@ type
   );
   TBCEditorSelectionOptions = set of TBCEditorSelectionOption;
 
-  TBCEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate);
+  TBCEditorSearchChanges = (
+    scRefresh,
+    scSearch,
+    scEngineUpdate
+  );
   TBCEditorSearchChangeEvent = procedure(Event: TBCEditorSearchChanges) of object;
 
   TBCEditorSearchOption = (
@@ -103,7 +111,10 @@ type
   );
   TBCEditorReplaceOptions = set of TBCEditorReplaceOption;
 
-  TBCEditorReplaceActionOption = (eraReplace, eraDeleteLine);
+  TBCEditorReplaceActionOption = (
+    eraReplace,
+    eraDeleteLine
+  );
 
   TBCEditorSearchEngine = (
     seNormal,
@@ -151,9 +162,30 @@ type
     Token: string;
   end;
 
-  TBCEditorBreakType = (btUnspecified, btAny, btTerm);
-  TBCEditorRangeType = (ttUnspecified, ttAddress, ttAttribute, ttChar, ttComment, ttDirective, ttFloat, ttHex,
-    ttMailtoLink, ttMethod, ttMethodName, ttNumber, ttOctal, ttReservedWord, ttString, ttSymbol, ttWebLink);
+  TBCEditorBreakType = (
+    btUnspecified,
+    btAny,
+    btTerm
+  );
+  TBCEditorRangeType = (
+    ttUnspecified,
+    ttAddress,
+    ttAttribute,
+    ttChar,
+    ttComment,
+    ttDirective,
+    ttFloat,
+    ttHex,
+    ttMailtoLink,
+    ttMethod,
+    ttMethodName,
+    ttNumber,
+    ttOctal,
+    ttReservedWord,
+    ttString,
+    ttSymbol,
+    ttWebLink
+  );
 
   TBCEditorMatchingPairToken = record
     OpenToken: string;
@@ -161,8 +193,13 @@ type
   end;
   PBCEditorMatchingPairToken = ^TBCEditorMatchingPairToken;
 
-  TBCEditorMatchingTokenResult = (trCloseAndOpenTokenFound, trCloseTokenFound, trNotFound, trOpenTokenFound,
-    trOpenAndCloseTokenFound);
+  TBCEditorMatchingTokenResult = (
+    trCloseAndOpenTokenFound,
+    trCloseTokenFound,
+    trNotFound,
+    trOpenTokenFound,
+    trOpenAndCloseTokenFound
+  );
 
   TBCEditorMatchingPairMatch = record
     OpenToken: string;
@@ -193,10 +230,20 @@ type
     MatchingPairUnderline: Boolean;
   end;
 
-  TBCEditorCompletionType = (ctNone, ctCode, ctHint);
-  TBCEditorSpecialCharsEndOfLineStyle = (eolArrow, eolEnter, eolPilcrow);
+  TBCEditorCompletionType = (
+    ctNone,
+    ctCode,
+    ctHint
+  );
+  TBCEditorSpecialCharsEndOfLineStyle = (
+    eolArrow,
+    eolEnter,
+    eolPilcrow
+  );
 
-  TBCEditorSpecialCharsOption = (scoUseTextColor);
+  TBCEditorSpecialCharsOption = (
+    scoUseTextColor
+  );
   TBCEditorSpecialCharsOptions = set of TBCEditorSpecialCharsOption;
   TBCEditorSpecialCharsStyle = (scsDot, scsSolid);
 
@@ -212,13 +259,22 @@ type
   );
   TBCEditorLeftMarginLineNumberOptions = set of TBCEditorLeftMarginLineNumberOption;
 
-  TBCEditorMatchingPairOption = (mpoHighlightAfterToken, mpoHighlightUnmatched, mpoUnderline, mpoUseMatchedColor);
+  TBCEditorMatchingPairOption = (
+    mpoHighlightAfterToken,
+    mpoHighlightUnmatched,
+    mpoUnderline,
+    mpoUseMatchedColor
+  );
   TBCEditorMatchingPairOptions = set of TBCEditorMatchingPairOption;
 
-  TBCEditorMinimapOption = (moShowIndentGuides);
+  TBCEditorMinimapOption = (
+    moShowIndentGuides
+  );
   TBCEditorMinimapOptions = set of TBCEditorMinimapOption;
 
-  TBCEditorUndoOption = (uoGroupUndo);
+  TBCEditorUndoOption = (
+    uoGroupUndo
+  );
   TBCEditorUndoOptions = set of TBCEditorUndoOption;
 
   TBCEditorCase = (cNone=-1, cUpper=0, cLower=1, cAlternating=2, cSentence=3, cTitle=4, cOriginal=5);

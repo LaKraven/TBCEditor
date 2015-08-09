@@ -1099,20 +1099,20 @@ var
 
   function StringToString(const S: AnsiString; CodePage: Word): string;
   var
-    InputLength, OutputLength: Integer;
+    LInputLength, LOutputLength: Integer;
   begin
-    InputLength := Length(S);
-    OutputLength := MultiByteToWideChar(CodePage, 0, PAnsiChar(S), InputLength, nil, 0);
-    SetLength(Result, OutputLength);
-    MultiByteToWideChar(CodePage, 0, PAnsiChar(S), InputLength, PChar(Result), OutputLength);
+    LInputLength := Length(S);
+    LOutputLength := MultiByteToWideChar(CodePage, 0, PAnsiChar(S), LInputLength, nil, 0);
+    SetLength(Result, LOutputLength);
+    MultiByteToWideChar(CodePage, 0, PAnsiChar(S), LInputLength, PChar(Result), LOutputLength);
   end;
 
   function CodePageFromLocale(Language: LCID): Integer;
   var
-    Buf: array [0 .. 6] of Char;
+    LBuffer: array [0 .. 6] of Char;
   begin
-    GetLocaleInfo(Language, LOCALE_IDefaultAnsiCodePage, Buf, 6);
-    Result := StrToIntDef(Buf, GetACP);
+    GetLocaleInfo(Language, LOCALE_IDefaultAnsiCodePage, LBuffer, 6);
+    Result := StrToIntDef(LBuffer, GetACP);
   end;
 
 begin
@@ -6990,7 +6990,7 @@ begin
       Canvas.Brush.Color := CodeFolding.Colors.FoldingLine;
       Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
     end;
-    PaintCodeFoldingLine(AClipRect, LLine, LPreviousLine = LLine);
+    PaintCodeFoldingLine(AClipRect, LLine, Assigned(LFoldRange) and (LPreviousLine = LLine));
     LPreviousLine := LLine;
   end;
   Canvas.Brush.Color := LOldBrushColor;
@@ -8071,8 +8071,7 @@ var
   var
     LFirstColumn, LLastColumn: Integer;
     LCurrentLineText: string;
-    LCurrentRow, LPreviousRow: Integer;
-    LDisplayPosition: TBCEditorDisplayPosition;
+    LCurrentRow: Integer;
     LFoldRange: TBCEditorCodeFoldingRange;
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
     LScrolledXBy: Integer;
@@ -8204,7 +8203,7 @@ var
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
           LTokenLength := Length(LTokenText); //FHighlighter.GetTokenLength; // Length(LTokenText);
-          if LTokenPosition + LTokenLength > LFirstColumn then
+          if LTokenPosition + LTokenLength >= LFirstColumn then
           begin
             if FWordWrap.Enabled then
             begin
@@ -9940,7 +9939,7 @@ begin
   Result.Row := GetDisplayLineNumber(ATextPosition.Line);
 
   LIsWrapped := False;
-  if FWordWrap.Enabled then
+  if Visible and FWordWrap.Enabled then
   begin
     LLength := GetWrapAtColumn;
     if FWordWrapLineLengths[Result.Row] <> 0 then
@@ -9974,8 +9973,6 @@ begin
     end;
     Result.Column := LChar + 1;
   end;
-
-  {$IFDEF DEBUG}OutputDebugString(PChar(Format('TextToDisplayPosition X, Y = %d, %d', [Result.Column, Result.Row])));{$ENDIF}
 end;
 
 function TBCBaseEditor.WordEnd: TBCEditorTextPosition;
@@ -10911,7 +10908,7 @@ begin
               end;
             end;
             if not LIsJustIndented then
-              FLines.Attributes[LCaretPosition.Line - 1].LineState := lsModified;
+              FLines.Attributes[GetTextCaretY - 1].LineState := lsModified;
           end;
         end;
       { Delete command }

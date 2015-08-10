@@ -411,7 +411,7 @@ type
     procedure NotifyHookedCommandHandlers(AfterProcessing: Boolean; var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer);
     procedure Paint; override;
     procedure PaintCodeFolding(AClipRect: TRect; AFirstRow, ALastRow: Integer);
-    procedure PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer; ADrawTreeLine: Boolean);
+    procedure PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer{; ADrawTreeLine: Boolean});
     procedure PaintCodeFoldingCollapsedLine(AFoldRange: TBCEditorCodeFoldingRange; ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
@@ -1847,7 +1847,6 @@ var
   LRowEnd: PChar;
   LRunner: PChar;
   LRowMinEnd: PChar;
-//  LLastVisibleChar: PChar;
   LMinRowLength: Word;
   LMaxRowLength: Word;
 
@@ -2733,7 +2732,7 @@ begin
           LMaxFromLine := LCodeFoldingRange.FromLine;
         FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
 
-        if LCodeFoldingRange.Collapsable and not LCodeFoldingRange.Collapsed then
+        if LCodeFoldingRange.Collapsable {and not LCodeFoldingRange.Collapsed} then
         begin
           for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
             FCodeFoldingTreeLine[j] := True;
@@ -2746,11 +2745,10 @@ begin
     end;
   end;
 
-  if FAllCodeFoldingRanges.AllCount > 0 then
-  begin
+  if Length(FCodeFoldingRangeFromLine) <> LMaxFromLine + 1 then
     SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
+  if Length(FCodeFoldingRangeToLine) <> LMaxToLine + 1 then
     SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
-  end;
 end;
 
 procedure TBCBaseEditor.CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
@@ -6258,6 +6256,7 @@ begin
   if Visible and HandleAllocated then
   begin
     FResetLineNumbersCache := True;
+    //CreateLineNumbersCache;
     UpdateScrollBars;
     LOldMode := FSelection.ActiveMode;
     SetSelectionBeginPosition(TextCaretPosition);
@@ -6951,7 +6950,7 @@ end;
 
 procedure TBCBaseEditor.PaintCodeFolding(AClipRect: TRect; AFirstRow, ALastRow: Integer);
 var
-  i, LLine, LPreviousLine: Integer;
+  i, LLine{, LPreviousLine}: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
   LOldBrushColor, LOldPenColor: TColor;
 begin
@@ -6967,7 +6966,7 @@ begin
   if cfoHighlightFoldingLine in FCodeFolding.Options then
     LFoldRange := CodeFoldingLineInsideRange(GetTextCaretY);
 
-  LPreviousLine := -1;
+ // LPreviousLine := -1;
   for i := AFirstRow to ALastRow do
   begin
     LLine := GetTextLineNumber(i);
@@ -6990,14 +6989,14 @@ begin
       Canvas.Brush.Color := CodeFolding.Colors.FoldingLine;
       Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
     end;
-    PaintCodeFoldingLine(AClipRect, LLine, Assigned(LFoldRange) and (LPreviousLine = LLine));
-    LPreviousLine := LLine;
+    PaintCodeFoldingLine(AClipRect, LLine{, LPreviousLine = LLine});
+//    LPreviousLine := LLine;
   end;
   Canvas.Brush.Color := LOldBrushColor;
   Canvas.Pen.Color := LOldPenColor;
 end;
 
-procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer; ADrawTreeLine: Boolean);
+procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer{; ADrawTreeLine: Boolean});
 var
   X, LHeight: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
@@ -7007,9 +7006,9 @@ begin
 
   LFoldRange := CodeFoldingCollapsableFoldRangeForLine(ALine);
 
-  if not Assigned(LFoldRange) or ADrawTreeLine then
+  if not Assigned(LFoldRange) {or ADrawTreeLine} then
   begin
-    if ADrawTreeLine or CodeFoldingTreeLineForLine(ALine) then
+    if {ADrawTreeLine or} CodeFoldingTreeLineForLine(ALine) then
     begin
       X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2);
       Canvas.MoveTo(X, AClipRect.Top);
@@ -7248,7 +7247,7 @@ begin
   // PaintBookmarks, PaintActiveLineIndicator, PaintLineState, PaintBookmarkPanelLine
 
   LFirstLine := AFirstRow;
-  LLastLine := ALastRow;
+  LLastLine := Min(ALastRow, FDisplayLineCount);
   LLastTextLine := ALastTextRow;
 
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
@@ -7358,7 +7357,7 @@ begin
   Canvas.Brush.Style := bsClear;
   { Word wrap }
   if FWordWrap.Enabled and FWordWrap.Indicator.Visible then
-    for i := AFirstRow to ALastRow do
+    for i := LFirstLine to LLastLine do
     begin
       LLine := GetTextLineNumber(i);
       LPreviousLine := GetTextLineNumber(i - 1);

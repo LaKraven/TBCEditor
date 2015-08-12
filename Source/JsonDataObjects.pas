@@ -755,6 +755,10 @@ const
   sNull = 'null';
   sQuoteChar = '"';
 
+  {$IF not declared(varObject)}
+  varObject = $0049;
+  {$IFEND}
+
 type
   PStrRec = ^TStrRec;
   TStrRec = packed record
@@ -1137,8 +1141,8 @@ end;
 function VarTypeToJsonDataType(AVarType: TVarType): TJsonDataType;
 begin
   case AVarType of
-    varEmpty, varNull:
-      Result := jdtNone;
+    varNull:
+      Result := jdtObject;
     varOleStr, varString, varUString, varDate:
       Result := jdtString;
     varSmallInt, varInteger, varShortInt, varByte, varWord, varLongWord:
@@ -1692,7 +1696,7 @@ function TJsonDataValue.GetVariantValue: Variant;
 begin
   case FTyp of
     jdtNone:
-      Result := Null;
+      Result := Unassigned;
     jdtString:
       Result := string(FValue.S);
     jdtInt:
@@ -3825,7 +3829,7 @@ begin
   else
   begin
     for Result := 0 to FCount - 1 do
-      if (Length(P[Result]) = Len) and CompareMem(S, Pointer(P[Result]), Len) then
+      if (Length(P[Result]) = Len) and CompareMem(S, Pointer(P[Result]), Len * SizeOf(Char)) then
         Exit;
   end;
   Result := -1;
@@ -6107,6 +6111,8 @@ begin
     Result := Value.FData.FIntern.VariantValue
   else
     case Value.FData.FTyp of
+      jdtNone:
+        Result := Unassigned;
       jdtString:
         Result := Value.FData.FValue;
       jdtInt:
@@ -6117,8 +6123,6 @@ begin
         Result := Value.FData.FFloatValue;
       jdtBool:
         Result := Value.FData.FBoolValue;
-      jdtNone:
-        Result := Null;
       jdtArray:
         ErrorUnsupportedVariantType(varArray);
       jdtObject:
@@ -6161,8 +6165,6 @@ begin
         Result.FData.FFloatValue := Value;
       jdtBool:
         Result.FData.FBoolValue := Value;
-    else
-      Result.FData.FTyp := jdtNone;
     end;
   end;
 end;

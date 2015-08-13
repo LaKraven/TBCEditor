@@ -98,7 +98,6 @@ contains
   BCEditor.Editor.Utils in '..\Source\BCEditor.Editor.Utils.pas',
   BCEditor.Editor.WordWrap in '..\Source\BCEditor.Editor.WordWrap.pas',
   BCEditor.Editor.WordWrap.Colors in '..\Source\BCEditor.Editor.WordWrap.Colors.pas',
-  BCEditor.Editor.WordWrap.Helper in '..\Source\BCEditor.Editor.WordWrap.Helper.pas',
   BCEditor.Encoding in '..\Source\BCEditor.Encoding.pas',
   BCEditor.Highlighter in '..\Source\BCEditor.Highlighter.pas',
   BCEditor.Highlighter.Attributes in '..\Source\BCEditor.Highlighter.Attributes.pas',

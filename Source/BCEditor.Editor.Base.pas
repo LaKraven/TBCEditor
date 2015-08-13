@@ -2937,34 +2937,13 @@ begin
 end;
 
 procedure TBCBaseEditor.DoEndKey(ASelection: Boolean);
-var
-  LNewCaretPosition: TBCEditorDisplayPosition;
 begin
-  if FWordWrap.Enabled then
-  begin
-    LNewCaretPosition.Row := DisplayCaretY;
-    // TODO
-    //LNewCaretPosition.Column := FWordWrapHelper.GetRowLength(LNewCaretPosition.Row) + 1;
-    LNewCaretPosition.Column := Min(FVisibleChars + 1, LNewCaretPosition.Column);
-    MoveCaretAndSelection(TextCaretPosition, DisplayToTextPosition(LNewCaretPosition), ASelection);
-    SetDisplayCaretPosition(LNewCaretPosition);
-  end
-  else
-    MoveCaretAndSelection(TextCaretPosition, GetTextPosition(Length(ExpandedLineText) + 1, GetTextCaretY), ASelection);
+  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(Length(ExpandedLineText) + 1, GetTextCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoHomeKey(ASelection: Boolean);
-var
-  LNewPosition: TBCEditorDisplayPosition;
 begin
-  if FWordWrap.Enabled then
-  begin
-    LNewPosition.Row := DisplayCaretY;
-    LNewPosition.Column := TextToDisplayPosition(GetTextPosition(1, GetTextCaretY)).Column;
-    MoveCaretAndSelection(TextCaretPosition, DisplayToTextPosition(LNewPosition), ASelection);
-  end
-  else
-    MoveCaretAndSelection(TextCaretPosition, GetTextPosition(1, GetTextCaretY), ASelection);
+  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(1, GetTextCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoLinesDeleted(AFirstLine, ACount: Integer; AddToUndoList: Boolean);

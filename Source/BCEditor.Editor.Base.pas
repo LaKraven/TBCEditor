@@ -4312,10 +4312,10 @@ begin
   else
     Value.Char := Max(Value.Char, 1);
 
-  Value.Line := MinMax(Value.Line, 1, FLines.Count);
+  Value.Line := MinMax(Value.Line, 0, FLines.Count - 1);
 
   if FSelection.ActiveMode = smNormal then
-    if (Value.Line >= 1) and (Value.Line <= FLines.Count) then
+    if (Value.Line >= 0) and (Value.Line < FLines.Count) then
       Value.Char := Min(Value.Char, Length(Lines[Value.Line]) + 1)
     else
       Value.Char := 1;
@@ -4359,7 +4359,7 @@ begin
     Value.Line := MinMax(Value.Line, 0, FLines.Count - 1);
     if FSelection.ActiveMode = smNormal then
     begin
-      if (Value.Line >= 1) and (Value.Line <= FLines.Count) then
+      if (Value.Line >= 0) and (Value.Line < FLines.Count) then
         Value.Char := Min(Value.Char, Length(Lines[Value.Line]) + 1)
       else
         Value.Char := 1;
@@ -11265,7 +11265,7 @@ begin
                         LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
                       Break;
                     end;
-                  until LBackCounter = 0;
+                  until LBackCounter < 0;
 
                   if (LSpaceCount1 = 0) and (LTextCaretPosition.Line < FLines.Count) then
                   begin
@@ -11285,7 +11285,7 @@ begin
                         Inc(LBackCounter);
                         Break;
                       end;
-                    until LBackCounter = FLines.Count - 1;
+                    until LBackCounter = FLines.Count;
                   end;
                 end;
                 FLines.Insert(LTextCaretPosition.Line, '');
@@ -11345,7 +11345,7 @@ begin
                       LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
                     Break;
                   end;
-                until LBackCounter = 0;
+                until LBackCounter < 0;
 
                 if (LSpaceCount1 = 0) and (LTextCaretPosition.Line < FLines.Count) then
                 begin
@@ -11365,7 +11365,7 @@ begin
                       Inc(LBackCounter);
                       Break;
                     end;
-                  until LBackCounter = FLines.Count - 1;
+                  until LBackCounter = FLines.Count;
                 end;
               end;
 

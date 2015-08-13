@@ -4400,7 +4400,6 @@ begin
     if Assigned(FOnSelectionChanged) then
       FOnSelectionChanged(Self);
   end;
-  {$IFDEF DEBUG}OutputDebugString(PChar(Format('Selection end x, y = %d, %d', [Value.Char, Value.Line])));{$ENDIF}
 end;
 
 procedure TBCBaseEditor.SetSpecialChars(const Value: TBCEditorSpecialChars);
@@ -6739,7 +6738,7 @@ begin
     if not (sfCodeFoldingInfoClicked in FStateFlags) then { no selection when info clicked }
     begin
       TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
-      SelectionEndPosition := TextCaretPosition; { TODO: word wrap }
+      SelectionEndPosition := TextCaretPosition;
     end;
     FLastSortOrder := soDesc;
     Include(FStateFlags, sfInSelection);
@@ -8178,35 +8177,35 @@ var
         LLineSelectionStart := 0;
         LLineSelectionEnd := 0;
 
-        if LAnySelection and (LCurrentRow >= LSelectionStartPosition.Row) and (LCurrentRow <= LSelectionEndPosition.Row) then
+        if LAnySelection and (LDisplayLine >= LSelectionStartPosition.Row) and (LDisplayLine <= LSelectionEndPosition.Row) then
         begin
-          LLineSelectionStart := LFirstColumn;
-          LLineSelectionEnd := LLastColumn + 1;
+          LLineSelectionStart := LFirstChar;
+          LLineSelectionEnd := LLastChar + 1;
           if (FSelection.ActiveMode = smColumn) or
-            ((FSelection.ActiveMode = smNormal) and (LCurrentRow = LSelectionStartPosition.Row)) then
+            ((FSelection.ActiveMode = smNormal) and (LDisplayLine = LSelectionStartPosition.Row)) then
           begin
-            if LSelectionStartPosition.Column > LLastColumn then
+            if LSelectionStartPosition.Column > LLastChar then
             begin
               LLineSelectionStart := 0;
               LLineSelectionEnd := 0;
             end
             else
-            if LSelectionStartPosition.Column > LFirstColumn then
+            if LSelectionStartPosition.Column > LFirstChar then
             begin
               LLineSelectionStart := LSelectionStartPosition.Column;
               LIsComplexLine := True;
             end;
           end;
           if (FSelection.ActiveMode = smColumn) or
-            ((FSelection.ActiveMode = smNormal) and (LCurrentRow = LSelectionEndPosition.Row)) then
+            ((FSelection.ActiveMode = smNormal) and (LDisplayLine = LSelectionEndPosition.Row)) then
           begin
-            if LSelectionEndPosition.Column < LFirstColumn then
+            if LSelectionEndPosition.Column < LFirstChar then
             begin
               LLineSelectionStart := 0;
               LLineSelectionEnd := 0;
             end
             else
-            if LSelectionEndPosition.Column < LLastColumn then
+            if LSelectionEndPosition.Column < LLastChar then
             begin
               LLineSelectionEnd := LSelectionEndPosition.Column;
               LIsComplexLine := True;
@@ -9428,23 +9427,24 @@ var
   LIsWrapped: Boolean;
 begin
   Result := TBCEditorTextPosition(ADisplayPosition);
-  Result.Line := GetDisplayTextLineNumber(Result.Line) - 1;
+  Result.Line := GetDisplayTextLineNumber(Result.Line);
 
   LIsWrapped := False;
 
   if FWordWrap.Enabled then
-    if Length(FWordWrapLineLengths) > 0 then
+  begin
+    LRow := ADisplayPosition.Row - 1;
+    LPreviousLine := GetDisplayTextLineNumber(LRow);
+    while LPreviousLine = Result.Line do
     begin
-      LRow := ADisplayPosition.Row - 1;
+      LIsWrapped := True;
+      Result.Char := Result.Char + FWordWrapLineLengths[LRow];
+      Dec(LRow);
       LPreviousLine := GetDisplayTextLineNumber(LRow);
-      while (LPreviousLine > 0) and (LPreviousLine = Result.Line) do
-      begin
-        LIsWrapped := True;
-        Result.Char := Result.Char + FWordWrapLineLengths[LRow];
-        Dec(LRow);
-        LPreviousLine := GetDisplayTextLineNumber(LRow);
-      end;
     end;
+  end;
+
+  Dec(Result.Line);
 
   if not LIsWrapped then
   begin

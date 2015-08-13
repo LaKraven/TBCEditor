@@ -4352,7 +4352,7 @@ begin
       Value.Char := MinMax(Value.Char, 1, FScroll.MaxWidth + 1)
     else
       Value.Char := Max(Value.Char, 1);
-    Value.Line := MinMax(Value.Line, 1, FLines.Count);
+    Value.Line := MinMax(Value.Line, 0, FLines.Count - 1);
     if FSelection.ActiveMode = smNormal then
     begin
       if (Value.Line >= 1) and (Value.Line <= FLines.Count) then
@@ -10653,7 +10653,7 @@ begin
           with LCaretNewPosition do
           begin
             Char := 1;
-            Line := 1;
+            Line := 0;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorTop);
           Update;
@@ -10663,9 +10663,9 @@ begin
           with LCaretNewPosition do
           begin
             Char := 1;
-            Line := FLines.Count;
+            Line := FLines.Count - 1;
             if Line > 0 then
-              Char := Length(Lines[Line - 1]) + 1;
+              Char := Length(Lines.ExpandedStrings[Line]) + 1;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
           Update;

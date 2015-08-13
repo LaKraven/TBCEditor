@@ -233,6 +233,8 @@ type
     function SearchText(const ASearchText: string): Integer;
     function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
     function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
+    function StringWordEnd(const ALine: string; AStart: Integer): Integer;
+    function StringWordStart(const ALine: string; AStart: Integer): Integer;
     function TrimTrailingSpaces(const ALine: string): string;
     procedure ActiveLineChanged(Sender: TObject);
     procedure AssignSearchEngine;
@@ -452,7 +454,7 @@ type
     function GetHighlighterFileName(AFileName: string): string;
     function FindPrevious: Boolean;
     function FindNext: Boolean;
-    function GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
+    function GetBookmark(ABookmark: Integer; var ATextPosition: TBCEditorTextPosition): Boolean;
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
     function GetWordAtPixels(X, Y: Integer): string;
     function IsBookmark(ABookmark: Integer): Boolean;
@@ -532,7 +534,7 @@ type
     procedure RescanCodeFoldingRanges;
     procedure SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
-    procedure SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
+    procedure SetBookmark(AIndex: Integer; ATextPosition: TBCEditorTextPosition);
     procedure SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition);
     procedure SetFocus; override;
     procedure SetLineColor(ALine: Integer; AForegroundColor, ABackgroundColor: TColor);
@@ -2255,18 +2257,18 @@ begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
 
-  if (Y >= 1) and (Y <= FLines.Count) then
+  if (Y >= 0) and (Y < FLines.Count) then
   begin
-    LLine := FLines[Y - 1];
+    LLine := FLines.ExpandedStrings[Y];
 
     LLength := Length(LLine);
     if X >= LLength then
     begin
       if Y < FLines.Count then
       begin
-        LLine := FLines[Y];
         Inc(Y);
-        X := StringScan(LLine, 1, IsWordBreakChar);
+        LLine := FLines.ExpandedStrings[Y];
+        X := StringWordEnd(LLine, 1);
         if X = 0 then
           Inc(X);
       end;
@@ -2314,19 +2316,21 @@ var
 begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
-  if (Y >= 1) and (Y <= FLines.Count) then
+  if (Y >= 0) and (Y < FLines.Count) then
   begin
-    LLine := FLines[Y - 1];
+    LLine := FLines.ExpandedStrings[Y];
     X := Min(X, Length(LLine) + 1);
 
     if X <= 1 then
     begin
-      if Y > 1 then
+      if Y > 0 then
       begin
         Dec(Y);
-        LLine := FLines[Y - 1];
-        X := Length(LLine) + 1;
-      end;
+        LLine := FLines.ExpandedStrings[Y];
+        X := StringWordStart(LLine, Length(LLine));
+      end
+      else
+        Y := FLines.Count - 1
     end
     else
     begin
@@ -2337,7 +2341,7 @@ begin
         if Y > 1 then
         begin
           Dec(Y);
-          LLine := FLines[Y - 1];
+          LLine := FLines[Y];
           X := Length(LLine) + 1;
         end
         else
@@ -9517,7 +9521,7 @@ begin
     Result := True;
 end;
 
-function TBCBaseEditor.GetBookmark(ABookmark: Integer; var X, Y: Integer): Boolean;
+function TBCBaseEditor.GetBookmark(ABookmark: Integer; var ATextPosition: TBCEditorTextPosition): Boolean;
 var
   i: Integer;
 begin
@@ -9526,8 +9530,8 @@ begin
     for i := 0 to Marks.Count - 1 do
       if Marks[i].IsBookmark and (Marks[i].Index = ABookmark) then
       begin
-        X := Marks[i].Char;
-        Y := Marks[i].Line;
+        ATextPosition.Char := Marks[i].Char;
+        ATextPosition.Line := Marks[i].Line;
         Result := True;
         Exit;
       end;
@@ -9555,9 +9559,9 @@ end;
 
 function TBCBaseEditor.IsBookmark(ABookmark: Integer): Boolean;
 var
-  X, Y: Integer;
+  LTextPosition: TBCEditorTextPosition;
 begin
-  Result := GetBookmark(ABookmark, X, Y);
+  Result := GetBookmark(ABookmark, LTextPosition);
 end;
 
 function TBCBaseEditor.IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
@@ -9992,6 +9996,34 @@ begin
   Result := WordEnd(TextCaretPosition);
 end;
 
+function TBCBaseEditor.StringWordEnd(const ALine: string; AStart: Integer): Integer;
+var
+  LCharPointer: PChar;
+begin
+  if (AStart > 0) and (AStart <= Length(ALine)) then
+  begin
+    LCharPointer := PChar(@ALine[AStart]);
+    repeat
+      if IsWordBreakChar((LCharPointer + 1)^) and IsWordChar(LCharPointer^) then
+        Exit(AStart + 1);
+      Inc(LCharPointer);
+      Inc(AStart);
+    until LCharPointer^ = BCEDITOR_NONE_CHAR;
+  end;
+  Result := 0;
+end;
+
+function TBCBaseEditor.StringWordStart(const ALine: string; AStart: Integer): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  if (AStart > 0) and (AStart <= Length(ALine)) then
+    for i := AStart downto 1 do
+      if IsWordBreakChar(ALine[i - 1]) and IsWordChar(ALine[i]) then
+        Exit(i);
+end;
+
 function TBCBaseEditor.WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
   X, Y: Integer;
@@ -9999,12 +10031,15 @@ var
 begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
-  if (X >= 1) and (Y <= FLines.Count) then
+  if (X >= 1) and (Y < FLines.Count) then
   begin
-    LLine := FLines[Y - 1];
-    X := StringScan(LLine, X, IsWordBreakChar);
-    if X = 0 then
-      X := Length(LLine) + 1;
+    LLine := FLines.ExpandedStrings[Y];
+    if X < Length(LLine) then
+    begin
+      X := StringWordEnd(LLine, X + 1);
+      if X = 0 then
+        X := Length(LLine) + 1;
+    end;
   end;
   Result.Char := X;
   Result.Line := Y;
@@ -10023,16 +10058,13 @@ begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
 
-  if (Y >= 1) and (Y <= FLines.Count) then
+  if (Y >= 0) and (Y < FLines.Count) then
   begin
-    LLine := FLines[Y - 1];
+    LLine := FLines.ExpandedStrings[Y];
     X := Min(X, Length(LLine) + 1);
-
-    if X > 1 then
-      if not IsWordBreakChar(LLine[X - 1]) then
-        X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1
-      else
-        X := X - 1;
+    X := StringWordStart(LLine, X - 1);
+    if X = 0 then
+      X := 1;
   end;
   Result.Char := X;
   Result.Line := Y;
@@ -10693,10 +10725,10 @@ begin
               LMoveBookmark := FBookmarks[i].Line <> LTextCaretPosition.Line;
               ClearBookmark(i);
               if LMoveBookmark then
-                SetBookmark(i, LTextCaretPosition.Char, LTextCaretPosition.Line);
+                SetBookmark(i, LTextCaretPosition);
             end
             else
-              SetBookmark(i, LTextCaretPosition.Char, LTextCaretPosition.Line);
+              SetBookmark(i, LTextCaretPosition);
           end;
         end;
       { Word selection, selection }
@@ -12280,17 +12312,17 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
+procedure TBCBaseEditor.SetBookmark(AIndex: Integer; ATextPosition: TBCEditorTextPosition);
 var
   LBookmark: TBCEditorBookmark;
 begin
-  if (AIndex in [0 .. 8]) and (Y >= 0) and (Y <= Max(0, FLines.Count - 1)) then
+  if (AIndex in [0 .. 8]) and (ATextPosition.Line >= 0) and (ATextPosition.Line <= Max(0, FLines.Count - 1)) then
   begin
     LBookmark := TBCEditorBookmark.Create(Self);
     with LBookmark do
     begin
-      Line := Y;
-      Char := X;
+      Line := ATextPosition.Line;
+      Char := ATextPosition.Char;
       ImageIndex := AIndex;
       Index := AIndex;
       Visible := True;
@@ -12414,12 +12446,12 @@ end;
 procedure TBCBaseEditor.ToggleBookmark(AIndex: Integer = -1);
 var
   i: Integer;
-  X, Y: Integer;
+  LTextPosition: TBCEditorTextPosition;
 begin
   if AIndex <> -1 then
   begin
-    if not GetBookmark(AIndex, X, Y) then
-      SetBookmark(AIndex, DisplayCaretX, GetTextCaretY)
+    if not GetBookmark(AIndex, LTextPosition) then
+      SetBookmark(AIndex, TextCaretPosition)
     else
       ClearBookmark(AIndex);
   end
@@ -12431,12 +12463,11 @@ begin
         ClearBookmark(Marks[i].Index);
         Exit;
       end;
-    X := DisplayCaretX;
-    Y := GetTextCaretY;
+    LTextPosition := TextCaretPosition;
     for i := 0 to 8 do
-      if not GetBookmark(i, X, Y) then { variables used because X and Y are var parameters }
+      if not GetBookmark(i, LTextPosition) then { variables used because X and Y are var parameters }
       begin
-        SetBookmark(i, DisplayCaretX, GetTextCaretY);
+        SetBookmark(i, TextCaretPosition);
         Exit;
       end;
   end;

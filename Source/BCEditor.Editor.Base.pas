@@ -10670,26 +10670,10 @@ begin
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
           Update;
         end;
-      { Go to the given line / column position }
       ecGotoXY, ecSelectionGotoXY:
         if Assigned(AData) then
         begin
           MoveCaretAndSelection(LTextCaretPosition, TBCEditorTextPosition(AData^), ACommand = ecSelectionGotoXY);
-          Update;
-        end;
-      { Go by given line / column offset }
-      ecOffsetCaret, ecSelOffsetCaret:
-        if Assigned(AData) then
-        begin
-          LCaretNewPosition := TBCEditorTextPosition(AData^);
-          LCaretNewPosition := GetTextPosition(LTextCaretPosition.Char + LCaretNewPosition.Char,
-            LTextCaretPosition.Line + LCaretNewPosition.Line);
-          with LCaretNewPosition do
-          begin
-            Char := Max(Char, 1);
-            Line := MinMax(Line, 1, FLines.Count);
-          end;
-          MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelOffsetCaret);
           Update;
         end;
       ecGotoBookmark1 .. ecGotoBookmark9:

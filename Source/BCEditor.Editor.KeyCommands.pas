@@ -27,7 +27,6 @@ const
   ecEditorTop = 15;
   ecEditorBottom = 16;
   ecGotoXY = 17;
-  ecOffsetCaret = 18;
   { Selection }
   ecSelection = 100;
   ecSelectionLeft = ecLeft + ecSelection;
@@ -47,7 +46,6 @@ const
   ecSelectionEditorTop = ecEditorTop + ecSelection;
   ecSelectionEditorBottom = ecEditorBottom + ecSelection;
   ecSelectionGotoXY = ecGotoXY + ecSelection;
-  ecSelOffsetCaret = ecOffsetCaret + ecSelection;
   ecSelectionScope = ecSelection + 21;
   ecSelectionWord = ecSelection + 22;
   ecSelectAll = ecSelection + 23;

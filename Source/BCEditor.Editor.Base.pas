@@ -189,7 +189,7 @@ type
     function GetCanUndo: Boolean;
     function GetClipboardText: string;
     function GetDisplayCaretPosition: TBCEditorDisplayPosition;
-    function GetDisplayLineNumber(const ATextLineNumber: Integer): Integer;
+    function GetDisplayLineNumber(const ADisplayLineNumber: Integer): Integer;
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
@@ -1159,7 +1159,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.GetDisplayLineNumber(const ATextLineNumber: Integer): Integer;
+function TBCBaseEditor.GetDisplayLineNumber(const ADisplayLineNumber: Integer): Integer;
 var
   LFirst: Integer;
   LLast: Integer;
@@ -1167,8 +1167,8 @@ var
   LFound: Boolean;
 begin
   Result := -1;
-  if Assigned(FLineNumbersCache) and (FLineNumbersCache[ATextLineNumber] = ATextLineNumber) then
-    Result := ATextLineNumber
+  if Assigned(FLineNumbersCache) and (FLineNumbersCache[ADisplayLineNumber] = ADisplayLineNumber) then
+    Result := ADisplayLineNumber
   else
   begin
     LFirst := Low(FLineNumbersCache);
@@ -1178,14 +1178,14 @@ begin
     while (LFirst <= LLast) and (not LFound) do
     begin
       LPivot := (LFirst + LLast) div 2;
-      if FLineNumbersCache[LPivot] = ATextLineNumber then
+      if FLineNumbersCache[LPivot] = ADisplayLineNumber then
       begin
         LFound  := True;
         Result := LPivot;
         if FWordWrap.Enabled then
         begin
           Dec(LPivot);
-          while FLineNumbersCache[LPivot] = ATextLineNumber do
+          while FLineNumbersCache[LPivot] = ADisplayLineNumber do
           begin
             Result := LPivot;
             Dec(LPivot);
@@ -1193,7 +1193,7 @@ begin
         end;
       end
       else
-      if FLineNumbersCache[LPivot] > ATextLineNumber then
+      if FLineNumbersCache[LPivot] > ADisplayLineNumber then
         LLast := LPivot - 1
       else
         LFirst := LPivot + 1;
@@ -7172,21 +7172,9 @@ procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALast
 var
   LLine, LPreviousLine: Integer;
   LLineRect: TRect;
-  LLeftMarginOffsets: PIntegerArray;
-  LHasOtherMarks: Boolean;
-  LLineNumber: string;
   LFirstLine: Integer;
   LLastLine: Integer;
   LLastTextLine: Integer;
-  LMarkRow: Integer;
-  LTextSize: TSize;
-  LLeftMarginWidth: Integer;
-  LOldColor: TColor;
-  LLineStateRect: TRect;
-  LPanelRect: TRect;
-  LPanelActiveLineRect: TRect;
-  LPEditorLineAttribute: PBCEditorLineAttribute;
-  LBookmark: TBCEditorBookmark;
 
   procedure DrawMark(ABookMark: TBCEditorBookmark; var ALeftMarginOffset: Integer; AMarkRow: Integer);
   var
@@ -7225,6 +7213,10 @@ var
   procedure PaintLineNumbers;
   var
     i: Integer;
+    LLineNumber: string;
+    LTextSize: TSize;
+    LLeftMarginWidth: Integer;
+    LOldColor: TColor;
   begin
     if FLeftMargin.LineNumbers.Visible then
     begin
@@ -7304,6 +7296,8 @@ var
   procedure PaintBookmarkPanel;
   var
     i: Integer;
+    LPanelRect: TRect;
+    LPanelActiveLineRect: TRect;
   begin
     if FLeftMargin.Bookmarks.Panel.Visible then
     begin
@@ -7372,6 +7366,10 @@ var
   procedure PaintBookmarks;
   var
     i: Integer;
+    LLeftMarginOffsets: PIntegerArray;
+    LHasOtherMarks: Boolean;
+    LBookmark: TBCEditorBookmark;
+    LBookmarkLine: Integer;
   begin
     if FLeftMargin.Bookmarks.Visible and FLeftMargin.Bookmarks.Visible and (Marks.Count > 0) and
       (LLastLine >= LFirstLine) then
@@ -7382,29 +7380,27 @@ var
         for i := 0 to Marks.Count - 1 do
         begin
           LBookmark := Marks[i];
-          if LBookmark.Visible and (LBookmark.Line >= LFirstLine) and (LBookmark.Line <= LLastLine) then
+          LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
+          if LBookmark.Visible and (LBookmarkLine >= LFirstLine) and (LBookmarkLine <= LLastLine) then
           begin
             if not LBookmark.IsBookmark then
               LHasOtherMarks := True
             else
-            begin
-              LMarkRow := LBookmark.Line;
-              if not FCodeFolding.Visible or FCodeFolding.Visible {and not IsLineInsideCollapsedCodeFolding(LMarkRow)} then
-                if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
-                  DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
-            end
+            if not FCodeFolding.Visible or FCodeFolding.Visible then
+              if (LBookmarkLine - AFirstRow >= 0) and (LBookmarkLine - AFirstRow <= ALastRow - AFirstRow + 1) then
+                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstRow], LBookmarkLine);
           end;
         end;
         if LHasOtherMarks then
         for i := 0 to Marks.Count - 1 do
         begin
           LBookmark := Marks[i];
-          if LBookmark.Visible and not LBookmark.IsBookmark and (LBookmark.Line >= LFirstLine) and (LBookmark.Line <= LLastLine) then
+          LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
+          if LBookmark.Visible and not LBookmark.IsBookmark and (LBookmarkLine >= LFirstLine) and (LBookmarkLine <= LLastLine) then
           begin
-            LMarkRow := LBookmark.Line;
-            if not FCodeFolding.Visible or FCodeFolding.Visible {and not IsLineInsideCollapsedCodeFolding(LMarkRow)} then
-              if (LMarkRow - aFirstRow >= 0) and (LMarkRow - AFirstRow <= ALastRow - AFirstRow + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LMarkRow - AFirstRow], LMarkRow);
+            if not FCodeFolding.Visible or FCodeFolding.Visible then
+              if (LBookmarkLine - AFirstRow >= 0) and (LBookmarkLine - AFirstRow <= ALastRow - AFirstRow + 1) then
+                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstRow], LBookmarkLine);
           end;
         end;
       finally
@@ -7422,6 +7418,8 @@ var
   procedure PaintLineState;
   var
     i: Integer;
+    LLineStateRect: TRect;
+    LPEditorLineAttribute: PBCEditorLineAttribute;
   begin
     if FLeftMargin.LineState.Enabled then
     begin
@@ -7450,6 +7448,7 @@ var
   procedure PaintBookmarkPanelLine;
   var
     i: Integer;
+    LPanelRect: TRect;
   begin
     if FLeftMargin.Bookmarks.Panel.Visible then
     begin
@@ -7471,6 +7470,7 @@ var
         FAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
     end;
   end;
+
 begin
   LFirstLine := AFirstRow;
   LLastLine := Min(ALastRow, FDisplayLineCount);
@@ -12284,7 +12284,7 @@ procedure TBCBaseEditor.SetBookmark(AIndex: Integer; X: Integer; Y: Integer);
 var
   LBookmark: TBCEditorBookmark;
 begin
-  if (AIndex in [0 .. 8]) and (Y >= 1) and (Y <= Max(1, FLines.Count)) then
+  if (AIndex in [0 .. 8]) and (Y >= 0) and (Y <= Max(0, FLines.Count - 1)) then
   begin
     LBookmark := TBCEditorBookmark.Create(Self);
     with LBookmark do

@@ -27,6 +27,7 @@ const
   ecEditorTop = 15;
   ecEditorBottom = 16;
   ecGotoXY = 17;
+  //ecOffsetCaret = 18;
   { Selection }
   ecSelection = 100;
   ecSelectionLeft = ecLeft + ecSelection;

@@ -6739,7 +6739,7 @@ begin
     if not (sfCodeFoldingInfoClicked in FStateFlags) then { no selection when info clicked }
     begin
       TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
-      SelectionEndPosition := TextCaretPosition;
+      SelectionEndPosition := TextCaretPosition; { TODO: word wrap }
     end;
     FLastSortOrder := soDesc;
     Include(FStateFlags, sfInSelection);
@@ -6977,7 +6977,7 @@ begin
     AClipRect.Top := (i - FTopLine) * LineHeight;
     AClipRect.Bottom := AClipRect.Top + LineHeight;
 
-    if (DisplayCaretY = LLine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
+    if (GetTextCaretY + 1 = LLine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
     begin
       Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
       Canvas.FillRect(AClipRect); { active line background }
@@ -7263,7 +7263,7 @@ var
         begin
           LLine := GetDisplayTextLineNumber(i);
 
-          if (DisplayCaretY = LLine) and (FLeftMargin.Colors.ActiveLineBackground <> clNone) then
+          if (GetTextCaretY + 1 = LLine) and (FLeftMargin.Colors.ActiveLineBackground <> clNone) then
             FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground)
           else
             FTextDrawer.SetBackgroundColor(FLeftMargin.Colors.Background);
@@ -7280,7 +7280,7 @@ var
           if not FWordWrap.Enabled or FWordWrap.Enabled and (LPreviousLine <> LLine) then
           begin
             LLineNumber := FLeftMargin.FormatLineNumber(LLine);
-            if DisplayCaretY <> LLine then
+            if GetTextCaretY + 1 <> LLine then
               if (lnoIntens in LeftMargin.LineNumbers.Options) and
                 (LLineNumber[Length(LLineNumber)] <> '0') and (i <> LeftMargin.LineNumbers.StartFrom) then
               begin
@@ -7341,7 +7341,7 @@ var
         begin
           LLine := GetDisplayTextLineNumber(i);
 
-          if LLine = DisplayCaretY then
+          if LLine = GetTextCaretY + 1 then
           begin
             LPanelActiveLineRect := System.Types.Rect(0, (i - TopLine) * LineHeight, FLeftMargin.Bookmarks.Panel.Width,
               (i - TopLine + 1) * LineHeight);
@@ -8169,7 +8169,7 @@ var
 
       while LCurrentRow = LCurrentLine do
       begin
-        LIsCurrentLine := DisplayCaretY = LCurrentLine;
+        LIsCurrentLine := (GetTextCaretY + 1) = LCurrentLine;
         LForegroundColor := Font.Color;
         LBackgroundColor := GetBackgroundColor;
         LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
@@ -9433,17 +9433,18 @@ begin
   LIsWrapped := False;
 
   if FWordWrap.Enabled then
-  begin
-    LRow := ADisplayPosition.Row - 1;
-    LPreviousLine := GetDisplayTextLineNumber(LRow);
-    while LPreviousLine = Result.Line do
+    if Length(FWordWrapLineLengths) > 0 then
     begin
-      LIsWrapped := True;
-      Result.Char := Result.Char + FWordWrapLineLengths[LRow]; // FVisibleChars; // TODO
-      Dec(LRow);
+      LRow := ADisplayPosition.Row - 1;
       LPreviousLine := GetDisplayTextLineNumber(LRow);
+      while (LPreviousLine > 0) and (LPreviousLine = Result.Line) do
+      begin
+        LIsWrapped := True;
+        Result.Char := Result.Char + FWordWrapLineLengths[LRow];
+        Dec(LRow);
+        LPreviousLine := GetDisplayTextLineNumber(LRow);
+      end;
     end;
-  end;
 
   if not LIsWrapped then
   begin

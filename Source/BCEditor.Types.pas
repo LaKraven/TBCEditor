@@ -284,7 +284,7 @@ type
   TBCEditorSortOrder = (soToggle, soAsc, soDesc);
 
   TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete,
-    crLineBreak, crLineInsert, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
+    crLineBreak, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
     crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll);
 
 implementation

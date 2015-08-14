@@ -235,7 +235,7 @@ type
     function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
     function StringWordEnd(const ALine: string; AStart: Integer): Integer;
     function StringWordStart(const ALine: string; AStart: Integer): Integer;
-    function TrimTrailingSpaces(const ALine: string): string;
+//    function TrimTrailingSpaces(const ALine: string): string;
     procedure ActiveLineChanged(Sender: TObject);
     procedure AssignSearchEngine;
     procedure CaretChanged(Sender: TObject);
@@ -2566,7 +2566,7 @@ begin
   Result := 0;
 end;
 
-function TBCBaseEditor.TrimTrailingSpaces(const ALine: string): string;
+{function TBCBaseEditor.TrimTrailingSpaces(const ALine: string): string;
 var
   i: Integer;
 begin
@@ -2574,7 +2574,7 @@ begin
   while (i > 0) and CharInSet(ALine[i], [BCEDITOR_SPACE_CHAR, BCEDITOR_TAB_CHAR]) do
     Dec(i);
   Result := Copy(ALine, 1, i);
-end;
+end; }
 
 procedure TBCBaseEditor.ActiveLineChanged(Sender: TObject);
 begin
@@ -2988,15 +2988,9 @@ end;
 
 procedure TBCBaseEditor.DoShiftTabKey;
 var
-  LNewX: Integer;
-  LLine: string;
-  LLength: Integer;
-  LDestinationX: Integer;
-  LMaxLength, LLineNumber: Integer;
-  LPreviousLine: string;
-  LOldSelectedText: string;
-  P: PChar;
-  LOldCaretPosition: TBCEditorTextPosition;
+  LNewX, LTabWidth: Integer;
+  LTextLine, LOldSelectedText: string;
+  LTextCaretPosition: TBCEditorTextPosition;
   LChangeScroll: Boolean;
 begin
   if (toSelectedBlockIndent in FTabs.Options) and SelectionAvailable then
@@ -3005,65 +2999,32 @@ begin
     Exit;
   end;
 
-  LNewX := DisplayCaretX;
+  LTextCaretPosition := TextCaretPosition;
+  if toTabsToSpaces in FTabs.Options then
+    LTabWidth := FTabs.Width
+  else
+    LTabWidth := 1;
+  LNewX := TextCaretPosition.Char - LTabWidth;
 
-  if LNewX <> 1 then
+  if LNewX < 1 then
+    LNewX := 1;
+
+  if LNewX <> TextCaretPosition.Char then
   begin
-    LLineNumber := GetTextCaretY;
-    if (LLineNumber > 0) and (LLineNumber < FLines.Count) then
+    LOldSelectedText := Copy(FLines[LTextCaretPosition.Line], LNewX, LTabWidth);
+
+    if toTabsToSpaces in FTabs.Options then
     begin
-      Dec(LLineNumber);
-      LMaxLength := DisplayCaretX - 1;
-      repeat
-        LPreviousLine := FLines[LLineNumber];
-        if Length(LPreviousLine) >= LMaxLength then
-        begin
-          P := @LPreviousLine[LMaxLength];
-          repeat
-            if P^ <> BCEDITOR_SPACE_CHAR then
-              Break;
-            Dec(LNewX);
-            Dec(P);
-          until LNewX = 1;
-          if LNewX <> 1 then
-            repeat
-              if P^ = BCEDITOR_SPACE_CHAR then
-                Break;
-              Dec(LNewX);
-              Dec(P);
-            until LNewX = 1;
-          Break;
-        end;
-        Dec(LLineNumber);
-      until LLineNumber < 0;
-    end;
-  end;
-
-  if LNewX = DisplayCaretX then
-  begin
-    LLine := ExpandedLineText;
-    LLength := Length(LLine);
-    LDestinationX := ((DisplayCaretX - 2) div FTabs.Width) * FTabs.Width + 1;
-    if LNewX > LLength then
-      LNewX := LDestinationX
+      if LOldSelectedText <> StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width) then
+        Exit;
+    end
     else
-    if (LNewX > LDestinationX) and (LLine[LNewX - 1] = BCEDITOR_TAB_CHAR) then
-      Dec(LNewX)
-    else
-    while (LNewX > LDestinationX) and ((LNewX - 1 > LLength) or (LLine[LNewX - 1] = BCEDITOR_SPACE_CHAR)) do
-      Dec(LNewX);
-  end;
+    if LOldSelectedText <> BCEDITOR_TAB_CHAR then
+      Exit;
 
-  if LNewX <> DisplayCaretX then
-  begin
-    SetSelectionBeginPosition(GetTextPosition(LNewX, GetTextCaretY));
-    SetSelectionEndPosition(TextCaretPosition);
-    LOldCaretPosition := TextCaretPosition;
-
-    LOldSelectedText := SelectedText;
-    SetSelectedTextPrimitive('');
-
-    FUndoList.AddChange(crSilentDelete, GetTextPosition(LNewX, GetTextCaretY), LOldCaretPosition, LOldSelectedText, smNormal);
+    LTextLine := FLines[LTextCaretPosition.Line];
+    Delete(LTextLine, LNewX, LTabWidth);
+    FLines[LTextCaretPosition.Line] := LTextLine;
 
     LChangeScroll := not (soPastEndOfLine in FScroll.Options);
     try
@@ -3073,17 +3034,18 @@ begin
       if LChangeScroll then
         FScroll.Options := FScroll.Options - [soPastEndOfLine];
     end;
+
+    FUndoList.AddChange(crSilentDelete, TextCaretPosition, LTextCaretPosition, LOldSelectedText, smNormal);
+    FUndoList.AddChange(crNothing, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode); { avoid group undo }
   end;
 end;
 
 procedure TBCBaseEditor.DoTabKey;
 var
-  i: Integer;
-  LBlockStartPosition: TBCEditorTextPosition;
-  LSpaces : string;
+  LTextCaretPosition: TBCEditorTextPosition;
+  LTabText, LTextLine: string;
   LNewCaretX: Integer;
   LChangeScroll: Boolean;
-  LDisplayPosition, LDistanceToTab: Integer;
 begin
   if (toSelectedBlockIndent in FTabs.Options) and SelectionAvailable then
   begin
@@ -3098,56 +3060,41 @@ begin
       FUndoList.AddChange(crDelete, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode);
       SetSelectedTextPrimitive('');
     end;
-    LBlockStartPosition := TextCaretPosition;
+    LTextCaretPosition := TextCaretPosition;
 
     if toTabsToSpaces in FTabs.Options then
     begin
-      i := FTabs.Width - (LBlockStartPosition.Char - 1) mod FTabs.Width;
-      if i = 0 then
-        i :=  FTabs.Width;
-    end
-    else
-      i :=  FTabs.Width;
-
-    if toTabsToSpaces in FTabs.Options then
-    begin
-      LSpaces := StringOfChar(BCEDITOR_SPACE_CHAR, i);
-      LNewCaretX := LBlockStartPosition.Char + i;
-    end
-    else
-    if (eoTrimTrailingSpaces in Options) and (LBlockStartPosition.Char > Length(ExpandedLineText)) then
-    begin
-      LDisplayPosition := DisplayCaretPosition.Column;
-      LDistanceToTab :=  FTabs.Width - ((LDisplayPosition - 1) mod FTabs.Width);
-      LNewCaretX := LBlockStartPosition.Char + LDistanceToTab;
+      LNewCaretX := LTextCaretPosition.Char + FTabs.Width;
+      LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width);
     end
     else
     begin
-      LSpaces := BCEDITOR_TAB_CHAR;
-      if (eoTrimTrailingSpaces in Options) and (Length(TrimTrailingSpaces(ExpandedLineText)) = 0) then
-        LNewCaretX := LBlockStartPosition.Char + GetExpandedLength(LSpaces)
-      else
-        LNewCaretX := LBlockStartPosition.Char + Length(LSpaces);
+      LNewCaretX := LTextCaretPosition.Char + 1;
+      LTabText := BCEDITOR_TAB_CHAR;
     end;
 
-    SetSelectedTextPrimitive(LSpaces);
+    LTextLine := FLines[LTextCaretPosition.Line];
+    Insert(LTabText, LTextLine, LTextCaretPosition.Char);
+    FLines[LTextCaretPosition.Line] := LTextLine;
+
+    LChangeScroll := not (soPastEndOfLine in FScroll.Options);
+    try
+      FScroll.Options := FScroll.Options + [soPastEndOfLine];
+      SetTextCaretX(LNewCaretX);
+    finally
+      if LChangeScroll then
+        FScroll.Options := FScroll.Options - [soPastEndOfLine];
+    end;
+    EnsureCursorPositionVisible;
+
     if FSelection.ActiveMode <> smColumn then
-      FUndoList.AddChange(crInsert, LBlockStartPosition, TextCaretPosition, GetSelectedText,
-        FSelection.ActiveMode );
+    begin
+      FUndoList.AddChange(crInsert, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode);
+      FUndoList.AddChange(crNothing, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode); { avoid group undo }
+    end;
   finally
     FUndoList.EndBlock;
   end;
-
-  LChangeScroll := not (soPastEndOfLine in FScroll.Options);
-  try
-    FScroll.Options := FScroll.Options + [soPastEndOfLine];
-    SetTextCaretX(LNewCaretX);
-  finally
-    if LChangeScroll then
-      FScroll.Options := FScroll.Options - [soPastEndOfLine];
-  end;
-
-  EnsureCursorPositionVisible;
 end;
 
 procedure TBCBaseEditor.DrawCursor(ACanvas: TCanvas);
@@ -8935,16 +8882,18 @@ var
       LStart: PChar;
       P: PChar;
       LIndented: Boolean;
+      LTextCaretPosition: TBCEditorTextPosition;
     begin
       Result := 0;
-      LLeftSide := Copy(LineText, 1, DisplayCaretX - 1);
-      if DisplayCaretX - 1 > Length(LLeftSide) then
-        LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LLeftSide));
-      LRightSide := Copy(LineText, DisplayCaretX, Length(ExpandedLineText) - (DisplayCaretX - 1));
+      LTextCaretPosition := TextCaretPosition;
+      LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
+      //if DisplayCaretX - 1 > Length(LLeftSide) then
+      //  LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LLeftSide));
+      LRightSide := Copy(LineText, LTextCaretPosition.Char, Length(ExpandedLineText) - (LTextCaretPosition.Char - 1));
 
       LIndented := False;
       if (FLines.Count > 0) and (eoAutoIndent in fOptions) then
-        LWhite := GetLeadingWhite(FLines.List^[GetTextCaretY].fString)
+        LWhite := GetLeadingWhite(FLines.List^[LTextCaretPosition.Line].FString)
       else
         LWhite := '';
 
@@ -8954,17 +8903,17 @@ var
       if P^ <> BCEDITOR_NONE_CHAR then
       begin
         LStr := LLeftSide + Copy(AValue, 1, P - LStart);
-        FLines[GetTextCaretY] := LStr;
-        FLines.InsertLines(GetTextCaretY, CountLines(P));
+        FLines[LTextCaretPosition.Line] := LStr;
+        FLines.InsertLines(LTextCaretPosition.Line, CountLines(P));
       end
       else
       begin
         LStr := LLeftSide + AValue + LRightSide;
-        FLines[GetTextCaretY] := LStr;
+        FLines[LTextCaretPosition.Line] := LStr;
       end;
 
       { insert left lines of Value }
-      i := GetTextCaretY;
+      i := LTextCaretPosition.Line;
       while P^ <> BCEDITOR_NONE_CHAR do
       begin
         if P^ = BCEDITOR_CARRIAGE_RETURN then
@@ -9000,7 +8949,7 @@ var
         Inc(Result);
         Inc(i);
       end;
-      FDisplayCaretX := 1 + Length(FLines[GetTextCaretY]) - Length(LRightSide);
+      FDisplayCaretX := 1 + Length(FLines[LTextCaretPosition.Line]) - Length(LRightSide);
     end;
 
     function InsertColumn: Integer;
@@ -9161,14 +9110,16 @@ var
 
   var
     I, LStartLine: Integer;
-    LStartColumn: Integer;
+    LStartChar: Integer;
     LInsertedLines: Integer;
+    LTextCaretPosition: TBCEditorTextPosition;
   begin
     if Length(AValue) = 0 then
       Exit;
 
-    LStartLine := GetTextCaretY;
-    LStartColumn := DisplayCaretX;
+    LTextCaretPosition := TextCaretPosition;
+    LStartLine := LTextCaretPosition.Line;
+    LStartChar := LTextCaretPosition.Char;
     case APasteMode of
       smNormal:
         LInsertedLines := InsertNormal;
@@ -9185,7 +9136,7 @@ var
       Update marks }
     if LInsertedLines > 0 then
     begin
-      if ((APasteMode = smNormal) and (LStartColumn > 1)) or ((APasteMode = smLine) and (LStartColumn > 1)) then
+      if ((APasteMode = smNormal) and (LStartChar > 1)) or ((APasteMode = smLine) and (LStartChar > 1)) then
         Inc(LStartLine);
 
       { Trim trailing spaces }

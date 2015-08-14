@@ -4474,7 +4474,7 @@ begin
     ATextPosition.Char := MinMax(ATextPosition.Char, 1, FScroll.MaxWidth + 1)
   else
     ATextPosition.Char := Max(ATextPosition.Char, 1);
-  ATextPosition.Line := MinMax(ATextPosition.Line, 1, FLines.Count);
+  ATextPosition.Line := MinMax(ATextPosition.Line, 0, FLines.Count - 1);
   LTempString := FLines[ATextPosition.Line] + BCEDITOR_NONE_CHAR;
 
   if ATextPosition.Char > Length(LTempString) then
@@ -10581,7 +10581,7 @@ var
   LSpaceCount1: Integer;
   LSpaceCount2: Integer;
   LVisualSpaceCount1, LVisualSpaceCount2: Integer;
-  LBackCounter: Integer;
+  LBackCounterLine: Integer;
   LBlockStartPosition: TBCEditorTextPosition;
   LChangeScroll: Boolean;
   LMoveBookmark: Boolean;
@@ -10778,25 +10778,25 @@ begin
                 { unindent }
                 if LSpaceCount1 > 0 then
                 begin
-                  LBackCounter := LTextCaretPosition.Line;
+                  LBackCounterLine := LTextCaretPosition.Line;
                   { It's better not to have if statement inside loop }
                   if (eoTrimTrailingSpaces in Options) and (LLength = 0) then
-                  while LBackCounter >= 0 do
+                  while LBackCounterLine >= 0 do
                   begin
-                    LSpaceCount2 := LeftSpaceCount(Lines[LBackCounter], True);
+                    LSpaceCount2 := LeftSpaceCount(Lines[LBackCounterLine], True);
                     if LSpaceCount2 < LSpaceCount1 then
                       Break;
-                    Dec(LBackCounter);
+                    Dec(LBackCounterLine);
                   end
                   else
-                  while LBackCounter >= 0 do
+                  while LBackCounterLine >= 0 do
                   begin
-                    LSpaceCount2 := LeftSpaceCount(Lines[LBackCounter]);
+                    LSpaceCount2 := LeftSpaceCount(Lines[LBackCounterLine]);
                     if LSpaceCount2 < LSpaceCount1 then
                       Break;
-                    Dec(LBackCounter);
+                    Dec(LBackCounterLine);
                   end;
-                  if (LBackCounter = -1) and (LSpaceCount2 > LSpaceCount1) then
+                  if (LBackCounterLine = -1) and (LSpaceCount2 > LSpaceCount1) then
                     LSpaceCount2 := 0;
                 end;
                 if LSpaceCount2 = LSpaceCount1 then
@@ -10811,15 +10811,15 @@ begin
               if LTextCaretPosition.Char = 1 then
               begin
                 { join this line with the last line if possible }
-                if LTextCaretPosition.Line > 1 then
+                if LTextCaretPosition.Line > 0 then
                 begin
-                  SetTextCaretY(LTextCaretPosition.Line);
+                  SetTextCaretY(LTextCaretPosition.Line - 1);
                   SetTextCaretX(Length(Lines[LTextCaretPosition.Line]) + 1);
 
                   FUndoList.AddChange(crSilentDelete, TextCaretPosition, LTextCaretPosition, sLineBreak, smNormal);
 
-                  FLines.Delete(GetTextCaretY);
-                  DoLinesDeleted(GetTextCaretY, 1, True);
+                  FLines.Delete(LTextCaretPosition.Line);
+                  DoLinesDeleted(LTextCaretPosition.Line, 1, True);
                   if eoTrimTrailingSpaces in Options then
                     LLineText := TrimRight(LLineText);
 
@@ -10837,19 +10837,19 @@ begin
                   { Unindent, count visual whitespace on current previous lines }
                   LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText);
                   LVisualSpaceCount2 := 0;
-                  LBackCounter := GetTextCaretY - 1;
-                  while LBackCounter >= 0 do
+                  LBackCounterLine := GetTextCaretY - 1;
+                  while LBackCounterLine >= 0 do
                   begin
-                    LVisualSpaceCount2 := GetLeadingExpandedLength(FLines[LBackCounter]);
+                    LVisualSpaceCount2 := GetLeadingExpandedLength(FLines[LBackCounterLine]);
                     if LVisualSpaceCount2 < LVisualSpaceCount1 then
                     begin
-                      LSpaceCount2 := LeftSpaceCount(FLines[LBackCounter]);
+                      LSpaceCount2 := LeftSpaceCount(FLines[LBackCounterLine]);
                       Break;
                     end;
-                    Dec(LBackCounter);
+                    Dec(LBackCounterLine);
                   end;
 
-                  if (LBackCounter = -1) and (LSpaceCount2 > LSpaceCount1) then
+                  if (LBackCounterLine = -1) and (LSpaceCount2 > LSpaceCount1) then
                     LSpaceCount2 := 0;
                   if LSpaceCount2 = LSpaceCount1 then
                     LSpaceCount2 := 0;
@@ -10916,7 +10916,7 @@ begin
                   LHelper, smNormal);
 
                 Delete(LLineText, LTextCaretPosition.Char - i, i);
-                FLines[GetTextCaretY] := LLineText;
+                FLines[LTextCaretPosition.Line] := LLineText;
 
                 SetTextCaretX(LTextCaretPosition.Char - i);
               end;
@@ -11168,7 +11168,7 @@ begin
               LInsertCount := 0;
               SetSelectedTextEmpty;
             end;
-            LLineText := FLines.ExpandedStrings[LTextCaretPosition.Line]; // ExpandedLineText;
+            LLineText := FLines[LTextCaretPosition.Line]; // ExpandedLineText;
             //LInsertDelta := Ord(LCaretPosition.Char = 1);
             LLength := Length(LLineText);
 
@@ -11205,9 +11205,9 @@ begin
 
                   LLineText := Copy(LLineText, LTextCaretPosition.Char, MaxInt);
                   if (eoAutoIndent in FOptions) and (LSpaceCount1 > 0) then
-                    FLines.Insert(LTextCaretPosition.Line, LSpaceBuffer + LLineText)
+                    FLines.Insert(LTextCaretPosition.Line + 1, LSpaceBuffer + LLineText)
                   else
-                    FLines.Insert(LTextCaretPosition.Line, LLineText);
+                    FLines.Insert(LTextCaretPosition.Line + 1, LLineText);
 
                   if (eoTrimTrailingSpaces in FOptions) and (LTabBuffer <> '') then
                     FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, LTabBuffer + LLineText, smNormal)
@@ -11249,46 +11249,47 @@ begin
               begin
                 LSpaceCount1 := 0;
                 LSpaceCount2 := 0;
-                LBackCounter := LTextCaretPosition.Line;
+                LBackCounterLine := LTextCaretPosition.Line + 1;
                 if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) then
                 begin
                   repeat
-                    Dec(LBackCounter);
-                    if FLines.AccessStringLength(LBackCounter) > 0 then
+                    Dec(LBackCounterLine);
+                    if FLines.AccessStringLength(LBackCounterLine) > 0 then
                     begin
                       if toTabsToSpaces in FTabs.Options then
                       begin
                         LSpaceCount1 := 1;
-                        LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounter]);
+                        LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounterLine]);
                       end
                       else
-                        LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
+                        LSpaceCount1 := LeftSpaceCount(Lines[LBackCounterLine]);
                       Break;
                     end;
-                  until LBackCounter < 0;
+                  until LBackCounterLine < 0;
 
+                  // TODO: Is there any need to check the space count from the next line?
                   if (LSpaceCount1 = 0) and (LTextCaretPosition.Line < FLines.Count) then
                   begin
-                    LBackCounter := LTextCaretPosition.Line;
+                    LBackCounterLine := LTextCaretPosition.Line;
                     repeat
-                      Inc(LBackCounter);
-                      if FLines.AccessStringLength(LBackCounter) > 0 then
+                      Inc(LBackCounterLine);
+                      if FLines.AccessStringLength(LBackCounterLine) > 0 then
                       begin
                         if toTabsToSpaces in FTabs.Options then
                         begin
                           LSpaceCount1 := 1;
-                          LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounter]);
+                          LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounterLine]);
                         end
                         else
-                          LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
+                          LSpaceCount1 := LeftSpaceCount(Lines[LBackCounterLine]);
                         Break;
-                        Inc(LBackCounter);
+                        Inc(LBackCounterLine);
                         Break;
                       end;
-                    until LBackCounter = FLines.Count;
+                    until LBackCounterLine = FLines.Count;
                   end;
                 end;
-                FLines.Insert(LTextCaretPosition.Line, '');
+                FLines.Insert(LTextCaretPosition.Line + 1, '');
 
                 FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, '', smNormal);
 
@@ -11305,11 +11306,11 @@ begin
                     if toTabsToSpaces in FTabs.Options then
                       LSpaceBuffer := GetLeftSpacing(LSpaceCount2, False)
                     else
-                      LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
+                      LSpaceBuffer := Copy(Lines[LBackCounterLine], 1, LSpaceCount1);
 
-                    //TextCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, GetTextCaretY + 1);
+                    //TextCaretPosition := GetTextPosition(Length(LSpaceBuffer) + 1, LTextCaretPosition.Line + 1);
 
-                    FLines[LTextCaretPosition.Line] := LSpaceBuffer + FLines[LTextCaretPosition.Line];
+                    FLines[LTextCaretPosition.Line + 1] := LSpaceBuffer + FLines[LTextCaretPosition.Line + 1];
                   end;
                   DisplayCaretY := FDisplayCaretY + 1;
                   if LSpaceCount1 > 0 then
@@ -11328,44 +11329,44 @@ begin
 
               LSpaceCount1 := 0;
               LSpaceCount2 := 0;
-              LBackCounter := LTextCaretPosition.Line;
+              LBackCounterLine := LTextCaretPosition.Line;
 
               if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) and (FLines.Count > 1) then
               begin
                 repeat
-                  Dec(LBackCounter);
-                  if FLines.AccessStringLength(LBackCounter) > 0 then
+                  Dec(LBackCounterLine);
+                  if FLines.AccessStringLength(LBackCounterLine) > 0 then
                   begin
                     if toTabsToSpaces in FTabs.Options then
                     begin
                       LSpaceCount1 := 1;
-                      LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounter]);
+                      LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounterLine]);
                     end
                     else
-                      LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
+                      LSpaceCount1 := LeftSpaceCount(Lines[LBackCounterLine]);
                     Break;
                   end;
-                until LBackCounter < 0;
+                until LBackCounterLine < 0;
 
                 if (LSpaceCount1 = 0) and (LTextCaretPosition.Line < FLines.Count) then
                 begin
-                  LBackCounter := LTextCaretPosition.Line;
+                  LBackCounterLine := LTextCaretPosition.Line;
                   repeat
-                    Inc(LBackCounter);
-                    if FLines.AccessStringLength(LBackCounter) > 0 then
+                    Inc(LBackCounterLine);
+                    if FLines.AccessStringLength(LBackCounterLine) > 0 then
                     begin
                       if toTabsToSpaces in FTabs.Options then
                       begin
                         LSpaceCount1 := 1;
-                        LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounter]);
+                        LSpaceCount2 := GetLeadingExpandedLength(Lines[LBackCounterLine]);
                       end
                       else
-                        LSpaceCount1 := LeftSpaceCount(Lines[LBackCounter]);
+                        LSpaceCount1 := LeftSpaceCount(Lines[LBackCounterLine]);
                       Break;
-                      Inc(LBackCounter);
+                      Inc(LBackCounterLine);
                       Break;
                     end;
-                  until LBackCounter = FLines.Count;
+                  until LBackCounterLine = FLines.Count;
                 end;
               end;
 
@@ -11386,7 +11387,7 @@ begin
                   if toTabsToSpaces in FTabs.Options then
                     LSpaceBuffer := GetLeftSpacing(LSpaceCount2, False)
                   else
-                    LSpaceBuffer := Copy(Lines[LBackCounter], 1, LSpaceCount1);
+                    LSpaceBuffer := Copy(Lines[LBackCounterLine], 1, LSpaceCount1);
 
                   //TextCaretPosition := GetTextPosition(Length(LSpaceBuffer) +  1, GetTextCaretY + 1);
 
@@ -12302,12 +12303,12 @@ var
 begin
   LOldCaretPosition := TextCaretPosition;
   LLastTextPosition.Char := 1;
-  LLastTextPosition.Line := FLines.Count;
+  LLastTextPosition.Line := FLines.Count - 1;
   if LLastTextPosition.Line > 0 then
     Inc(LLastTextPosition.Char, Length(Lines[LLastTextPosition.Line]))
   else
-    LLastTextPosition.Line := 1;
-  SetCaretAndSelection(LOldCaretPosition, GetTextPosition(1, 1), LLastTextPosition);
+    LLastTextPosition.Line := 0;
+  SetCaretAndSelection(LOldCaretPosition, GetTextPosition(1, 0), LLastTextPosition);
   FLastSortOrder := soDesc;
   Invalidate;
 end;

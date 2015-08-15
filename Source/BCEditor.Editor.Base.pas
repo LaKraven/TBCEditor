@@ -12241,7 +12241,7 @@ begin
     if Assigned(AEncoding) then
       FEncoding := AEncoding;
     FLines.SaveToStream(LFileStream, FEncoding);
-    FModified := False;
+    Modified := False;
   finally
     LFileStream.Free;
   end;

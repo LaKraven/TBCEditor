@@ -1469,7 +1469,7 @@ begin
   if FHighlighter = nil then
     Exit;
   //Dec(APoint.Line);
-  //Dec(APoint.Char);
+  Dec(APoint.Char);
   with FHighlighter do
   begin
     if APoint.Line = 0 then
@@ -8948,7 +8948,7 @@ var
         Inc(Result);
         Inc(i);
       end;
-      FDisplayCaretY := Min(LTextCaretPosition.Line + i, FLines.Count);
+      FDisplayCaretY := i;
       FDisplayCaretX := Length(FLines[i - 1]) - Length(LRightSide) + 1;
     end;
 
@@ -12254,7 +12254,7 @@ begin
   LOldCaretPosition := TextCaretPosition;
   LLastTextPosition.Char := 1;
   LLastTextPosition.Line := FLines.Count - 1;
-  if LLastTextPosition.Line > 0 then
+  if LLastTextPosition.Line >= 0 then
     Inc(LLastTextPosition.Char, Length(Lines[LLastTextPosition.Line]))
   else
     LLastTextPosition.Line := 0;

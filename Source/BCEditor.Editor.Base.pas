@@ -1702,7 +1702,7 @@ function TBCBaseEditor.GetSelectedText: string;
             { Calculate total length of result string }
             LTotalLength := Max(0, Length(Lines[LFirst]) - LColumnFrom + 1);
             Inc(LTotalLength, Length(SLineBreak));
-            for i := LFirst to LLast - 1 do
+            for i := LFirst + 1 to LLast - 1 do
             begin
               Inc(LTotalLength, Length(Lines[i]));
               Inc(LTotalLength, Length(SLineBreak));
@@ -1713,7 +1713,7 @@ function TBCBaseEditor.GetSelectedText: string;
             P := PChar(Result);
             CopyAndForward(Lines[LFirst], LColumnFrom, MaxInt, P);
             CopyAndForward(SLineBreak, 1, MaxInt, P);
-            for i := LFirst to LLast - 1 do
+            for i := LFirst + 1 to LLast - 1 do
             begin
               CopyAndForward(Lines[i], 1, MaxInt, P);
               CopyAndForward(SLineBreak, 1, MaxInt, P);
@@ -8903,7 +8903,7 @@ var
       begin
         LStr := LLeftSide + Copy(AValue, 1, P - LStart);
         FLines[LTextCaretPosition.Line] := LStr;
-        FLines.InsertLines(LTextCaretPosition.Line, CountLines(P));
+        FLines.InsertLines(LTextCaretPosition.Line + 1, CountLines(P));
       end
       else
       begin
@@ -8912,7 +8912,7 @@ var
       end;
 
       { insert left lines of Value }
-      i := LTextCaretPosition.Line;
+      i := LTextCaretPosition.Line + 1;
       while P^ <> BCEDITOR_NONE_CHAR do
       begin
         if P^ = BCEDITOR_CARRIAGE_RETURN then
@@ -8948,7 +8948,8 @@ var
         Inc(Result);
         Inc(i);
       end;
-      FDisplayCaretX := 1 + Length(FLines[LTextCaretPosition.Line]) - Length(LRightSide);
+      FDisplayCaretY := Min(LTextCaretPosition.Line + i, FLines.Count);
+      FDisplayCaretX := Length(FLines[i - 1]) - Length(LRightSide) + 1;
     end;
 
     function InsertColumn: Integer;
@@ -11970,13 +11971,13 @@ var
   P: PByte;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
-  if FCodeFolding.Visible then
+  {if FCodeFolding.Visible then
   begin
     // TODO: Needed?
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY);
     if Assigned(LFoldRange) and LFoldRange.Collapsed then
       Exit;
-  end;
+  end; }
   if not CanPaste then
     Exit;
 

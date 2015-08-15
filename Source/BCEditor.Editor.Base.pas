@@ -12576,7 +12576,7 @@ begin
 
     LCaretTextPosition := TextCaretPosition;
     if Assigned(FOnCaretChanged) then
-      FOnCaretChanged(Self, LCaretTextPosition.Char, LCaretTextPosition.Line);
+      FOnCaretChanged(Self, LCaretTextPosition.Char, LCaretTextPosition.Line + FLeftMargin.LineNumbers.StartFrom);
   end;
 end;
 

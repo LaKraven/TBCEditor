@@ -11356,7 +11356,7 @@ begin
             end;
             DoTrimTrailingSpaces(LTextCaretPosition.Line);
 
-            DoLinesInserted(LTextCaretPosition.Line {- LInsertDelta}, LInsertCount);
+            DoLinesInserted(LTextCaretPosition.Line + 1 {- LInsertDelta}, LInsertCount);
             SelectionBeginPosition := LTextCaretPosition;
             SelectionEndPosition := LTextCaretPosition;
             EnsureCursorPositionVisible;

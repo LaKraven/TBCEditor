@@ -163,31 +163,31 @@ type
   TBCEditorKeyCommand = class(TCollectionItem)
   strict private
     FKey: Word;
-    FKey2: Word;
+    FSecondaryKey: Word;
     FShiftState: TShiftState;
-    FShiftState2: TShiftState;
+    FSecondaryShiftState: TShiftState;
     FCommand: TBCEditorCommand;
     function GetShortCut: TShortCut;
-    function GetShortCut2: TShortCut;
+    function GetSecondaryShortCut: TShortCut;
     procedure SetCommand(const Value: TBCEditorCommand);
     procedure SetKey(const Value: Word);
-    procedure SetKey2(const Value: Word);
+    procedure SetSecondaryKey(const Value: Word);
     procedure SetShiftState(const Value: TShiftState);
-    procedure SetShiftState2(const Value: TShiftState);
+    procedure SetSecondaryShiftState(const Value: TShiftState);
     procedure SetShortCut(const Value: TShortCut);
-    procedure SetShortCut2(const Value: TShortCut);
+    procedure SetSecondaryShortCut(const Value: TShortCut);
   protected
     function GetDisplayName: string; override;
   public
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     property Key: Word read FKey write SetKey;
-    property Key2: Word read FKey2 write SetKey2;
+    property SecondaryKey: Word read FSecondaryKey write SetSecondaryKey;
     property ShiftState: TShiftState read FShiftState write SetShiftState;
-    property ShiftState2: TShiftState read FShiftState2 write SetShiftState2;
+    property SecondaryShiftState: TShiftState read FSecondaryShiftState write SetSecondaryShiftState;
   published
     property Command: TBCEditorCommand read FCommand write SetCommand;
     property ShortCut: TShortCut read GetShortCut write SetShortCut default 0;
-    property ShortCut2: TShortCut read GetShortCut2 write SetShortCut2 default 0;
+    property SecondaryShortCut: TShortCut read GetSecondaryShortCut write SetSecondaryShortCut default 0;
   end;
 
   TBCEditorKeyCommands = class(TCollection)
@@ -200,21 +200,21 @@ type
   public
     constructor Create(AOwner: TPersistent);
 
-    function Add: TBCEditorKeyCommand;
-    function FindCommand(Command: TBCEditorCommand): Integer;
-    function FindKeyCode(KeyCode: Word; Shift: TShiftState): Integer;
-    function FindKeyCode2(KeyCode1: Word; Shift1: TShiftState; Keycode2: Word; Shift2: TShiftState): Integer;
-    function FindShortcut(ShortCut: TShortCut): Integer;
-    function FindShortcut2(ShortCut1, ShortCut2: TShortCut): Integer;
-    procedure AddKey(const Command: TBCEditorCommand; const Key: Word; const Shift: TShiftState);
-    procedure Assign(Source: TPersistent); override;
+    function FindCommand(ACommand: TBCEditorCommand): Integer;
+    function FindKeyCode(AKeyCode: Word; AShift: TShiftState): Integer;
+    function FindKeyCodes(AKeyCode: Word; AShift: TShiftState; ASecondaryKeycode: Word; ASecondaryShift: TShiftState): Integer;
+    function FindShortcut(AShortCut: TShortCut): Integer;
+    function FindShortcuts(AShortCut, ASecondaryShortCut: TShortCut): Integer;
+    function NewItem: TBCEditorKeyCommand;
+    procedure Add(const ACommand: TBCEditorCommand; const AShift: TShiftState; const AKey: Word);
+    procedure Assign(ASource: TPersistent); override;
     procedure ResetDefaults;
   public
     property Items[index: Integer]: TBCEditorKeyCommand read GetItem write SetItem; default;
   end;
 
-function IdentToEditorCommand(const Ident: string; var Command: LongInt): Boolean;
-function EditorCommandToIdent(Command: LongInt; var Ident: string): Boolean;
+function IdentToEditorCommand(const AIdent: string; var ACommand: LongInt): Boolean;
+function EditorCommandToIdent(ACommand: LongInt; var AIdent: string): Boolean;
 
 implementation
 
@@ -341,38 +341,38 @@ const
     (Value: ecSearchPrevious; Name: 'ecSearchPrevious')//,
   );
 
-function IdentToEditorCommand(const Ident: string; var Command: LongInt): Boolean;
+function IdentToEditorCommand(const AIdent: string; var ACommand: LongInt): Boolean;
 var
   i: Integer;
 begin
   Result := True;
   for i := Low(EditorCommandStrings) to High(EditorCommandStrings) do
-    if CompareText(EditorCommandStrings[i].Name, Ident) = 0 then
+    if CompareText(EditorCommandStrings[i].Name, AIdent) = 0 then
     begin
-      Command := EditorCommandStrings[i].Value;
+      ACommand := EditorCommandStrings[i].Value;
       Exit;
     end;
   Result := False;
 end;
 
-function EditorCommandToIdent(Command: LongInt; var Ident: string): Boolean;
+function EditorCommandToIdent(ACommand: LongInt; var AIdent: string): Boolean;
 var
   i: Integer;
 begin
   Result := True;
   for i := Low(EditorCommandStrings) to High(EditorCommandStrings) do
-    if EditorCommandStrings[i].Value = Command then
+    if EditorCommandStrings[i].Value = ACommand then
     begin
-      Ident := EditorCommandStrings[i].Name;
+      AIdent := EditorCommandStrings[i].Name;
       Exit;
     end;
   Result := False;
 end;
 
-function EditorCommandToCodeString(Command: TBCEditorCommand): string;
+function EditorCommandToCodeString(ACommand: TBCEditorCommand): string;
 begin
-  if not EditorCommandToIdent(Command, Result) then
-    Result := IntToStr(Command);
+  if not EditorCommandToIdent(ACommand, Result) then
+    Result := IntToStr(ACommand);
 end;
 
 { TBCEditorHookedCommandHandler }
@@ -391,26 +391,26 @@ end;
 
 { TBCEditorKeyCommand }
 
-procedure TBCEditorKeyCommand.Assign(Source: TPersistent);
+procedure TBCEditorKeyCommand.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorKeyCommand) then
-  with Source as TBCEditorKeyCommand do
+  if Assigned(ASource) and (ASource is TBCEditorKeyCommand) then
+  with ASource as TBCEditorKeyCommand do
   begin
     Self.FCommand := FCommand;
     Self.FKey := FKey;
-    Self.FKey2 := FKey2;
+    Self.FSecondaryKey := FSecondaryKey;
     Self.FShiftState := FShiftState;
-    Self.FShiftState2 := FShiftState2;
+    Self.FSecondaryShiftState := FSecondaryShiftState;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 function TBCEditorKeyCommand.GetDisplayName: string;
 begin
   Result := Format('%s - %s', [EditorCommandToCodeString(Command), ShortCutToText(ShortCut)]);
-  if ShortCut <> 0 then
-    Result := Result + ' ' + ShortCutToText(ShortCut2);
+  if SecondaryShortCut <> 0 then
+    Result := Result + ' ' + ShortCutToText(SecondaryShortCut);
   if Result = '' then
     Result := inherited GetDisplayName;
 end;
@@ -440,38 +440,39 @@ end;
 
 procedure TBCEditorKeyCommand.SetShortCut(const Value: TShortCut);
 var
-  NewKey: Word;
-  NewShiftState: TShiftState;
-  Duplicate: Integer;
+  LNewKey: Word;
+  LNewShiftState: TShiftState;
+  LDuplicate: Integer;
 begin
   if Value <> 0 then
   begin
-    Duplicate := TBCEditorKeyCommands(Collection).FindShortcut2(Value, ShortCut2);
-    if (Duplicate <> -1) and (Duplicate <> Self.Index) then
-      raise Exception.Create(SBCEditOrduplicateShortcut);
+    LDuplicate := TBCEditorKeyCommands(Collection).FindShortcuts(Value, SecondaryShortCut);
+    if (LDuplicate <> -1) and (LDuplicate <> Self.Index) then
+      raise Exception.Create(SBCEditorDuplicateShortcut);
   end;
 
-  Vcl.Menus.ShortCutToKey(Value, NewKey, NewShiftState);
-  if (NewKey <> Key) or (NewShiftState <> ShiftState) then
+  Vcl.Menus.ShortCutToKey(Value, LNewKey, LNewShiftState);
+
+  if (LNewKey <> Key) or (LNewShiftState <> ShiftState) then
   begin
-    Key := NewKey;
-    ShiftState := NewShiftState;
+    Key := LNewKey;
+    ShiftState := LNewShiftState;
   end;
 end;
 
-procedure TBCEditorKeyCommand.SetKey2(const Value: Word);
+procedure TBCEditorKeyCommand.SetSecondaryKey(const Value: Word);
 begin
-  if Value <> FKey2 then
-    FKey2 := Value;
+  if Value <> FSecondaryKey then
+    FSecondaryKey := Value;
 end;
 
-procedure TBCEditorKeyCommand.SetShiftState2(const Value: TShiftState);
+procedure TBCEditorKeyCommand.SetSecondaryShiftState(const Value: TShiftState);
 begin
-  if Value <> FShiftState2 then
-    FShiftState2 := Value;
+  if Value <> FSecondaryShiftState then
+    FSecondaryShiftState := Value;
 end;
 
-procedure TBCEditorKeyCommand.SetShortCut2(const Value: TShortCut);
+procedure TBCEditorKeyCommand.SetSecondaryShortCut(const Value: TShortCut);
 var
   NewKey: Word;
   NewShiftState: TShiftState;
@@ -479,55 +480,55 @@ var
 begin
   if Value <> 0 then
   begin
-    Dup := TBCEditorKeyCommands(Collection).FindShortcut2(ShortCut, Value);
+    Dup := TBCEditorKeyCommands(Collection).FindShortcuts(ShortCut, Value);
     if (Dup <> -1) and (Dup <> Self.Index) then
       raise Exception.Create(SBCEditOrduplicateShortcut);
   end;
 
   Vcl.Menus.ShortCutToKey(Value, NewKey, NewShiftState);
-  if (NewKey <> Key2) or (NewShiftState <> ShiftState2) then
+  if (NewKey <> SecondaryKey) or (NewShiftState <> SecondaryShiftState) then
   begin
-    Key2 := NewKey;
-    ShiftState2 := NewShiftState;
+    SecondaryKey := NewKey;
+    SecondaryShiftState := NewShiftState;
   end;
 end;
 
-function TBCEditorKeyCommand.GetShortCut2: TShortCut;
+function TBCEditorKeyCommand.GetSecondaryShortCut: TShortCut;
 begin
-  Result := Vcl.Menus.ShortCut(Key2, ShiftState2);
+  Result := Vcl.Menus.ShortCut(SecondaryKey, SecondaryShiftState);
 end;
 
 { TBCEditorKeyCommands }
 
-function TBCEditorKeyCommands.Add: TBCEditorKeyCommand;
+function TBCEditorKeyCommands.NewItem: TBCEditorKeyCommand;
 begin
   Result := TBCEditorKeyCommand(inherited Add);
 end;
 
-procedure TBCEditorKeyCommands.AddKey(const Command: TBCEditorCommand; const Key: Word; const Shift: TShiftState);
+procedure TBCEditorKeyCommands.Add(const ACommand: TBCEditorCommand; const AShift: TShiftState; const AKey: Word);
 var
   NewKeystroke: TBCEditorKeyCommand;
 begin
-  NewKeystroke := Add;
-  NewKeystroke.Key := Key;
-  NewKeystroke.ShiftState := Shift;
-  NewKeystroke.Command := Command;
+  NewKeystroke := NewItem;
+  NewKeystroke.Key := AKey;
+  NewKeystroke.ShiftState := AShift;
+  NewKeystroke.Command := ACommand;
 end;
 
-procedure TBCEditorKeyCommands.Assign(Source: TPersistent);
+procedure TBCEditorKeyCommands.Assign(ASource: TPersistent);
 var
   i: Integer;
 begin
-  if Assigned(Source) and (Source is TBCEditorKeyCommands) then
-  with Source as TBCEditorKeyCommands do
+  if Assigned(ASource) and (ASource is TBCEditorKeyCommands) then
+  with ASource as TBCEditorKeyCommands do
   begin
     Self.Clear;
     for i := 0 to Count - 1 do
-      with Self.Add do
-        Assign((Source as TBCEditorKeyCommands)[i]);
+      with NewItem do
+        Assign((ASource as TBCEditorKeyCommands)[i]);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 constructor TBCEditorKeyCommands.Create(AOwner: TPersistent);
@@ -536,66 +537,66 @@ begin
   FOwner := AOwner;
 end;
 
-function TBCEditorKeyCommands.FindCommand(Command: TBCEditorCommand): Integer;
+function TBCEditorKeyCommands.FindCommand(ACommand: TBCEditorCommand): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to Count - 1 do
-    if Items[i].Command = Command then
+    if Items[i].Command = ACommand then
     begin
       Result := i;
       Break;
     end;
 end;
 
-function TBCEditorKeyCommands.FindKeyCode(Keycode: Word; Shift: TShiftState): Integer;
+function TBCEditorKeyCommands.FindKeyCode(AKeycode: Word; AShift: TShiftState): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to Count - 1 do
-    if (Items[i].Key = Keycode) and (Items[i].ShiftState = Shift) and (Items[i].Key2 = 0) then
+    if (Items[i].Key = AKeyCode) and (Items[i].ShiftState = AShift) and (Items[i].SecondaryKey = 0) then
     begin
       Result := i;
       Break;
     end;
 end;
 
-function TBCEditorKeyCommands.FindKeyCode2(KeyCode1: Word; Shift1: TShiftState; KeyCode2: Word; Shift2: TShiftState): Integer;
+function TBCEditorKeyCommands.FindKeyCodes(AKeyCode: Word; AShift: TShiftState; ASecondaryKeyCode: Word; ASecondaryShift: TShiftState): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to Count - 1 do
-    if (Items[i].Key = KeyCode1) and (Items[i].ShiftState = Shift1) and (Items[i].Key2 = KeyCode2) and
-      (Items[i].ShiftState2 = Shift2) then
+    if (Items[i].Key = AKeyCode) and (Items[i].ShiftState = AShift) and (Items[i].SecondaryKey = ASecondaryKeyCode) and
+      (Items[i].SecondaryShiftState = ASecondaryShift) then
     begin
       Result := i;
       Break;
     end;
 end;
 
-function TBCEditorKeyCommands.FindShortcut(ShortCut: TShortCut): Integer;
+function TBCEditorKeyCommands.FindShortcut(AShortCut: TShortCut): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to Count - 1 do
-    if Items[i].ShortCut = ShortCut then
+    if Items[i].ShortCut = AShortCut then
     begin
       Result := i;
       Break;
     end;
 end;
 
-function TBCEditorKeyCommands.FindShortcut2(ShortCut1, ShortCut2: TShortCut): Integer;
+function TBCEditorKeyCommands.FindShortcuts(AShortCut, ASecondaryShortCut: TShortCut): Integer;
 var
   i: Integer;
 begin
   Result := -1;
   for i := 0 to Count - 1 do
-    if (Items[i].ShortCut = ShortCut1) and (Items[i].ShortCut2 = ShortCut2) then
+    if (Items[i].ShortCut = AShortCut) and (Items[i].SecondaryShortCut = ASecondaryShortCut) then
     begin
       Result := i;
       break;
@@ -617,102 +618,102 @@ begin
   Clear;
 
   { Scrolling, caret moving and selection }
-  AddKey(ecUp, VK_UP, []);
-  AddKey(ecSelectionUp, VK_UP, [ssShift]);
-  AddKey(ecScrollUp, VK_UP, [ssCtrl]);
-  AddKey(ecDown, VK_DOWN, []);
-  AddKey(ecSelectionDown, VK_DOWN, [ssShift]);
-  AddKey(ecScrollDown, VK_DOWN, [ssCtrl]);
-  AddKey(ecLeft, VK_LEFT, []);
-  AddKey(ecSelectionLeft, VK_LEFT, [ssShift]);
-  AddKey(ecWordLeft, VK_LEFT, [ssCtrl]);
-  AddKey(ecSelectionWordLeft, VK_LEFT, [ssShift, ssCtrl]);
-  AddKey(ecRight, VK_RIGHT, []);
-  AddKey(ecSelectionRight, VK_RIGHT, [ssShift]);
-  AddKey(ecWordRight, VK_RIGHT, [ssCtrl]);
-  AddKey(ecSelectionWordRight, VK_RIGHT, [ssShift, ssCtrl]);
-  AddKey(ecPageDown, VK_NEXT, []);
-  AddKey(ecSelectionPageDown, VK_NEXT, [ssShift]);
-  AddKey(ecPageBottom, VK_NEXT, [ssCtrl]);
-  AddKey(ecSelectionPageBottom, VK_NEXT, [ssShift, ssCtrl]);
-  AddKey(ecPageUp, VK_PRIOR, []);
-  AddKey(ecSelectionPageUp, VK_PRIOR, [ssShift]);
-  AddKey(ecPageTop, VK_PRIOR, [ssCtrl]);
-  AddKey(ecSelectionPageTop, VK_PRIOR, [ssShift, ssCtrl]);
-  AddKey(ecLineStart, VK_HOME, []);
-  AddKey(ecSelectionLineStart, VK_HOME, [ssShift]);
-  AddKey(ecEditorTop, VK_HOME, [ssCtrl]);
-  AddKey(ecSelectionEditorTop, VK_HOME, [ssShift, ssCtrl]);
-  AddKey(ecLineEnd, VK_END, []);
-  AddKey(ecSelectionLineEnd, VK_END, [ssShift]);
-  AddKey(ecEditorBottom, VK_END, [ssCtrl]);
-  AddKey(ecSelectionEditorBottom, VK_END, [ssShift, ssCtrl]);
+  Add(ecUp, [], VK_UP);
+  Add(ecSelectionUp, [ssShift], VK_UP);
+  Add(ecScrollUp, [ssCtrl], VK_UP);
+  Add(ecDown, [], VK_DOWN);
+  Add(ecSelectionDown, [ssShift], VK_DOWN);
+  Add(ecScrollDown, [ssCtrl], VK_DOWN);
+  Add(ecLeft, [], VK_LEFT);
+  Add(ecSelectionLeft, [ssShift], VK_LEFT);
+  Add(ecWordLeft, [ssCtrl], VK_LEFT);
+  Add(ecSelectionWordLeft, [ssShift, ssCtrl], VK_LEFT);
+  Add(ecRight, [], VK_RIGHT);
+  Add(ecSelectionRight, [ssShift], VK_RIGHT);
+  Add(ecWordRight, [ssCtrl], VK_RIGHT);
+  Add(ecSelectionWordRight, [ssShift, ssCtrl], VK_RIGHT);
+  Add(ecPageDown, [], VK_NEXT);
+  Add(ecSelectionPageDown, [ssShift], VK_NEXT);
+  Add(ecPageBottom, [ssCtrl], VK_NEXT);
+  Add(ecSelectionPageBottom, [ssShift, ssCtrl], VK_NEXT);
+  Add(ecPageUp, [], VK_PRIOR);
+  Add(ecSelectionPageUp, [ssShift], VK_PRIOR);
+  Add(ecPageTop, [ssCtrl], VK_PRIOR);
+  Add(ecSelectionPageTop, [ssShift, ssCtrl], VK_PRIOR);
+  Add(ecLineStart, [], VK_HOME);
+  Add(ecSelectionLineStart, [ssShift], VK_HOME);
+  Add(ecEditorTop, [ssCtrl], VK_HOME);
+  Add(ecSelectionEditorTop, [ssShift, ssCtrl], VK_HOME);
+  Add(ecLineEnd, [], VK_END);
+  Add(ecSelectionLineEnd, [ssShift], VK_END);
+  Add(ecEditorBottom, [ssCtrl], VK_END);
+  Add(ecSelectionEditorBottom, [ssShift, ssCtrl], VK_END);
   { Insert key alone }
-  AddKey(ecToggleMode, VK_INSERT, []);
+  Add(ecToggleMode, [], VK_INSERT);
   { Clipboard }
-  AddKey(ecUndo, VK_BACK, [ssAlt]);
-  AddKey(ecRedo, VK_BACK, [ssAlt, ssShift]);
-  AddKey(ecCopy, VK_INSERT, [ssCtrl]);
-  AddKey(ecCut, VK_DELETE, [ssShift]);
-  AddKey(ecPaste, VK_INSERT, [ssShift]);
+  Add(ecUndo, [ssAlt], VK_BACK);
+  Add(ecRedo, [ssAlt, ssShift], VK_BACK);
+  Add(ecCopy, [ssCtrl], VK_INSERT);
+  Add(ecCut, [ssShift], VK_DELETE);
+  Add(ecPaste, [ssShift], VK_INSERT);
   { Deletion }
-  AddKey(ecDeleteChar, VK_DELETE, []);
-  AddKey(ecDeleteLastChar, VK_BACK, []);
-  AddKey(ecDeleteLastChar, VK_BACK, [ssShift]);
-  AddKey(ecDeleteLastWord, VK_BACK, [ssCtrl]);
+  Add(ecDeleteChar, [], VK_DELETE);
+  Add(ecDeleteLastChar, [], VK_BACK);
+  Add(ecDeleteLastChar, [ssShift], VK_BACK);
+  Add(ecDeleteLastWord, [ssCtrl], VK_BACK);
   { Search }
-  AddKey(ecSearchNext, VK_F3, []);
-  AddKey(ecSearchPrevious, VK_F3, [ssShift]);
+  Add(ecSearchNext, [], VK_F3);
+  Add(ecSearchPrevious, [ssShift], VK_F3);
   { Enter (return) & Tab }
-  AddKey(ecLineBreak, VK_RETURN, []);
-  AddKey(ecLineBreak, VK_RETURN, [ssShift]);
-  AddKey(ecTab, VK_TAB, []);
-  AddKey(ecShiftTab, VK_TAB, [ssShift]);
+  Add(ecLineBreak, [], VK_RETURN);
+  Add(ecLineBreak, [ssShift], VK_RETURN);
+  Add(ecTab, [], VK_TAB);
+  Add(ecShiftTab, [ssShift], VK_TAB);
   { Help }
-  AddKey(ecContextHelp, VK_F1, []);
+  Add(ecContextHelp, [], VK_F1);
   { Standard edit commands }
-  AddKey(ecUndo, Ord('Z'), [ssCtrl]);
-  AddKey(ecRedo, Ord('Z'), [ssCtrl, ssShift]);
-  AddKey(ecCut, Ord('X'), [ssCtrl]);
-  AddKey(ecCopy, Ord('C'), [ssCtrl]);
-  AddKey(ecPaste, Ord('V'), [ssCtrl]);
-  AddKey(ecSelectAll, Ord('A'), [ssCtrl]);
+  Add(ecUndo, [ssCtrl], Ord('Z'));
+  Add(ecRedo, [ssCtrl, ssShift], Ord('Z'));
+  Add(ecCut, [ssCtrl], Ord('X'));
+  Add(ecCopy, [ssCtrl], Ord('C'));
+  Add(ecPaste, [ssCtrl], Ord('V'));
+  Add(ecSelectAll, [ssCtrl], Ord('A'));
   { Block commands }
-  AddKey(ecBlockIndent, Ord('I'), [ssCtrl, ssShift]);
-  AddKey(ecBlockUnindent, Ord('U'), [ssCtrl, ssShift]);
+  Add(ecBlockIndent, [ssCtrl, ssShift], Ord('I'));
+  Add(ecBlockUnindent, [ssCtrl, ssShift], Ord('U'));
   { Fragment deletion }
-  AddKey(ecDeleteWord, Ord('T'), [ssCtrl]);
+  Add(ecDeleteWord, [ssCtrl], Ord('T'));
   { Line operations }
-  AddKey(ecInsertLine, Ord('M'), [ssCtrl]);
-  AddKey(ecMoveLineUp, VK_UP, [ssCtrl, ssAlt]);
-  AddKey(ecMoveLineDown, VK_DOWN, [ssCtrl, ssAlt]);
-  AddKey(ecDeleteLine, Ord('Y'), [ssCtrl]);
-  AddKey(ecDeleteEndOfLine, Ord('Y'), [ssCtrl, ssShift]);
-  AddKey(ecMoveCharLeft, VK_LEFT, [ssAlt, ssCtrl]);
-  AddKey(ecMoveCharRight, VK_RIGHT, [ssAlt, ssCtrl]);
+  Add(ecInsertLine, [ssCtrl], Ord('M'));
+  Add(ecMoveLineUp, [ssCtrl, ssAlt], VK_UP);
+  Add(ecMoveLineDown, [ssCtrl, ssAlt], VK_DOWN);
+  Add(ecDeleteLine, [ssCtrl], Ord('Y'));
+  Add(ecDeleteEndOfLine, [ssCtrl, ssShift], Ord('Y'));
+  Add(ecMoveCharLeft, [ssAlt, ssCtrl], VK_LEFT);
+  Add(ecMoveCharRight, [ssAlt, ssCtrl], VK_RIGHT);
   { Bookmarks }
-  AddKey(ecGotoBookmark1, Ord('1'), [ssCtrl]);
-  AddKey(ecGotoBookmark2, Ord('2'), [ssCtrl]);
-  AddKey(ecGotoBookmark3, Ord('3'), [ssCtrl]);
-  AddKey(ecGotoBookmark4, Ord('4'), [ssCtrl]);
-  AddKey(ecGotoBookmark5, Ord('5'), [ssCtrl]);
-  AddKey(ecGotoBookmark6, Ord('6'), [ssCtrl]);
-  AddKey(ecGotoBookmark7, Ord('7'), [ssCtrl]);
-  AddKey(ecGotoBookmark8, Ord('8'), [ssCtrl]);
-  AddKey(ecGotoBookmark9, Ord('9'), [ssCtrl]);
-  AddKey(ecSetBookmark1, Ord('1'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark2, Ord('2'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark3, Ord('3'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark4, Ord('4'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark5, Ord('5'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark6, Ord('6'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark7, Ord('7'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark8, Ord('8'), [ssCtrl, ssShift]);
-  AddKey(ecSetBookmark9, Ord('9'), [ssCtrl, ssShift]);
+  Add(ecGotoBookmark1, [ssCtrl], Ord('1'));
+  Add(ecGotoBookmark2, [ssCtrl], Ord('2'));
+  Add(ecGotoBookmark3, [ssCtrl], Ord('3'));
+  Add(ecGotoBookmark4, [ssCtrl], Ord('4'));
+  Add(ecGotoBookmark5, [ssCtrl], Ord('5'));
+  Add(ecGotoBookmark6, [ssCtrl], Ord('6'));
+  Add(ecGotoBookmark7, [ssCtrl], Ord('7'));
+  Add(ecGotoBookmark8, [ssCtrl], Ord('8'));
+  Add(ecGotoBookmark9, [ssCtrl], Ord('9'));
+  Add(ecSetBookmark1, [ssCtrl, ssShift], Ord('1'));
+  Add(ecSetBookmark2, [ssCtrl, ssShift], Ord('2'));
+  Add(ecSetBookmark3, [ssCtrl, ssShift], Ord('3'));
+  Add(ecSetBookmark4, [ssCtrl, ssShift], Ord('4'));
+  Add(ecSetBookmark5, [ssCtrl, ssShift], Ord('5'));
+  Add(ecSetBookmark6, [ssCtrl, ssShift], Ord('6'));
+  Add(ecSetBookmark7, [ssCtrl, ssShift], Ord('7'));
+  Add(ecSetBookmark8, [ssCtrl, ssShift], Ord('8'));
+  Add(ecSetBookmark9, [ssCtrl, ssShift], Ord('9'));
   { Selection modes }
-  AddKey(ecNormalSelect, Ord('N'), [ssCtrl,ssAlt]);
-  AddKey(ecColumnSelect, Ord('C'), [ssCtrl,ssAlt]);
-  AddKey(ecLineSelect, Ord('L'), [ssCtrl,ssAlt]);
+  Add(ecNormalSelect, [ssCtrl, ssAlt], Ord('N'));
+  Add(ecColumnSelect, [ssCtrl, ssAlt], Ord('C'));
+  Add(ecLineSelect, [ssCtrl, ssAlt], Ord('L'));
 end;
 
 procedure TBCEditorKeyCommands.SetItem(Index: Integer; Value: TBCEditorKeyCommand);
@@ -723,5 +724,9 @@ end;
 initialization
 
   RegisterIntegerConsts(TypeInfo(TBCEditorCommand), IdentToEditorCommand, EditorCommandToIdent);
+
+finalization
+
+  UnregisterIntegerConsts(TypeInfo(TBCEditorCommand), IdentToEditorCommand, EditorCommandToIdent);
 
 end.

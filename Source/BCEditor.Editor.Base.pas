@@ -470,7 +470,7 @@ type
     function WordStart: TBCEditorTextPosition; overload;
     function WordStart(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     procedure AddFocusControl(AControl: TWinControl);
-    procedure AddKeyCommand(ACommand: TBCEditorCommand; AKey1: Word; AShift1: TShiftState; AKey2: Word = 0; AShift2: TShiftState = []);
+    procedure AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word; ASecondaryShift: TShiftState = []; ASecondaryKey: Word = 0);
     procedure AddKeyDownHandler(AHandler: TKeyEvent);
     procedure AddKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
     procedure AddKeyUpHandler(AHandler: TKeyEvent);
@@ -5243,7 +5243,7 @@ function TBCBaseEditor.TranslateKeyCode(ACode: Word; AShift: TShiftState; var AD
 var
   i: Integer;
 begin
-  i := KeyCommands.FindKeycode2(FLastKey, FLastShiftState, ACode, AShift);
+  i := KeyCommands.FindKeycodes(FLastKey, FLastShiftState, ACode, AShift);
   if i >= 0 then
     Result := KeyCommands[i].Command
   else
@@ -6110,7 +6110,6 @@ var
   LTextPosition: TBCEditorTextPosition;
   LShortCutKey: Word;
   LShortCutShift: TShiftState;
-
 begin
   inherited;
 
@@ -10026,19 +10025,19 @@ begin
   FFocusList.Add(aControl);
 end;
 
-procedure TBCBaseEditor.AddKeyCommand(ACommand: TBCEditorCommand; AKey1: Word; AShift1: TShiftState;
-  AKey2: Word; AShift2: TShiftState);
+procedure TBCBaseEditor.AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word;
+  ASecondaryShift: TShiftState; ASecondaryKey: Word);
 var
   LKeyCommand: TBCEditorKeyCommand;
 begin
-  LKeyCommand := KeyCommands.Add;
+  LKeyCommand := KeyCommands.NewItem;
   with LKeyCommand do
   begin
     Command := ACommand;
-    Key := AKey1;
-    Key2 := AKey2;
-    ShiftState := AShift1;
-    ShiftState2 := AShift2;
+    Key := AKey;
+    SecondaryKey := ASecondaryKey;
+    ShiftState := AShift;
+    SecondaryShiftState := ASecondaryShift;
   end;
 end;
 

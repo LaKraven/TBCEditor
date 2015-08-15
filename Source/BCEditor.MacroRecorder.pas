@@ -741,7 +741,7 @@ begin
       end;
     end;
   end;
-  KeyCommand := TBCBaseEditor(AEditor).KeyCommands.Add;
+  KeyCommand := TBCBaseEditor(AEditor).KeyCommands.NewItem;
   try
     KeyCommand.ShortCut := ANewShortCut;
   except

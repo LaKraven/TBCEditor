@@ -1426,7 +1426,7 @@ var
       begin
         GetMatchingToken := trOpenAndCloseTokenFound;
         AMatch.CloseToken := GetToken;
-        AMatch.CloseTokenPos.Line := APoint.Line + 1;
+        AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Result := True;
       end
@@ -1457,7 +1457,7 @@ var
         if LMatchStackID >= Length(FMatchingPairMatchStack) then
           SetLength(FMatchingPairMatchStack, Length(FMatchingPairMatchStack) + 32);
         FMatchingPairMatchStack[LMatchStackID].Token := GetToken;
-        FMatchingPairMatchStack[LMatchStackID].Position.Line := APoint.Line + 1;
+        FMatchingPairMatchStack[LMatchStackID].Position.Line := APoint.Line {+ 1};
         FMatchingPairMatchStack[LMatchStackID].Position.Char := GetTokenPosition + 1;
       end;
       Next;
@@ -1468,8 +1468,8 @@ begin
   Result := trNotFound;
   if FHighlighter = nil then
     Exit;
-  Dec(APoint.Line);
-  Dec(APoint.Char);
+  //Dec(APoint.Line);
+  //Dec(APoint.Char);
   with FHighlighter do
   begin
     if APoint.Line = 0 then
@@ -1499,7 +1499,7 @@ begin
       begin
         Result := trOpenTokenFound;
         AMatch.OpenToken := OriginalToken;
-        AMatch.OpenTokenPos.Line := APoint.Line + 1;
+        AMatch.OpenTokenPos.Line := APoint.Line {+ 1};
         AMatch.OpenTokenPos.Char := GetTokenPosition + 1;
         Break;
       end
@@ -1508,7 +1508,7 @@ begin
       begin
         Result := trCloseTokenFound;
         AMatch.CloseToken := OriginalToken;
-        AMatch.CloseTokenPos.Line := APoint.Line + 1;
+        AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Break;
       end;
@@ -8204,9 +8204,9 @@ var
                   if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
                   begin
                     if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
-                       (LCurrentLine = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
+                       (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
-                       (LCurrentLine = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
+                       (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
                     begin
                       if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                       begin
@@ -8626,16 +8626,16 @@ begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
         LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]));
         FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], LTempPosition, Length(LFoldRange.RegionItem.OpenToken));
-        FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine);
+        FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine - 1);
 
         LLine := LFoldRange.ToLine;
         LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines.ExpandedStrings[LLine - 1]));
         FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines.ExpandedStrings[LLine - 1], LTempPosition, Length(LFoldRange.RegionItem.CloseToken));
         if not LFoldRange.Collapsed then
-          FCurrentMatchingPairMatch.CloseTokenPos := GetTextPosition(LTempPosition, LLine)
+          FCurrentMatchingPairMatch.CloseTokenPos := GetTextPosition(LTempPosition, LLine - 1)
         else
           FCurrentMatchingPairMatch.CloseTokenPos := GetTextPosition(FCurrentMatchingPairMatch.OpenTokenPos.Char +
-            Length(FCurrentMatchingPairMatch.OpenToken) + 2 { +2 = '..' }, LFoldRange.FromLine);
+            Length(FCurrentMatchingPairMatch.OpenToken) + 2 { +2 = '..' }, LFoldRange.FromLine - 1);
       end;
     end;
   end;
@@ -11969,7 +11969,7 @@ var
   LPasteMode: TBCEditorSelectionMode;
   LGlobalMem: HGLOBAL;
   P: PByte;
-  LFoldRange: TBCEditorCodeFoldingRange;
+//  LFoldRange: TBCEditorCodeFoldingRange;
 begin
   {if FCodeFolding.Visible then
   begin

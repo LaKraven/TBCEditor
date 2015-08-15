@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "22.7.2015",
+                "Date": "15.8.2015",
                 "Sample": [
                     "// Hello World in Pascal\r\n",
                     "\r\n",
@@ -91,6 +91,11 @@
                         "TokenRange": {
                             "Open": "function"
                         },
+                        "Delimiters": ";",
+                        "Properties": {
+                          "CloseOnTerm": true,
+                          "SkipWhitespace": true
+                        },
                         "SubRules": {
                            "Range": [
                               {
@@ -98,15 +103,15 @@
                                 "Attributes": {
                                     "Element": "MethodName"
                                 },
-                                "Delimiters": ":(;",
+                                "Delimiters": ":(",
                                 "Properties": {
                                     "CloseParent": true,
                                     "CloseOnTerm": true,
                                     "SkipWhitespace": true
                                 },
-                                 "TokenRange": {
+                                "TokenRange": {
                                     "Open": " "
-                                 }
+                                }
                               }
                            ]
                         }
@@ -118,6 +123,11 @@
                         },
                         "TokenRange": {
                             "Open": "procedure"
+                        },
+                        "Delimiters": ";",
+                        "Properties": {
+                          "CloseOnTerm": true,
+                          "SkipWhitespace": true
                         },
                         "SubRules": {
                            "Range": [
@@ -132,9 +142,9 @@
                                     "CloseOnTerm": true,
                                     "SkipWhitespace": true
                                 },
-                                 "TokenRange": {
+                                "TokenRange": {
                                     "Open": " "
-                                 }
+                                }
                               }
                            ]
                         }

@@ -11017,7 +11017,7 @@ begin
           begin
             FLines.Delete(LTextCaretPosition.Line);
             LHelper := LHelper + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
-            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, LTextCaretPosition.Line), GetTextPosition(1, LTextCaretPosition.Line + 1),
+            FUndoList.AddChange(crSilentDeleteAfterCursor, GetTextPosition(1, LTextCaretPosition.Line - 1), GetTextPosition(1, LTextCaretPosition.Line),
               LHelper, smNormal);
             DoLinesDeleted(LTextCaretPosition.Line, 1, True);
           end;

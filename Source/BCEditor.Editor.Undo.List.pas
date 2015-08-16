@@ -34,7 +34,7 @@ type
     function PopItem: TBCEditorUndoItem;
     function LastChangeReason: TBCEditorChangeReason;
     function LastChangeString: string;
-    procedure AddChange(AReason: TBCEditorChangeReason; const AStart, AEnd: TBCEditorTextPosition;
+    procedure AddChange(AReason: TBCEditorChangeReason; const ACaretPosition, ASelectionStartPosition, ASelectionEndPosition: TBCEditorTextPosition;
       const ChangeText: string; SelectionMode: TBCEditorSelectionMode; Data: Pointer = nil; Index: Integer = 0);
     procedure BeginBlock;
     procedure Clear;
@@ -106,7 +106,8 @@ begin
     inherited Assign(Source);
 end;
 
-procedure TBCEditorUndoList.AddChange(AReason: TBCEditorChangeReason; const AStart, AEnd: TBCEditorTextPosition;
+procedure TBCEditorUndoList.AddChange(AReason: TBCEditorChangeReason;
+  const ACaretPosition, ASelectionStartPosition, ASelectionEndPosition: TBCEditorTextPosition;
   const ChangeText: string; SelectionMode: TBCEditorSelectionMode; Data: Pointer = nil; Index: Integer = 0);
 var
   NewItem: TBCEditorUndoItem;
@@ -119,8 +120,9 @@ begin
       begin
         ChangeReason := AReason;
         ChangeSelectionMode := SelectionMode;
-        ChangeStartPosition := AStart;
-        ChangeEndPosition := AEnd;
+        ChangeCaretPosition := ACaretPosition;
+        ChangeStartPosition := ASelectionStartPosition;
+        ChangeEndPosition := ASelectionEndPosition;
         ChangeString := ChangeText;
         ChangeData := Data;
         //ChangeIndex := Index;
@@ -289,7 +291,7 @@ begin
   // Add the GroupBreak even if ItemCount = 0. Since items are stored in
   // reverse order in TBCCustomEditor.fRedoList, a GroupBreak could be lost.
   if LastChangeReason <> crGroupBreak then
-    AddChange(crGroupBreak, vDummy, vDummy, '', smNormal);
+    AddChange(crGroupBreak, vDummy, vDummy, vDummy, '', smNormal);
 end;
 
 procedure TBCEditorUndoList.SetInitialState(const Value: Boolean);

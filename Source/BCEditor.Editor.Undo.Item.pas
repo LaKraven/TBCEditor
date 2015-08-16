@@ -8,7 +8,7 @@ uses
 type
   TBCEditorUndoItem = class(TPersistent)
   protected
-    FChangeCaret: Integer;
+    FChangeCaretPosition: TBCEditorTextPosition;
     FChangeData: Pointer;
     FChangeEndPosition: TBCEditorTextPosition;
     FChangeNumber: Integer;
@@ -19,7 +19,7 @@ type
   public
     procedure Assign(Source: TPersistent); override;
 
-    property ChangeCaret: Integer read FChangeCaret write FChangeCaret;
+    property ChangeCaretPosition: TBCEditorTextPosition read FChangeCaretPosition write FChangeCaretPosition;
     property ChangeData: Pointer read FChangeData write FChangeData;
     property ChangeEndPosition: TBCEditorTextPosition read FChangeEndPosition write FChangeEndPosition;
     property ChangeNumber: Integer read FChangeNumber write FChangeNumber;

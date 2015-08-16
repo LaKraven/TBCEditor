@@ -458,28 +458,35 @@ begin
   FName := ExtractFileName(AFileName);
   FName := Copy(FName, 1, Pos('.', FName) - 1);
   LEditor := FEditor as TBCBaseEditor;
+  LTopLine := 0;
   if Assigned(LEditor) then
   begin
     LTempLines := TStringList.Create;
     LStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(AFileName));
     try
-      LTopLine := LEditor.TopLine;
       if LEditor.Visible then
         LCaretPosition := LEditor.TextCaretPosition;
-      LTempLines.Text := LEditor.Lines.Text;
-      LEditor.Lines.Clear;
-      LEditor.ClearCodeFolding;
+      if LEditor.Lines.Count <> 0 then
+      begin
+        LTopLine := LEditor.TopLine;
+        LTempLines.Text := LEditor.Lines.Text;
+        LEditor.Lines.Clear;
+        LEditor.ClearCodeFolding;
+      end;
       with TBCEditorHighlighterJSONImporter.Create(Self) do
       try
         ImportFromStream(LStream);
       finally
         Free;
       end;
-      LEditor.Lines.Text := LTempLines.Text;
-      LEditor.TopLine := LTopLine;
+      if LEditor.Lines.Count <> 0 then
+      begin
+        LEditor.Lines.Text := LTempLines.Text;
+        LEditor.TopLine := LTopLine;
+        LEditor.InitCodeFolding;
+      end;
       if LEditor.Visible then
         LEditor.TextCaretPosition := LCaretPosition;
-      LEditor.InitCodeFolding;
     finally
       LStream.Free;
       LTempLines.Free;

@@ -2375,7 +2375,7 @@ var
   LCurrentRange: TBCEditorLinesRange;
 begin
   Result := Index;
-  if Result >= FLines.Count then
+  if Result > FLines.Count then
     Exit;
 
   if Result = 0 then
@@ -8058,6 +8058,7 @@ var
 
     LScrolledXBy := (FLeftChar - 1) * FCharWidth;
     LDisplayLine := LFirstLine;
+
     while LDisplayLine <= LLastLine do
     begin
       LCurrentLine := GetDisplayTextLineNumber(LDisplayLine);
@@ -8151,10 +8152,10 @@ var
         LIsLineSelected := not LIsComplexLine and (LLineSelectionStart > 0);
         LTokenRect := LLineRect;
 
-        if LCurrentLine = 1 then
+        if LCurrentLine - 1 = 0 then
           FHighlighter.ResetCurrentRange
         else
-          FHighlighter.SetCurrentRange(Lines.Ranges[LCurrentLine - 1]);
+          FHighlighter.SetCurrentRange(Lines.Ranges[LCurrentLine - 2]);
         FHighlighter.SetCurrentLine(LCurrentLineText);
         LTokenHelper.Length := 0;
 
@@ -8162,7 +8163,7 @@ var
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
-          LTokenLength := Length(LTokenText); //FHighlighter.GetTokenLength; // Length(LTokenText);
+          LTokenLength := Length(LTokenText);
           if LTokenPosition + LTokenLength >= LFirstColumn then
           begin
             if FWordWrap.Enabled then

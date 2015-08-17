@@ -651,7 +651,7 @@ implementation
 {$R BCEditor.res}
 
 uses
-  Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character,
+  Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character, Winapi.CommCtrl,
   Vcl.Menus, BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
   {$IFDEF USE_VCL_STYLES}Vcl.Themes, BCEditor.StyleHooks,{$ENDIF} BCEditor.Highlighter.Rules
@@ -6340,7 +6340,8 @@ end;
 procedure TBCBaseEditor.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FCommonData.Loaded;
+  //FCommonData.Loaded;
+  UpdateData(FCommonData);
 end;
 {$ENDIF}
 
@@ -6349,7 +6350,7 @@ begin
   inherited Loaded;
   {$IFDEF USE_ALPHASKINS}
   FCommonData.Loaded;
-  RefreshEditScrolls(SkinData, FScrollWnd);
+  //RefreshEditScrolls(SkinData, FScrollWnd);
   {$ENDIF}
   LeftMarginChanged(Self);
   MinimapChanged(Self);
@@ -12619,73 +12620,69 @@ begin
       FWindowProducedMessage := False;
   end;
   {$IFDEF USE_ALPHASKINS}
-  case Message.Msg of
-    SM_ALPHACMD:
-      case Message.WParamHi of
-        AC_CTRLHANDLED:
-          begin
-            Message.Result := 1;
-            Exit;
-          end;
+  if Message.Msg = SM_ALPHACMD then
+    case Message.WParamHi of
+      AC_CTRLHANDLED:
+        begin
+          Message.Result := 1;
+          Exit;
+        end;
 
-        AC_SETNEWSKIN:
-          begin
-            CommonWndProc(Message, FCommonData);
-            Exit;
-          end;
-
-        AC_REMOVESKIN:
-          if not (csDestroying in ComponentState) then
-          begin
-            if FScrollWnd <> nil then
-              FreeAndNil(FScrollWnd);
-
-            CommonWndProc(Message, FCommonData);
-            RecreateWnd;
-            Exit;
-          end;
-
-        AC_REFRESH:
-          if Visible then
-          begin
-            CommonWndProc(Message, FCommonData);
-            SendMessage(Handle, WM_NCPaint, 0, 0);
-            RefreshEditScrolls(SkinData, FScrollWnd);
-            Exit;
-          end
+      AC_GETAPPLICATION: begin
+        Message.Result := LRESULT(Application);
+        Exit
       end;
-  end;
+
+      AC_REMOVESKIN:
+        if (ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager)) and not (csDestroying in ComponentState) then
+        begin
+          if FScrollWnd <> nil then
+            FreeAndNil(FScrollWnd);
+
+          CommonWndProc(Message, FCommonData);
+          RecreateWnd;
+          Exit;
+        end;
+
+      AC_REFRESH:
+        if (ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager)) and Visible then
+        begin
+          CommonWndProc(Message, FCommonData);
+          RefreshEditScrolls(SkinData, FScrollWnd);
+          SendMessage(Handle, WM_NCPaint, 0, 0);
+          Exit;
+        end;
+
+      AC_SETNEWSKIN:
+        if (ACUInt(Message.LParam) = ACUInt(SkinData.SkinManager)) then
+        begin
+          CommonWndProc(Message, FCommonData);
+          Exit;
+        end;
+    end;
 
   if not ControlIsReady(Self) or not Assigned(FCommonData) or not FCommonData.Skinned then
     inherited
   else
   begin
-    case Message.Msg of
-      SM_ALPHACMD:
-        case Message.WParamHi of
-          AC_ENDPARENTUPDATE:
-            if FCommonData.Updating then
-            begin
-              FCommonData.Updating := False;
-              Perform(WM_NCPAINT, 0, 0); Exit
-            end;
-        end;
+    if Message.Msg = SM_ALPHACMD then
+      case Message.WParamHi of
+        AC_ENDPARENTUPDATE:
+          if FCommonData.Updating then begin
+            if not InUpdating(FCommonData, True) then
+              Perform(WM_NCPAINT, 0, 0);
 
-      WM_PRINT:
-      begin
-        Perform(WM_PAINT, Message.WParam, Message.LParam);
-        Perform(WM_NCPAINT, Message.WParam, Message.LParam);
-        Exit;
+            Exit;
+          end;
       end;
 
-      WM_ENABLE:
-        Exit;
-    end;
     CommonWndProc(Message, FCommonData);
 
     inherited;
 
     case Message.Msg of
+      TB_SETANCHORHIGHLIGHT, WM_SIZE:
+        SendMessage(Handle, WM_NCPAINT, 0, 0);
       CM_SHOWINGCHANGED:
         RefreshEditScrolls(SkinData, FScrollWnd);
     end;

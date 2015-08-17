@@ -46,7 +46,8 @@ type
     procedure ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string; var Glyph: TBitmap; var LineVisible: Boolean);
+    procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string;
+      var Glyph: TBitmap; var LineVisible: Boolean);
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
     procedure ActionSkinsExecute(Sender: TObject);
   private
@@ -76,6 +77,7 @@ begin
     ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample;
     InitCodeFolding;
+    CaretZero;
     SetFocus;
   end;
   StatusBar.Panels[3].Text := '';
@@ -118,8 +120,7 @@ begin
     if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Insert') then
       StatusBar.Panels[1].Text := LanguageDataModule.GetConstant('Insert');
   if KeyState[VK_INSERT] = 1 then
-    if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Overwrite')
-    then
+    if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Overwrite') then
       StatusBar.Panels[1].Text := LanguageDataModule.GetConstant('Overwrite');
 end;
 
@@ -269,29 +270,29 @@ begin
     'Highlighters\*.json'), Win32FindData);
 {$WARNINGS ON}
   if FindFileHandle <> INVALID_HANDLE_VALUE then
-  try
-    //i := 1;
-    repeat
-      FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
-      FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
+    try
+      // i := 1;
+      repeat
+        FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
+        FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
 
-      LAction := TAction.Create(Self);
-      LAction.Caption := FileName;
-      LAction.OnExecute := ActionSelectHighlighterExecute;
-      LMenuItem := TMenuItem.Create(PopupMenuHighlighters);
-      LMenuItem.Action := LAction;
-      LMenuItem.RadioItem := True;
-      LMenuItem.AutoCheck := True;
-      PopupMenuHighlighters.Items.Add(LMenuItem);
-      if LAction.Caption = 'Object Pascal' then
-      begin
-        LAction.Checked := True;
-        LAction.Execute;
-      end;
-    until not FindNextFile(FindFileHandle, Win32FindData);
-  finally
-    Winapi.Windows.FindClose(FindFileHandle);
-  end;
+        LAction := TAction.Create(Self);
+        LAction.Caption := FileName;
+        LAction.OnExecute := ActionSelectHighlighterExecute;
+        LMenuItem := TMenuItem.Create(PopupMenuHighlighters);
+        LMenuItem.Action := LAction;
+        LMenuItem.RadioItem := True;
+        LMenuItem.AutoCheck := True;
+        PopupMenuHighlighters.Items.Add(LMenuItem);
+        if LAction.Caption = 'Object Pascal' then
+        begin
+          LAction.Checked := True;
+          LAction.Execute;
+        end;
+      until not FindNextFile(FindFileHandle, Win32FindData);
+    finally
+      Winapi.Windows.FindClose(FindFileHandle);
+    end;
 end;
 
 procedure TMainForm.SetHighlighterColors;
@@ -304,46 +305,44 @@ var
 begin
   PopupMenuColors.Items.Clear;
 {$WARNINGS OFF}
-  FindFileHandle := FindFirstFile
-    (PChar(IncludeTrailingBackSlash(ExtractFilePath(Application.ExeName)) +
+  FindFileHandle := FindFirstFile(PChar(IncludeTrailingBackSlash(ExtractFilePath(Application.ExeName)) +
     'Colors\*.json'), Win32FindData);
 {$WARNINGS ON}
   if FindFileHandle <> INVALID_HANDLE_VALUE then
-  try
-    repeat
-      FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
-      FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
-      LAction := TAction.Create(Self);
-      LAction.Caption := FileName;
-      LAction.OnExecute := ActionSelectHighlighterColorExecute;
-      LMenuItem := TMenuItem.Create(PopupMenuColors);
-      LMenuItem.Action := LAction;
-      LMenuItem.RadioItem := True;
-      LMenuItem.AutoCheck := True;
-      PopupMenuColors.Items.Add(LMenuItem);
-      if LAction.Caption = 'Default' then
-      begin
-        LAction.Checked := True;
-        LAction.Execute;
-      end;
-    until not FindNextFile(FindFileHandle, Win32FindData);
-  finally
-    Winapi.Windows.FindClose(FindFileHandle);
-  end;
+    try
+      repeat
+        FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
+        FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
+        LAction := TAction.Create(Self);
+        LAction.Caption := FileName;
+        LAction.OnExecute := ActionSelectHighlighterColorExecute;
+        LMenuItem := TMenuItem.Create(PopupMenuColors);
+        LMenuItem.Action := LAction;
+        LMenuItem.RadioItem := True;
+        LMenuItem.AutoCheck := True;
+        PopupMenuColors.Items.Add(LMenuItem);
+        if LAction.Caption = 'Default' then
+        begin
+          LAction.Checked := True;
+          LAction.Execute;
+        end;
+      until not FindNextFile(FindFileHandle, Win32FindData);
+    finally
+      Winapi.Windows.FindClose(FindFileHandle);
+    end;
 end;
 
 procedure TMainForm.SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string;
   var Glyph: TBitmap; var LineVisible: Boolean);
 begin
   inherited;
- 
+
   if FirstItem = PopupMenuHighlighters.Items[0] then
   begin
     LineVisible := True;
     Caption := 'Highlighter';
   end
-  else
-  if FirstItem = PopupMenuColors.Items[0] then
+  else if FirstItem = PopupMenuColors.Items[0] then
   begin
     LineVisible := True;
     Caption := 'Color';

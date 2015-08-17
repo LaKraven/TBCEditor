@@ -5,7 +5,7 @@
         <FrameworkType>VCL</FrameworkType>
         <MainSource>TBCEditorDemo.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -58,7 +58,6 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <Icon_MainIcon>EditBone_Icon.ico</Icon_MainIcon>
         <DCC_Define>USE_ALPHASKINS;$(DCC_Define)</DCC_Define>
         <DCC_UnitSearchPath>$(BONECODE_ROOT)\Components\Ehlib\Common;$(BONECODE_ROOT)\Components\VirtualTree\Source;$(BONECODE_ROOT)\Components\BCEditor\Source;$(BONECODE_ROOT)\Components\BCComponents\Source;$(BONECODE_ROOT)\Components\BCControls\Source;$(BONECODE_ROOT)\Common\Source;$(BONECODE_ROOT)\3rd Party\Source;$(BONECODE_ROOT)\Components\FastMM;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
@@ -73,6 +72,7 @@
         <DCC_K>false</DCC_K>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <Icon_MainIcon>EditBone_Icon.ico</Icon_MainIcon>
         <DCC_UnitSearchPath>$(BONECODE_ROOT)\Components\AlphaSkins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <BRCC_IncludePath>$(BONECODE_ROOT)\Components\AlphaSkins;$(BRCC_IncludePath)</BRCC_IncludePath>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
@@ -81,6 +81,7 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <Icon_MainIcon>EditBone_Icon.ico</Icon_MainIcon>
         <DCC_UnitSearchPath>$(BONECODE_ROOT)\Components\AlphaSkins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <BRCC_IncludePath>$(BONECODE_ROOT)\Components\AlphaSkins;$(BRCC_IncludePath)</BRCC_IncludePath>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -189,17 +190,13 @@
                     <Source Name="MainSource">TBCEditorDemo.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\15.0\Bpl\SynEdit_DXE7.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\15.0\Bpl\SynEdit_DXE7.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclDataSnapFireDAC210.bpl">Embarcadero DataSnap FireDAC</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k210.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp210.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp210.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="1">
-                <DeployFile LocalName="..\Release\TBCEditorDemo.exe" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win32">
+                <DeployFile LocalName="\TBCEditorDemo.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win64">
                         <RemoteName>TBCEditorDemo.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -222,8 +219,8 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="\TBCEditorDemo.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win64">
+                <DeployFile LocalName="..\Release\TBCEditorDemo.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
                         <RemoteName>TBCEditorDemo.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
@@ -604,13 +601,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>

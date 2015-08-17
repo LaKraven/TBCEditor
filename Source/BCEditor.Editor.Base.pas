@@ -4264,11 +4264,11 @@ begin
 
   Value.Line := MinMax(Value.Line, 0, FLines.Count - 1);
 
-  if FSelection.ActiveMode = smNormal then
+  {if FSelection.ActiveMode = smNormal then
     if (Value.Line >= 0) and (Value.Line < FLines.Count) then
       Value.Char := Min(Value.Char, Length(Lines[Value.Line]) + 1)
     else
-      Value.Char := 1;
+      Value.Char := 1;  }
 
   if SelectionAvailable then
   begin
@@ -4307,13 +4307,13 @@ begin
     else
       Value.Char := Max(Value.Char, 1);
     Value.Line := MinMax(Value.Line, 0, FLines.Count - 1);
-    if FSelection.ActiveMode = smNormal then
+    {if FSelection.ActiveMode = smNormal then
     begin
       if (Value.Line >= 0) and (Value.Line < FLines.Count) then
         Value.Char := Min(Value.Char, Length(Lines[Value.Line]) + 1)
       else
         Value.Char := 1;
-    end;
+    end;  }
     if (Value.Char <> FSelectionEndPosition.Char) or (Value.Line <> FSelectionEndPosition.Line) then
     begin
       if (FSelection.ActiveMode = smColumn) and (Value.Char <> FSelectionEndPosition.Char) then
@@ -8896,8 +8896,8 @@ var
       Result := 0;
       //LTextCaretPosition := TextCaretPosition;
       LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
-      //if DisplayCaretX - 1 > Length(LLeftSide) then
-      //  LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LLeftSide));
+      if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
+        LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
       LRightSide := Copy(LineText, LTextCaretPosition.Char, Length(ExpandedLineText) - (LTextCaretPosition.Char - 1));
 
       LIndented := False;
@@ -9123,7 +9123,10 @@ var
     if Length(AValue) = 0 then
       Exit;
 
-    LTextCaretPosition := FSelectionBeginPosition; // TextCaretPosition;
+    if SelectionAvailable then
+      LTextCaretPosition := FSelectionBeginPosition
+    else
+      LTextCaretPosition := TextCaretPosition;
     LStartLine := LTextCaretPosition.Line;
     LStartChar := LTextCaretPosition.Char;
     case APasteMode of
@@ -12050,7 +12053,7 @@ begin
         LStartPositionOfBlock.Char := 1;
     end
     else
-      LStartPositionOfBlock := TextCaretPosition;
+      LStartPositionOfBlock := LTextCaretPosition;
 
     SetSelectedTextPrimitive(LPasteMode, PChar(GetClipboardText), True);
     LEndPositionOfBlock := SelectionEndPosition;

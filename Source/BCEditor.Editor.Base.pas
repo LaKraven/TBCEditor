@@ -11029,7 +11029,7 @@ begin
               LHelper, smNormal);
             DoLinesDeleted(LTextCaretPosition.Line, 1);
           end;
-          DisplayCaretPosition := GetDisplayPosition(1, LTextCaretPosition.Line);
+          TextCaretPosition := GetTextPosition(1, LTextCaretPosition.Line);
         end;
       { Moving }
       ecMoveLineUp:

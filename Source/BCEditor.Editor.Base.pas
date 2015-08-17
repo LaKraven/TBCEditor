@@ -5448,12 +5448,12 @@ begin
     FUndoList.BeginBlock;
     try
       LInsertionPosition.Line := LBlockBeginPosition.Line;
-      if FSelection.ActiveMode = smColumn then
-        LInsertionPosition.Char := Min(LBlockBeginPosition.Char, LBlockEndPosition.Char)
-      else
-        LInsertionPosition.Char := 1;
+      //if FSelection.ActiveMode = smColumn then
+        LInsertionPosition.Char := LBlockBeginPosition.Char;
+      //else
+      //  LInsertionPosition.Char := 1;
       InsertBlock(LInsertionPosition, LInsertionPosition, PChar(LStringToInsert), True);
-      //FUndoList.AddChange(crIndent, LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition, '', smColumn);
+      FUndoList.AddChange(crIndent, LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition, '', smColumn);
       //FUndoList.AddChange(crIndent, LOldCaretPosition, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces), LBlockBeginPosition.Line),
       //  GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line), '', smColumn);
     finally
@@ -8864,6 +8864,8 @@ var
   end;
 
   procedure InsertText;
+  var
+    LTextCaretPosition: TBCEditorTextPosition;
 
     function CountLines(P: PChar): Integer;
     begin
@@ -8888,10 +8890,10 @@ var
       LStart: PChar;
       P: PChar;
       LIndented: Boolean;
-      LTextCaretPosition: TBCEditorTextPosition;
+      //LTextCaretPosition: TBCEditorTextPosition;
     begin
       Result := 0;
-      LTextCaretPosition := TextCaretPosition;
+      //LTextCaretPosition := TextCaretPosition;
       LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
       //if DisplayCaretX - 1 > Length(LLeftSide) then
       //  LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LLeftSide));
@@ -8969,10 +8971,10 @@ var
       LCurrentLine: Integer;
       LInsertPosition: Integer;
       //LDisplayInsertPosition: Integer;
-      LTextCaretPosition, LLineBreakPosition: TBCEditorTextPosition;
+      LLineBreakPosition: TBCEditorTextPosition;
     begin
       Result := 0;
-      LTextCaretPosition := TextCaretPosition;
+
       LCurrentLine := LTextCaretPosition.Line;
       //LDisplayInsertPosition := LTextCaretPosition.Char;
 
@@ -9038,8 +9040,8 @@ var
           FLines[LCurrentLine] := LTempString;
 
           if AAddToUndoList then
-            FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition,
-              GetTextPosition(LTextCaretPosition.Char + (P - LStart), LTextCaretPosition.Line), '', FSelection.ActiveMode);
+            FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LTextCaretPosition.Char, LCurrentLine),
+              GetTextPosition(LTextCaretPosition.Char + (P - LStart), LCurrentLine), '', FSelection.ActiveMode);
         end;
 
         if P^ = BCEDITOR_CARRIAGE_RETURN then
@@ -9048,11 +9050,11 @@ var
           if P^ = BCEDITOR_LINEFEED then
             Inc(P);
           Inc(LCurrentLine); //LFirstLine);
-          //Inc(FDisplayCaretY);
+          Inc(FDisplayCaretY);
         end;
         LStart := P;
       until P^ = BCEDITOR_NONE_CHAR;
-      // ? Inc(FDisplayCaretX, Length(LStr));
+      Inc(FDisplayCaretX, Length(LStr));
     end;
 
     function InsertLine: Integer;
@@ -9067,11 +9069,11 @@ var
       if FLines.Count = 0 then
         FLines.Add('');
 
-      if FDisplayCaretX = 1 then
+      if LTextCaretPosition.Char = 0 then
         LIsAfterLine := False
       else
-        LIsAfterLine := FDisplayCaretX > FLines.AccessStringLength(GetTextCaretY);
-      LDoReplace := FLines.AccessStringLength(GetTextCaretY) = 0;
+        LIsAfterLine := LTextCaretPosition.Char > FLines.AccessStringLength(LTextCaretPosition.Line);
+      LDoReplace := FLines.AccessStringLength(LTextCaretPosition.Line) = 0;
       LDoCaretFix := False;
 
       { Insert strings }
@@ -9116,12 +9118,11 @@ var
     I, LStartLine: Integer;
     LStartChar: Integer;
     LInsertedLines: Integer;
-    LTextCaretPosition: TBCEditorTextPosition;
   begin
     if Length(AValue) = 0 then
       Exit;
 
-    LTextCaretPosition := TextCaretPosition;
+    LTextCaretPosition := FSelectionBeginPosition; // TextCaretPosition;
     LStartLine := LTextCaretPosition.Line;
     LStartChar := LTextCaretPosition.Char;
     case APasteMode of
@@ -9152,7 +9153,7 @@ var
     end;
 
     { Force caret reset }
-    TextCaretPosition := TextCaretPosition;
+    //TextCaretPosition := TextCaretPosition;
     SelectionBeginPosition := TextCaretPosition;
     SelectionEndPosition := TextCaretPosition;
   end;
@@ -9172,8 +9173,8 @@ begin
     end;
     if Assigned(AValue) and (AValue[0] <> BCEDITOR_NONE_CHAR) then
       InsertText;
-    if DisplayCaretY < 1 then
-      SetTextCaretY(1);
+    //if DisplayCaretY < 1 then
+    //  SetTextCaretY(1);
   finally
     FLines.EndUpdate;
     DecPaintLock;
@@ -9228,7 +9229,7 @@ begin
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, LTempText, LUndoItem.ChangeSelectionMode);
-          TextCaretPosition := LUndoItem.ChangeCaretPosition;
+          //TextCaretPosition := LUndoItem.ChangeCaretPosition;
         end;
       crDeleteAfterCursor, crDelete, crSilentDelete, crSilentDeleteAfterCursor, crDeleteAll:
         begin

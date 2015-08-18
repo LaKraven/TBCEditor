@@ -479,7 +479,7 @@ begin
       finally
         Free;
       end;
-      if LEditor.Lines.Count <> 0 then
+      if LTempLines.Count <> 0 then
       begin
         LEditor.Lines.Text := LTempLines.Text;
         LEditor.TopLine := LTopLine;

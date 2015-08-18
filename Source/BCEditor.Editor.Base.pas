@@ -11659,6 +11659,7 @@ procedure TBCBaseEditor.GotoLineAndCenter(ATextLine: Integer);
 var
   i: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
   if FCodeFolding.Visible then
   for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -11670,10 +11671,12 @@ begin
     if (LCodeFoldingRange.FromLine <= ATextLine) and LCodeFoldingRange.Collapsed then
       CodeFoldingUncollapse(LCodeFoldingRange);
   end;
-  SetTextCaretPosition(GetTextPosition(1, ATextLine));
+  LTextCaretPosition := GetTextPosition(1, ATextLine);
+  TopLine := Max(LTextCaretPosition.Line - FVisibleLines div 2, 1);
+  SetTextCaretPosition(LTextCaretPosition);
   if SelectionAvailable then
     InvalidateSelection;
-  FSelectionBeginPosition := TextCaretPosition;
+  FSelectionBeginPosition := LTextCaretPosition;
   FSelectionEndPosition := FSelectionBeginPosition;
   EnsureCursorPositionVisible(True);
 end;

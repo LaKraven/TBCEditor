@@ -5448,10 +5448,10 @@ begin
     FUndoList.BeginBlock;
     try
       LInsertionPosition.Line := LBlockBeginPosition.Line;
-      //if FSelection.ActiveMode = smColumn then
-        LInsertionPosition.Char := LBlockBeginPosition.Char;
-      //else
-      //  LInsertionPosition.Char := 1;
+      if FSelection.ActiveMode = smColumn then
+        LInsertionPosition.Char := LBlockBeginPosition.Char
+      else
+        LInsertionPosition.Char := 1;
       InsertBlock(LInsertionPosition, LInsertionPosition, PChar(LStringToInsert), True);
       FUndoList.AddChange(crIndent, LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition, '', smColumn);
       //FUndoList.AddChange(crIndent, LOldCaretPosition, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces), LBlockBeginPosition.Line),
@@ -5461,8 +5461,8 @@ begin
     end;
     LOldCaretPosition.Char := LCaretPositionX;
   finally
-    if LBlockEndPosition.Char > 1 then
-      Inc(LBlockEndPosition.Char, Length(LSpaces));
+    //if LBlockEndPosition.Char > 1 then
+    //  Inc(LBlockEndPosition.Char, Length(LSpaces));
     SetCaretAndSelection(LOldCaretPosition, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces),
       LBlockBeginPosition.Line), GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line){LBlockEndPosition});
     FSelection.ActiveMode := LOrgSelectionMode;
@@ -6765,6 +6765,9 @@ var
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
+  if FHighlighter.Loading then
+    Exit;
+
   LClipRect := Canvas.ClipRect;
 
   LLine1 := FTopLine;

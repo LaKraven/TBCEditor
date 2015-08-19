@@ -9641,8 +9641,8 @@ begin
   else
   begin
     LStartTextPosition.Char := 1;
-    LStartTextPosition.Line := 1;
-    LEndTextPosition.Line := FLines.Count;
+    LStartTextPosition.Line := 0;
+    LEndTextPosition.Line := FLines.Count - 1;
     LEndTextPosition.Char := Length(Lines[LEndTextPosition.Line]) + 1;
     if LIsFromCursor then
       if LIsBackward then

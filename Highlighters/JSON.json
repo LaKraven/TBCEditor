@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"14.6.2015",
+            "Date":"19.8.2015",
             "Sample":[
                "{\r\n",
                "  \"firstName\": \"John\",\r\n",
@@ -104,6 +104,72 @@
                   },
                   "SubRules":{
                      "Range":[
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"Symbol",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "AlternativeClose1":"{"
+                           },
+                           "TokenRange":{
+                              "Open":"[",
+                              "Close":"]"
+                           },
+                           "SubRules":{
+                              "Range":[
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
+                                    },
+                                    "Properties":{
+                                       "CloseOnEndOfLine":true
+                                    },
+                                    "TokenRange":{
+                                       "Open":"\"",
+                                       "Close":"\""
+                                    },
+                                    "SubRules":{
+                                       "Range":[
+                                          {
+                                             "Type":"String",
+                                             "Attributes":{
+                                                "Element":"String",
+                                                "ParentBackground":true
+                                             },
+                                             "Properties":{
+                                                "CloseOnEndOfLine":true,
+                                                "CloseOnTerm":true
+                                             },
+                                             "TokenRange":{
+                                                "Open":"\\\"",
+                                                "Close":"\""
+                                             }
+                                          },
+                                          {
+                                             "Type":"String",
+                                             "Attributes":{
+                                                "Element":"String",
+                                                "ParentBackground":true
+                                             },
+                                             "Properties":{
+                                                "CloseOnEndOfLine":true,
+                                                "CloseOnTerm":true
+                                             },
+                                             "TokenRange":{
+                                                "Open":"\\\\",
+                                                "Close":""
+                                             }
+                                          }
+                                       ]
+                                    }
+                                 }
+                              ]
+                           }
+                        },
                         {
                            "Type":"String",
                            "Attributes":{

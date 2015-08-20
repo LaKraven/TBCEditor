@@ -337,7 +337,7 @@ begin
       Exit;
     end;
   end;
-  ARun := Succ(StartPosition);
+  ARun := StartPosition + 1;
 end;
 
 constructor TBCEditorDefaultParser.Create(AToken: TBCEditorToken);

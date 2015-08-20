@@ -192,7 +192,6 @@ type
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
-    function GetExpandedLength(const ALine: string): Integer;
     function GetExpandedLineText: string;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
       var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
@@ -1214,22 +1213,6 @@ begin
   if Assigned(Result) then
     while (Result^ <> BCEDITOR_NONE_CHAR) and (Result^ <> BCEDITOR_LINEFEED) and (Result^ <> BCEDITOR_CARRIAGE_RETURN) do
       Inc(Result);
-end;
-
-function TBCBaseEditor.GetExpandedLength(const ALine: string): Integer;
-var
-  LPLine: PChar;
-begin
-  Result := 0;
-  LPLine := PChar(ALine);
-  while LPLine^ <> BCEDITOR_NONE_CHAR do
-  begin
-    if LPLine^ = BCEDITOR_TAB_CHAR then
-      Inc(Result, FTabs.Width - (Result mod FTabs.Width))
-    else
-      Inc(Result);
-    Inc(LPLine);
-  end;
 end;
 
 function TBCBaseEditor.GetExpandedLineText: string;
@@ -11390,7 +11373,7 @@ begin
             SetSelectedTextEmpty(AChar)
           else
           begin
-            LLineText := FLines.ExpandedStrings[LTextCaretPosition.Line];
+            LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
 
             LSpaceCount1 := 0;
@@ -11404,7 +11387,7 @@ begin
                   StringOfChar(BCEDITOR_SPACE_CHAR, (LTextCaretPosition.Char - LLength - Ord(FInsertMode)) mod FTabs.Width)
               else
                 LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - LLength - Ord(FInsertMode));
-              LSpaceCount1 := GetExpandedLength(LSpaceBuffer);
+              LSpaceCount1 := Length(LSpaceBuffer);
             end;
 
             LBlockStartPosition := LTextCaretPosition;

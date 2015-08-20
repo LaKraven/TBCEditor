@@ -62,7 +62,6 @@ type
     FCurrentMatchingPair: TBCEditorMatchingTokenResult;
     FCurrentMatchingPairMatch: TBCEditorMatchingPairMatch;
     FDirectories: TBCEditorDirectories;
-    FDisplayLineCount: Integer;
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
     FFocusList: TList;
@@ -77,9 +76,8 @@ type
     FKeyboardHandler: TBCEditorKeyboardHandler;
     FKeyCommands: TBCEditorKeyCommands;
     FLastDblClick: Cardinal;
-    FLastDisplayLineCount: Integer;
-    //FLastDisplayY: Integer;
     FLastKey: Word;
+    FLastLineNumberCount: Integer;
     FLastRow: Integer;
     FLastShiftState: TShiftState;
     FLastSortOrder: TBCEditorSortOrder;
@@ -88,6 +86,7 @@ type
     FLeftMargin: TBCEditorLeftMargin;
     FLeftMarginCharWidth: Integer;
     FLineNumbersCache: array of Integer;
+    FLineNumbersCount: Integer;
     FLines: TBCEditorLines;
     FLinespacing: TBCEditorLineSpacing;
     FMarkList: TBCEditorBookmarkList;
@@ -566,7 +565,6 @@ type
     property CompletionProposal: TBCEditorCompletionProposal read FCompletionProposal write FCompletionProposal;
     property Cursor default crIBeam;
     property Directories: TBCEditorDirectories read FDirectories write FDirectories;
-    property DisplayLineCount: Integer read FDisplayLineCount;
     property Encoding: TEncoding read FEncoding write FEncoding;
     property ExpandedLineText: string read GetExpandedLineText;
     property Font;
@@ -577,6 +575,7 @@ type
     property LeftChar: Integer read FLeftChar write SetLeftChar;
     property LeftMargin: TBCEditorLeftMargin read FLeftMargin write SetLeftMargin;
     property LineHeight: Integer read GetLineHeight;
+    property LineNumbersCount: Integer read FLineNumbersCount;
     property Lines: TBCEditorLines read FLines write SetLines;
     property LineSpacing: TBCEditorLineSpacing read FLinespacing write FLinespacing;
     property LineText: string read GetLineText write SetLineText;
@@ -1955,7 +1954,7 @@ begin
         SetLength(FWordWrapLineLengths, k);
     end;
     SetLength(LCollapsedCodeFolding, 0);
-    FDisplayLineCount := Length(FLineNumbersCache) - 1;
+    FLineNumbersCount := Length(FLineNumbersCache) - 1;
   end;
 end;
 
@@ -1963,7 +1962,7 @@ function TBCBaseEditor.GetDisplayTextLineNumber(ADisplayLineNumber: Integer): In
 begin
   Result := ADisplayLineNumber;
   CreateLineNumbersCache;
-  if Assigned(FLineNumbersCache) and (ADisplayLineNumber <= FDisplayLineCount) then// Length(FLineNumbersCache)) then
+  if Assigned(FLineNumbersCache) and (ADisplayLineNumber <= FLineNumbersCount) then
     Result := FLineNumbersCache[ADisplayLineNumber];
 end;
 
@@ -2797,7 +2796,7 @@ var
   LCaretNearestPosition: TBCEditorDisplayPosition;
 begin
   LCaretNearestPosition := PixelsToNearestRowColumn(X, Y);
-  LCaretNearestPosition.Row := MinMax(LCaretNearestPosition.Row, 1, DisplayLineCount);
+  LCaretNearestPosition.Row := MinMax(LCaretNearestPosition.Row, 1, FLineNumbersCount);
   if FWordWrap.Enabled then
     if FWordWrapLineLengths[LCaretNearestPosition.Row] <> 0 then
       LCaretNearestPosition.Column := MinMax(LCaretNearestPosition.Column, 1, FWordWrapLineLengths[LCaretNearestPosition.Row] + 1);
@@ -3242,8 +3241,8 @@ procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
 begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
-  if FMinimap.Visible and (FDisplayLineCount > 0) then
-    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / FDisplayLineCount))), 1);
+  if FMinimap.Visible and (FLineNumbersCount > 0) then
+    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / FLineNumbersCount))), 1);
   Invalidate;
   if not (csLoading in ComponentState) then
     InvalidateMinimap;
@@ -3339,8 +3338,8 @@ begin
   Inc(LDestinationPosition.Row, Y);
   if Y >= 0 then
   begin
-    if LDestinationPosition.Row > DisplayLineCount then // FLines.Count then
-      LDestinationPosition.Row := Max(1, DisplayLineCount);
+    if LDestinationPosition.Row > FLineNumbersCount then // FLines.Count then
+      LDestinationPosition.Row := Max(1, FLineNumbersCount);
   end
   else
   if LDestinationPosition.Row < 1 then
@@ -3866,7 +3865,7 @@ begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
   LDisplayPosition := PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y);
-  LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, DisplayLineCount);
+  LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, FLineNumbersCount);
   if FScrollDeltaX <> 0 then
   begin
     LeftChar := LeftChar + FScrollDeltaX;
@@ -3882,7 +3881,7 @@ begin
     Y := TopLine;
     if FScrollDeltaY > 0 then
       Inc(Y, VisibleLines - 1);
-    LDisplayPosition.Row := MinMax(Y, 1, DisplayLineCount);
+    LDisplayPosition.Row := MinMax(Y, 1, FLineNumbersCount);
   end;
   LTextPosition := DisplayToTextPosition(LDisplayPosition);
   if (DisplayCaretX <> LTextPosition.Char) or (GetTextCaretY <> LTextPosition.Line) then
@@ -4361,7 +4360,7 @@ var
   LClientRect: TRect;
   LDisplayLineCount: Integer;
 begin
-  LDisplayLineCount := FDisplayLineCount;
+  LDisplayLineCount := FLineNumbersCount;
   if LDisplayLineCount = 0 then
     LDisplayLineCount := 1;
 
@@ -4611,7 +4610,7 @@ var
   begin
     if FScroll.Bars in [ssBoth, ssVertical] then
     begin
-      LMaxScroll := DisplayLineCount;
+      LMaxScroll := FLineNumbersCount;
 
       if soPastEndOfFileMarker in FScroll.Options then
         Inc(LMaxScroll, VisibleLines - 1);
@@ -4644,7 +4643,7 @@ var
           if TopLine <= 1 then
             EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
           else
-          if DisplayLineCount - TopLine - VisibleLines + 1 = 0 then
+          if FLineNumbersCount - TopLine - VisibleLines + 1 = 0 then
             EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
         end;
       end
@@ -5115,7 +5114,7 @@ begin
     SB_TOP:
       TopLine := 1;
     SB_BOTTOM:
-      TopLine := DisplayLineCount;
+      TopLine := FLineNumbersCount;
     { Scrolls one line up / down }
     SB_LINEDOWN:
       TopLine := TopLine + 1;
@@ -5130,8 +5129,8 @@ begin
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         FIsScrolling := True;
-        if DisplayLineCount > BCEDITOR_MAX_SCROLL_RANGE then
-          TopLine := MulDiv(VisibleLines + DisplayLineCount - 1, Msg.Pos, BCEDITOR_MAX_SCROLL_RANGE)
+        if FLineNumbersCount > BCEDITOR_MAX_SCROLL_RANGE then
+          TopLine := MulDiv(VisibleLines + FLineNumbersCount - 1, Msg.Pos, BCEDITOR_MAX_SCROLL_RANGE)
         else
           TopLine := Msg.Pos;
 
@@ -5141,7 +5140,7 @@ begin
           if FScroll.Hint.Format = shFTopLineOnly then
             LScrollHint := Format(SBCEditorScrollInfoTopLine, [TopLine])
           else
-            LScrollHint := Format(SBCEditorScrollInfo, [TopLine, TopLine + Min(VisibleLines, DisplayLineCount - TopLine)]);
+            LScrollHint := Format(SBCEditorScrollInfo, [TopLine, TopLine + Min(VisibleLines, FLineNumbersCount - TopLine)]);
 
           LScrollHintRect := ScrollHintWindow.CalcHintRect(200, LScrollHint, nil);
 
@@ -6538,7 +6537,7 @@ begin
     begin
       if FMinimap.Dragging then
       begin
-        LTemp := FDisplayLineCount - FMinimap.VisibleLines;
+        LTemp := FLineNumbersCount - FMinimap.VisibleLines;
         LTemp2 := Max(Y div FMinimap.CharHeight - FMinimapClickOffsetY, 0);
         FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2));
         if (FMinimap.TopLine > LTemp) and (LTemp > 0) then
@@ -6663,7 +6662,7 @@ begin
     FOldMouseMovePoint.Y := Y;
     ComputeScroll(X, Y);
     LDisplayPosition := PixelsToNearestRowColumn(X, Y);
-    LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, DisplayLineCount);
+    LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, FLineNumbersCount);
     if FScrollDeltaX <> 0 then
       LDisplayPosition.Column := DisplayCaretX;
     if FScrollDeltaY <> 0 then
@@ -6772,7 +6771,7 @@ begin
 
   LLine1 := FTopLine;
   LTemp := (LClipRect.Bottom + FTextHeight - 1) div LineHeight;
-  LLine2 := MinMax(FTopLine + LTemp, 1, FDisplayLineCount);
+  LLine2 := MinMax(FTopLine + LTemp, 1, FLineNumbersCount);
   LLine3 := FTopLine + LTemp;
 
   HideCaret;
@@ -6840,7 +6839,7 @@ begin
 
         if not FMinimap.Dragging and
           (DrawRect.Height = FMinimapBufferBmp.Height) and (FLastTopLine = FTopLine) and
-          (FLastDisplayLineCount = DisplayLineCount) and (not LSelectionAvailable or
+          (FLastLineNumberCount = FLineNumbersCount) and (not LSelectionAvailable or
           LSelectionAvailable and
           (FSelectionBeginPosition.Line >= FTopLine) and (FSelectionEndPosition.Line <= FTopLine + FVisibleLines)) then
         begin
@@ -6851,7 +6850,7 @@ begin
         else
         begin
           LLine1 := Max(FMinimap.TopLine, 1);
-          LLine2 := Min(FDisplayLineCount, LLine1 + (LClipRect.Height div FMinimap.CharHeight) - 1);
+          LLine2 := Min(FLineNumbersCount, LLine1 + (LClipRect.Height div FMinimap.CharHeight) - 1);
         end;
 
         PaintTextLines(DrawRect, LLine1, LLine2, True);
@@ -6877,7 +6876,7 @@ begin
       PaintRightMarginMove;
   finally
     FLastTopLine := FTopLine;
-    FLastDisplayLineCount := DisplayLineCount;
+    FLastLineNumberCount := FLineNumbersCount;
     FTextDrawer.EndDrawing;
     FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
     FBufferBmp.Canvas.Handle := Canvas.Handle;
@@ -7087,7 +7086,7 @@ begin
             if AMinimap then
               X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
             else
-              X := FLeftMargin.GetWidth + FCodeFolding.Width + X - AScrolledXBy;
+              X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - AScrolledXBy;
             LTempColor := Canvas.Pen.Color;
             Canvas.Pen.Color := FBackgroundColor;
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
@@ -7430,7 +7429,7 @@ var
 
 begin
   LFirstLine := AFirstRow;
-  LLastLine := Min(ALastRow, FDisplayLineCount);
+  LLastLine := Min(ALastRow, FLineNumbersCount);
   LLastTextLine := ALastTextRow;
 
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
@@ -7567,7 +7566,7 @@ begin
         begin
           Top := X - LTextHeight;
           Bottom := X + 2 + LTextHeight;
-          Left := FLeftMargin.Width + FCodeFolding.Width - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
+          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
           Right := Left + 2;
         end;
         with Canvas, LCharRect do
@@ -7579,7 +7578,7 @@ begin
         begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom;
-          Left := FLeftMargin.Width + FCodeFolding.Width - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
+          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
           Right := Left + FTabs.Width * LCharWidth - 6;
         end;
         with Canvas do
@@ -7615,7 +7614,7 @@ begin
         Inc(LCharPosition, Length(LPLine^));
       Inc(LPLine);
     end;
-    if FSpecialChars.EndOfLine.Visible then
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) then
     begin
       if scoUseTextColor in FSpecialChars.Options then
         Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
@@ -7627,7 +7626,7 @@ begin
         begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom - 3;
-          Left := FLeftMargin.Width + FCodeFolding.Width - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
+          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
           Right := Left + FTabs.Width * LCharWidth - 3;
         end;
         if LCharRect.Left > FLeftMargin.GetWidth - FCodeFolding.GetWidth then
@@ -8342,7 +8341,7 @@ begin
 
   if AMinimap then
   begin
-    ALastRow := Min(FDisplayLineCount, Max(FMinimap.TopLine, 1) + (AClipRect.Height div FMinimap.CharHeight) - 1);
+    ALastRow := Min(FLineNumbersCount, Max(FMinimap.TopLine, 1) + (AClipRect.Height div FMinimap.CharHeight) - 1);
     LTokenRect.Top := (ALastRow - FMinimap.TopLine + 1) * FMinimap.CharHeight
   end
   else
@@ -8546,7 +8545,7 @@ begin
   if FCodeFolding.Visible then
   try
     HideCaret;
-    LLineRect.Left := FLeftMargin.GetWidth + FCodeFolding.Width;
+    LLineRect.Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     LLineRect.Right := LLineRect.Left + FVisibleChars * CharWidth;
     LLineRect.Top := 0;
     LLineRect.Bottom := GetLineHeight;
@@ -8702,8 +8701,8 @@ var
 begin
   LMaxX := FScroll.MaxWidth + 1;
 
-  if Value.Row > FDisplayLineCount then
-    Value.Row := FDisplayLineCount;
+  if Value.Row > FLineNumbersCount then
+    Value.Row := FLineNumbersCount;
 
   if Value.Row < 1 then
   begin
@@ -8792,7 +8791,7 @@ begin
   Result := False;
   if FWordWrap.Enabled then
     Result := (FLineNumbersCache[ALine] = FLineNumbersCache[ALine - 1]) or
-      (ALine + 1 < FDisplayLineCount) and (FLineNumbersCache[ALine] = FLineNumbersCache[ALine + 1]);
+      (ALine + 1 < FLineNumbersCount) and (FLineNumbersCache[ALine] = FLineNumbersCache[ALine + 1]);
 end; }
 
 procedure TBCBaseEditor.SetSelectedTextPrimitive(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean);
@@ -12578,7 +12577,7 @@ begin
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
 
-    if (X >= ClientRect.Left + FLeftMargin.Width + FCodeFolding.GetWidth) and (X < ClientRect.Right) and (Y >= ClientRect.Top) and (Y < ClientRect.Bottom) then
+    if (X >= ClientRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth) and (X < ClientRect.Right) and (Y >= ClientRect.Top) and (Y < ClientRect.Bottom) then
     begin
       SetCaretPos(X, Y);
       ShowCaret;

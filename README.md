@@ -1,3 +1,7 @@
+<h3>Description</h3>
+
+A syntax highlighting edit control with code folding, minimap, external JSON highlighter and color scheme files, etc.
+
 Version 1.0 beta released. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
 <h3>Build requirements</h3>
@@ -40,7 +44,7 @@ TBCEditor Control Demo v. 1.0b.
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 18.08.2015 22:23, UTC+02:00
+The latest update: 20.08.2015 16:22, UTC+02:00
 
 EditBone Text Editor v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
 

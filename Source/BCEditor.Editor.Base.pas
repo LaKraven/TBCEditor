@@ -8070,6 +8070,9 @@ var
               UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
 
           LCurrentLineText := LCurrentLineText + '..' + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
+          FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +
+            Length(FCurrentMatchingPairMatch.OpenToken) + 2;
+          FCurrentMatchingPairMatch.CloseTokenPos.Line := FCurrentMatchingPairMatch.OpenTokenPos.Line;
         end;
       end;
       InitColumnWidths(PChar(LCurrentLineText), FTextDrawer.CharWidth, Length(LCurrentLineText));

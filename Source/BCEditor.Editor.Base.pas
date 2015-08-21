@@ -5866,8 +5866,8 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
 begin
-  DisplayCaretX := 1;
-  DisplayCaretY := PixelsToRowColumn(X, Y).Row;
+  FDisplayCaretX := 1;
+  FDisplayCaretY := PixelsToRowColumn(X, Y).Row;
   { Clear selection }
   FSelectionBeginPosition := TextCaretPosition;
   FSelectionEndPosition := FSelectionBeginPosition;
@@ -6396,8 +6396,7 @@ begin
   FKeyboardHandler.ExecuteMouseDown(Self, Button, Shift, X, Y);
 
   { double and triple clicks }
-  if (Button = mbLeft) and (ssDouble in Shift) and (X > LLeftMarginWidth)
-  then
+  if (Button = mbLeft) and (ssDouble in Shift) and (X > LLeftMarginWidth) then
   begin
     FLastDblClick := GetTickCount;
     FLastRow := PixelsToRowColumn(X, Y).Row;
@@ -6489,7 +6488,7 @@ begin
       eoScrollPastEndOfLine mode. TODO: Needed? }
   end;
 
-  if X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth then
+  if X <= LLeftMarginWidth then
     DoOnLeftMarginClick(Button, X, Y)
   else
     RepaintGuides;

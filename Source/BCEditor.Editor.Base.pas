@@ -260,6 +260,7 @@ type
     procedure DoShiftTabKey;
     procedure DoTabKey;
     procedure DoToggleSelectedCase(const ACommand: TBCEditorCommand);
+    procedure DragMinimap(Y: Integer);
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(ASearchText: string = '');
     procedure FontChanged(Sender: TObject);
@@ -3225,10 +3226,7 @@ begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
   if FMinimap.Visible and (FLineNumbersCount > 0) then
-    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / FLineNumbersCount))), 1);
-  Invalidate;
-  if not (csLoading in ComponentState) then
-    InvalidateMinimap;
+    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / (FLineNumbersCount - FVisibleLines)))), 1);
 end;
 
 procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
@@ -4359,7 +4357,7 @@ begin
     LDelta := TopLine - Value;
     FTopLine := Value;
     if FMinimap.Visible and not FMinimap.Dragging then
-      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / LDisplayLineCount))), 1);
+      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / (LDisplayLineCount - FVisibleLines)))), 1);
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
     if Abs(LDelta) < FVisibleLines then
@@ -5353,7 +5351,8 @@ begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
 
-  if LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2 then
+  if (LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) and
+    (LCursorPoint.X < ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     if FSelection.Visible then
       SetWordBlock(TextCaretPosition);
@@ -5937,6 +5936,7 @@ begin
     while LNewLine < TopLine - LStep do
     begin
       TopLine := TopLine - LStep;
+
       if TopLine <> LPreviousLine then
         LPreviousLine := TopLine
       else
@@ -5947,6 +5947,7 @@ begin
     while LNewLine > TopLine + LStep do
     begin
       TopLine := TopLine + LStep;
+
       if TopLine <> LPreviousLine then
         LPreviousLine := TopLine
       else
@@ -6503,6 +6504,23 @@ begin
   end;
 end;
 
+procedure TBCBaseEditor.DragMinimap(Y: Integer);
+var
+  LTopLine, LTemp, LTemp2: Integer;
+begin
+  LTemp := FLineNumbersCount - FMinimap.VisibleLines;
+  LTemp2 := Max(Y div FMinimap.CharHeight - FMinimapClickOffsetY, 0);
+  FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2));
+  if (FMinimap.TopLine > LTemp) and (LTemp > 0) then
+    FMinimap.TopLine := LTemp;
+  LTopLine := Max(1, FMinimap.TopLine + LTemp2);
+  if TopLine <> LTopLine then
+  begin
+    TopLine := LTopLine;
+    Paint;
+  end;
+end;
+
 procedure TBCBaseEditor.MouseMove(Shift: TShiftState; X, Y: Integer);
 var
   LDisplayPosition: TBCEditorDisplayPosition;
@@ -6512,25 +6530,13 @@ var
   LRect: TRect;
   LHintWindow: THintWindow;
   S: string;
-  LTopLine, LTemp, LTemp2, LLine: Integer;
+  LLine: Integer;
 begin
   if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
     if FMinimap.Clicked then
     begin
       if FMinimap.Dragging then
-      begin
-        LTemp := FLineNumbersCount - FMinimap.VisibleLines;
-        LTemp2 := Max(Y div FMinimap.CharHeight - FMinimapClickOffsetY, 0);
-        FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLines - VisibleLines, 1)) * LTemp2));
-        if (FMinimap.TopLine > LTemp) and (LTemp > 0) then
-          FMinimap.TopLine := LTemp;
-        LTopLine := Max(1, FMinimap.TopLine + LTemp2);
-        if TopLine <> LTopLine then
-        begin
-          TopLine := LTopLine;
-          Paint;
-        end;
-      end;
+        DragMinimap(Y);
       if not FMinimap.Dragging then
         if (ssLeft in Shift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
           FMinimap.Dragging := True;

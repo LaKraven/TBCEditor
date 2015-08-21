@@ -8174,20 +8174,6 @@ var
               LBackgroundColor := LHighlighterAttribute.Background;
               LStyle := LHighlighterAttribute.Style;
 
-              { TODO: This is quite ugly and should not be here, think a better solution }
-              if LHighlighterAttribute.UseParentElementForTokens then
-              begin
-                LCurrentRange := TBCEditorRange(FHighlighter.GetCurrentRange);
-                if Assigned(LCurrentRange) then
-                  if (LTokenText = LCurrentRange.OpenToken.Symbols[0]) or (LTokenText = LCurrentRange.CloseToken.Symbols[0]) or
-                    (LCurrentRange.CloseToken.Symbols[0] = '') then
-                  begin
-                    LForegroundColor := LCurrentRange.Parent.Attribute.Foreground;
-                    LBackgroundColor := LCurrentRange.Parent.Attribute.Background;
-                    LStyle := LCurrentRange.Parent.Attribute.Style;
-                  end;
-              end;
-
               LIsCustomBackgroundColor := False;
               LMatchingPairUnderline := False;
 

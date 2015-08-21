@@ -327,7 +327,6 @@ begin
     AHighlighterAttribute.Element := AElementPrefix + AAttributesObject['Element'].Value;
     AHighlighterAttribute.ParentForeground := AAttributesObject.B['ParentForeground'];
     AHighlighterAttribute.ParentBackground := AAttributesObject.B['ParentBackground'];
-    AHighlighterAttribute.UseParentElementForTokens := AAttributesObject.B['UseParentElementForTokens'];
   end;
 end;
 

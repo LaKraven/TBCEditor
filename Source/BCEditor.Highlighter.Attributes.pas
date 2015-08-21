@@ -19,7 +19,6 @@ type
     FParentBackground: Boolean;
     FStyle: TFontStyles;
     FStyleDefault: TFontStyles;
-    FUseParentElementForTokens: Boolean;
     function GetBackgroundColorStored: Boolean;
     function GetFontStyleStored: Boolean;
     function GetForegroundColorStored: Boolean;
@@ -42,7 +41,6 @@ type
     property ParentForeground: Boolean read FParentForeground write FParentForeground;
     property ParentBackground: Boolean read FParentBackground write FParentBackground;
     property Style: TFontStyles read FStyle write SetStyle stored GetFontStyleStored;
-    property UseParentElementForTokens: Boolean read FUseParentElementForTokens write FUseParentElementForTokens default False;
   end;
 
 implementation
@@ -103,7 +101,6 @@ begin
   FBackground := clNone;
   FForeground := clNone;
   FName := AttributeName;
-  FUseParentElementForTokens := False;
 end;
 
 function TBCEditorHighlighterAttribute.GetBackgroundColorStored: Boolean;

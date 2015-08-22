@@ -8689,7 +8689,7 @@ begin
   end
   else
   if not (soPastEndOfLine in FScroll.Options) then
-    LMaxX := Length(Lines[GetDisplayTextLineNumber(Value.Row) - 1]) + 1; // TODO: GetTextCaretY?
+    LMaxX := Length(Lines[GetDisplayTextLineNumber(Value.Row) - 1]) + 1;
 
   if (Value.Column > LMaxX) and (not (soPastEndOfLine in FScroll.Options) or not (soAutosizeMaxWidth in FScroll.Options)) then
     Value.Column := LMaxX;
@@ -8868,7 +8868,7 @@ var
       LRightSide: string;
       LStr, LWhite: string;
       LStart: PChar;
-      P: PChar;
+      LTextPointer: PChar;
       LIndented: Boolean;
       //LTextCaretPosition: TBCEditorTextPosition;
     begin
@@ -8887,12 +8887,12 @@ var
 
       { insert the first line of Value into current line }
       LStart := PChar(AValue);
-      P := GetEndOfLine(LStart);
-      if P^ <> BCEDITOR_NONE_CHAR then
+      LTextPointer := GetEndOfLine(LStart);
+      if LTextPointer^ <> BCEDITOR_NONE_CHAR then
       begin
-        LStr := LLeftSide + Copy(AValue, 1, P - LStart);
+        LStr := LLeftSide + Copy(AValue, 1, LTextPointer - LStart);
         FLines[LTextCaretPosition.Line] := LStr;
-        FLines.InsertLines(LTextCaretPosition.Line + 1, CountLines(P));
+        FLines.InsertLines(LTextCaretPosition.Line + 1, CountLines(LTextPointer));
       end
       else
       begin
@@ -8902,26 +8902,26 @@ var
 
       { insert left lines of Value }
       i := LTextCaretPosition.Line + 1;
-      while P^ <> BCEDITOR_NONE_CHAR do
+      while LTextPointer^ <> BCEDITOR_NONE_CHAR do
       begin
-        if P^ = BCEDITOR_CARRIAGE_RETURN then
-          Inc(P);
-        if P^ = BCEDITOR_LINEFEED then
-          Inc(P);
+        if LTextPointer^ = BCEDITOR_CARRIAGE_RETURN then
+          Inc(LTextPointer);
+        if LTextPointer^ = BCEDITOR_LINEFEED then
+          Inc(LTextPointer);
 
-        LStart := P;
-        P := GetEndOfLine(LStart);
-        if P = LStart then
+        LStart := LTextPointer;
+        LTextPointer := GetEndOfLine(LStart);
+        if LTextPointer = LStart then
         begin
-          if P^ <> BCEDITOR_NONE_CHAR then
+          if LTextPointer^ <> BCEDITOR_NONE_CHAR then
             LStr := ''
           else
             LStr := LRightSide;
         end
         else
         begin
-          SetString(LStr, LStart, P - LStart);
-          if P^ = BCEDITOR_NONE_CHAR then
+          SetString(LStr, LStart, LTextPointer - LStart);
+          if LTextPointer^ = BCEDITOR_NONE_CHAR then
             LStr := LStr + LRightSide
         end;
 
@@ -10236,7 +10236,7 @@ var
       if Assigned(LCodeFoldingRange) then
         if LCodeFoldingRange.Collapsed then
         begin
-          Result := LCodeFoldingRange.ToLine - LCodeFoldingRange.FromLine - 1;
+          Result := LCodeFoldingRange.ToLine - LCodeFoldingRange.FromLine;
           CodeFoldingUncollapse(LCodeFoldingRange);
         end;
     end;
@@ -10256,23 +10256,38 @@ begin
       FNeedToRescanCodeFolding := True;
 
     if FCodeFolding.Visible then
-    case ACommand of
-      ecDeleteLastChar, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteLine, ecClear, ecLineBreak, ecChar,
-      ecString, ecImeStr, ecCut, ecPaste, ecBlockIndent, ecBlockUnindent, ecTab:
-        if SelectionAvailable then
-        begin
-          LOldSelectionBeginPosition := GetSelectionBeginPosition;
-          LOldSelectionEndPosition := GetSelectionEndPosition;
-          LCollapsedCount := 0;
-          for i := LOldSelectionBeginPosition.Line to LOldSelectionEndPosition.Line do
-            LCollapsedCount := LCollapsedCount + CodeFoldingUncollapseLine(i);
-          FSelectionBeginPosition := LOldSelectionBeginPosition;
-          FSelectionEndPosition := LOldSelectionEndPosition;
-          FSelectionEndPosition.Line := FSelectionEndPosition.Line + LCollapsedCount
-          // TODO: If last line was folded, set the selection char
-        end
-        else
-          CodeFoldingUncollapseLine(GetTextCaretY);
+    begin
+      case ACommand of
+        ecDeleteLastChar, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteLine, ecClear, ecLineBreak, ecChar,
+        ecString, ecImeStr, ecCut, ecPaste, ecBlockIndent, ecBlockUnindent, ecTab:
+          if SelectionAvailable then
+          begin
+            LOldSelectionBeginPosition := GetSelectionBeginPosition;
+            LOldSelectionEndPosition := GetSelectionEndPosition;
+            LCollapsedCount := 0;
+            for i := LOldSelectionBeginPosition.Line to LOldSelectionEndPosition.Line do
+              LCollapsedCount := CodeFoldingUncollapseLine(i + 1);
+            FSelectionBeginPosition := LOldSelectionBeginPosition;
+            FSelectionEndPosition := LOldSelectionEndPosition;
+            Inc(FSelectionEndPosition.Line, LCollapsedCount);
+            FSelectionEndPosition.Char := Length(Lines[FSelectionEndPosition.Line]) + 1;
+          end
+          else
+            CodeFoldingUncollapseLine(GetTextCaretY + 1);
+      end;
+      {case ACommand of
+        ecBlockIndent, ecBlockUnindent, ecTab:
+          if SelectionAvailable then
+          begin
+            //LOldSelectionBeginPosition := GetSelectionBeginPosition;
+            //LOldSelectionEndPosition := GetSelectionEndPosition;
+            //LCollapsedCount := 0;
+            for i := LOldSelectionBeginPosition.Line to LOldSelectionEndPosition.Line do
+              LCollapsedCount := LCollapsedCount + CodeFoldingUncollapseLine(i);
+            //FSelectionBeginPosition := LOldSelectionBeginPosition;
+            //FSelectionEndPosition := LOldSelectionEndPosition;
+          end
+      end; }
     end;
 
     { internal command handler }
@@ -11962,16 +11977,8 @@ var
   LEndPositionOfBlock: TBCEditorTextPosition;
   LPasteMode: TBCEditorSelectionMode;
   LGlobalMem: HGLOBAL;
-  P: PByte;
-//  LFoldRange: TBCEditorCodeFoldingRange;
+  LFirstByteOfMemoryBlock: PByte;
 begin
-  {if FCodeFolding.Visible then
-  begin
-    // TODO: Needed?
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY);
-    if Assigned(LFoldRange) and LFoldRange.Collapsed then
-      Exit;
-  end; }
   if not CanPaste then
     Exit;
 
@@ -11984,10 +11991,10 @@ begin
       Clipboard.Open;
       try
         LGlobalMem := Clipboard.GetAsHandle(ClipboardFormatBCEditor);
-        P := GlobalLock(LGlobalMem);
+        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
         try
-          if Assigned(P) then
-            LPasteMode := PBCEditorSelectionMode(P)^;
+          if Assigned(LFirstByteOfMemoryBlock) then
+            LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
         finally
           GlobalUnlock(LGlobalMem);
         end
@@ -12001,10 +12008,10 @@ begin
       Clipboard.Open;
       try
         LGlobalMem := Clipboard.GetAsHandle(ClipboardFormatBorland);
-        P := GlobalLock(LGlobalMem);
+        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
         try
-          if Assigned(P) then
-            if P^ = $02 then
+          if Assigned(LFirstByteOfMemoryBlock) then
+            if LFirstByteOfMemoryBlock^ = $02 then
               LPasteMode := smColumn
             else
               LPasteMode := smNormal;

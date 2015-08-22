@@ -6478,17 +6478,6 @@ begin
     end;
   end;
 
-  { Trim if not modifying selection }
-  if not (ssShift in Shift) then
-  begin
-    DoTrimTrailingSpaces(LOldCaretY);
-    if DoTrimTrailingSpaces(GetTextCaretY) > 0 then
-      if not (soPastEndOfLine in FScroll.Options) then
-        DisplayCaretX := DisplayCaretX;
-    { This is necessary because user could click on trimmed area and caret would appear behind line length when not in
-      eoScrollPastEndOfLine mode. TODO: Needed? }
-  end;
-
   if X <= LLeftMarginWidth then
     DoOnLeftMarginClick(Button, X, Y)
   else

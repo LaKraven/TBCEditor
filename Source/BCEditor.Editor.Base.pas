@@ -10616,7 +10616,7 @@ begin
             SetSelectedTextEmpty
           else
           begin
-            LLineText := FLines.ExpandedStrings[LTextCaretPosition.Line];
+            LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
             LTabBuffer := FLines.Strings[LTextCaretPosition.Line];
             { Behind EndOfLine? Simply move the cursor }

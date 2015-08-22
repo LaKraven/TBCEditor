@@ -7968,7 +7968,6 @@ var
     LScrolledXBy: Integer;
     LTokenText: string;
     LTokenPosition, LTokenLength: Integer;
-    LCurrentRange: TBCEditorRange;
     LStyle: TFontStyles;
     LKeyWord, LWord: string;
     LSelectionBeginChar, LSelectionEndChar: Integer;
@@ -10168,7 +10167,7 @@ begin
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
     if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecDeleteLastChar)) and IsKeywordAtCursorPosition or
-      SelectionAvailable and (ACommand = ecLineBreak) or
+      SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecDeleteLastChar)) or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
       FNeedToRescanCodeFolding := True;
 

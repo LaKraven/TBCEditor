@@ -176,7 +176,7 @@ begin
         begin
           if FWholeWordsOnly then
             if not TestWholeWord then
-              break;
+              Break;
           Inc(FCount);
           Result := FRun - FOrigin - FPatternLength + 2;
           Exit;
@@ -186,7 +186,7 @@ begin
       end;
       Inc(FRun, FLookAt);
       if FRun >= FTheEnd then
-        break;
+        Break;
       Inc(FRun, FShift[AnsiChar(FRun^)] - 1);
     end;
   end;
@@ -233,7 +233,7 @@ begin
   Found := FindFirst(NewText);
   while Found > 0 do
   begin
-    FResults.Add(pointer(Found));
+    FResults.Add(Pointer(Found));
     Found := Next;
   end;
   Result := FResults.Count;

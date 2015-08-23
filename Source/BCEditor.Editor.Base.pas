@@ -10185,8 +10185,11 @@ begin
               LCollapsedCount := CodeFoldingUncollapseLine(i + 1);
             FSelectionBeginPosition := LOldSelectionBeginPosition;
             FSelectionEndPosition := LOldSelectionEndPosition;
-            Inc(FSelectionEndPosition.Line, LCollapsedCount);
-            FSelectionEndPosition.Char := Length(Lines[FSelectionEndPosition.Line]) + 1;
+            if LCollapsedCount <> 0 then
+            begin
+              Inc(FSelectionEndPosition.Line, LCollapsedCount);
+              FSelectionEndPosition.Char := Length(Lines[FSelectionEndPosition.Line]) + 1;
+            end;
           end
           else
             CodeFoldingUncollapseLine(GetTextCaretY + 1);

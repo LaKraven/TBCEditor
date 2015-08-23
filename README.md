@@ -7,8 +7,8 @@ Version 1.0 beta released. Use the Issues page to report bugs or send them direc
 <h3>Build requirements</h3>
 
 * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
-* Delphi versions from XE4 to XE8 are supported 
-* Delphi XE7: Update 1 required
+* Delphi versions from XE4 to XE8 are supported - XE7: Update 1 required
+* C++ Builder XE7 supported (more to come)
 
 Eric Grange has made a Delphi XE backport: https://bitbucket.org/egrange/tbceditorxe
 
@@ -45,9 +45,11 @@ TBCEditor Control Demo v. 1.0b.
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 20.08.2015 21:58, UTC+02:00
+The latest update: 23.08.2015 22:10, UTC+02:00
 
-EditBone Text Editor v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
+<h3>Project's using the control</h3>
+
+EditBone v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
 
   * <a href="http://www.bonecode.com/downloads/EditBone32.zip">32-bit Windows</a> 
   * <a href="http://www.bonecode.com/downloads/EditBone64.zip">64-bit Windows</a>

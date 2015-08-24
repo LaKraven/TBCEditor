@@ -10,7 +10,7 @@ type
 
   TBCEditorCaretStyle = (csVerticalLine, csThinVerticalLine, csHorizontalLine, csThinHorizontalLine, csHalfBlock, csBlock);
 
-  TBCEditorDropFilesEvent = procedure(Sender: TObject; X, Y: Integer; AFiles: TStrings) of object;
+  TBCEditorDropFilesEvent = procedure(Sender: TObject; Pos: TPoint; AFiles: TStrings) of object;
 
   TBCEditorPaintEvent = procedure(Sender: TObject; ACanvas: TCanvas) of object;
 

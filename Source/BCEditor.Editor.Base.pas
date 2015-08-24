@@ -4758,7 +4758,7 @@ begin
           DragQueryFileW(THandle(Msg.wParam), i, LFileName, SizeOf(LFileName) div 2);
           LFilesList.Add(LFileName)
         end;
-        FOnDropFiles(Self, LPoint.X, LPoint.Y, LFilesList);
+        FOnDropFiles(Self, LPoint, LFilesList);
       finally
         LFilesList.Free;
       end;

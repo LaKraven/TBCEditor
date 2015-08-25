@@ -2496,8 +2496,7 @@ begin
         LCurrentTextPosition.Char := LFound;
 
         SelectionBeginPosition := LCurrentTextPosition;
-        SetDisplayCaretPosition(False, GetDisplayPosition(1, LCurrentTextPosition.Line));
-        EnsureCursorPositionVisible(True);
+
         Inc(LCurrentTextPosition.Char, LSearchLength);
         SelectionEndPosition := LCurrentTextPosition;
 
@@ -3291,7 +3290,6 @@ begin
       Inc(LCaretRowColumn.Row);
       LCaretRowColumn.Column := 1;
       DisplayCaretPosition := LCaretRowColumn;
-      //TextCaretPosition := DisplayToTextPosition(LCaretRowColumn);
     end;
   end;
 end;
@@ -3306,7 +3304,7 @@ begin
   Inc(LDestinationPosition.Row, Y);
   if Y >= 0 then
   begin
-    if LDestinationPosition.Row > FLineNumbersCount then // FLines.Count then
+    if LDestinationPosition.Row > FLineNumbersCount then
       LDestinationPosition.Row := Max(1, FLineNumbersCount);
   end
   else
@@ -3867,9 +3865,6 @@ procedure TBCBaseEditor.SearchChanged(AEvent: TBCEditorSearchChanges);
 begin
   if AEvent = scEngineUpdate then
     CaretZero;
-  if AEvent = scSearch then
-    if SelectionAvailable then
-      TextCaretPosition := SelectionBeginPosition;
 
   case AEvent of
     scEngineUpdate:
@@ -3878,7 +3873,12 @@ begin
     begin
       FindAll; { for search map and search count }
       if Assigned(FSearchEngine) and FSearch.Enabled then
-        FindNext;
+      begin
+        if soBackwards in FSearch.Options then
+          FindPrevious
+        else
+          FindNext;
+      end;
     end;
   end;
   Invalidate;
@@ -8798,10 +8798,9 @@ var
       LStart: PChar;
       LTextPointer: PChar;
       LIndented: Boolean;
-      //LTextCaretPosition: TBCEditorTextPosition;
     begin
       Result := 0;
-      //LTextCaretPosition := TextCaretPosition;
+
       LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
       if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
         LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
@@ -8875,19 +8874,15 @@ var
       LStart: PChar;
       P: PChar;
       LLength: Integer;
-      //LFirstLine: Integer;
       LCurrentLine: Integer;
       LInsertPosition: Integer;
-      //LDisplayInsertPosition: Integer;
       LLineBreakPosition: TBCEditorTextPosition;
     begin
       Result := 0;
 
       LCurrentLine := LTextCaretPosition.Line;
-      //LDisplayInsertPosition := LTextCaretPosition.Char;
 
       LStart := PChar(AValue);
-      //P := nil;
       repeat
         LInsertPosition := LTextCaretPosition.Char;
 
@@ -9055,7 +9050,6 @@ var
     end;
 
     { Force caret reset }
-    //TextCaretPosition := TextCaretPosition;
     SelectionBeginPosition := TextCaretPosition;
     SelectionEndPosition := TextCaretPosition;
   end;
@@ -11146,7 +11140,7 @@ begin
                   end;
                   DisplayCaretY := FDisplayCaretY + 1;
                   if LSpaceCount1 > 0 then
-                    DisplayCaretX := LSpaceCount2 + 1 //Length(LSpaceBuffer) + 1
+                    DisplayCaretX := LSpaceCount2 + 1
                   else
                     DisplayCaretX := 1;
                 end;

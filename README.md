@@ -47,7 +47,7 @@ TBCEditor Control Demo v. 1.0b.
 
 The latest update: 25.08.2015 15:37, UTC+02:00
 
-<h3>Project's using the control</h3>
+<h3>Projects using the control</h3>
 
 EditBone v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
 

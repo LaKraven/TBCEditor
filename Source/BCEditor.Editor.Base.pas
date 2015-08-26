@@ -7301,9 +7301,11 @@ var
     i: Integer;
     LLineStateRect: TRect;
     LPEditorLineAttribute: PBCEditorLineAttribute;
+    LOldColor: TColor;
   begin
     if FLeftMargin.LineState.Enabled then
     begin
+      LOldColor := Canvas.Brush.Color;
       LLineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
       LLineStateRect.Right := LLineStateRect.Left + FLeftMargin.LineState.Width;
       for i := AFirstRow to ALastTextRow do
@@ -7323,6 +7325,7 @@ var
           Canvas.FillRect(LLineStateRect); { fill line state rect }
         end;
       end;
+      Canvas.Brush.Color := LOldColor;
     end;
   end;
 

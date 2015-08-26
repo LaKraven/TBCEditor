@@ -5777,20 +5777,20 @@ begin
   begin
     LTextCaretY := GetTextCaretY;
     if FNeedToRescanCodeFolding or
-      ((ACommand = ecChar) or (ACommand = ecDeleteLastChar) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(LTextCaretY) or
+      ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(LTextCaretY) or
       ((ACommand = ecLineBreak) and IsKeywordAtLine(LTextCaretY - 1)) or { the caret is already in the new line }
       (ACommand = ecPaste) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
     else
     case ACommand of
-      ecInsertLine, ecLineBreak, ecDeleteLine, ecDeleteLastChar, ecClear:
+      ecInsertLine, ecLineBreak, ecDeleteLine, ecBackspace, ecDeleteChar, ecClear:
         CodeFoldingResetCaches;
     end;
   end;
 
   if FMatchingPair.Enabled then
   case ACommand of
-    ecPaste, ecUndo, ecRedo, ecDeleteLastChar, ecTab, ecLeft, ecRight, ecUp, ecDown, ecPageUp, ecPageDown, ecPageTop,
+    ecPaste, ecUndo, ecRedo, ecBackspace, ecTab, ecLeft, ecRight, ecUp, ecDown, ecPageUp, ecPageDown, ecPageTop,
     ecPageBottom, ecEditorTop, ecEditorBottom, ecGotoXY, ecBlockIndent, ecBlockUnindent, ecShiftTab, ecInsertLine, ecChar,
     ecString, ecLineBreak, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteBeginningOfLine, ecDeleteEndOfLine,
     ecDeleteLine, ecClear:
@@ -5799,7 +5799,7 @@ begin
 
   if cfoShowIndentGuides in CodeFolding.Options then
   case ACommand of
-    ecCut, ecPaste, ecUndo, ecRedo, ecDeleteLastChar, ecDeleteChar:
+    ecCut, ecPaste, ecUndo, ecRedo, ecBackspace, ecDeleteChar:
       CheckIfAtMatchingKeywords;
     ecUp, ecDown, ecPageUp, ecPageDown, ecPageTop, ecPageBottom, ecEditorTop, ecEditorBottom, ecGotoXY:
       RepaintGuides;
@@ -10162,15 +10162,15 @@ begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
     if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
-      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecDeleteLastChar)) and IsKeywordAtCursorPosition or
-      SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecDeleteLastChar)) or
+      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace)) and IsKeywordAtCursorPosition or
+      SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace)) or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
       FNeedToRescanCodeFolding := True;
 
     if FCodeFolding.Visible then
     begin
       case ACommand of
-        ecDeleteLastChar, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteLine, ecClear, ecLineBreak, ecChar,
+        ecBackspace, ecDeleteChar, ecDeleteWord, ecDeleteLastWord, ecDeleteLine, ecClear, ecLineBreak, ecChar,
         ecString, ecImeStr, ecCut, ecPaste, ecBlockIndent, ecBlockUnindent, ecTab:
           if SelectionAvailable then
           begin
@@ -10606,8 +10606,7 @@ begin
         SetSelectedWord;
       ecSelectAll:
         SelectAll;
-      { Backspace command }
-      ecDeleteLastChar:
+      ecBackspace:
         if not ReadOnly then
         begin
           if SelectionAvailable then

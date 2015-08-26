@@ -88,7 +88,7 @@ const
   { Help }
   ecContextHelp = 490;
   { Deletion }
-  ecDeleteLastChar = 501;
+  ecBackspace = 501;
   ecDeleteChar = 502;
   ecDeleteWord = 503;
   ecDeleteLastWord = 504;
@@ -270,7 +270,7 @@ const
     (Value: ecScrollDown; Name: 'ecScrollDown'),
     (Value: ecScrollLeft; Name: 'ecScrollLeft'),
     (Value: ecScrollRight; Name: 'ecScrollRight'),
-    (Value: ecDeleteLastChar; Name: 'ecDeleteLastChar'),
+    (Value: ecBackspace; Name: 'ecBackspace'),
     (Value: ecDeleteChar; Name: 'ecDeleteChar'),
     (Value: ecDeleteWord; Name: 'ecDeleteWord'),
     (Value: ecDeleteLastWord; Name: 'ecDeleteLastWord'),
@@ -658,8 +658,8 @@ begin
   Add(ecPaste, [ssShift], VK_INSERT);
   { Deletion }
   Add(ecDeleteChar, [], VK_DELETE);
-  Add(ecDeleteLastChar, [], VK_BACK);
-  Add(ecDeleteLastChar, [ssShift], VK_BACK);
+  Add(ecBackspace, [], VK_BACK);
+  Add(ecBackspace, [ssShift], VK_BACK);
   Add(ecDeleteLastWord, [ssCtrl], VK_BACK);
   { Search }
   Add(ecSearchNext, [], VK_F3);

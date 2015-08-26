@@ -364,12 +364,12 @@ begin
                 CurrentString := Copy(CurrentString, 1, Length(CurrentString) - 1);
 
                 if Assigned(Owner) then
-                  (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
+                  (Owner as TBCBaseEditor).CommandProcessor(ecBackspace, BCEDITOR_NONE_CHAR, nil);
               end
               else
               begin
                 if Assigned(Owner) then
-                  (Owner as TBCBaseEditor).CommandProcessor(ecDeleteLastChar, BCEDITOR_NONE_CHAR, nil);
+                  (Owner as TBCBaseEditor).CommandProcessor(ecBackspace, BCEDITOR_NONE_CHAR, nil);
 
                 if Assigned(OnCancel) then
                   OnCancel(Self);

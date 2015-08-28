@@ -8268,7 +8268,7 @@ begin
 
   if LTokenRect.Top < LTokenRect.Bottom then
   begin
-    LBackgroundColor := GetBackgroundColor;
+    LBackgroundColor := FBackgroundColor;
     SetDrawingColors(False);
     Canvas.FillRect(LTokenRect);
   end;

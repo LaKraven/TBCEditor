@@ -1476,21 +1476,21 @@ begin
       Exit;
     while I < J do
     begin
-      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.OpenToken then
-      begin
-        Result := trOpenTokenFound;
-        AMatch.OpenToken := OriginalToken;
-        AMatch.OpenTokenPos.Line := APoint.Line {+ 1};
-        AMatch.OpenTokenPos.Char := GetTokenPosition + 1;
-        Break;
-      end
-      else
       if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.CloseToken then
       begin
         Result := trCloseTokenFound;
         AMatch.CloseToken := OriginalToken;
         AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
+        Break;
+      end
+      else
+      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.OpenToken then
+      begin
+        Result := trOpenTokenFound;
+        AMatch.OpenToken := OriginalToken;
+        AMatch.OpenTokenPos.Line := APoint.Line {+ 1};
+        AMatch.OpenTokenPos.Char := GetTokenPosition + 1;
         Break;
       end;
       Inc(I);

@@ -7787,7 +7787,7 @@ var
       FTextDrawer.SetStyle(LTokenHelper.FontStyle);
 
       if AMinimap then
-        if ({LCurrentLine} LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
+        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
           LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
@@ -7833,7 +7833,7 @@ var
     begin
       LBackgroundColor := GetBackgroundColor;
       if AMinimap then
-        if ({LCurrentLine}LDisplayLine >= TopLine) and ({LCurrentLine}LDisplayLine < TopLine + VisibleLines) then
+        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
           LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
@@ -8014,9 +8014,13 @@ var
               UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
 
           LCurrentLineText := LCurrentLineText + '..' + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
-          FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +
-            Length(FCurrentMatchingPairMatch.OpenToken) + 2;
-          FCurrentMatchingPairMatch.CloseTokenPos.Line := FCurrentMatchingPairMatch.OpenTokenPos.Line;
+
+          if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
+          begin
+            FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +
+              Length(FCurrentMatchingPairMatch.OpenToken) + 2;
+            FCurrentMatchingPairMatch.CloseTokenPos.Line := FCurrentMatchingPairMatch.OpenTokenPos.Line;
+          end;
         end;
       end;
       InitColumnWidths(PChar(LCurrentLineText), FTextDrawer.CharWidth, Length(LCurrentLineText));
@@ -8542,7 +8546,7 @@ begin
     end;
   if cfoHighlightMatchingPair in FCodeFolding.Options then
   begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY);
+    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY + 1);
     if Assigned(LFoldRange) then
     begin
       if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then

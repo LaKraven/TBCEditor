@@ -1,419 +1,423 @@
 {
-    "Highlighter": {
-        "Info": {
-            "General": {
-                "Version": "1.0",
-                "Date": "14.5.2015",
-                "Sample": [
-                    "<?php\r\n",
-                    "  echo \"Hello World!\";\r\n",
-                    "?>"
-                ]
-            },
-            "Author": {
-                "Name": "Lasse Rautiainen",
-                "Mail": "lasse@bonecode.com"
-            }
-        },
-        "MainRules": {
-            "Attributes": {
-                "Element": "Editor"
-            },
-            "SubRules": {
-                "Range": [
-                    {
-                        "Name": "PHP",
-                        "Type": "Tag",
-                        "Attributes": {
-                            "Element": "HighlightedBlock"
+   "Highlighter":{
+      "Info":{
+         "General":{
+            "Version":"1.0",
+            "Date":"29.8.2015",
+            "Sample":[
+               "<?php\r\n",
+               "  echo \"Hello World!\";\r\n",
+               "?>"
+            ]
+         },
+         "Author":{
+            "Name":"Lasse Rautiainen",
+            "Mail":"lasse@bonecode.com"
+         }
+      },
+      "MainRules":{
+         "Attributes":{
+            "Element":"Editor"
+         },
+         "SubRules":{
+            "Range":[
+               {
+                  "Name":"PHP",
+                  "Type":"Tag",
+                  "Attributes":{
+                     "Element":"HighlightedBlock"
+                  },
+                  "TokenRange":{
+                     "Open":"<?",
+                     "Close":"?>"
+                  },
+                  "SubRules":{
+                     "Range":[
+                        {
+                           "Type":"Comment",
+                           "Attributes":{
+                              "Element":"Comment",
+                              "ParentBackground":true
+                           },
+                           "TokenRange":{
+                              "Open":"/*",
+                              "Close":"*/"
+                           }
                         },
-                        "TokenRange": {
-                            "Open": "<?",
-                            "Close": "?>"
+                        {
+                           "Type":"Comment",
+                           "Attributes":{
+                              "Element":"Comment",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnEndOfLine":true
+                           },
+                           "TokenRange":{
+                              "Open":"//"
+                           }
                         },
-                        "SubRules": {
-                            "Range": [
-                                {
-                                    "Type": "Comment",
-                                    "Attributes": {
-                                        "Element": "Comment",
-                                        "ParentBackground": true
+                        {
+                           "Type":"Comment",
+                           "Attributes":{
+                              "Element":"Comment",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnEndOfLine":true
+                           },
+                           "TokenRange":{
+                              "Open":"#"
+                           }
+                        },
+                        {
+                           "Type":"BinaryNumber",
+                           "CaseSensitive":true,
+                           "Attributes":{
+                              "Element":"Number",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnTerm":true,
+                              "CloseOnEndOfLine":true
+                           },
+                           "TokenRange":{
+                              "Open":"0b",
+                              "Close":" "
+                           }
+                        },
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"String",
+                              "ParentBackground":true
+                           },
+                           "TokenRange":{
+                              "Open":"\"",
+                              "Close":"\""
+                           },
+                           "SubRules":{
+                              "Range":[
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
                                     },
-                                    "TokenRange": {
-                                        "Open": "/*",
-                                        "Close": "*/"
+                                    "Properties":{
+                                       "CloseOnEndOfLine":true,
+                                       "CloseOnTerm":true
+                                    },
+                                    "TokenRange":{
+                                       "Open":"\\\"",
+                                       "Close":""
                                     }
-                                },
-                                {
-                                    "Type": "Comment",
-                                    "Attributes": {
-                                        "Element": "Comment",
-                                        "ParentBackground": true
+                                 },
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
                                     },
-                                    "Properties": {
-                                        "CloseOnEndOfLine": true
+                                    "Properties":{
+                                       "CloseOnEndOfLine":true,
+                                       "CloseOnTerm":true
                                     },
-                                    "TokenRange": {
-                                        "Open": "//"
+                                    "TokenRange":{
+                                       "Open":"\\\\",
+                                       "Close":""
                                     }
-                                },
-                                {
-                                    "Type": "Comment",
-                                    "Attributes": {
-                                        "Element": "Comment",
-                                        "ParentBackground": true
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "Type":"String",
+                           "Attributes":{
+                              "Element":"String",
+                              "ParentBackground":true
+                           },
+                           "TokenRange":{
+                              "Open":"'",
+                              "Close":"'"
+                           },
+                           "SubRules":{
+                              "Range":[
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
                                     },
-                                    "Properties": {
-                                        "CloseOnEndOfLine": true
+                                    "Properties":{
+                                       "CloseOnEndOfLine":true,
+                                       "CloseOnTerm":true
                                     },
-                                    "TokenRange": {
-                                        "Open": "#"
+                                    "TokenRange":{
+                                       "Open":"\\'",
+                                       "Close":""
                                     }
-                                },
-                                {
-                                    "Type": "BinaryNumber",
-                                    "CaseSensitive": true,
-                                    "Attributes": {
-                                        "Element": "Number",
-                                        "ParentBackground": true
+                                 },
+                                 {
+                                    "Type":"String",
+                                    "Attributes":{
+                                       "Element":"String",
+                                       "ParentBackground":true
                                     },
-                                    "Properties": {
-                                        "CloseOnTerm": true,
-                                        "CloseOnEndOfLine": true
+                                    "Properties":{
+                                       "CloseOnEndOfLine":true,
+                                       "CloseOnTerm":true
                                     },
-                                    "TokenRange": {
-                                        "Open": "0b",
-                                        "Close": " "
+                                    "TokenRange":{
+                                       "Open":"\\\\",
+                                       "Close":""
                                     }
-                                },
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "\"",
-                                        "Close": "\""
-                                    },
-                                    "SubRules": {
-                                        "Range": [
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEndOfLine": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\\"",
-                                                    "Close": ""
-                                                }
-                                            },
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEndOfLine": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\\\",
-                                                    "Close": ""
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    "Type": "String",
-                                    "Attributes": {
-                                        "Element": "String",
-                                        "ParentBackground": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "'",
-                                        "Close": "'"
-                                    },
-                                    "SubRules": {
-                                        "Range": [
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEndOfLine": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\'",
-                                                    "Close": ""
-                                                }
-                                            },
-                                            {
-                                                "Type": "String",
-                                                "Attributes": {
-                                                    "Element": "String",
-                                                    "ParentBackground": true
-                                                },
-                                                "Properties": {
-                                                    "CloseOnEndOfLine": true,
-                                                    "CloseOnTerm": true
-                                                },
-                                                "TokenRange": {
-                                                    "Open": "\\\\",
-                                                    "Close": ""
-                                                }
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    "Type": "Character",
-                                    "Attributes": {
-                                        "Element": "Character",
-                                        "ParentBackground": true
-                                    },
-                                    "Properties": {
-                                        "CloseOnTerm": true,
-                                        "CloseOnEndOfLine": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "$",
-                                        "Close": " "
-                                    }
-                                },
-                                {
-                                    "Type": "Hex",
-                                    "Attributes": {
-                                        "Element": "Number",
-                                        "ParentBackground": true
-                                    },
-                                    "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
-                                    "Properties": {
-                                        "CloseOnTerm": true,
-                                        "CloseOnEndOfLine": true
-                                    },
-                                    "TokenRange": {
-                                        "Open": "0"
-                                    }
-                                }
-                            ],
-                            "KeyList": [
-                                {
-                                    "Name": "PHP",
-                                    "Type": "ReservedWord",
-                                    "Words": [
-                                        "__halt_compiler",
-                                        "abstract",
-                                        "and",
-                                        "array",
-                                        "as",
-                                        "break",
-                                        "callable",
-                                        "case",
-                                        "catch",
-                                        "class",
-                                        "clone",
-                                        "const",
-                                        "continue",
-                                        "declare",
-                                        "default",
-                                        "die",
-                                        "do",
-                                        "echo",
-                                        "else",
-                                        "elseif",
-                                        "empty",
-                                        "enddeclare",
-                                        "endfor",
-                                        "endforeach",
-                                        "endif",
-                                        "endswitch",
-                                        "endwhile",
-                                        "eval",
-                                        "exit",
-                                        "extends",
-                                        "final",
-                                        "for",
-                                        "foreach",
-                                        "function",
-                                        "global",
-                                        "goto",
-                                        "if",
-                                        "implements",
-                                        "include",
-                                        "include_once",
-                                        "instanceof",
-                                        "insteadof",
-                                        "interface",
-                                        "isset",
-                                        "list",
-                                        "namespace",
-                                        "new",
-                                        "or",
-                                        "php",
-                                        "print",
-                                        "private",
-                                        "protected",
-                                        "public",
-                                        "require",
-                                        "require_once",
-                                        "return",
-                                        "static",
-                                        "switch",
-                                        "throw",
-                                        "trait",
-                                        "try",
-                                        "unset",
-                                        "use",
-                                        "var",
-                                        "while",
-                                        "xor"
-                                    ],
-                                    "Attributes": {
-                                        "Element": "ReservedWord",
-                                        "ParentBackground": true
-                                    }
-                                },
-                                {
-                                    "Type": "Symbol",
-                                    "Words": [
-                                        "..",
-                                        ":",
-                                        ";",
-                                        "<",
-                                        ">",
-                                        "=",
-                                        "/",
-                                        "*",
-                                        ".",
-                                        ",",
-                                        "-",
-                                        "+",
-                                        "(",
-                                        ")",
-                                        "[",
-                                        "]"
-                                    ],
-                                    "Attributes": {
-                                        "Element": "Symbol",
-                                        "ParentBackground": true
-                                    }
-                                }
-                            ],
-                            "Set": [
-                                {
-                                    "Type": "Number",
-                                    "Symbols": "0123456789",
-                                    "Attributes": {
-                                        "Element": "Number",
-                                        "ParentBackground": true
-                                    }
-                                },
-                                {
-                                    "Type": "Float",
-                                    "Symbols": ".0123456789",
-                                    "Attributes": {
-                                        "Element": "Number",
-                                        "ParentBackground": true
-                                    }
-                                }
-                            ]
+                                 }
+                              ]
+                           }
+                        },
+                        {
+                           "Type":"Character",
+                           "Attributes":{
+                              "Element":"Character",
+                              "ParentBackground":true
+                           },
+                           "Properties":{
+                              "CloseOnTerm":true,
+                              "CloseOnEndOfLine":true
+                           },
+                           "TokenRange":{
+                              "Open":"$",
+                              "Close":" "
+                           }
+                        },
+                        {
+                           "Type":"Hex",
+                           "Attributes":{
+                              "Element":"Number",
+                              "ParentBackground":true
+                           },
+                           "Delimiters":"*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
+                           "Properties":{
+                              "CloseOnTerm":true,
+                              "CloseOnEndOfLine":true
+                           },
+                           "TokenRange":{
+                              "Open":"0"
+                           }
                         }
-                    }
-                ]
-            }
-        }
-    },
-    "CodeFolding": {
-        "Options": {
-            "StringEscapeChar": "\\"
-        },
-        "SkipRegion": [
-            {
-                "OpenToken": "'",
-                "CloseToken": "'",
-                "RegionType": "String"
+                     ],
+                     "KeyList":[
+                        {
+                           "Name":"PHP",
+                           "Type":"ReservedWord",
+                           "Words":[
+                              "__halt_compiler",
+                              "abstract",
+                              "and",
+                              "array",
+                              "as",
+                              "break",
+                              "callable",
+                              "case",
+                              "catch",
+                              "class",
+                              "clone",
+                              "const",
+                              "continue",
+                              "declare",
+                              "default",
+                              "die",
+                              "do",
+                              "echo",
+                              "else",
+                              "elseif",
+                              "empty",
+                              "enddeclare",
+                              "endfor",
+                              "endforeach",
+                              "endif",
+                              "endswitch",
+                              "endwhile",
+                              "eval",
+                              "exit",
+                              "extends",
+                              "final",
+                              "for",
+                              "foreach",
+                              "function",
+                              "global",
+                              "goto",
+                              "if",
+                              "implements",
+                              "include",
+                              "include_once",
+                              "instanceof",
+                              "insteadof",
+                              "interface",
+                              "isset",
+                              "list",
+                              "namespace",
+                              "new",
+                              "or",
+                              "php",
+                              "print",
+                              "private",
+                              "protected",
+                              "public",
+                              "require",
+                              "require_once",
+                              "return",
+                              "static",
+                              "switch",
+                              "throw",
+                              "trait",
+                              "try",
+                              "unset",
+                              "use",
+                              "var",
+                              "while",
+                              "xor"
+                           ],
+                           "Attributes":{
+                              "Element":"ReservedWord",
+                              "ParentBackground":true
+                           }
+                        },
+                        {
+                           "Type":"Symbol",
+                           "Words":[
+                              "..",
+                              ":",
+                              ";",
+                              "<",
+                              ">",
+                              "=",
+                              "/",
+                              "*",
+                              ".",
+                              ",",
+                              "-",
+                              "+",
+                              "(",
+                              ")",
+                              "[",
+                              "]"
+                           ],
+                           "Attributes":{
+                              "Element":"Symbol",
+                              "ParentBackground":true
+                           }
+                        }
+                     ],
+                     "Set":[
+                        {
+                           "Type":"Number",
+                           "Symbols":"0123456789",
+                           "Attributes":{
+                              "Element":"Number",
+                              "ParentBackground":true
+                           }
+                        },
+                        {
+                           "Type":"Float",
+                           "Symbols":".0123456789",
+                           "Attributes":{
+                              "Element":"Number",
+                              "ParentBackground":true
+                           }
+                        }
+                     ]
+                  }
+               }
+            ]
+         }
+      }
+   },
+   "CodeFolding":{
+      "Ranges":[
+         {
+            "Options":{
+               "StringEscapeChar":"\\"
             },
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": "//",
-                "RegionType": "SingleLine"
-            },
-            {
-                "OpenToken": "#",
-                "RegionType": "SingleLine"
-            },
-            {
-                "OpenToken": "/*",
-                "CloseToken": "*/",
-                "RegionType": "MultiLine"
-            }
-        ],
-        "FoldRegion": [
-            {
-                "OpenToken": "{",
-                "CloseToken": "}"
-            },
-            {
-                "OpenToken": "IF",
-                "CloseToken": "ENDIF",
-                "Properties": {
-                    "BreakIfNotFoundBeforeNextRegion": "):"
-                }
-            }
-        ]
-    },
-    "MatchingPair": {
-        "Pairs": [
-            {
-                "OpenToken": "(",
-                "CloseToken": ")"
-            },
-            {
-                "OpenToken": "[",
-                "CloseToken": "]"
-            },
-            {
-                "OpenToken": "{",
-                "CloseToken": "}"
-            }
-        ]
-    },
-    "CompletionProposal": {
-        "SkipRegion": [
-            {
-                "OpenToken": "'",
-                "CloseToken": "'",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": "//",
-                "RegionType": "SingleLine"
-            },
-            {
-                "OpenToken": "/*",
-                "CloseToken": "*/",
-                "RegionType": "MultiLine"
-            }
-        ]
-    }
+            "SkipRegion":[
+               {
+                  "OpenToken":"'",
+                  "CloseToken":"'",
+                  "RegionType":"String"
+               },
+               {
+                  "OpenToken":"\"",
+                  "CloseToken":"\"",
+                  "RegionType":"String"
+               },
+               {
+                  "OpenToken":"//",
+                  "RegionType":"SingleLine"
+               },
+               {
+                  "OpenToken":"#",
+                  "RegionType":"SingleLine"
+               },
+               {
+                  "OpenToken":"/*",
+                  "CloseToken":"*/",
+                  "RegionType":"MultiLine"
+               }
+            ],
+            "FoldRegion":[
+               {
+                  "OpenToken":"{",
+                  "CloseToken":"}"
+               },
+               {
+                  "OpenToken":"IF",
+                  "CloseToken":"ENDIF",
+                  "Properties":{
+                     "BreakIfNotFoundBeforeNextRegion":"):"
+                  }
+               }
+            ]
+         }
+      ]
+   },
+   "MatchingPair":{
+      "Pairs":[
+         {
+            "OpenToken":"(",
+            "CloseToken":")"
+         },
+         {
+            "OpenToken":"[",
+            "CloseToken":"]"
+         },
+         {
+            "OpenToken":"{",
+            "CloseToken":"}"
+         }
+      ]
+   },
+   "CompletionProposal":{
+      "SkipRegion":[
+         {
+            "OpenToken":"'",
+            "CloseToken":"'",
+            "RegionType":"String"
+         },
+         {
+            "OpenToken":"\"",
+            "CloseToken":"\"",
+            "RegionType":"String"
+         },
+         {
+            "OpenToken":"//",
+            "RegionType":"SingleLine"
+         },
+         {
+            "OpenToken":"/*",
+            "CloseToken":"*/",
+            "RegionType":"MultiLine"
+         }
+      ]
+   }
 }

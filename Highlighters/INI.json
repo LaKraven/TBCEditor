@@ -1,141 +1,145 @@
 {
-    "Highlighter": {
-        "Info": {
-            "General": {
-                "Version": "1.0",
-                "Date": "30.5.2015",
-                "Sample": [
-                    "; Comment\r\n",
-                    "[Section]\r\n",
-                    "Name=Value"
-                ]
+   "Highlighter":{
+      "Info":{
+         "General":{
+            "Version":"1.0",
+            "Date":"29.8.2015",
+            "Sample":[
+               "; Comment\r\n",
+               "[Section]\r\n",
+               "Name=Value"
+            ]
+         },
+         "Author":{
+            "Name":"Lasse Rautiainen",
+            "Mail":"lasse@bonecode.com"
+         }
+      },
+      "MainRules":{
+         "Attributes":{
+            "Element":"Editor"
+         },
+         "SubRules":{
+            "Range":[
+               {
+                  "Type":"Comment",
+                  "Attributes":{
+                     "Element":"Comment",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEndOfLine":true,
+                     "OpenBeginningOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":";"
+                  }
+               },
+               {
+                  "Type":"String",
+                  "Attributes":{
+                     "Element":"ReservedWord",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEndOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":"[",
+                     "Close":"]"
+                  }
+               },
+               {
+                  "Type":"String",
+                  "Attributes":{
+                     "Element":"String",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEndOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":"="
+                  }
+               }
+            ],
+            "KeyList":[
+               {
+                  "Type":"Symbol",
+                  "Words":[
+                     "="
+                  ],
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
+                  }
+               }
+            ]
+         }
+      }
+   },
+   "CodeFolding":{
+      "Ranges":[
+         {
+            "Options":{
+               "NoMatchingPairHighlight":true
             },
-            "Author": {
-                "Name": "Lasse Rautiainen",
-                "Mail": "lasse@bonecode.com"
-            }
-        },
-        "MainRules": {
-            "Attributes": {
-                "Element": "Editor"
-            },
-            "SubRules": {
-                "Range": [
-                    {
-                        "Type": "Comment",
-                        "Attributes": {
-                            "Element": "Comment",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnEndOfLine": true,
-                            "OpenBeginningOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": ";"
-                        }
-                    },
-                    {
-                        "Type": "String",
-                        "Attributes": {
-                            "Element": "ReservedWord",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnEndOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": "[",
-                            "Close": "]"
-                        }
-                    },
-                    {
-                        "Type": "String",
-                        "Attributes": {
-                            "Element": "String",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnEndOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": "="
-                        }
-                    }
-                ],
-                "KeyList": [
-                    {
-                        "Type": "Symbol",
-                        "Words": [
-                            "="
-                        ],
-                        "Attributes": {
-                            "Element": "Symbol",
-                            "ParentBackground": true
-                        }
-                    }
-                ]
-            }
-        }
-    },
-    "CodeFolding": {
-        "Options": {
-            "NoMatchingPairHighlight": true
-        },
-        "SkipRegion": [
-            {
-                "OpenToken": "'",
-                "CloseToken": "'",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": ";",
-                "RegionType": "SingleLine"
-            }
-        ],
-        "FoldRegion": [
-            {
-                "OpenToken": "[",
-                "CloseToken": "[",
-                "Properties": {
-                    "OpenTokenBeginningOfLine": true,
-                    "CloseTokenBeginningOfLine": true,
-                    "OpenIsClose": true,
-                    "TokenEndIsPreviousLine": true,
-                    "OpenTokenEnd": "]"
-                }
-            }
-        ]
-    },
-    "MatchingPair": {
-        "Pairs": [
-            {
-                "OpenToken": "[",
-                "CloseToken": "]"
-            }
-        ]
-    },
-    "CompletionProposal": {
-        "SkipRegion": [
-            {
-                "OpenToken": "'",
-                "CloseToken": "'",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": "\"",
-                "CloseToken": "\"",
-                "RegionType": "String"
-            },
-            {
-                "OpenToken": ";",
-                "RegionType": "SingleLine"
-            }
-        ]
-    }
+            "SkipRegion":[
+               {
+                  "OpenToken":"'",
+                  "CloseToken":"'",
+                  "RegionType":"String"
+               },
+               {
+                  "OpenToken":"\"",
+                  "CloseToken":"\"",
+                  "RegionType":"String"
+               },
+               {
+                  "OpenToken":";",
+                  "RegionType":"SingleLine"
+               }
+            ],
+            "FoldRegion":[
+               {
+                  "OpenToken":"[",
+                  "CloseToken":"[",
+                  "Properties":{
+                     "OpenTokenBeginningOfLine":true,
+                     "CloseTokenBeginningOfLine":true,
+                     "OpenIsClose":true,
+                     "TokenEndIsPreviousLine":true,
+                     "OpenTokenEnd":"]"
+                  }
+               }
+            ]
+         }
+      ]
+   },
+   "MatchingPair":{
+      "Pairs":[
+         {
+            "OpenToken":"[",
+            "CloseToken":"]"
+         }
+      ]
+   },
+   "CompletionProposal":{
+      "SkipRegion":[
+         {
+            "OpenToken":"'",
+            "CloseToken":"'",
+            "RegionType":"String"
+         },
+         {
+            "OpenToken":"\"",
+            "CloseToken":"\"",
+            "RegionType":"String"
+         },
+         {
+            "OpenToken":";",
+            "RegionType":"SingleLine"
+         }
+      ]
+   }
 }

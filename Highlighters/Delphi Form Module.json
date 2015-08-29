@@ -1,205 +1,209 @@
 {
-    "Highlighter": {
-        "Info": {
-            "General": {
-                "Version": "1.0",
-                "Date": "23.5.2015",
-                "Sample": [
-                    "object Form1: TForm1\r\n",
-                    "  Left = 0\r\n",
-                    "  Top = 0\r\n",
-                    "  Caption = 'Form1'\r\n",
-                    "  object Label1: TLabel\r\n",
-                    "    Left = 30\r\n",
-                    "    Top = 20\r\n",
-                    "    Width = 55\r\n",
-                    "    Height = 13\r\n",
-                    "    Caption = 'Hello world!'\r\n",
-                    "  end\r\n",
-                    "end"
-                ]
-            },
-            "Author": {
-                "Name": "Lasse Rautiainen",
-                "Mail": "lasse@bonecode.com"
-            }
-        },
-        "MainRules": {
-            "Attributes": {
-                "Element": "Editor"
-            },
-            "SubRules": {
-                "Range": [
-                    {
-                        "Type": "Comment",
-                        "Attributes": {
-                            "Element": "Comment",
-                            "ParentBackground": true
-                        },
-                        "TokenRange": {
-                            "Open": "{",
-                            "Close": "}"
-                        }
-                    },
-                    {
-                        "Type": "String",
-                        "Attributes": {
-                            "Element": "String",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnEndOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": "'",
-                            "Close": "'"
-                        }
-                    },
-                    {
-                        "Type": "HexNumber",
-                        "Attributes": {
-                            "Element": "HexNumber",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnTerm": true,
-                            "CloseOnEndOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": "$",
-                            "Close": " "
-                        }
-                    },
-                    {
-                        "Type": "Character",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        },
-                        "Properties": {
-                            "CloseOnTerm": true,
-                            "CloseOnEndOfLine": true
-                        },
-                        "TokenRange": {
-                            "Open": "#",
-                            "Close": " "
-                        }
-                    }
-                ],
-                "KeyList": [
-                    {
-                        "Type": "ReservedWord",
-                        "Words": [
-                            "end",
-                            "inherited",
-                            "inline",
-                            "nil",
-                            "object"
-                        ],
-                        "Attributes": {
-                            "Element": "ReservedWord",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Type": "Symbol",
-                        "Words": [
-                            "..",
-                            ":",
-                            "<",
-                            ">",
-                            "=",
-                            "/",
-                            "*",
-                            ".",
-                            ",",
-                            "-",
-                            "+",
-                            "(",
-                            ")",
-                            "[",
-                            "]"
-                        ],
-                        "Attributes": {
-                            "Element": "Symbol",
-                            "ParentBackground": true
-                        }
-                    }
-                ],
-                "Set": [
-                    {
-                        "Type": "Number",
-                        "Symbols": "0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    },
-                    {
-                        "Type": "Float",
-                        "Symbols": ".0123456789",
-                        "Attributes": {
-                            "Element": "Number",
-                            "ParentBackground": true
-                        }
-                    }
-                ]
-            }
-        }
-    },
-    "CodeFolding": {
-        "SkipRegion": [
-            {
-                "OpenToken": "'",
-                "CloseToken": "'",
-                "RegionType": "String"
-            }
-        ],
-        "FoldRegion": [
-            {
-                "OpenToken": "OBJECT",
-                "CloseToken": "END",
-                "Properties": {
-                    "OpenTokenBeginningOfLine": true
-                }
-            },
-            {
-                "OpenToken": "INLINE",
-                "CloseToken": "END",
-                "Properties": {
-                    "OpenTokenBeginningOfLine": true
-                }
-            },
-            {
-                "OpenToken": "ITEM",
-                "CloseToken": "END",
-                "Properties": {
-                    "OpenTokenBeginningOfLine": true
-                }
-            },
-            {
-                "OpenToken": "INHERITED",
-                "CloseToken": "END",
-                "Properties": {
-                    "OpenTokenBeginningOfLine": true
-                }
-            }
-        ]
-    },
-    "MatchingPair": {
-        "Pairs": [
-            {
-                "OpenToken": "object",
-                "CloseToken": "end"
-            },
-            {
-                "OpenToken": "inline",
-                "CloseToken": "end"
-            },
-            {
-                "OpenToken": "inherited",
-                "CloseToken": "end"
-            }
-        ]
-    }
+   "Highlighter":{
+      "Info":{
+         "General":{
+            "Version":"1.0",
+            "Date":"29.8.2015",
+            "Sample":[
+               "object Form1: TForm1\r\n",
+               "  Left = 0\r\n",
+               "  Top = 0\r\n",
+               "  Caption = 'Form1'\r\n",
+               "  object Label1: TLabel\r\n",
+               "    Left = 30\r\n",
+               "    Top = 20\r\n",
+               "    Width = 55\r\n",
+               "    Height = 13\r\n",
+               "    Caption = 'Hello world!'\r\n",
+               "  end\r\n",
+               "end"
+            ]
+         },
+         "Author":{
+            "Name":"Lasse Rautiainen",
+            "Mail":"lasse@bonecode.com"
+         }
+      },
+      "MainRules":{
+         "Attributes":{
+            "Element":"Editor"
+         },
+         "SubRules":{
+            "Range":[
+               {
+                  "Type":"Comment",
+                  "Attributes":{
+                     "Element":"Comment",
+                     "ParentBackground":true
+                  },
+                  "TokenRange":{
+                     "Open":"{",
+                     "Close":"}"
+                  }
+               },
+               {
+                  "Type":"String",
+                  "Attributes":{
+                     "Element":"String",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnEndOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":"'",
+                     "Close":"'"
+                  }
+               },
+               {
+                  "Type":"HexNumber",
+                  "Attributes":{
+                     "Element":"HexNumber",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnTerm":true,
+                     "CloseOnEndOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":"$",
+                     "Close":" "
+                  }
+               },
+               {
+                  "Type":"Character",
+                  "Attributes":{
+                     "Element":"Number",
+                     "ParentBackground":true
+                  },
+                  "Properties":{
+                     "CloseOnTerm":true,
+                     "CloseOnEndOfLine":true
+                  },
+                  "TokenRange":{
+                     "Open":"#",
+                     "Close":" "
+                  }
+               }
+            ],
+            "KeyList":[
+               {
+                  "Type":"ReservedWord",
+                  "Words":[
+                     "end",
+                     "inherited",
+                     "inline",
+                     "nil",
+                     "object"
+                  ],
+                  "Attributes":{
+                     "Element":"ReservedWord",
+                     "ParentBackground":true
+                  }
+               },
+               {
+                  "Type":"Symbol",
+                  "Words":[
+                     "..",
+                     ":",
+                     "<",
+                     ">",
+                     "=",
+                     "/",
+                     "*",
+                     ".",
+                     ",",
+                     "-",
+                     "+",
+                     "(",
+                     ")",
+                     "[",
+                     "]"
+                  ],
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
+                  }
+               }
+            ],
+            "Set":[
+               {
+                  "Type":"Number",
+                  "Symbols":"0123456789",
+                  "Attributes":{
+                     "Element":"Number",
+                     "ParentBackground":true
+                  }
+               },
+               {
+                  "Type":"Float",
+                  "Symbols":".0123456789",
+                  "Attributes":{
+                     "Element":"Number",
+                     "ParentBackground":true
+                  }
+               }
+            ]
+         }
+      }
+   },
+   "CodeFolding":{
+      "Ranges":[
+         {
+            "SkipRegion":[
+               {
+                  "OpenToken":"'",
+                  "CloseToken":"'",
+                  "RegionType":"String"
+               }
+            ],
+            "FoldRegion":[
+               {
+                  "OpenToken":"OBJECT",
+                  "CloseToken":"END",
+                  "Properties":{
+                     "OpenTokenBeginningOfLine":true
+                  }
+               },
+               {
+                  "OpenToken":"INLINE",
+                  "CloseToken":"END",
+                  "Properties":{
+                     "OpenTokenBeginningOfLine":true
+                  }
+               },
+               {
+                  "OpenToken":"ITEM",
+                  "CloseToken":"END",
+                  "Properties":{
+                     "OpenTokenBeginningOfLine":true
+                  }
+               },
+               {
+                  "OpenToken":"INHERITED",
+                  "CloseToken":"END",
+                  "Properties":{
+                     "OpenTokenBeginningOfLine":true
+                  }
+               }
+            ]
+         }
+      ]
+   },
+   "MatchingPair":{
+      "Pairs":[
+         {
+            "OpenToken":"object",
+            "CloseToken":"end"
+         },
+         {
+            "OpenToken":"inline",
+            "CloseToken":"end"
+         },
+         {
+            "OpenToken":"inherited",
+            "CloseToken":"end"
+         }
+      ]
+   }
 }

@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"19.8.2015",
+            "Date":"29.8.2015",
             "Sample":[
                "{\r\n",
                "  \"firstName\": \"John\",\r\n",
@@ -270,24 +270,28 @@
       }
    },
    "CodeFolding":{
-      "Options":{
-         "StringEscapeChar":"\\"
-      },
-      "SkipRegion":[
+      "Ranges":[
          {
-            "OpenToken":"\"",
-            "CloseToken":"\"",
-            "RegionType":"String"
-         }
-      ],
-      "FoldRegion":[
-         {
-            "OpenToken":"{",
-            "CloseToken":"}"
-         },
-         {
-            "OpenToken":"[",
-            "CloseToken":"]"
+            "Options":{
+               "StringEscapeChar":"\\"
+            },
+            "SkipRegion":[
+               {
+                  "OpenToken":"\"",
+                  "CloseToken":"\"",
+                  "RegionType":"String"
+               }
+            ],
+            "FoldRegion":[
+               {
+                  "OpenToken":"{",
+                  "CloseToken":"}"
+               },
+               {
+                  "OpenToken":"[",
+                  "CloseToken":"]"
+               }
+            ]
          }
       ]
    },

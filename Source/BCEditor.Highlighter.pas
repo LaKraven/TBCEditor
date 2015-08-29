@@ -12,7 +12,9 @@ type
   strict private
     FAttributes: TStringList;
     FBeginningOfLine: Boolean;
-    FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
+    //FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
+    FCodeFoldingRanges: TBCEditorCodeFoldingRanges;
+    FCodeFoldingRangeCount: Integer;
     FColors: TBCEditorHighlighterColors;
     FCompletionProposalSkipRegions: TBCEditorSkipRegions;
     FCurrentLine: PChar;
@@ -41,6 +43,7 @@ type
     procedure Prepare;
     procedure Reset;
     procedure SetAttributesOnChange(AEvent: TNotifyEvent);
+    procedure SetCodeFoldingRangeCount(Value: Integer);
     procedure SetWordBreakChars(AChars: TBCEditorCharSet);
   public
     constructor Create(AOwner: TWinControl);
@@ -67,7 +70,9 @@ type
 
     property Attribute[Index: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
-    property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions;
+    property CodeFoldingRanges: TBCEditorCodeFoldingRanges read FCodeFoldingRanges write FCodeFoldingRanges;
+    property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
+    //property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions;
     property CompletionProposalSkipRegions: TBCEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
     property FileName: string read FFileName write FFileName;
@@ -113,7 +118,8 @@ begin
   FAttributes.Duplicates := dupIgnore;
   FAttributes.Sorted := False;
 
-  FCodeFoldingRegions := TBCEditorCodeFoldingRegions.Create(TBCEditorCodeFoldingRegionItem);
+  FCodeFoldingRangeCount := 0;
+
   FCompletionProposalSkipRegions := TBCEditorSkipRegions.Create(TBCEditorSkipRegionItem);
 
   FPrepared := False;
@@ -145,8 +151,6 @@ begin
   FInfo := nil;
   FAttributes.Free;
   FAttributes := nil;
-  FCodeFoldingRegions.Free;
-  FCodeFoldingRegions := nil;
   FCompletionProposalSkipRegions.Free;
   FCompletionProposalSkipRegions := nil;
   FMatchingPairs.Free;
@@ -332,6 +336,15 @@ begin
   FCurrentRange := MainRules;
 end;
 
+procedure TBCEditorHighlighter.SetCodeFoldingRangeCount(Value: Integer);
+begin
+  if Value <> FCodeFoldingRangeCount then
+  begin
+    SetLength(FCodeFoldingRanges, Value);
+    FCodeFoldingRangeCount := Value;
+  end;
+end;
+
 procedure TBCEditorHighlighter.SetCurrentRange(Value: Pointer);
 begin
   FCurrentRange := TBCEditorRange(Value);
@@ -392,8 +405,12 @@ begin
   for i := FMatchingPairs.Count - 1 downto 0 do
     Dispose(PBCEditorMatchingPairToken(FMatchingPairs.Items[i]));
   FMatchingPairs.Clear;
-  FCodeFoldingRegions.SkipRegions.Clear;
-  FCodeFoldingRegions.Clear;
+  for i := 0 to FCodeFoldingRangeCount - 1 do
+  begin
+    FCodeFoldingRanges[i].Free;
+    FCodeFoldingRanges[i] := nil;
+  end;
+  CodeFoldingRangeCount := 0;
   (Editor as TBCBaseEditor).ClearMatchingPair;
 end;
 

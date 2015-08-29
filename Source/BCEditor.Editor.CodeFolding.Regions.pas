@@ -58,6 +58,8 @@ type
     property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default BCEDITOR_NONE_CHAR;
   end;
 
+  TBCEditorCodeFoldingRanges = array of TBCEditorCodeFoldingRegions;
+
 implementation
 
 { TBCEditorCodeFoldingRegions }

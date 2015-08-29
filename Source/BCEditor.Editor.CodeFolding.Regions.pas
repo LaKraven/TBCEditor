@@ -1,4 +1,4 @@
-unit BCEditor.Editor.CodeFolding.FoldRegions;
+unit BCEditor.Editor.CodeFolding.Regions;
 
 interface
 
@@ -45,7 +45,6 @@ type
 
   TBCEditorCodeFoldingRegions = class(TCollection)
   strict private
-    FReverseRegions: TBCEditorCodeFoldingRegions;
     FSkipRegions: TBCEditorSkipRegions;
     FStringEscapeChar: Char;
     function GetItem(Index: Integer): TBCEditorCodeFoldingRegionItem;
@@ -55,7 +54,6 @@ type
     function Add(AOpenToken: string; ACloseToken: string): TBCEditorCodeFoldingRegionItem;
     function Contains(const AOpenToken, ACloseToken: string): Boolean;
     property Items[index: Integer]: TBCEditorCodeFoldingRegionItem read GetItem; default;
-    property ReverseRegions: TBCEditorCodeFoldingRegions read FReverseRegions write FReverseRegions;
     property SkipRegions: TBCEditorSkipRegions read FSkipRegions;
     property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default BCEDITOR_NONE_CHAR;
   end;
@@ -93,8 +91,6 @@ end;
 destructor TBCEditorCodeFoldingRegions.Destroy;
 begin
   FSkipRegions.Free;
-  if Assigned(FReverseRegions) then
-    FReverseRegions.Free;
   inherited;
 end;
 

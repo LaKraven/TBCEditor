@@ -48,7 +48,7 @@ contains
   BCEditor.Editor.Caret.Styles in '..\Source\BCEditor.Editor.Caret.Styles.pas',
   BCEditor.Editor.CodeFolding in '..\Source\BCEditor.Editor.CodeFolding.pas',
   BCEditor.Editor.CodeFolding.Colors in '..\Source\BCEditor.Editor.CodeFolding.Colors.pas',
-  BCEditor.Editor.CodeFolding.FoldRegions in '..\Source\BCEditor.Editor.CodeFolding.FoldRegions.pas',
+  BCEditor.Editor.CodeFolding.Regions in '..\Source\BCEditor.Editor.CodeFolding.Regions.pas',
   BCEditor.Editor.CodeFolding.Hint in '..\Source\BCEditor.Editor.CodeFolding.Hint.pas',
   BCEditor.Editor.CodeFolding.Hint.Colors in '..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas',
   BCEditor.Editor.CodeFolding.Ranges in '..\Source\BCEditor.Editor.CodeFolding.Ranges.pas',

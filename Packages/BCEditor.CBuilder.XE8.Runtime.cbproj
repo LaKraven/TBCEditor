@@ -152,7 +152,7 @@
         <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Colors.pas">
             <BuildOrder>11</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.FoldRegions.pas">
+        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas">
             <BuildOrder>12</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas">

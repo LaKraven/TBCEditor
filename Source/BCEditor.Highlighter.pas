@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, System.SysUtils, Vcl.Controls, Vcl.Graphics, BCEditor.Highlighter.Rules, BCEditor.Highlighter.Token,
   BCEditor.Types, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Info, BCEditor.Editor.SkipRegions,
-  BCEditor.Highlighter.Colors, BCEditor.Editor.CodeFolding.FoldRegions;
+  BCEditor.Highlighter.Colors, BCEditor.Editor.CodeFolding.Regions;
 
 type
   TBCEditorHighlighter = class(TObject)

@@ -1,10 +1,10 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{AC917C2B-5870-48AD-981D-668AD3E4A533}</ProjectGuid>
         <MainSource>BCEditor.Delphi.XE8.Runtime.dpk</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <TargetedPlatforms>1</TargetedPlatforms>
+        <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Package</AppType>
         <FrameworkType>VCL</FrameworkType>
         <ProjectVersion>17.2</ProjectVersion>
@@ -59,7 +59,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <SanitizedProjectName>BCEditor.Delphi.XE8.Runtime</SanitizedProjectName>
+        <SanitizedProjectName>BCEditor_Delphi_XE8_Runtime</SanitizedProjectName>
         <RuntimeOnlyPackage>true</RuntimeOnlyPackage>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_ImageBase>00400000</DCC_ImageBase>
@@ -75,7 +75,6 @@
         <DCC_F>false</DCC_F>
         <DCC_E>false</DCC_E>
     </PropertyGroup>
-
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -137,7 +136,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.Caret.Styles.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Colors.pas"/>
-        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.FoldRegions.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Ranges.pas"/>

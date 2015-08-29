@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{FDB54465-D13F-4A09-B762-F707035B2A36}</ProjectGuid>
-        <ProjectVersion>16.1</ProjectVersion>
+        <ProjectVersion>17.2</ProjectVersion>
         <MainSource>BCEditor.CBuilder.XE7.Runtime.cpp</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
@@ -149,7 +149,7 @@
         <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Colors.pas">
             <BuildOrder>12</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.FoldRegions.pas">
+        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas">
             <BuildOrder>13</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas">

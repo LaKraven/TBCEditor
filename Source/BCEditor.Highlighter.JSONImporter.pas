@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, BCEditor.Editor.Base, BCEditor.Highlighter, BCEditor.Highlighter.Colors, BCEditor.Highlighter.Info,
   BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Rules, BCEditor.Editor.SkipRegions,
-  BCEditor.Editor.CodeFolding.FoldRegions, JsonDataObjects;
+  BCEditor.Editor.CodeFolding.Regions, JsonDataObjects;
 
 type
   TBCEditorHighlighterJSONImporter = class(TObject)
@@ -676,6 +676,7 @@ begin
     if ACodeFoldingObject['Options'].ObjectValue.Contains('StringEscapeChar') then
       LFoldRegions.StringEscapeChar := ACodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1];
 
+    // TODO: Maybe this could be a highlighter option.
     if ACodeFoldingObject['Options'].ObjectValue.Contains('NoMatchingPairHighlight') then
       if ACodeFoldingObject['Options'].ObjectValue.B['NoMatchingPairHighlight'] then
         TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options := TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options -

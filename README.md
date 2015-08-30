@@ -10,8 +10,6 @@ Version 1.0 beta released. Use the Issues page to report bugs or send them direc
 * Delphi versions from XE4 to XE8 are supported (XE7: Update 1 required)
 * C++ Builder XE7 and XE8 supported
 
-Eric Grange has made a Delphi XE backport: https://bitbucket.org/egrange/tbceditorxe
-
 <h3>Conditional compilation</h3>
 
 Define | Description 

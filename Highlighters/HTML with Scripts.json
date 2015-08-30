@@ -469,6 +469,10 @@
             ],
             "FoldRegion":[
                {
+                  "OpenToken":"<?PHP",
+                  "CloseToken":"?>"
+               },
+               {
                   "OpenToken":"<?",
                   "CloseToken":"?>"
                },

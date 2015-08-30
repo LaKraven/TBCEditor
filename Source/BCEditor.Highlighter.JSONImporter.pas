@@ -43,9 +43,6 @@ uses
   BCEditor.Highlighter.Token,
    BCEditor.Editor.CodeFolding.Types;
 
-var
-  GMultiHighlighter: Boolean;
-
 function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
 begin
   if Trim(AString) = '' then
@@ -210,7 +207,7 @@ begin
   begin
     LHighlighterInfo := FHighlighter.Info;
     { General }
-    GMultiHighlighter := AInfoObject['General'].B['MultiHighlighter'];
+    FHighlighter.MultiHighlighter := AInfoObject['General'].B['MultiHighlighter'];
     LHighlighterInfo.General.Version := AInfoObject['General']['Version'].Value;
     LHighlighterInfo.General.Date := AInfoObject['General']['Date'].Value;
     LSampleArray := AInfoObject['General'].A['Sample'];
@@ -374,7 +371,7 @@ begin
   if Assigned(RangeObject) then
   begin
     LFileName := RangeObject['File'].Value;
-    if GMultiHighlighter and (LFileName <> '') then
+    if FHighlighter.MultiHighlighter and (LFileName <> '') then
     begin
       LElementPrefix := RangeObject['ElementPrefix'].Value;
       LEditor := FHighlighter.Editor as TBCBaseEditor;
@@ -495,7 +492,7 @@ begin
   begin
     LJsonDataValue := ACompletionProposalObject['SkipRegion'].ArrayValue.Items[i];
 
-    if GMultiHighlighter then
+    if FHighlighter.MultiHighlighter then
     begin
       { Multi highlighter code folding skip region include }
       LFileName := LJsonDataValue.ObjectValue['File'].Value;
@@ -546,7 +543,7 @@ begin
     LOpenToken := LJsonDataValue.ObjectValue['OpenToken'].Value;
     LCloseToken := LJsonDataValue.ObjectValue['CloseToken'].Value;
 
-    if GMultiHighlighter then
+    if FHighlighter.MultiHighlighter then
     begin
       { Multi highlighter code folding skip region include }
       LFileName := LJsonDataValue.ObjectValue['File'].Value;
@@ -558,7 +555,7 @@ begin
         if Assigned(LJSONObject) then
         try
           if LJSONObject.Contains('CodeFolding') then
-            ImportCodeFoldingSkipRegions(ACodeFoldingRegions, LJSONObject['CodeFolding'].ObjectValue);
+            ImportCodeFoldingSkipRegions(ACodeFoldingRegions, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
         finally
           LJSONObject.Free;
           LFileStream.Free;
@@ -614,7 +611,7 @@ begin
     LOpenToken := LJsonDataValue.ObjectValue['OpenToken'].Value;
     LCloseToken := LJsonDataValue.ObjectValue['CloseToken'].Value;
 
-    if GMultiHighlighter then
+    if FHighlighter.MultiHighlighter then
     begin
       { Multi highlighter code folding fold region include }
       LFileName := LJsonDataValue.ObjectValue['File'].Value;
@@ -626,7 +623,7 @@ begin
         if Assigned(LJSONObject) then
         try
           if LJSONObject.Contains('CodeFolding') then
-            ImportCodeFoldingFoldRegions(ACodeFoldingRegions, LJSONObject['CodeFolding'].ObjectValue);
+            ImportCodeFoldingFoldRegions(ACodeFoldingRegions, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
         finally
           LJSONObject.Free;
           LFileStream.Free;
@@ -664,17 +661,27 @@ end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingOptions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions;
   ACodeFoldingObject: TJsonObject);
+var
+  LCodeFoldingObject: TJsonObject;
 begin
   ACodeFoldingRegions.StringEscapeChar := BCEDITOR_NONE_CHAR;
 
   if ACodeFoldingObject.Contains('Options') then
   begin
-    if ACodeFoldingObject['Options'].ObjectValue.Contains('StringEscapeChar') then
-      ACodeFoldingRegions.StringEscapeChar := ACodeFoldingObject['Options'].ObjectValue['StringEscapeChar'].Value[1];
+    LCodeFoldingObject := ACodeFoldingObject['Options'].ObjectValue;
 
-    // TODO: Maybe this could be a highlighter option.
-    if ACodeFoldingObject['Options'].ObjectValue.Contains('NoMatchingPairHighlight') then
-      if ACodeFoldingObject['Options'].ObjectValue.B['NoMatchingPairHighlight'] then
+    if LCodeFoldingObject.Contains('OpenToken') then
+      ACodeFoldingRegions.OpenToken := LCodeFoldingObject['OpenToken'].Value;
+
+    if LCodeFoldingObject.Contains('CloseToken') then
+      ACodeFoldingRegions.CloseToken := LCodeFoldingObject['CloseToken'].Value;
+
+    if LCodeFoldingObject.Contains('StringEscapeChar') then
+      ACodeFoldingRegions.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
+
+    // TODO: This should be a highlighter option. The CodeFolding.Options should not enable the highlighting.
+    if LCodeFoldingObject.Contains('NoMatchingPairHighlight') then
+      if LCodeFoldingObject.B['NoMatchingPairHighlight'] then
         TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options := TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options -
           [cfoHighlightMatchingPair]
   end;
@@ -684,17 +691,19 @@ procedure TBCEditorHighlighterJSONImporter.ImportCodeFolding(ACodeFoldingObject:
 var
   i, LCount: Integer;
   LCodeFoldingObject: TJsonObject;
+  LArray: TJsonArray;
 begin
   if not Assigned(ACodeFoldingObject) then
     Exit;
-  LCount := ACodeFoldingObject['Ranges'].ArrayValue.Count;
+  LArray := ACodeFoldingObject['Ranges'].ArrayValue;
+  LCount := LArray.Count;
   if LCount > 0 then
   begin
     FHighlighter.CodeFoldingRangeCount := LCount;
     for i := 0 to LCount - 1 do
     begin
       FHighlighter.CodeFoldingRanges[i] := TBCEditorCodeFoldingRegions.Create(TBCEditorCodeFoldingRegionItem);
-      LCodeFoldingObject := ACodeFoldingObject['Ranges'].ArrayValue.Items[i].ObjectValue;
+      LCodeFoldingObject := LArray.Items[i].ObjectValue;
 
       ImportCodeFoldingOptions(FHighlighter.CodeFoldingRanges[i], LCodeFoldingObject);
       ImportCodeFoldingSkipRegions(FHighlighter.CodeFoldingRanges[i], LCodeFoldingObject);
@@ -712,15 +721,17 @@ var
   LEditor: TBCBaseEditor;
   LFileStream: TStream;
   LJSONObject: TJsonObject;
+  LArray: TJsonArray;
 begin
   if not Assigned(AMatchingPairObject) then
     Exit;
   { Matching token pairs }
-  for i := 0 to AMatchingPairObject['Pairs'].ArrayValue.Count - 1 do
+  LArray := AMatchingPairObject['Pairs'].ArrayValue;
+  for i := 0 to LArray.Count - 1 do
   begin
-    LJsonDataValue := AMatchingPairObject['Pairs'].ArrayValue.Items[i];
+    LJsonDataValue := LArray.Items[i];
 
-    if GMultiHighlighter then
+    if FHighlighter.MultiHighlighter then
     begin
       { Multi highlighter code folding fold region include }
       LFileName := LJsonDataValue.ObjectValue['File'].Value;

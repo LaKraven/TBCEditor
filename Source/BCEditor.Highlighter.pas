@@ -12,7 +12,6 @@ type
   strict private
     FAttributes: TStringList;
     FBeginningOfLine: Boolean;
-    //FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FCodeFoldingRanges: TBCEditorCodeFoldingRanges;
     FCodeFoldingRangeCount: Integer;
     FColors: TBCEditorHighlighterColors;
@@ -27,6 +26,7 @@ type
     FLoading: Boolean;
     FMatchingPairs: TList;
     FMainRules: TBCEditorRange;
+    FMultiHighlighter: Boolean;
     FName: string;
     FPrepared: Boolean;
     FPreviousEndOfLine: Boolean;
@@ -72,7 +72,6 @@ type
     property Attributes: TStringList read FAttributes;
     property CodeFoldingRanges: TBCEditorCodeFoldingRanges read FCodeFoldingRanges write FCodeFoldingRanges;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
-    //property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions;
     property CompletionProposalSkipRegions: TBCEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
     property FileName: string read FFileName write FFileName;
@@ -80,6 +79,7 @@ type
     property Loading: Boolean read FLoading write FLoading;
     property MainRules: TBCEditorRange read FMainRules;
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
+    property MultiHighlighter: Boolean read FMultiHighlighter write FMultiHighlighter;
     property Name: string read FName write FName;
     property Colors: TBCEditorHighlighterColors read FColors write FColors;
     property WordBreakChars: TBCEditorCharSet read FWordBreakChars write SetWordBreakChars;

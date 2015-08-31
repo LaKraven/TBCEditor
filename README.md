@@ -49,6 +49,7 @@ The latest update: 30.08.2015 17:59, UTC+02:00
 
 * <a href="http://www.bonecode.com">EditBone</a>
 * <a href="http://www.mitec.cz/ibq.html">MiTeC Interbase Query</a>
+* <a href="http://www.mitec.cz/sqliteq.html">MiTeC SQLite Query</a>
 
 <h3>Screenshots</h3>
 

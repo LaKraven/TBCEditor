@@ -47,10 +47,8 @@ The latest update: 30.08.2015 17:59, UTC+02:00
 
 <h3>Projects using the control</h3>
 
-EditBone v. <a href="http://bonecode.com/downloads/EditBone/changes.html" target="_blank">10.0.0 beta</a>
-
-  * <a href="http://www.bonecode.com/downloads/EditBone32.zip">32-bit Windows</a> 
-  * <a href="http://www.bonecode.com/downloads/EditBone64.zip">64-bit Windows</a>
+* <a href="http://www.bonecode.com">EditBone</a>
+* <a href="http://www.mitec.cz/ibq.html">MiTeC Interbase Query</a>
 
 <h3>Screenshots</h3>
 

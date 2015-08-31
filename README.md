@@ -1,8 +1,8 @@
+Version 1.0 beta. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
+
 <h3>Description</h3>
 
 A syntax highlighting edit control with code folding, minimap, external JSON highlighter and color scheme files, etc.
-
-Version 1.0 beta released. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
 <h3>Build requirements</h3>
 

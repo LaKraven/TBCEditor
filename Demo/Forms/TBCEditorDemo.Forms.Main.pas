@@ -74,9 +74,7 @@ begin
   with Editor do
   begin
     Highlighter.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
-    ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample;
-    InitCodeFolding;
     CaretZero;
     SetFocus;
   end;

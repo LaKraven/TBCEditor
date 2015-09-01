@@ -6,8 +6,6 @@ inherited MainForm: TMainForm
   Position = poScreenCenter
   ShowHint = True
   OnShow = FormShow
-  ExplicitWidth = 1116
-  ExplicitHeight = 683
   PixelsPerInch = 96
   TextHeight = 13
   object Splitter: TBCSplitter [0]
@@ -34,8 +32,6 @@ inherited MainForm: TMainForm
       item
         Width = 50
       end>
-    ExplicitTop = 625
-    ExplicitWidth = 1100
   end
   object PanelProperty: TBCPanel [2]
     Left = 760
@@ -64,6 +60,13 @@ inherited MainForm: TMainForm
       Margins.Right = 0
       Margins.Bottom = 5
       Options = [goFixedVertLineEh, goVertLineEh, goEditingEh, goAlwaysShowEditorEh]
+      Align = alClient
+      ContraColCount = 0
+      Flat = True
+      ParentColor = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
     end
   end
   object PanelLeft: TBCPanel [3]
@@ -200,23 +203,17 @@ inherited MainForm: TMainForm
         ParentColor = False
         ParentFont = False
         TabOrder = 0
-        ExplicitTop = 3
-        ExplicitWidth = 754
         inherited SearchPanel: TBCPanel
           Width = 754
-          ExplicitWidth = 754
           inherited SpeedButtonSearchClose: TBCSpeedButton
             Left = 733
             Images = nil
-            ExplicitLeft = 733
           end
           inherited PanelRight: TBCPanel
             Width = 400
-            ExplicitWidth = 400
             inherited LabelSearchResultCount: TBCLabelFX
               Left = 388
               Height = 21
-              ExplicitLeft = 388
             end
           end
           inherited PanelToolBar: TBCPanel

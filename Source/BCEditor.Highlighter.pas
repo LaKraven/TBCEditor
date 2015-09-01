@@ -488,7 +488,6 @@ begin
         LTopLine := LEditor.TopLine;
         LTempLines.Text := LEditor.Lines.Text;
         LEditor.Lines.Clear;
-        LEditor.ClearCodeFolding;
       end;
       with TBCEditorHighlighterJSONImporter.Create(Self) do
       try
@@ -500,7 +499,6 @@ begin
       begin
         LEditor.Lines.Text := LTempLines.Text;
         LEditor.TopLine := LTopLine;
-        LEditor.InitCodeFolding;
       end;
       if LEditor.Visible then
         LEditor.TextCaretPosition := LCaretPosition;

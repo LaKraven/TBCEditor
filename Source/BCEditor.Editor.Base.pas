@@ -238,6 +238,7 @@ type
     procedure BeforeSetText(Sender: TObject);
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
+    procedure ClearCodeFolding;
     procedure ClearSearchLines;
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
@@ -264,6 +265,7 @@ type
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(ASearchText: string = '');
     procedure FontChanged(Sender: TObject);
+    procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
     procedure MinimapChanged(Sender: TObject);
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
@@ -483,7 +485,6 @@ type
     procedure Clear;
     procedure ClearBookmark(ABookmark: Integer);
     procedure ClearBookmarks;
-    procedure ClearCodeFolding;
     procedure ClearMarks;
     procedure ClearMatchingPair;
     procedure ClearSelection;
@@ -506,7 +507,6 @@ type
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
-    procedure InitCodeFolding;
     procedure InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
     procedure InvalidateLeftMargin;
     procedure InvalidateLeftMarginLine(ALine: Integer);
@@ -10116,7 +10116,7 @@ end;
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);
 begin
   HookEditorLines(AEditor.Lines, AEditor.UndoList, AEditor.RedoList);
-
+  InitCodeFolding;
   FChainedEditor := AEditor;
   AEditor.FreeNotification(Self);
 end;

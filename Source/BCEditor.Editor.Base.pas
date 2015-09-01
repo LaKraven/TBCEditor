@@ -3813,7 +3813,10 @@ var
         if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
         begin
           LCodeFoldingRangeIndexList.Delete(LCodeFoldingRangeIndexList.Count - 1);
-          LCurrentCodeFoldingRegions := Highlighter.CodeFoldingRanges[Integer(LCodeFoldingRangeIndexList.Last)];
+          if LCodeFoldingRangeIndexList.Count > 0 then
+            LCurrentCodeFoldingRegions := Highlighter.CodeFoldingRanges[Integer(LCodeFoldingRangeIndexList.Last)]
+          else
+            LCurrentCodeFoldingRegions := Highlighter.CodeFoldingRanges[DEFAULT_CODE_FOLDING_RANGE_INDEX];
           Exit;
         end
       end;

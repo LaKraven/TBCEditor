@@ -30,9 +30,7 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
     LoadFromFile(GetHighlighterFileName('JSON.json')); 
     ...
     { Set editor lines }
-    ClearCodeFolding;
     Lines.Text := Highlighter.Info.General.Sample; 
-    InitCodeFolding;
   end;
 ```
 

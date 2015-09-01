@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"29.8.2015",
+            "Date":"1.9.2015",
             "Sample":[
                "<?php\r\n",
                "  echo \"Hello World!\";\r\n",
@@ -68,6 +68,34 @@
                            },
                            "TokenRange":{
                               "Open":"#"
+                           }
+                        },
+                        {
+                        "Type":"Method",
+                           "Attributes":{
+                              "Element":"MethodName"
+                           },
+                           "Properties":{
+                              "AlternativeClose1":"{"
+                           },
+                           "TokenRange":{
+                              "Open":"function",
+                              "Close":"("
+                           },
+                           "SubRules":{
+                              "KeyList":[
+                                 {
+                                    "Type":"Symbol",
+                                    "Words":[
+                                       "{",
+                                       "("
+                                    ],
+                                    "Attributes":{
+                                       "Element":"Symbol",
+                                       "ParentBackground":true
+                                    }
+                                 }
+                              ]
                            }
                         },
                         {
@@ -231,7 +259,6 @@
                               "do",
                               "else",
                               "elseif",
-                              "empty",
                               "enddeclare",
                               "endfor",
                               "endforeach",
@@ -244,7 +271,6 @@
                               "final",
                               "for",
                               "foreach",
-                              "function",
                               "global",
                               "goto",
                               "if",
@@ -285,8 +311,19 @@
                         {
                            "Type":"Method",
                            "Words":[
+                              "function",
+                              "procedure"
+                           ],
+                           "Attributes":{
+                              "Element":"Method"
+                           }
+                        },
+                        {
+                           "Type":"Method",
+                           "Words":[
                               "echo",
-                              "print"
+                              "print",
+                              "empty"
                            ],
                            "Attributes":{
                               "Element":"Method",
@@ -311,7 +348,10 @@
                               "(",
                               ")",
                               "[",
-                              "]"
+                              "]",
+                              "{",
+                              "}",
+                              "?>"
                            ],
                            "Attributes":{
                               "Element":"Symbol",
@@ -337,6 +377,18 @@
                            }
                         }
                      ]
+                  }
+               }
+            ],
+            "KeyList":[
+               {
+                  "Type":"Symbol",
+                  "Words":[
+                     "<?"
+                  ],
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
                   }
                }
             ]

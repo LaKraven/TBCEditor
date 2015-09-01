@@ -4,7 +4,7 @@
          "General":{
             "MultiHighlighter":true,
             "Version":"1.0",
-            "Date":"31.8.2015",
+            "Date":"1.9.2015",
             "Sample":[
                "<!DOCTYPE HTML>\r\n",
                "<!-- Hello World in HTML -->\r\n",
@@ -128,6 +128,18 @@
                                  {
                                     "File":"PHP.json",
                                     "IncludeRange":"PHP"
+                                 }
+                              ],
+                              "KeyList":[
+                                 {
+                                    "Type":"Symbol",
+                                    "Words":[
+                                       "<?"
+                                    ],
+                                    "Attributes":{
+                                       "Element":"Symbol",
+                                       "ParentBackground":true
+                                    }
                                  }
                               ]
                            }
@@ -448,14 +460,39 @@
                         {
                            "Type":"Symbol",
                            "Words":[
-                              "/"
+                              "/",
+                              "<?"
                            ],
                            "Attributes":{
                               "Element":"ReservedWord",
                               "ParentBackground":true
                            }
                         }
+                     ],
+                     "KeyList":[
+                        {
+                           "Type":"Symbol",
+                           "Words":[
+                              "<?"
+                           ],
+                           "Attributes":{
+                              "Element":"Symbol",
+                              "ParentBackground":true
+                           }
+                        }
                      ]
+                  }
+               }
+            ],
+            "KeyList":[
+               {
+                  "Type":"Symbol",
+                  "Words":[
+                     "<?"
+                  ],
+                  "Attributes":{
+                     "Element":"Symbol",
+                     "ParentBackground":true
                   }
                }
             ]

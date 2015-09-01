@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"21.8.2015"
+            "Date":"1.9.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -117,7 +117,7 @@
          },
          {
             "Name":"HighlightedBlock",
-            "Foreground":"$00F8F8F2",
+            "Foreground":"$00EFD966",
             "Background":"$00222827"
          },
          {
@@ -133,7 +133,7 @@
          },
          {
             "Name":"Attribute",
-            "Foreground":"$00EFD966",
+            "Foreground":"$002AE27F",
             "Background":"$00222827"
          },
          {

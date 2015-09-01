@@ -488,7 +488,8 @@
                {
                   "Type":"Symbol",
                   "Words":[
-                     "<?"
+                     "<?",
+                     "&&"
                   ],
                   "Attributes":{
                      "Element":"Symbol",

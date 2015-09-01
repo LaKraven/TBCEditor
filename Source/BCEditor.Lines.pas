@@ -52,7 +52,9 @@ type
     FLengthOfLongestLine: Integer;
     FList: PEditorStringRecordList;
     FLongestLineNeedsUpdate: Boolean;
+    FOnAfterSetText: TNotifyEvent;
     FOnBeforePutted: TStringListChangeEvent;
+    FOnBeforeSetText: TNotifyEvent;
     FOnChange: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOnCleared: TNotifyEvent;
@@ -106,7 +108,9 @@ type
     property ExpandedStrings[Index: Integer]: string read GetExpandedString;
     property ExpandedStringLengths[Index: Integer]: Integer read GetExpandedStringLength;
     property List: PEditorStringRecordList read FList;
+    property OnAfterSetText: TNotifyEvent read FOnAfterSetText write FOnAfterSetText;
     property OnBeforePutted: TStringListChangeEvent read FOnBeforePutted write FOnBeforePutted;
+    property OnBeforeSetText: TNotifyEvent read FOnBeforeSetText write FOnBeforeSetText;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OnCleared: TNotifyEvent read FOnCleared write FOnCleared;
@@ -666,6 +670,8 @@ var
   LLength: Integer;
   PValue, PStartValue, PLastChar: PChar;
 begin
+  if Assigned(FOnBeforeSetText) then
+    FOnBeforeSetText(Self);
   Clear;
   PValue := Pointer(Value);
   if Assigned(PValue) then
@@ -697,6 +703,8 @@ begin
     FOnInserted(Self, 0, FCount);
   if Assigned(FOnChange) then
     FOnChange(Self);
+  if Assigned(FOnAfterSetText) then
+    FOnAfterSetText(Self);
 end;
 
 procedure TBCEditorLines.SetUpdateState(Updating: Boolean);

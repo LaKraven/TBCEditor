@@ -234,6 +234,8 @@ type
     function StringWordStart(const ALine: string; AStart: Integer): Integer;
     procedure ActiveLineChanged(Sender: TObject);
     procedure AssignSearchEngine;
+    procedure AfterSetText(Sender: TObject);
+    procedure BeforeSetText(Sender: TObject);
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearSearchLines;
@@ -728,6 +730,8 @@ begin
   FCaret.OnChange := CaretChanged;
   { Text buffer }
   FLines := TBCEditorLines.Create(Self);
+  FLines.OnBeforeSetText := BeforeSetText;
+  FLines.OnAfterSetText := AfterSetText;
   FOriginalLines := FLines;
   with FLines do
   begin
@@ -2576,6 +2580,16 @@ begin
   end;
 end;
 
+procedure TBCBaseEditor.AfterSetText(Sender: TObject);
+begin
+  InitCodeFolding;
+end;
+
+procedure TBCBaseEditor.BeforeSetText(Sender: TObject);
+begin
+  ClearCodeFolding;
+end;
+
 procedure TBCBaseEditor.CaretChanged(Sender: TObject);
 begin
   ResetCaret;
@@ -4215,10 +4229,11 @@ end;
 procedure TBCBaseEditor.SetLines(Value: TBCEditorLines);
 begin
   ClearBookmarks;
+  ClearCodeFolding;
   FLines.Assign(Value);
-  FResetLineNumbersCache := True;
   CreateLineNumbersCache;
   SizeOrFontChanged(True);
+  InitCodeFolding;
 end;
 
 procedure TBCBaseEditor.SetLineText(Value: string);

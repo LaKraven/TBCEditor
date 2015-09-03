@@ -364,6 +364,7 @@ var
   NewSet: TBCEditorSet;
   SubRulesObject, PropertiesObject, TokenRangeObject: TJsonObject;
   LJSONObject, LJSONSubRulesObject: TJsonObject;
+  AlternativeCloseArray: TJsonArray;
   LFileStream: TStream;
   LEditor: TBCBaseEditor;
   LElementPrefix: string;
@@ -425,8 +426,13 @@ begin
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
           ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];
-          ARange.AlternativeClose1 := PropertiesObject['AlternativeClose1'].Value;
-          ARange.AlternativeClose2 := PropertiesObject['AlternativeClose2'].Value;
+          AlternativeCloseArray := PropertiesObject['AlternativeClose'].ArrayValue;
+          if AlternativeCloseArray.Count > 0 then
+          begin
+            ARange.AlternativeCloseCount := AlternativeCloseArray.Count;
+            for i := 0 to ARange.AlternativeCloseCount - 1 do
+              ARange.AlternativeClose[i] := AlternativeCloseArray.Items[i].Value;
+          end;
           ARange.OpenBeginningOfLine := PropertiesObject.B['OpenBeginningOfLine'];
         end;
 

@@ -93,8 +93,10 @@
                               "ParentBackground":true
                            },
                            "Properties":{
-                              "AlternativeClose1":">",
-                              "AlternativeClose2":"<"
+                              "AlternativeClose":[
+                                ">",
+                                "<"
+                              ]
                            },
                            "TokenRange":{
                               "Open":" ",

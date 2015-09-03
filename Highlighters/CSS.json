@@ -129,7 +129,9 @@
                               "Element":"String"
                            },
                            "Properties":{
-                              "AlternativeClose1":"}"
+                              "AlternativeClose":[
+                                "}"
+                              ]
                            },
                            "TokenRange":{
                               "Open":":",

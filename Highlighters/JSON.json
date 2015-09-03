@@ -111,7 +111,9 @@
                               "ParentBackground":true
                            },
                            "Properties":{
-                              "AlternativeClose1":"{"
+                              "AlternativeClose":[
+                                "{"
+                              ]
                            },
                            "TokenRange":{
                               "Open":"[",

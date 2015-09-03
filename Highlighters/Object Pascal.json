@@ -89,11 +89,16 @@
                      "Element":"MethodName"
                   },
                   "Properties":{
-                     "AlternativeClose1":":"
+                     "AlternativeClose":[
+                         "(",
+                         "'",
+                         "/",
+                         "{"
+                     ]
                   },
                   "TokenRange":{
                      "Open":"function",
-                     "Close":"("
+                     "Close":":"
                   },
                   "SubRules":{
                      "KeyList":[
@@ -117,11 +122,16 @@
                      "Element":"MethodName"
                   },
                   "Properties":{
-                     "AlternativeClose1":";"
+                     "AlternativeClose":[
+                       "(",
+                       "'",
+											 "/",
+											 "{"
+                     ]
                   },
                   "TokenRange":{
                      "Open":"procedure",
-                     "Close":"("
+                     "Close":";"
                   },
                   "SubRules":{
                      "KeyList":[

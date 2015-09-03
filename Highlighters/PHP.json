@@ -76,7 +76,9 @@
                               "Element":"MethodName"
                            },
                            "Properties":{
-                              "AlternativeClose1":"{"
+                              "AlternativeClose":[
+                                "{"
+                              ]
                            },
                            "TokenRange":{
                               "Open":"function",

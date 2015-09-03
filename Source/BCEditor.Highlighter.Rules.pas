@@ -96,8 +96,8 @@ type
 
   TBCEditorRange = class(TBCEditorRule)
   strict private
-    FAlternativeClose1: string;
-    FAlternativeClose2: string;
+    FAlternativeClose: TBCEditorArrayOfString;
+    FAlternativeCloseCount: Integer;
     FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
@@ -126,6 +126,7 @@ type
     function GetSet(Index: Integer): TBCEditorSet;
     function GetSetCount: Integer;
     function GetToken(Index: Integer): TBCEditorToken;
+    procedure SetAlternativeCloseCount(const Value: Integer);
     procedure SetCaseSensitive(const Value: Boolean);
   public
     constructor Create(AOpenToken: string = ''; ACloseToken: string = ''); virtual;
@@ -141,8 +142,8 @@ type
     procedure Prepare(AParent: TBCEditorRange);
     procedure Reset;
     procedure SetDelimiters(ADelimiters: TBCEditorCharSet);
-    property AlternativeClose1: string read FAlternativeClose1 write FAlternativeClose1;
-    property AlternativeClose2: string read FAlternativeClose2 write FAlternativeClose2;
+    property AlternativeClose: TBCEditorArrayOfString read FAlternativeClose write FAlternativeClose;
+    property AlternativeCloseCount: Integer read FAlternativeCloseCount write SetAlternativeCloseCount;
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TBCEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
@@ -423,6 +424,8 @@ begin
 
   SetCaseSensitive(False);
 
+  FAlternativeCloseCount := 0;
+
   FPrepared := False;
 
   FRanges := TList.Create;
@@ -546,6 +549,12 @@ begin
   Delimiters := ADelimiters;
   for i := 0 to RangeCount - 1 do
     Ranges[i].SetDelimiters(ADelimiters);
+end;
+
+procedure TBCEditorRange.SetAlternativeCloseCount(const Value: Integer);
+begin
+  FAlternativeCloseCount := Value;
+  SetLength(FAlternativeClose, Value);
 end;
 
 procedure TBCEditorRange.SetCaseSensitive(const Value: Boolean);

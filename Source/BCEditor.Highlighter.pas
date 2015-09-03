@@ -193,24 +193,10 @@ end;
 
 procedure TBCEditorHighlighter.Next;
 var
-  i: Integer;
+  i, j: Integer;
   LParser: TBCEditorAbstractParser;
   LKeyword: PChar;
   LCloseParent: Boolean;
-
-  procedure CheckAlternativeClose(AAlternativeClose: string);
-  begin
-    LKeyword := PChar(AAlternativeClose);
-    i := FRunPosition;
-    while (FCurrentLine[i] <> BCEDITOR_NONE_CHAR) and (FCurrentLine[i] = LKeyword^) do
-    begin
-      Inc(LKeyword);
-      Inc(i);
-    end;
-    if LKeyword^ = BCEDITOR_NONE_CHAR then
-      FCurrentRange := FCurrentRange.Parent;
-  end;
-
 begin
   while FTemporaryCurrentTokens.Count > 0 do
   begin
@@ -231,10 +217,24 @@ begin
 
   if Assigned(FCurrentRange) then
   begin
-    if FCurrentRange.AlternativeClose1 <> '' then
-      CheckAlternativeClose(FCurrentRange.AlternativeClose1);
-     if FCurrentRange.AlternativeClose2 <> '' then
-      CheckAlternativeClose(FCurrentRange.AlternativeClose2);
+    if FCurrentRange.AlternativeCloseCount > 0 then
+    begin
+      for i := 0 to FCurrentRange.AlternativeCloseCount - 1 do
+      begin
+        LKeyword := PChar(FCurrentRange.AlternativeClose[i]);
+        j := FRunPosition;
+        while (FCurrentLine[j] <> BCEDITOR_NONE_CHAR) and (FCurrentLine[j] = LKeyword^) do
+        begin
+          Inc(LKeyword);
+          Inc(j);
+        end;
+        if LKeyword^ = BCEDITOR_NONE_CHAR then
+        begin
+          FCurrentRange := FCurrentRange.Parent;
+          Break;
+        end;
+      end;
+    end;
   end;
 
   FTokenPosition := FRunPosition;

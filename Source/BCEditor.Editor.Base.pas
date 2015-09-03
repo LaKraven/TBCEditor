@@ -5529,7 +5529,7 @@ var
   LBlockBeginPosition, LBlockEndPosition: TBCEditorTextPosition;
   LLine: PChar;
   LFullStringToDelete: string;
-  LStringToDelete: array of string;
+  LStringToDelete: TBCEditorArrayOfString;
   LLength, LCaretPositionX, LDeleteIndex, i, j, LDeletionLength, LFirstIndent, LLastIndent, LLastLine: Integer;
   LLineText: string;
   LOldSelectionMode: TBCEditorSelectionMode;

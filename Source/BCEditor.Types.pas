@@ -6,6 +6,8 @@ uses
   Winapi.Windows, System.Classes, Vcl.Forms, Vcl.Graphics, Vcl.Controls, BCEditor.Highlighter.Attributes, System.SysUtils;
 
 type
+  TBCEditorArrayOfString = array of string;
+
   TBCEditorCharMethod = function(AChar: Char): Boolean of object;
 
   TBCEditorCaretStyle = (csVerticalLine, csThinVerticalLine, csHorizontalLine, csThinHorizontalLine, csHalfBlock, csBlock);

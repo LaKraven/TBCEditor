@@ -4976,56 +4976,25 @@ begin
     Handling the WM_IME_CHAR message stops Windows from sending WM_CHAR messages while using the IME }
 end;
 
-function IsWindows98orLater: Boolean;
-begin
-  Result := (Win32MajorVersion > 4) or (Win32MajorVersion = 4) and (Win32MinorVersion > 0);
-end;
-
 procedure TBCBaseEditor.WMIMEComposition(var Msg: TMessage);
 var
   LImc: HIMC;
   LPBuffer: PChar;
-  LPAnsiBuffer: PAnsiChar;
-  LPBufferLength: Integer;
   LImeCount: Integer;
 begin
   if (Msg.LParam and GCS_RESULTSTR) <> 0 then
   begin
     LImc := ImmGetContext(Handle);
     try
-      if IsWindows98orLater then
-      begin
-        LImeCount := ImmGetCompositionStringW(LImc, GCS_RESULTSTR, nil, 0);
-        { ImeCount is always the size in bytes, also for Unicode }
-        GetMem(LPBuffer, LImeCount + SizeOf(Char));
-        try
-          ImmGetCompositionStringW(LImc, GCS_RESULTSTR, LPBuffer, LImeCount);
-          LPBuffer[LImeCount div SizeOf(Char)] := BCEDITOR_NONE_CHAR;
-          CommandProcessor(ecImeStr, BCEDITOR_NONE_CHAR, LPBuffer);
-        finally
-          FreeMem(LPBuffer);
-        end;
-      end
-      else
-      begin
-        LImeCount := ImmGetCompositionStringA(LImc, GCS_RESULTSTR, nil, 0);
-        { ImeCount is always the size in bytes, also for Unicode }
-        GetMem(LPAnsiBuffer, LImeCount + SizeOf(AnsiChar));
-        try
-          ImmGetCompositionStringA(LImc, GCS_RESULTSTR, LPAnsiBuffer, LImeCount);
-          LPAnsiBuffer[LImeCount] := BCEDITOR_NONE_CHAR;
-
-          LPBufferLength := MultiByteToWideChar(DefaultSystemCodePage, 0, LPAnsiBuffer, LImeCount, nil, 0);
-          GetMem(LPBuffer, (LPBufferLength + 1) * SizeOf(Char));
-          try
-            MultiByteToWideChar(DefaultSystemCodePage, 0, LPAnsiBuffer, LImeCount, LPBuffer, LPBufferLength);
-            CommandProcessor(ecImeStr, BCEDITOR_NONE_CHAR, LPBuffer);
-          finally
-            FreeMem(LPBuffer);
-          end;
-        finally
-          FreeMem(LPAnsiBuffer);
-        end;
+      LImeCount := ImmGetCompositionStringW(LImc, GCS_RESULTSTR, nil, 0);
+      { ImeCount is always the size in bytes, also for Unicode }
+      GetMem(LPBuffer, LImeCount + SizeOf(Char));
+      try
+        ImmGetCompositionStringW(LImc, GCS_RESULTSTR, LPBuffer, LImeCount);
+        LPBuffer[LImeCount div SizeOf(Char)] := BCEDITOR_NONE_CHAR;
+        CommandProcessor(ecImeStr, BCEDITOR_NONE_CHAR, LPBuffer);
+      finally
+        FreeMem(LPBuffer);
       end;
     finally
       ImmReleaseContext(Handle, LImc);
@@ -5038,7 +5007,6 @@ procedure TBCBaseEditor.WMIMENotify(var Msg: TMessage);
 var
   LImc: HIMC;
   LLogFontW: TLogFontW;
-  LLogFontA: TLogFontA;
 begin
   with Msg do
   begin
@@ -5048,16 +5016,8 @@ begin
           LImc := ImmGetContext(Handle);
           if LImc <> 0 then
           begin
-            if IsWindows98orLater then
-            begin
-              GetObjectW(Font.Handle, SizeOf(TLogFontW), @LLogFontW);
-              ImmSetCompositionFontW(LImc, @LLogFontW);
-            end
-            else
-            begin
-              GetObjectA(Font.Handle, SizeOf(TLogFontA), @LLogFontA);
-              ImmSetCompositionFontA(LImc, @LLogFontA);
-            end;
+            GetObjectW(Font.Handle, SizeOf(TLogFontW), @LLogFontW);
+            ImmSetCompositionFontW(LImc, @LLogFontW);
             ImmReleaseContext(Handle, LImc);
           end;
         end;
@@ -11562,7 +11522,7 @@ begin
           end
           else
           begin
-            LLineText := FLines.ExpandedStrings[LTextCaretPosition.Line];
+            LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
             if LLength < LTextCaretPosition.Char then
               LLineText := LLineText + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - LLength - 1);
@@ -11571,7 +11531,9 @@ begin
               if LChangeScroll then
                 FScroll.Options := FScroll.Options + [soPastEndOfLine];
               LBlockStartPosition := LTextCaretPosition;
-              LLength := Length(S);
+
+              LLength := FTextDrawer.GetCharCount(PChar(AData));
+
               if not FInsertMode then
               begin
                 LHelper := Copy(LLineText, LTextCaretPosition.Char, LLength);

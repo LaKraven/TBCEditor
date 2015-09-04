@@ -93,7 +93,7 @@ type
 implementation
 
 uses
-  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Consts, BCEditor.Editor.Base;
+  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Consts, BCEditor.Editor.Base, System.IOUtils;
 
 { TBCEditorHighlighter }
 
@@ -472,8 +472,7 @@ var
 begin
   FLoading := True;
   FFileName := AFileName;
-  FName := ExtractFileName(AFileName);
-  FName := Copy(FName, 1, Pos('.', FName) - 1);
+  FName := TPath.GetFileNameWithoutExtension(AFileName);
   LEditor := FEditor as TBCBaseEditor;
   LTopLine := 0;
   if Assigned(LEditor) then

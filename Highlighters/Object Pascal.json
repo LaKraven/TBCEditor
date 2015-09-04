@@ -573,7 +573,11 @@
                   "CloseToken":"END",
                   "Properties":{
                      "NoSubs":true,
-                     "SkipIfFoundAfterOpenToken":";"
+                     "SkipIfFoundAfterOpenToken":[
+                       ";",
+                       "FUNCTION",
+                       "PROCEDURE"
+                     ]
                   }
                },
                {
@@ -595,7 +599,9 @@
                   "CloseToken":"END",
                   "Properties":{
                      "NoSubs":true,
-                     "SkipIfFoundAfterOpenToken":";"
+                     "SkipIfFoundAfterOpenToken":[
+                       ";"
+                     ]
                   }
                },
                {

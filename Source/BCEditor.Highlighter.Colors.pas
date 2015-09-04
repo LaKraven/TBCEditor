@@ -28,6 +28,7 @@ type
     function GetElement(Name: string): PBCEditorHighlighterElement;
     procedure Clear;
     procedure LoadFromFile(AFileName: string);
+    procedure LoadFromStream(AStream: TStream);
     property FileName: string read FFileName write FFileName;
     property Info: TBCEditorHighlighterInfo read FInfo write FInfo;
     property Name: string read FName write FName;
@@ -37,7 +38,7 @@ type
 implementation
 
 uses
-  System.SysUtils, BCEditor.Editor.Base, BCEditor.Highlighter, BCEditor.Highlighter.JSONImporter;
+  System.SysUtils, BCEditor.Editor.Base, BCEditor.Highlighter, BCEditor.Highlighter.JSONImporter, System.IOUtils;
 
 { TBCEditorHighlighterColors }
 
@@ -86,23 +87,30 @@ var
   LHighlighter: TBCEditorHighlighter;
   LEditor: TBCBaseEditor;
 begin
-  TBCEditorHighlighter(FOwner).Loading := True;
   FFileName := AFileName;
-  FName := ExtractFileName(AFileName);
-  FName := Copy(FName, 1, Pos('.', FName) - 1);
+  FName := TPath.GetFileNameWithoutExtension(AFileName);
 
   LHighlighter := TBCEditorHighlighter(FOwner);
   LEditor := LHighlighter.Editor as TBCBaseEditor;
   LStream := LEditor.CreateFileStream(LEditor.GetColorsFileName(AFileName));
   try
-    with TBCEditorHighlighterJSONImporter.Create(LHighlighter) do
-    try
-      ImportColorsFromStream(LStream);
-    finally
-      Free;
-    end;
+    LoadFromStream(LStream);
   finally
     LStream.Free;
+  end;
+end;
+
+procedure TBCEditorHighlighterColors.LoadFromStream(AStream: TStream);
+var
+  LHighlighter: TBCEditorHighlighter;
+begin
+  TBCEditorHighlighter(FOwner).Loading := True;
+  LHighlighter := TBCEditorHighlighter(FOwner);
+  with TBCEditorHighlighterJSONImporter.Create(LHighlighter) do
+  try
+    ImportColorsFromStream(AStream);
+  finally
+    Free;
   end;
   LHighlighter.UpdateColors;
   TBCEditorHighlighter(FOwner).Loading := False;

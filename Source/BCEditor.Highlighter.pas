@@ -60,6 +60,7 @@ type
     procedure AddKeywords(var AStringList: TStringList);
     procedure Clear;
     procedure LoadFromFile(AFileName: string);
+    procedure LoadFromStream(AStream: TStream);
     procedure Next;
     procedure NextToEndOfLine;
     procedure ResetCurrentRange;
@@ -466,19 +467,34 @@ procedure TBCEditorHighlighter.LoadFromFile(AFileName: string);
 var
   LStream: TStream;
   LEditor: TBCBaseEditor;
+begin
+  FFileName := AFileName;
+  FName := TPath.GetFileNameWithoutExtension(AFileName);
+  LEditor := FEditor as TBCBaseEditor;
+  if Assigned(LEditor) then
+  begin
+    LStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(AFileName));
+    try
+      LoadFromStream(LStream);
+    finally
+      LStream.Free;
+    end;
+  end;
+end;
+
+procedure TBCEditorHighlighter.LoadFromStream(AStream: TStream);
+var
+  LEditor: TBCBaseEditor;
   LTempLines: TStringList;
   LTopLine: Integer;
   LCaretPosition: TBCEditorTextPosition;
 begin
   FLoading := True;
-  FFileName := AFileName;
-  FName := TPath.GetFileNameWithoutExtension(AFileName);
   LEditor := FEditor as TBCBaseEditor;
   LTopLine := 0;
   if Assigned(LEditor) then
   begin
     LTempLines := TStringList.Create;
-    LStream := LEditor.CreateFileStream(LEditor.GetHighlighterFileName(AFileName));
     try
       if LEditor.Visible then
         LCaretPosition := LEditor.TextCaretPosition;
@@ -490,7 +506,7 @@ begin
       end;
       with TBCEditorHighlighterJSONImporter.Create(Self) do
       try
-        ImportFromStream(LStream);
+        ImportFromStream(AStream);
       finally
         Free;
       end;
@@ -502,7 +518,6 @@ begin
       if LEditor.Visible then
         LEditor.TextCaretPosition := LCaretPosition;
     finally
-      LStream.Free;
       LTempLines.Free;
     end;
     UpdateColors;

@@ -364,7 +364,7 @@ var
   NewSet: TBCEditorSet;
   SubRulesObject, PropertiesObject, TokenRangeObject: TJsonObject;
   LJSONObject, LJSONSubRulesObject: TJsonObject;
-  AlternativeCloseArray: TJsonArray;
+  LAlternativeCloseArray: TJsonArray;
   LFileStream: TStream;
   LEditor: TBCBaseEditor;
   LElementPrefix: string;
@@ -426,12 +426,12 @@ begin
           ARange.CloseOnTerm := PropertiesObject.B['CloseOnTerm'];
           ARange.SkipWhitespace := PropertiesObject.B['SkipWhitespace'];
           ARange.CloseParent := PropertiesObject.B['CloseParent'];
-          AlternativeCloseArray := PropertiesObject['AlternativeClose'].ArrayValue;
-          if AlternativeCloseArray.Count > 0 then
+          LAlternativeCloseArray := PropertiesObject['AlternativeClose'].ArrayValue;
+          if LAlternativeCloseArray.Count > 0 then
           begin
-            ARange.AlternativeCloseCount := AlternativeCloseArray.Count;
-            for i := 0 to ARange.AlternativeCloseCount - 1 do
-              ARange.AlternativeClose[i] := AlternativeCloseArray.Items[i].Value;
+            ARange.AlternativeCloseArrayCount := LAlternativeCloseArray.Count;
+            for i := 0 to ARange.AlternativeCloseArrayCount - 1 do
+              ARange.AlternativeCloseArray[i] := LAlternativeCloseArray.Items[i].Value;
           end;
           ARange.OpenBeginningOfLine := PropertiesObject.B['OpenBeginningOfLine'];
         end;
@@ -600,7 +600,7 @@ end;
 procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingFoldRegions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions;
   ACodeFoldingObject: TJsonObject);
 var
-  i: Integer;
+  i, j: Integer;
   LJsonDataValue: PJsonDataValue;
   LRegionItem: TBCEditorCodeFoldingRegionItem;
   LMemberObject: TJsonObject;
@@ -609,6 +609,7 @@ var
   LFileStream: TStream;
   LJSONObject: TJsonObject;
   LOpenToken, LCloseToken: string;
+  LSkipIfFoundAfterOpenTokenArray: TJsonArray;
 begin
   if ACodeFoldingObject.Contains('FoldRegion') then
   for i := 0 to ACodeFoldingObject['FoldRegion'].ArrayValue.Count - 1 do
@@ -652,7 +653,15 @@ begin
       LRegionItem.OpenIsClose := LMemberObject.B['OpenIsClose'];
       LRegionItem.TokenEndIsPreviousLine := LMemberObject.B['TokenEndIsPreviousLine'];
       LRegionItem.NoSubs := LMemberObject.B['NoSubs'];
-      LRegionItem.SkipIfFoundAfterOpenToken := LMemberObject['SkipIfFoundAfterOpenToken'].Value;
+
+      LSkipIfFoundAfterOpenTokenArray := LMemberObject['SkipIfFoundAfterOpenToken'].ArrayValue;
+      if LSkipIfFoundAfterOpenTokenArray.Count > 0 then
+      begin
+        LRegionItem.SkipIfFoundAfterOpenTokenArrayCount := LSkipIfFoundAfterOpenTokenArray.Count;
+        for j := 0 to LRegionItem.SkipIfFoundAfterOpenTokenArrayCount - 1 do
+          LRegionItem.SkipIfFoundAfterOpenTokenArray[j] := LSkipIfFoundAfterOpenTokenArray.Items[j].Value;
+      end;
+
       LRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
       LRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
     end;

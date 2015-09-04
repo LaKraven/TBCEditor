@@ -3646,7 +3646,7 @@ var
 
   procedure RegionItemsOpen;
   var
-    i, j: Integer;
+    i, j, k: Integer;
     LSkipIfFoundAfterOpenToken: Boolean;
     LRegionItem: TBCEditorCodeFoldingRegionItem;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -3711,27 +3711,32 @@ var
               begin
                 { check if special rule found }
                 LSkipIfFoundAfterOpenToken := False;
-                if LRegionItem.SkipIfFoundAfterOpenToken <> '' then
+                if LRegionItem.SkipIfFoundAfterOpenTokenArrayCount > 0 then
                 begin
                   while LTextPtr^ <> BCEDITOR_NONE_CHAR do
                   begin
-                    LKeyWordPtr := PChar(LRegionItem.SkipIfFoundAfterOpenToken);
-                    LBookmarkTextPtr2 := LTextPtr;
-                    if UpCase(LTextPtr^) = LKeyWordPtr^ then { if first character match }
+                    for k := 0 to LRegionItem.SkipIfFoundAfterOpenTokenArrayCount - 1 do
                     begin
-                      while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
+                      LKeyWordPtr := PChar(LRegionItem.SkipIfFoundAfterOpenTokenArray[k]);
+                      LBookmarkTextPtr2 := LTextPtr;
+                      if UpCase(LTextPtr^) = LKeyWordPtr^ then { if first character match }
                       begin
-                        Inc(LTextPtr);
-                        Inc(LKeyWordPtr);
+                        while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
+                        begin
+                          Inc(LTextPtr);
+                          Inc(LKeyWordPtr);
+                        end;
+                        if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
+                        begin
+                          LSkipIfFoundAfterOpenToken := True;
+                          Break; { for }
+                        end
+                        else
+                          LTextPtr := LBookmarkTextPtr2; { region not found, return pointer back }
                       end;
-                      if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
-                      begin
-                        LSkipIfFoundAfterOpenToken := True;
-                        Break;
-                      end
-                      else
-                        LTextPtr := LBookmarkTextPtr2; { region not found, return pointer back }
                     end;
+                    if LSkipIfFoundAfterOpenToken then
+                      Break; { while }
                     Inc(LTextPtr);
                   end;
                 end;
@@ -11099,6 +11104,8 @@ begin
             begin
               LInsertCount := 0;
               SetSelectedTextEmpty;
+              if LTextCaretPosition.Line > FLines.Count then
+                LTextCaretPosition.Line := FLines.Count - 1;
             end;
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);

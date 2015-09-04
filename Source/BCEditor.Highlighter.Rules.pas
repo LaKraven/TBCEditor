@@ -96,8 +96,8 @@ type
 
   TBCEditorRange = class(TBCEditorRule)
   strict private
-    FAlternativeClose: TBCEditorArrayOfString;
-    FAlternativeCloseCount: Integer;
+    FAlternativeCloseArray: TBCEditorArrayOfString;
+    FAlternativeCloseArrayCount: Integer;
     FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
@@ -126,7 +126,7 @@ type
     function GetSet(Index: Integer): TBCEditorSet;
     function GetSetCount: Integer;
     function GetToken(Index: Integer): TBCEditorToken;
-    procedure SetAlternativeCloseCount(const Value: Integer);
+    procedure SetAlternativeCloseArrayCount(const Value: Integer);
     procedure SetCaseSensitive(const Value: Boolean);
   public
     constructor Create(AOpenToken: string = ''; ACloseToken: string = ''); virtual;
@@ -142,8 +142,8 @@ type
     procedure Prepare(AParent: TBCEditorRange);
     procedure Reset;
     procedure SetDelimiters(ADelimiters: TBCEditorCharSet);
-    property AlternativeClose: TBCEditorArrayOfString read FAlternativeClose write FAlternativeClose;
-    property AlternativeCloseCount: Integer read FAlternativeCloseCount write SetAlternativeCloseCount;
+    property AlternativeCloseArray: TBCEditorArrayOfString read FAlternativeCloseArray write FAlternativeCloseArray;
+    property AlternativeCloseArrayCount: Integer read FAlternativeCloseArrayCount write SetAlternativeCloseArrayCount;
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TBCEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
@@ -424,7 +424,7 @@ begin
 
   SetCaseSensitive(False);
 
-  FAlternativeCloseCount := 0;
+  FAlternativeCloseArrayCount := 0;
 
   FPrepared := False;
 
@@ -551,10 +551,10 @@ begin
     Ranges[i].SetDelimiters(ADelimiters);
 end;
 
-procedure TBCEditorRange.SetAlternativeCloseCount(const Value: Integer);
+procedure TBCEditorRange.SetAlternativeCloseArrayCount(const Value: Integer);
 begin
-  FAlternativeCloseCount := Value;
-  SetLength(FAlternativeClose, Value);
+  FAlternativeCloseArrayCount := Value;
+  SetLength(FAlternativeCloseArray, Value);
 end;
 
 procedure TBCEditorRange.SetCaseSensitive(const Value: Boolean);

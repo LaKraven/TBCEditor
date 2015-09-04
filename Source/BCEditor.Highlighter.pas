@@ -218,11 +218,11 @@ begin
 
   if Assigned(FCurrentRange) then
   begin
-    if FCurrentRange.AlternativeCloseCount > 0 then
+    if FCurrentRange.AlternativeCloseArrayCount > 0 then
     begin
-      for i := 0 to FCurrentRange.AlternativeCloseCount - 1 do
+      for i := 0 to FCurrentRange.AlternativeCloseArrayCount - 1 do
       begin
-        LKeyword := PChar(FCurrentRange.AlternativeClose[i]);
+        LKeyword := PChar(FCurrentRange.AlternativeCloseArray[i]);
         j := FRunPosition;
         while (FCurrentLine[j] <> BCEDITOR_NONE_CHAR) and (FCurrentLine[j] = LKeyword^) do
         begin

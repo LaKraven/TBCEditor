@@ -33,7 +33,6 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
     Lines.Text := Highlighter.Info.General.Sample; 
   end;
 ```
-If you want to use stream to read the higlighter and color, override virtual function CreateFileStream(AFileName: string): TStream;.
 
 <h3>Demo</h3>
 

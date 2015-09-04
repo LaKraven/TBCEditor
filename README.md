@@ -33,6 +33,7 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
     Lines.Text := Highlighter.Info.General.Sample; 
   end;
 ```
+Note! LoadFromStream does not support multi-highlighters (for example HTML with Script.json). Override TBCBaseEditor.CreateFileStream function, if you want to load multi-highlighters from a stream. 
 
 <h3>Demo</h3>
 

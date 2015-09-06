@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"29.8.2015",
+            "Date":"6.9.2015",
             "Sample":[
                "; Comment\r\n",
                "[Section]\r\n",
@@ -86,16 +86,6 @@
             },
             "SkipRegion":[
                {
-                  "OpenToken":"'",
-                  "CloseToken":"'",
-                  "RegionType":"String"
-               },
-               {
-                  "OpenToken":"\"",
-                  "CloseToken":"\"",
-                  "RegionType":"String"
-               },
-               {
                   "OpenToken":";",
                   "RegionType":"SingleLine"
                }
@@ -126,16 +116,6 @@
    },
    "CompletionProposal":{
       "SkipRegion":[
-         {
-            "OpenToken":"'",
-            "CloseToken":"'",
-            "RegionType":"String"
-         },
-         {
-            "OpenToken":"\"",
-            "CloseToken":"\"",
-            "RegionType":"String"
-         },
          {
             "OpenToken":";",
             "RegionType":"SingleLine"

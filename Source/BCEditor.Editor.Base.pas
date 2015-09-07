@@ -8955,7 +8955,7 @@ var
         Inc(Result);
         Inc(i);
       end;
-      FDisplayCaretY := i;
+
       FDisplayCaretX := Length(FLines[i - 1]) - Length(LRightSide) + 1;
     end;
 
@@ -9152,12 +9152,7 @@ begin
     LBeginTextPosition := SelectionBeginPosition;
     LEndTextPosition := SelectionEndPosition;
     if (LBeginTextPosition.Char <> LEndTextPosition.Char) or (LBeginTextPosition.Line <> LEndTextPosition.Line) then
-    //begin
       DeleteSelection;
-      //TextCaretPosition := LBeginTextPosition;
-      //SelectionBeginPosition := LBeginTextPosition;
-      //SelectionEndPosition := LBeginTextPosition;
-    //end;
     if Assigned(AValue) and (AValue[0] <> BCEDITOR_NONE_CHAR) then
       InsertText;
   finally

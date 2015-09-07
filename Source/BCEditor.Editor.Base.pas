@@ -9152,12 +9152,12 @@ begin
     LBeginTextPosition := SelectionBeginPosition;
     LEndTextPosition := SelectionEndPosition;
     if (LBeginTextPosition.Char <> LEndTextPosition.Char) or (LBeginTextPosition.Line <> LEndTextPosition.Line) then
-    begin
+    //begin
       DeleteSelection;
-      TextCaretPosition := LBeginTextPosition;
-      SelectionBeginPosition := LBeginTextPosition;
-      SelectionEndPosition := LBeginTextPosition;
-    end;
+      //TextCaretPosition := LBeginTextPosition;
+      //SelectionBeginPosition := LBeginTextPosition;
+      //SelectionEndPosition := LBeginTextPosition;
+    //end;
     if Assigned(AValue) and (AValue[0] <> BCEDITOR_NONE_CHAR) then
       InsertText;
   finally
@@ -9230,7 +9230,7 @@ begin
             FLines.Add('');
           end;
           TextCaretPosition := LTempPosition;
-          SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
+
           if LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor] then
             LTempPosition := LUndoItem.ChangeStartPosition
           else
@@ -9239,6 +9239,9 @@ begin
             TextCaretPosition := LTempPosition
           else
             SetCaretAndSelection(LTempPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
+
+          SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
+
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
           if LUndoItem.ChangeReason = crDeleteAll then

@@ -10491,7 +10491,6 @@ begin
         LMiddle := VisibleLines div 2;
         TopLine := LCaretRow - VisibleLines - 1 + LMiddle;
       end
-      { Forces to middle even if visible in viewport }
       else
       if AEvenIfVisible then
       begin
@@ -10571,13 +10570,11 @@ var
   end;
 
 begin
-  { Process a command }
   LHelper := '';
   IncPaintLock;
   LTextCaretPosition := TextCaretPosition;
   try
     case ACommand of
-      { Horizontal caret movement or selection }
       ecLeft, ecSelectionLeft:
         MoveCaretHorizontally(-1, ACommand = ecSelectionLeft);
       ecRight, ecSelectionRight:
@@ -10590,7 +10587,6 @@ begin
         DoHomeKey(ACommand = ecSelectionLineStart);
       ecLineEnd, ecSelectionLineEnd:
         DoEndKey(ACommand = ecSelectionLineEnd);
-      { Vertical caret movement or selection }
       ecUp, ecSelectionUp:
         begin
           MoveCaretVertically(-1, ACommand = ecSelectionUp);
@@ -10674,7 +10670,6 @@ begin
               SetBookmark(i, LTextCaretPosition);
           end;
         end;
-      { Word selection, selection }
       ecWordLeft, ecSelectionWordLeft:
         begin
           LCaretNewPosition := WordStart;
@@ -10703,23 +10698,18 @@ begin
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
             LTabBuffer := FLines.Strings[LTextCaretPosition.Line];
-            { Behind EndOfLine? Simply move the cursor }
             if LTextCaretPosition.Char > LLength + 1 then
             begin
               LHelper := '';
-              { It's at the end of the line, move it to the length }
               if LLength > 0 then
                 SetTextCaretX(LLength + 1)
               else
               begin
-                { move it as if there were normal spaces there }
                 LSpaceCount1 := LTextCaretPosition.Char - 1;
                 LSpaceCount2 := 0;
-                { unindent }
                 if LSpaceCount1 > 0 then
                 begin
                   LBackCounterLine := LTextCaretPosition.Line;
-                  { It's better not to have if statement inside loop }
                   if (eoTrimTrailingSpaces in Options) and (LLength = 0) then
                   while LBackCounterLine >= 0 do
                   begin
@@ -10741,22 +10731,21 @@ begin
                 end;
                 if LSpaceCount2 = LSpaceCount1 then
                   LSpaceCount2 := 0;
-                { Move caret }
+
                 SetTextCaretX(LTextCaretPosition.Char - (LSpaceCount1 - LSpaceCount2));
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end;
             end
             else
-              { Deleting while on beginning of line? }
               if LTextCaretPosition.Char = 1 then
               begin
-                { join this line with the last line if possible }
                 if LTextCaretPosition.Line > 0 then
                 begin
                   SetTextCaretY(LTextCaretPosition.Line - 1);
                   SetTextCaretX(Length(Lines[LTextCaretPosition.Line - 1]) + 1);
 
-                  FUndoList.AddChange(crSilentDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, sLineBreak, smNormal);
+                  FUndoList.AddChange(crSilentDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition,
+                    sLineBreak, smNormal);
 
                   FLines.Delete(LTextCaretPosition.Line);
                   DoLinesDeleted(LTextCaretPosition.Line, 1);
@@ -10769,12 +10758,10 @@ begin
               end
               else
               begin
-                { Delete text before the caret }
                 LSpaceCount1 := LeftSpaceCount(LLineText);
                 LSpaceCount2 := 0;
                 if (LLineText[LTextCaretPosition.Char - 1] <= BCEDITOR_SPACE_CHAR) and (LSpaceCount1 = LTextCaretPosition.Char - 1) then
                 begin
-                  { Unindent, count visual whitespace on current previous lines }
                   LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText);
                   LVisualSpaceCount2 := 0;
                   LBackCounterLine := LTextCaretPosition.Line - 1;
@@ -10809,10 +10796,6 @@ begin
                     FUndoList.BeginBlock;
                     try
                       FUndoList.AddChange(crSilentDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
-
-                      { If there's visual difference after deletion, that means there are BCEDITOR_SPACE_CHAR space
-                        chars which we need to compensate with BCEDITOR_SPACE_CHAR spaces. They cannot exceed tab
-                        width. }
                       if LVisualSpaceCount2 - LLength > 0 then
                         LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
                       Insert(LSpaceBuffer, LLineText, i + 1);
@@ -10862,7 +10845,6 @@ begin
             end;
           end;
         end;
-      { Delete command }
       ecDeleteChar:
         if not ReadOnly then
         begin
@@ -10915,7 +10897,6 @@ begin
             end;
           end;
         end;
-      { Other deletion commands }
       ecDeleteWord, ecDeleteEndOfLine:
         if not ReadOnly then
         begin
@@ -11003,13 +10984,12 @@ begin
           begin
             FLines.Delete(LTextCaretPosition.Line);
             LHelper := LHelper + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
-            FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, GetTextPosition(1, LTextCaretPosition.Line - 1), GetTextPosition(1, LTextCaretPosition.Line),
+            FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, GetTextPosition(1, LTextCaretPosition.Line), GetTextPosition(1, LTextCaretPosition.Line + 1),
               LHelper, smNormal);
             DoLinesDeleted(LTextCaretPosition.Line, 1);
           end;
           TextCaretPosition := GetTextPosition(1, LTextCaretPosition.Line);
         end;
-      { Moving }
       ecMoveLineUp:
         begin
           FCommandDrop := True;
@@ -11082,16 +11062,13 @@ begin
             FCommandDrop := False;
           end;
         end;
-      { Search }
       ecSearchNext:
         FindNext;
       ecSearchPrevious:
         FindPrevious;
-      { Delete everything }
       ecClear:
         if not ReadOnly then
           Clear;
-      { New line insertion / break }
       ecInsertLine, ecLineBreak:
         if not ReadOnly then
         begin
@@ -11298,7 +11275,6 @@ begin
             UndoList.EndBlock;
           end;
         end;
-      { Tabbing }
       ecTab:
         if not ReadOnly then
           DoTabKey;
@@ -11417,7 +11393,6 @@ begin
       ecAlternatingCaseBlock:
         if not ReadOnly then
           DoToggleSelectedCase(ACommand);
-      { Undo / Redo }
       ecUndo:
         if not readonly then
         begin
@@ -11446,7 +11421,6 @@ begin
       ecPaste:
         if not ReadOnly then
           DoPasteFromClipboard;
-      { Scrolling }
       ecScrollUp, ecScrollDown:
         begin
           LCaretRow := DisplayCaretY;
@@ -11480,34 +11454,29 @@ begin
           LeftChar := LeftChar + 1;
           Update;
         end;
-      { Editing mode }
       ecInsertMode:
         InsertMode := True;
       ecOverwriteMode:
         InsertMode := False;
       ecToggleMode:
         InsertMode := not InsertMode;
-      { Indentation }
       ecBlockIndent:
         if not ReadOnly then
           DoBlockIndent;
       ecBlockUnindent:
         if not ReadOnly then
           DoBlockUnindent;
-      { Selection mode }
       ecNormalSelect:
         FSelection.Mode := smNormal;
       ecColumnSelect:
         FSelection.Mode := smColumn;
       ecLineSelect:
         FSelection.Mode := smLine;
-      { Fires event with word under cursor }
       ecContextHelp:
         begin
           if Assigned(FOnContextHelp) then
             FOnContextHelp(Self, WordAtCursor);
         end;
-      { IME }
       ecImeStr:
         if not ReadOnly then
         begin

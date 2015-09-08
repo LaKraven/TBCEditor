@@ -9224,18 +9224,20 @@ begin
             TextCaretPosition := GetTextPosition(1, FLines.Count);
             FLines.Add('');
           end;
-          TextCaretPosition := LTempPosition;
 
           if LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor] then
             LTempPosition := LUndoItem.ChangeStartPosition
           else
             LTempPosition := LUndoItem.ChangeEndPosition;
+
           if LUndoItem.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor] then
             TextCaretPosition := LTempPosition
           else
             SetCaretAndSelection(LTempPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
+
+          TextCaretPosition := LUndoItem.ChangeEndPosition;
 
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
@@ -9251,15 +9253,15 @@ begin
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
           if DisplayCaretY > 0 then
           begin
-            LTempText := FLines.Strings[LUndoItem.ChangeEndPosition.Line];
+            LTempText := FLines.Strings[LUndoItem.ChangeStartPosition.Line];
             if (Length(LTempText) < DisplayCaretX - 1) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
               LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LTempText));
-            SetLineWithRightTrim(LUndoItem.ChangeEndPosition.Line, LTempText + LUndoItem.ChangeString);
-            FLines.Delete(LUndoItem.ChangeEndPosition.Line + 1);
+            SetLineWithRightTrim(LUndoItem.ChangeStartPosition.Line, LTempText + LUndoItem.ChangeString);
+            FLines.Delete(LUndoItem.ChangeEndPosition.Line);
           end
           else
             SetLineWithRightTrim(LUndoItem.ChangeEndPosition.Line, LUndoItem.ChangeString);
-          DoLinesDeleted(LUndoItem.ChangeEndPosition.Line + 1, 1);
+          DoLinesDeleted(LUndoItem.ChangeEndPosition.Line, 1);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
         end;
@@ -10744,7 +10746,7 @@ begin
                   SetTextCaretY(LTextCaretPosition.Line - 1);
                   SetTextCaretX(Length(Lines[LTextCaretPosition.Line - 1]) + 1);
 
-                  FUndoList.AddChange(crSilentDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition,
+                  FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, TextCaretPosition, LTextCaretPosition,
                     sLineBreak, smNormal);
 
                   FLines.Delete(LTextCaretPosition.Line);
@@ -11128,7 +11130,8 @@ begin
                   if (eoTrimTrailingSpaces in FOptions) and (LTabBuffer <> '') then
                     FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, LTabBuffer + LLineText, smNormal)
                   else
-                    FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, LLineText, smNormal);
+                    FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition,
+                      GetTextPosition(1, LTextCaretPosition.Line + 1), LLineText, smNormal);
 
                   with FLines do
                   begin
@@ -11185,8 +11188,6 @@ begin
                 end;
                 FLines.Insert(LTextCaretPosition.Line + 1, '');
 
-                FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', smNormal);
-
                 with FLines do
                 begin
                   Attributes[LTextCaretPosition.Line].LineState := lsModified;
@@ -11210,6 +11211,9 @@ begin
                   else
                     DisplayCaretX := 1;
                 end;
+
+                FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition,
+                  GetTextPosition(DisplayCaretX, LTextCaretPosition.Line + 1), '', smNormal);
               end;
             end
             else

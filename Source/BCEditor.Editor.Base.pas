@@ -1169,7 +1169,7 @@ var
   LPivot: Integer;
   LFound: Boolean;
 begin
-  Result := -1;
+  Result := ADisplayLineNumber; //-1;
   if Assigned(FLineNumbersCache) and (FLineNumbersCache[ADisplayLineNumber] = ADisplayLineNumber) then
     Result := ADisplayLineNumber
   else
@@ -8956,7 +8956,11 @@ var
         Inc(i);
       end;
 
-      FDisplayCaretX := Length(FLines[i - 1]) - Length(LRightSide) + 1;
+      { TextCaretPosition cannot be set correctly, if the line numbers are not updated after inserted lines. }
+      FResetLineNumbersCache := True;
+      CreateLineNumbersCache;
+
+      TextCaretPosition := GetTextPosition(Length(FLines[i - 1]) - Length(LRightSide) + 1, i - 1);
     end;
 
     function InsertColumn: Integer;

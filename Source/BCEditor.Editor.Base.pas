@@ -10519,7 +10519,7 @@ end;
 procedure TBCBaseEditor.ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
 var
   i: Integer;
-  LLength: Integer;
+  LLength, LRealLength: Integer;
   LLineText: string;
   LHelper: string;
   LTabBuffer: string;
@@ -10541,6 +10541,7 @@ var
   LCaretRow: Integer;
   S: string;
   LChar: Char;
+  LPChar: PChar;
 
   function SaveTrimmedWhitespace(const S: string; APosition: Integer): string;
   var
@@ -11485,7 +11486,15 @@ begin
       ecImeStr:
         if not ReadOnly then
         begin
-          SetString(S, PChar(AData), Length(PChar(AData)));
+          LPChar := PChar(AData);
+          LLength := Length(PChar(AData));
+          LRealLength := 0;
+          for i := 0 to LLength - 1 do
+          begin
+            LRealLength := LRealLength + FTextDrawer.GetCharCount(LPChar);
+            Inc(LPChar);
+          end;
+          SetString(S, PChar(AData), LRealLength);
           if SelectionAvailable then
           begin
             BeginUndoBlock;
@@ -11511,15 +11520,13 @@ begin
                 FScroll.Options := FScroll.Options + [soPastEndOfLine];
               LBlockStartPosition := LTextCaretPosition;
 
-              LLength := FTextDrawer.GetCharCount(PChar(AData));
-
               if not FInsertMode then
               begin
                 LHelper := Copy(LLineText, LTextCaretPosition.Char, LLength);
-                Delete(LLineText, LTextCaretPosition.Char, LLength);
+                Delete(LLineText, LTextCaretPosition.Char, LRealLength);
               end;
               Insert(S, LLineText, LTextCaretPosition.Char);
-              DisplayCaretX := (DisplayCaretX + LLength);
+              DisplayCaretX := DisplayCaretX + LRealLength;
               SetLineWithRightTrim(GetTextCaretY, LLineText);
               if FInsertMode then
                 LHelper := '';

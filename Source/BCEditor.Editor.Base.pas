@@ -8956,11 +8956,7 @@ var
         Inc(i);
       end;
 
-      { TextCaretPosition cannot be set correctly, if the line numbers are not updated after inserted lines. }
-      FResetLineNumbersCache := True;
-      CreateLineNumbersCache;
-
-      TextCaretPosition := GetTextPosition(Length(FLines[i - 1]) - Length(LRightSide) + 1, i - 1);
+      LTextCaretPosition := GetTextPosition(Length(FLines[i - 1]) - Length(LRightSide) + 1, i - 1);
     end;
 
     function InsertColumn: Integer;
@@ -9145,6 +9141,7 @@ var
     end;
 
     { Force caret reset }
+    TextCaretPosition := LTextCaretPosition;
     SelectionBeginPosition := TextCaretPosition;
     SelectionEndPosition := TextCaretPosition;
   end;

@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"29.8.2015",
+            "Date":"10.9.2015",
             "Sample":[
                "; This is comment\r\n",
                "/[Setup]\r\n",
@@ -373,7 +373,7 @@
       "Ranges":[
          {
             "Options":{
-               "NoMatchingPairHighlight":true
+               "MatchingPairHighlight":false
             },
             "SkipRegion":[
                {

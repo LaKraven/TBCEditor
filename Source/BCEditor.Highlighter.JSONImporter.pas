@@ -694,11 +694,8 @@ begin
     if LCodeFoldingObject.Contains('StringEscapeChar') then
       ACodeFoldingRegions.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
 
-    // TODO: This should be a highlighter option. The CodeFolding.Options should not enable the highlighting.
-    if LCodeFoldingObject.Contains('NoMatchingPairHighlight') then
-      if LCodeFoldingObject.B['NoMatchingPairHighlight'] then
-        TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options := TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options -
-          [cfoHighlightMatchingPair]
+    if LCodeFoldingObject.Contains('MatchingPairHighlight') then
+      FHighlighter.MatchingPairHighlight := LCodeFoldingObject.B['MatchingPairHighlight'];
   end;
 end;
 

@@ -24,6 +24,7 @@ type
     FFileName: string;
     FInfo: TBCEditorHighlighterInfo;
     FLoading: Boolean;
+    FMatchingPairHighlight: Boolean;
     FMatchingPairs: TList;
     FMainRules: TBCEditorRange;
     FMultiHighlighter: Boolean;
@@ -79,6 +80,7 @@ type
     property Info: TBCEditorHighlighterInfo read FInfo write FInfo;
     property Loading: Boolean read FLoading write FLoading;
     property MainRules: TBCEditorRange read FMainRules;
+    property MatchingPairHighlight: Boolean read FMatchingPairHighlight write FMatchingPairHighlight default True;
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
     property MultiHighlighter: Boolean read FMultiHighlighter write FMultiHighlighter;
     property Name: string read FName write FName;
@@ -136,6 +138,7 @@ begin
 
   FColors := TBCEditorHighlighterColors.Create(Self);
   FMatchingPairs := TList.Create;
+  FMatchingPairHighlight := True;
 
   FTemporaryCurrentTokens := TList.Create;
 

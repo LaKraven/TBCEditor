@@ -8621,6 +8621,8 @@ var
   LTextPosition: TBCEditorTextPosition;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
+  if not FHighlighter.MatchingPairHighlight then
+    Exit;
   LTextPosition := TextCaretPosition;
   FCurrentMatchingPair := GetMatchingToken(LTextPosition, FCurrentMatchingPairMatch);
   if mpoHighlightAfterToken in FMatchingPair.Options then

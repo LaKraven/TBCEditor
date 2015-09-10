@@ -11494,7 +11494,7 @@ begin
             LRealLength := LRealLength + FTextDrawer.GetCharCount(LPChar);
             Inc(LPChar);
           end;
-          SetString(S, PChar(AData), LRealLength);
+          SetString(S, PChar(AData), LLength);
           if SelectionAvailable then
           begin
             BeginUndoBlock;
@@ -11523,8 +11523,9 @@ begin
               if not FInsertMode then
               begin
                 LHelper := Copy(LLineText, LTextCaretPosition.Char, LLength);
-                Delete(LLineText, LTextCaretPosition.Char, LRealLength);
+                Delete(LLineText, LTextCaretPosition.Char, LLength);
               end;
+
               Insert(S, LLineText, LTextCaretPosition.Char);
               DisplayCaretX := DisplayCaretX + LRealLength;
               SetLineWithRightTrim(GetTextCaretY, LLineText);

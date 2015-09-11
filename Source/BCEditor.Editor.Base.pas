@@ -7797,25 +7797,25 @@ var
   const
     ETOOptions = [tooOpaque, tooClipped];
 
-    function ShrinkAtWideGlyphs(const Token: string; First: Integer; var CharCount: Integer): string;
+    function ShrinkAtWideGlyphs(const AToken: string; AFirst: Integer; var ACharCount: Integer): string;
     var
-      i, j: Integer;
+      i, j, k: Integer;
     begin
-      Result := Token;
-      i := First;
+      Result := AToken;
+      i := AFirst;
       j := 0;
-      while i < First + CharCount do
+      k := Min(AFirst + ACharCount, Length(Result));
+      while i < k do
       begin
         Inc(j);
-        while Token[i] = BCEDITOR_FILLER_CHAR do
+        while AToken[i] = BCEDITOR_FILLER_CHAR do
           Inc(i);
         if j <> i then
-          Result[j] := Token[i];
+          Result[j] := AToken[i];
         Inc(i);
       end;
-      if Length(Result) <> j then
-        SetLength(Result, j);
-      CharCount := j;
+      SetLength(Result, j);
+      ACharCount := j;
     end;
 
   begin
@@ -11091,6 +11091,7 @@ begin
               if LTextCaretPosition.Line > FLines.Count then
                 LTextCaretPosition.Line := FLines.Count - 1;
             end;
+            LTextCaretPosition := TextCaretPosition;
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
 

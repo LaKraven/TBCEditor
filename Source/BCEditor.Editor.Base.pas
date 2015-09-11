@@ -9221,12 +9221,15 @@ begin
           else
             LTempPosition := TBCEditorTextPosition(MinPoint(TPoint(LUndoItem.ChangeStartPosition),
               TPoint(LUndoItem.ChangeEndPosition)));
+
           if (LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor]) and
             (LTempPosition.Line > FLines.Count) then
           begin
             TextCaretPosition := GetTextPosition(1, FLines.Count);
             FLines.Add('');
           end;
+
+          SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
 
           if LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor] then
             LTempPosition := LUndoItem.ChangeStartPosition
@@ -9238,7 +9241,7 @@ begin
           else
             SetCaretAndSelection(LTempPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
-          SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
+          //SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
 
           TextCaretPosition := LUndoItem.ChangeEndPosition;
 

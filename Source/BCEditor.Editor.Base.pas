@@ -220,7 +220,6 @@ type
     function IsKeywordAtLine(ALine: Integer): Boolean;
     function IsStringAllWhite(const ALine: string): Boolean;
     function LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
-    function MinPoint(const APoint1, APoint2: TPoint): TPoint;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function PreviousWordPosition: TBCEditorTextPosition; overload;
@@ -2221,14 +2220,6 @@ begin
   end
   else
     Result := 0;
-end;
-
-function TBCBaseEditor.MinPoint(const APoint1, APoint2: TPoint): TPoint;
-begin
-  if (APoint2.Y < APoint1.Y) or ((APoint2.Y = APoint1.Y) and (APoint2.X < APoint1.X)) then
-    Result := APoint2
-  else
-    Result := APoint1;
 end;
 
 function TBCBaseEditor.NextWordPosition: TBCEditorTextPosition;
@@ -8766,10 +8757,8 @@ end;
 
 procedure TBCBaseEditor.SetSelectedTextEmpty(const AChangeString: string = '');
 var
-  LBlockStartPosition, LUndoBeginPosition, LUndoEndPosition: TBCEditorTextPosition;
+  LBlockStartPosition: TBCEditorTextPosition;
 begin
-  LUndoBeginPosition := SelectionBeginPosition;
-  LUndoEndPosition := SelectionEndPosition;
   if AChangeString <> '' then
   begin
     LBlockStartPosition := SelectionBeginPosition;
@@ -8777,7 +8766,7 @@ begin
       LBlockStartPosition.Char := 1;
     FUndoList.BeginBlock;
   end;
-  FUndoList.AddChange(crDelete, LUndoBeginPosition, LUndoBeginPosition, LUndoEndPosition, GetSelectedText,
+  FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
   SetSelectedTextPrimitive(AChangeString);
   if AChangeString <> '' then
@@ -8823,6 +8812,7 @@ var
         end;
       smColumn:
         begin
+          // TODO: Refactor
           if LBeginTextPosition.Char > LEndTextPosition.Char then
             SwapInt(LBeginTextPosition.Char, LEndTextPosition.Char);
 
@@ -9215,12 +9205,10 @@ begin
         end;
       crDeleteAfterCursor, crDelete, crSilentDelete, crSilentDeleteAfterCursor, crDeleteAll:
         begin
-          if LUndoItem.ChangeSelectionMode = smColumn then
-            LTempPosition := GetTextPosition(Min(LUndoItem.ChangeStartPosition.Char, LUndoItem.ChangeEndPosition.Char),
-              Min(LUndoItem.ChangeStartPosition.Line, LUndoItem.ChangeEndPosition.Line))
-          else
-            LTempPosition := TBCEditorTextPosition(MinPoint(TPoint(LUndoItem.ChangeStartPosition),
-              TPoint(LUndoItem.ChangeEndPosition)));
+          //LTempPosition := LUndoItem.ChangeCaretPosition;
+
+          //if FSelection.ActiveMode = smColumn then
+          TextCaretPosition := LUndoItem.ChangeStartPosition;
 
           if (LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor]) and
             (LTempPosition.Line > FLines.Count) then
@@ -9231,27 +9219,20 @@ begin
 
           SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
 
-          if LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor] then
-            LTempPosition := LUndoItem.ChangeStartPosition
-          else
-            LTempPosition := LUndoItem.ChangeEndPosition;
-
           if LUndoItem.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor] then
-            TextCaretPosition := LTempPosition
+            TextCaretPosition := LUndoItem.ChangeCaretPosition // LTempPosition
           else
-            SetCaretAndSelection(LTempPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
-
-          //SetSelectedTextPrimitive(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
-
-          TextCaretPosition := LUndoItem.ChangeEndPosition;
+            SetCaretAndSelection(LUndoItem.ChangeCaretPosition{LTempPosition}, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
+
           if LUndoItem.ChangeReason = crDeleteAll then
           begin
             TextCaretPosition := GetTextPosition(1, 1);
             FSelectionEndPosition := GetTextPosition(1, 1);
           end;
+
           EnsureCursorPositionVisible;
         end;
       crLineBreak:
@@ -10257,7 +10238,8 @@ begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
     if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
-      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace)) and IsKeywordAtCursorPosition or
+      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
+       (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace)) or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
       FNeedToRescanCodeFolding := True;

@@ -4417,8 +4417,10 @@ procedure TBCBaseEditor.SetText(const Value: string);
 begin
   IncPaintLock;
   BeginUndoBlock;
+  ClearCodeFolding;
   SelectAll;
   SelectedText := Value;
+  InitCodeFolding;
   EndUndoBlock;
   DecPaintLock;
 end;

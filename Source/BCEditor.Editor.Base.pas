@@ -2273,7 +2273,7 @@ begin
   { don't return a partially visible last line }
   if Y >= LLinesY then
     Y := Max(LLinesY - 1, 0);
-  Result := PixelsToRowColumn(X + 6, Y); { +6 because X is not in the middle of the cursor }
+  Result := PixelsToRowColumn(X + 2, Y);
 end;
 
 function TBCBaseEditor.PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;

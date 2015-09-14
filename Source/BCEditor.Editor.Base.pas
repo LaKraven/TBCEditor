@@ -1665,7 +1665,6 @@ function TBCBaseEditor.GetSelectedText: string;
     LTextPosition: TBCEditorTextPosition;
     LDisplayPosition: TBCEditorDisplayPosition;
     LTrimCount: Integer;
-    LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     LColumnFrom := SelectionBeginPosition.Char;
     LFirst := SelectionBeginPosition.Line;
@@ -1675,10 +1674,6 @@ function TBCBaseEditor.GetSelectedText: string;
     case FSelection.ActiveMode of
       smNormal:
         begin
-          LCodeFoldingRange := CodeFoldingRangeForLine(LLast);
-          if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
-            LLast := LCodeFoldingRange.ToLine;
-
           if LFirst = LLast then
             Result := Copy(Lines[LFirst], LColumnFrom, LColumnTo - LColumnFrom)
           else

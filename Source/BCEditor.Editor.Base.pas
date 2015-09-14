@@ -3738,7 +3738,7 @@ var
                 end;
 
                 if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '') and not LCodeFoldingRange.IsExtraTokenFound then
-                  LOpenTokenFoldRangeList.Remove(LCodeFoldingRange); //LOpenTokenFoldRangeList.Last);
+                  LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
 
                 if LOpenTokenFoldRangeList.Count > 0 then
                   LFoldRanges := TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).SubCodeFoldingRanges
@@ -4301,6 +4301,7 @@ var
   LTextCaretPosition, LBlockStartPosition, LBlockEndPosition: TBCEditorTextPosition;
 begin
   BeginUndoBlock;
+  ClearCodeFolding;
   try
     LTextCaretPosition := TextCaretPosition;
     if SelectionAvailable then
@@ -4318,6 +4319,7 @@ begin
     if (Value <> '') and (FSelection.ActiveMode <> smColumn) then
       FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
   finally
+    InitCodeFolding;
     EndUndoBlock;
   end;
 end;
@@ -4417,10 +4419,8 @@ procedure TBCBaseEditor.SetText(const Value: string);
 begin
   IncPaintLock;
   BeginUndoBlock;
-  ClearCodeFolding;
   SelectAll;
   SelectedText := Value;
-  InitCodeFolding;
   EndUndoBlock;
   DecPaintLock;
 end;
@@ -6769,6 +6769,8 @@ var
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
+  if FPaintLock <> 0 then
+    Exit;
   if FHighlighter.Loading then
     Exit;
 

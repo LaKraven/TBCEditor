@@ -7,7 +7,8 @@ A syntax highlighting edit control with code folding, minimap, external JSON hig
 <h3>Build requirements</h3>
 
 * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
-* Delphi versions XE4, XE5, XE6, XE7, XE8, and Seattle are supported (XE7: Update 1 required)
+* Delphi versions XE4, XE5, XE6, XE7, XE8, and Seattle are supported 
+* Delphi XE7: Update 1 required
 * C++ Builder XE7, XE8, and Seattle are supported
 
 <h3>Conditional compilation</h3>

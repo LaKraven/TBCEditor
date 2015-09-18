@@ -8441,7 +8441,7 @@ begin
         end;
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition);
+          SetCaretAndSelection(LUndoItem.ChangeStartPosition{LUndoItem.ChangeCaretPosition}, LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition);
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
@@ -8449,18 +8449,11 @@ begin
           if LUndoItem.ChangeReason = crDragDropInsert then
             SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
         end;
-      crDeleteAfterCursor, crSilentDeleteAfterCursor:
+      crDeleteAfterCursor, crSilentDeleteAfterCursor, crDelete, crSilentDelete:
         begin
           SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           LTempString := SelectedText;
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
-          FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
-            LUndoItem.ChangeEndPosition, LTempString, LUndoItem.ChangeSelectionMode);
-          TextCaretPosition := LUndoItem.ChangeCaretPosition;
-        end;
-      crDelete, crSilentDelete:
-        begin
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, LTempString, LUndoItem.ChangeSelectionMode);
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
@@ -9197,7 +9190,7 @@ begin
         end;
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
+          SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
@@ -9205,9 +9198,6 @@ begin
         end;
       crDeleteAfterCursor, crDelete, crSilentDelete, crSilentDeleteAfterCursor, crDeleteAll:
         begin
-          //LTempPosition := LUndoItem.ChangeCaretPosition;
-
-          //if FSelection.ActiveMode = smColumn then
           TextCaretPosition := LUndoItem.ChangeStartPosition;
 
           if (LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor]) and

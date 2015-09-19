@@ -6936,7 +6936,7 @@ end;
 
 procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
 var
-  X, LHeight: Integer;
+  X, Y, LHeight: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
   if CodeFolding.Padding > 0 then
@@ -6956,8 +6956,9 @@ begin
     begin
       X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2) - 1;
       Canvas.MoveTo(X, AClipRect.Top);
-      Canvas.LineTo(X, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
-      Canvas.LineTo(AClipRect.Right, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
+      Y := AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4);
+      Canvas.LineTo(X, Y);
+      Canvas.LineTo(AClipRect.Right - 1, Y);
     end
   end
   else

@@ -6792,7 +6792,7 @@ begin
     if LClipRect.Right > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
     begin
       DrawRect := LClipRect;
-      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2;
       DrawRect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
       DeflateMinimapRect(DrawRect);
       FTextDrawer.SetBaseFont(Font);
@@ -6818,8 +6818,8 @@ begin
 
       if FCodeFolding.Visible and (Lines.Count > 0) then
       begin
-        DrawRect.Left := FLeftMargin.GetWidth + 1;
-        DrawRect.Right := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+        DrawRect.Left := FLeftMargin.GetWidth + 2;
+        DrawRect.Right := DrawRect.Left + FCodeFolding.GetWidth;
         PaintCodeFolding(DrawRect, LLine1, LLine2);
       end;
     end;
@@ -6946,15 +6946,15 @@ begin
 
   if not Assigned(LFoldRange) then
   begin
-    if {ADrawTreeLine or} CodeFoldingTreeLineForLine(ALine) then
+    if CodeFoldingTreeLineForLine(ALine) then
     begin
-      X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2);
+      X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2) - 1;
       Canvas.MoveTo(X, AClipRect.Top);
       Canvas.LineTo(X, AClipRect.Bottom);
     end;
     if CodeFoldingTreeEndForLine(ALine) then
     begin
-      X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2);
+      X := AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2) - 1;
       Canvas.MoveTo(X, AClipRect.Top);
       Canvas.LineTo(X, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
       Canvas.LineTo(AClipRect.Right, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) - 4));
@@ -6965,7 +6965,8 @@ begin
   begin
     LHeight := AClipRect.Right - AClipRect.Left;
     AClipRect.Top := AClipRect.Top + ((LineHeight - LHeight) div 2);
-    AClipRect.Bottom := AClipRect.Top + LHeight;
+    AClipRect.Bottom := AClipRect.Top + LHeight - 1;
+    AClipRect.Right := AClipRect.Right - 1;
 
     if CodeFolding.MarkStyle = msSquare then
       Canvas.FrameRect(AClipRect)

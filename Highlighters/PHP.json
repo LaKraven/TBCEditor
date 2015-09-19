@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"3.9.2015",
+            "Date":"19.9.2015",
             "Sample":[
                "<?php\r\n",
                "  echo \"Hello World!\";\r\n",
@@ -430,6 +430,14 @@
                }
             ],
             "FoldRegion":[
+               {
+                  "OpenToken":"<?PHP",
+                  "CloseToken":"?>"
+               },
+               {
+                  "OpenToken":"<?",
+                  "CloseToken":"?>"
+               },
                {
                   "OpenToken":"{",
                   "CloseToken":"}"

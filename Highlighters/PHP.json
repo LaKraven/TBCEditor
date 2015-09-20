@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"19.9.2015",
+            "Date":"20.9.2015",
             "Sample":[
                "<?php\r\n",
                "  echo \"Hello World!\";\r\n",
@@ -385,14 +385,13 @@
             ],
             "KeyList":[
                {
-                  "Type":"Symbol",
+                  "Type":"Tag",
+                  "Attributes":{
+                     "Element":"HighlightedBlock"
+                  },
                   "Words":[
                      "<?"
-                  ],
-                  "Attributes":{
-                     "Element":"Symbol",
-                     "ParentBackground":true
-                  }
+                  ]
                }
             ]
          }
@@ -431,12 +430,11 @@
             ],
             "FoldRegion":[
                {
-                  "OpenToken":"<?PHP",
-                  "CloseToken":"?>"
-               },
-               {
                   "OpenToken":"<?",
-                  "CloseToken":"?>"
+                  "CloseToken":"?>",
+                  "Properties":{
+                     "OpenTokenCanBeFollowedBy":"PHP"
+                  }
                },
                {
                   "OpenToken":"{",

@@ -651,6 +651,7 @@ begin
       LRegionItem.CloseTokenBeginningOfLine := LMemberObject.B['CloseTokenBeginningOfLine'];
       LRegionItem.SharedClose := LMemberObject.B['SharedClose'];
       LRegionItem.OpenIsClose := LMemberObject.B['OpenIsClose'];
+      LRegionItem.OpenTokenCanBeFollowedBy := LMemberObject['OpenTokenCanBeFollowedBy'].Value;
       LRegionItem.TokenEndIsPreviousLine := LMemberObject.B['TokenEndIsPreviousLine'];
       LRegionItem.NoSubs := LMemberObject.B['NoSubs'];
 

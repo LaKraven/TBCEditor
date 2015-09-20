@@ -2709,7 +2709,7 @@ begin
           LMaxFromLine := LCodeFoldingRange.FromLine;
         FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
 
-        if LCodeFoldingRange.Collapsable {and not LCodeFoldingRange.Collapsed} then
+        if LCodeFoldingRange.Collapsable then
         begin
           for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
             FCodeFoldingTreeLine[j] := True;
@@ -3636,6 +3636,7 @@ var
     LSkipIfFoundAfterOpenToken: Boolean;
     LRegionItem: TBCEditorCodeFoldingRegionItem;
     LCodeFoldingRange: TBCEditorCodeFoldingRange;
+    LTempTextPtr, LTempKeyWordPtr: PChar;
   begin
     if LOpenTokenSkipFoldRangeList.Count <> 0 then
       Exit;
@@ -3690,6 +3691,20 @@ var
               Inc(LTextPtr);
               Inc(LKeyWordPtr);
             end;
+
+            if LRegionItem.OpenTokenCanBeFollowedBy <> '' then
+              if UpCase(LTextPtr^) = PChar(LRegionItem.OpenTokenCanBeFollowedBy)^ then
+              begin
+                LTempTextPtr := LTextPtr;
+                LTempKeyWordPtr := PChar(LRegionItem.OpenTokenCanBeFollowedBy);
+                while UpCase(LTempTextPtr^) = LTempKeyWordPtr^ do
+                begin
+                  Inc(LTempTextPtr);
+                  Inc(LTempKeyWordPtr);
+                end;
+                if LTempKeyWordPtr^ = BCEDITOR_NONE_CHAR then
+                  LTextPtr := LTempTextPtr;
+              end;
 
             if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
             begin
@@ -6629,8 +6644,7 @@ begin
             if j > FCodeFolding.Hint.RowCount then
               j := FCodeFolding.Hint.RowCount;
             for i := LFoldRange.FromLine - 1 to LFoldRange.FromLine + j do
-              FCodeFoldingHintForm.ItemList.Add(StringReplace(Lines[i], BCEDITOR_TAB_CHAR,
-                StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width), [rfReplaceAll]));
+              FCodeFoldingHintForm.ItemList.Add(FLines.ExpandedStrings[i]);
             if j = FCodeFolding.Hint.RowCount then
               FCodeFoldingHintForm.ItemList.Add('...');
 
@@ -6765,8 +6779,6 @@ var
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
-  if FPaintLock <> 0 then
-    Exit;
   if FHighlighter.Loading then
     Exit;
 
@@ -8046,7 +8058,7 @@ var
     LFoldRange: TBCEditorCodeFoldingRange;
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
     LScrolledXBy: Integer;
-    LTokenText: string;
+    LTokenText, LPreviousTokenText: string;
     LTokenPosition, LTokenLength: Integer;
     LStyle: TFontStyles;
     LKeyWord, LWord: string;
@@ -8091,7 +8103,10 @@ var
               Length(LFoldRange.RegionItem.OpenToken) + Pos(LFoldRange.RegionItem.OpenToken,
               UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
 
-          LCurrentLineText := LCurrentLineText + '..' + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
+          LCurrentLineText := LCurrentLineText + '..';
+          if LFoldRange.RegionItem.CloseToken <> '' then
+            if Pos(LFoldRange.RegionItem.CloseToken, FLines.ExpandedStrings[LFoldRange.ToLine - 1]) <> 0 then
+              LCurrentLineText := LCurrentLineText + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
           begin
@@ -8205,13 +8220,21 @@ var
 
               if FMatchingPair.Enabled then
                 if FCurrentMatchingPair <> trNotFound then
-                  if (LTokenText = FCurrentMatchingPairMatch.OpenToken) or (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
+                  if (Pos(LTokenText, FCurrentMatchingPairMatch.OpenToken) <> 0) or
+                    (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
                   begin
-                    if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
+                    if ((LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or
+                        (LTokenPosition - Length(LPreviousTokenText) = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1)) and
                        (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
                        (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
                     begin
+                      if LPreviousTokenText + LTokenText = FCurrentMatchingPairMatch.OpenToken then
+                      begin
+                        LTokenText := LPreviousTokenText + LTokenText;
+                        LTokenPosition := LTokenPosition - Length(LPreviousTokenText);
+                        LTokenLength := Length(LTokenText);
+                      end;
                       if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                       begin
                         if mpoUseMatchedColor in FMatchingPair.Options then
@@ -8277,6 +8300,7 @@ var
               PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
                 False);
           end;
+          LPreviousTokenText := LTokenText;
           FHighlighter.Next;
         end;
 
@@ -8603,6 +8627,7 @@ end;
 
 procedure TBCBaseEditor.ScanMatchingPair;
 var
+  LOpenLineText: string;
   LLine, LTempPosition: Integer;
   LTextPosition: TBCEditorTextPosition;
   LFoldRange: TBCEditorCodeFoldingRange;
@@ -8625,13 +8650,18 @@ begin
       if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
-        LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]));
-        FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], LTempPosition, Length(LFoldRange.RegionItem.OpenToken));
+
+        LOpenLineText :=  UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]);
+        LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
+
+        FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1],
+          LTempPosition, Length(LFoldRange.RegionItem.OpenToken));
         FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine - 1);
 
         LLine := LFoldRange.ToLine;
         LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines.ExpandedStrings[LLine - 1]));
-        FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines.ExpandedStrings[LLine - 1], LTempPosition, Length(LFoldRange.RegionItem.CloseToken));
+        FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines.ExpandedStrings[LLine - 1], LTempPosition,
+          Length(LFoldRange.RegionItem.CloseToken));
         if not LFoldRange.Collapsed then
           FCurrentMatchingPairMatch.CloseTokenPos := GetTextPosition(LTempPosition, LLine - 1)
         else

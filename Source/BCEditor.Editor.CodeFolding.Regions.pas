@@ -19,6 +19,7 @@ type
     FNoSubs: Boolean;
     FOpenIsClose: Boolean;
     FOpenToken: string;
+    FOpenTokenCanBeFollowedBy: string;
     FOpenTokenEnd: string;
     FOpenTokenLength: Integer;
     FParentRegionItem: TBCEditorCodeFoldingRegionItem;
@@ -38,6 +39,7 @@ type
     property NoSubs: Boolean read FNoSubs write FNoSubs default False;
     property OpenIsClose: Boolean read FOpenIsClose write FOpenIsClose default False;
     property OpenToken: string read FOpenToken write FOpenToken;
+    property OpenTokenCanBeFollowedBy: string read FOpenTokenCanBeFollowedBy write FOpenTokenCanBeFollowedBy;
     property OpenTokenEnd: string read FOpenTokenEnd write FOpenTokenEnd;
     property OpenTokenLength: Integer read FOpenTokenLength write FOpenTokenLength;
     property ParentRegionItem: TBCEditorCodeFoldingRegionItem read FParentRegionItem write FParentRegionItem;

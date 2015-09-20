@@ -928,10 +928,13 @@ var
 begin
   Result := nil;
 
-  LCodeFoldingRange := FCodeFoldingRangeToLine[ALine];
-  if Assigned(LCodeFoldingRange) then
-    if (LCodeFoldingRange.ToLine = ALine) and not LCodeFoldingRange.ParentCollapsed then
-      Result := LCodeFoldingRange;
+  if (ALine > 0) and (ALine < Length(FCodeFoldingRangeToLine)) then
+  begin
+    LCodeFoldingRange := FCodeFoldingRangeToLine[ALine];
+    if Assigned(LCodeFoldingRange) then
+      if (LCodeFoldingRange.ToLine = ALine) and not LCodeFoldingRange.ParentCollapsed then
+        Result := LCodeFoldingRange;
+  end;
 end;
 
 function TBCBaseEditor.CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCodeFoldingRange;
@@ -8661,7 +8664,7 @@ begin
       Dec(LTextPosition.Char);
       FCurrentMatchingPair := GetMatchingToken(LTextPosition, FCurrentMatchingPairMatch);
     end;
-  if cfoHighlightMatchingPair in FCodeFolding.Options then
+  if FHighlighter.MatchingPairHighlight and (cfoHighlightMatchingPair in FCodeFolding.Options) then
   begin
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LTextPosition.Line + 1);
     if not Assigned(LFoldRange) then

@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "29.7.2015"
+                "Date": "20.9.2015"
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -120,6 +120,11 @@
             {
                 "Name": "HighlightedBlock",
                 "Foreground": "clBlack",
+                "Background": "$00EEFFFF"
+            },
+            {
+                "Name": "HighlightedBlockSymbol",
+                "Foreground": "clNavy",
                 "Background": "$00EEFFFF"
             },
             {

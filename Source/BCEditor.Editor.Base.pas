@@ -2040,9 +2040,33 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
               Exit;
             end
             else
-              Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)));
+              Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
           end;
         until LPosition = 0;
+
+        if LFoldRegions[j].OpenTokenCanBeFollowedBy <> '' then
+        begin
+          LLine := UpperCase(ExpandedLineText);
+          LKeyword := PChar(LFoldRegions[j].OpenTokenCanBeFollowedBy);
+
+          repeat
+            LPosition := Pos(LKeyword, LLine);
+            if LPosition > 0 then
+            begin
+              if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
+              begin
+                Result := True;
+
+                if Assigned(AOpenKeyWord) then
+                  AOpenKeyWord^ := True;
+
+                Exit;
+              end
+              else
+                Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
+            end;
+          until LPosition = 0;
+        end;
 
         LLine := UpperCase(ExpandedLineText);
         LKeyword := PChar(LFoldRegions[i].CloseToken);
@@ -3697,7 +3721,7 @@ var
               begin
                 LTempTextPtr := LTextPtr;
                 LTempKeyWordPtr := PChar(LRegionItem.OpenTokenCanBeFollowedBy);
-                while UpCase(LTempTextPtr^) = LTempKeyWordPtr^ do
+                while (LTempTextPtr^ <> BCEDITOR_NONE_CHAR) and (LTempKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTempTextPtr^) = LTempKeyWordPtr^) do
                 begin
                   Inc(LTempTextPtr);
                   Inc(LTempKeyWordPtr);
@@ -8644,7 +8668,9 @@ begin
     end;
   if cfoHighlightMatchingPair in FCodeFolding.Options then
   begin
-    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(GetTextCaretY + 1);
+    LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LTextPosition.Line + 1);
+    if not Assigned(LFoldRange) then
+      LFoldRange := CodeFoldingFoldRangeForLineTo(LTextPosition.Line + 1);
     if Assigned(LFoldRange) then
     begin
       if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
@@ -8655,7 +8681,7 @@ begin
         LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
 
         FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1],
-          LTempPosition, Length(LFoldRange.RegionItem.OpenToken));
+          LTempPosition, Length(LFoldRange.RegionItem.OpenToken + LFoldRange.RegionItem.OpenTokenCanBeFollowedBy));
         FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine - 1);
 
         LLine := LFoldRange.ToLine;

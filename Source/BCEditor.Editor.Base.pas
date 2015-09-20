@@ -924,19 +924,14 @@ end;
 
 function TBCBaseEditor.CodeFoldingFoldRangeForLineTo(ALine: Integer): TBCEditorCodeFoldingRange;
 var
-  i: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   Result := nil;
-  for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
-  begin
-    LCodeFoldingRange := FAllCodeFoldingRanges[i];
+
+  LCodeFoldingRange := FCodeFoldingRangeToLine[ALine];
+  if Assigned(LCodeFoldingRange) then
     if (LCodeFoldingRange.ToLine = ALine) and not LCodeFoldingRange.ParentCollapsed then
-    begin
       Result := LCodeFoldingRange;
-      Break;
-    end;
-  end;
 end;
 
 function TBCBaseEditor.CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCodeFoldingRange;

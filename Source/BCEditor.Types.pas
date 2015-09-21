@@ -289,6 +289,8 @@ type
     crLineBreak, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
     crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll);
 
+  TBCEditorWordWrapStyle = (wwsClientWidth, wwsRightMargin, wwsSpecified);
+
 implementation
 
 end.

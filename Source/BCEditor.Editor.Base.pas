@@ -2616,7 +2616,7 @@ var
   begin
     Result := False;
 
-    LLine := GetTextCaretY;
+    LLine := GetTextCaretY + 1;
 
     if LIsKeyWord and LOpenKeyWord then
       FHighlightedFoldRange := CodeFoldingRangeForLine(LLine)
@@ -2641,7 +2641,7 @@ begin
   begin
     LNewFoldRange := nil;
 
-    LLine := GetTextCaretY;
+    LLine := GetTextCaretY + 1;
 
     if LIsKeyWord and LOpenKeyWord then
       LNewFoldRange := CodeFoldingRangeForLine(LLine)
@@ -7096,7 +7096,7 @@ begin
   if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
     ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
-    LLine := GetTextCaretY;
+    LLine := GetTextCaretY + 1;
     for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];

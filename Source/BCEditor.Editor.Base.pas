@@ -2672,7 +2672,7 @@ begin
   with AFoldRange do
   begin
     Collapsed := True;
-    SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
+    //SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
   end;
 
   CheckIfAtMatchingKeywords;
@@ -2773,7 +2773,7 @@ begin
   with AFoldRange do
   begin
     Collapsed := False;
-    SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
+    //SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
   end;
   CheckIfAtMatchingKeywords;
   Paint;
@@ -9255,6 +9255,7 @@ begin
       crDeleteAfterCursor, crDelete, crSilentDelete, crSilentDeleteAfterCursor, crDeleteAll:
         begin
           TextCaretPosition := LUndoItem.ChangeStartPosition;
+          //SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
           if (LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor]) and
             (LTempPosition.Line > FLines.Count) then
@@ -9265,10 +9266,10 @@ begin
 
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
 
-          if LUndoItem.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor] then
-            TextCaretPosition := LUndoItem.ChangeCaretPosition
-          else
-            SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
+          //if LUndoItem.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor] then
+            TextCaretPosition := LUndoItem.ChangeCaretPosition;
+          //else
+          //  SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
@@ -10286,7 +10287,8 @@ begin
     if (ACommand = ecCut) or (ACommand = ecDeleteLine) or
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
        (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
-      SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace)) or
+      SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar) or
+        (ACommand = ecCut) or (ACommand = ecPaste)) or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars)) then
       FNeedToRescanCodeFolding := True;
 

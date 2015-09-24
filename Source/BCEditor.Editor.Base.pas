@@ -198,7 +198,7 @@ type
     function GetHookedCommandHandlersCount: Integer;
     function GetTextCaretPosition: TBCEditorTextPosition;
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
-    function GetLeadingWhite(const ALine: string): string;
+//    function GetLeadingWhite(const ALine: string): string;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineHeight: Integer;
     function GetLineIndentChars(AStrings: TStrings; ALine: Integer): Integer;
@@ -218,7 +218,7 @@ type
     function GetWrapAtColumn: Integer;
     function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
     function IsKeywordAtLine(ALine: Integer): Boolean;
-    function IsStringAllWhite(const ALine: string): Boolean;
+//    function IsStringAllWhite(const ALine: string): Boolean;
     function LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
@@ -1299,7 +1299,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.GetLeadingWhite(const ALine: string): string;
+{function TBCBaseEditor.GetLeadingWhite(const ALine: string): string;
 var
   i: Integer;
 begin
@@ -1311,7 +1311,7 @@ begin
     Result := Result + ALine[i];
     Inc(i);
   end;
-end;
+end;  }
 
 function TBCBaseEditor.GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
 begin
@@ -2205,7 +2205,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.IsStringAllWhite(const ALine: string): Boolean;
+{function TBCBaseEditor.IsStringAllWhite(const ALine: string): Boolean;
 var
   i: Integer;
 begin
@@ -2216,7 +2216,7 @@ begin
     Result := False;
     Break;
   end;
-end;
+end; }
 
 function TBCBaseEditor.LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
 var
@@ -8926,10 +8926,10 @@ var
       i: Integer;
       LLeftSide: string;
       LRightSide: string;
-      LStr, LWhite: string;
+      LStr{, LWhite}: string;
       LStart: PChar;
       LTextPointer: PChar;
-      LIndented: Boolean;
+      //LIndented: Boolean;
     begin
       Result := 0;
 
@@ -8938,11 +8938,11 @@ var
         LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
       LRightSide := Copy(LineText, LTextCaretPosition.Char, Length(ExpandedLineText) - (LTextCaretPosition.Char - 1));
 
-      LIndented := False;
+      {LIndented := False;
       if (FLines.Count > 0) and (eoAutoIndent in fOptions) then
         LWhite := GetLeadingWhite(FLines.List^[LTextCaretPosition.Line].FString)
       else
-        LWhite := '';
+        LWhite := ''; }
 
       { insert the first line of Value into current line }
       LStart := PChar(AValue);
@@ -8984,13 +8984,13 @@ var
             LStr := LStr + LRightSide
         end;
 
-        if (not IsStringAllWhite(LStr) and
+        {if (not IsStringAllWhite(LStr) and
           (GetLeadingExpandedLength(LStr) < GetLeadingExpandedLength(LWhite))) or LIndented then
         begin
           FLines[i] := LWhite + LStr;
           LIndented := True;
         end
-        else
+        else }
           FLines[i] := LStr;
 
         Inc(Result);

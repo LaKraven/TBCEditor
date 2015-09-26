@@ -137,7 +137,8 @@ type
     procedure AddRange(NewRange: TBCEditorRange);
     procedure AddSet(NewSet: TBCEditorSet);
     procedure AddToken(NewToken: TBCEditorToken);
-    procedure AddTokenRange(AOpenToken, ACloseToken: string);
+    procedure AddTokenRange(AOpenToken: string; AOpenTokenBreakType: TBCEditorBreakType; ACloseToken: string;
+      ACloseTokenBreakType: TBCEditorBreakType);
     procedure Clear;
     procedure Prepare(AParent: TBCEditorRange);
     procedure Reset;
@@ -418,7 +419,7 @@ begin
 
   FOpenToken := TBCEditorMultiToken.Create;
   FCloseToken := TBCEditorMultiToken.Create;
-  AddTokenRange(AOpenToken, ACloseToken);
+  AddTokenRange(AOpenToken, btAny, ACloseToken, btAny);
 
  // FillChar(FSymbolList, SizeOf(SymbolList), 0);
 
@@ -536,10 +537,13 @@ begin
   Result := TBCEditorSet(FSets[Index]);
 end;
 
-procedure TBCEditorRange.AddTokenRange(AOpenToken, ACloseToken: string);//: Integer;
+procedure TBCEditorRange.AddTokenRange(AOpenToken: string; AOpenTokenBreakType: TBCEditorBreakType; ACloseToken: string;
+  ACloseTokenBreakType: TBCEditorBreakType);
 begin
   FOpenToken.AddSymbol(AOpenToken);
+  FOpenToken.BreakType := AOpenTokenBreakType;
   FCloseToken.AddSymbol(ACloseToken);
+  FCloseToken.BreakType := ACloseTokenBreakType;
 end;
 
 procedure TBCEditorRange.SetDelimiters(ADelimiters: TBCEditorCharSet);
@@ -799,7 +803,7 @@ var
 begin
   OpenToken.Clear;
   CloseToken.Clear;
-  AddTokenRange('', '');
+  //AddTokenRange('', '');
   CloseOnTerm := False;
   CloseOnEndOfLine := False;
   CloseParent := False;

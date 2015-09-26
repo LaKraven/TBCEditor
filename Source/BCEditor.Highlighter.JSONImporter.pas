@@ -81,6 +81,17 @@ begin
     Include(Result, fsStrikeOut);
 end;
 
+function StrToBreakType(const AString: string): TBCEditorBreakType;
+begin
+  if (AString = 'Any') or (AString = '') then
+    Result := btAny
+  else
+  if AString = 'Term' then
+    Result := btTerm
+  else
+    Result := btUnspecified;
+end;
+
 function StrToRegionType(const AString: string): TBCEditorSkipRegionItemType;
 begin
   if AString = 'SingleLine' then
@@ -443,7 +454,8 @@ begin
 
         TokenRangeObject := RangeObject['TokenRange'].ObjectValue;
         if Assigned(TokenRangeObject) then
-          ARange.AddTokenRange(TokenRangeObject['Open'].Value, TokenRangeObject['Close'].Value);
+          ARange.AddTokenRange(TokenRangeObject['Open'].Value, StrToBreakType(TokenRangeObject['OpenBreakType'].Value),
+            TokenRangeObject['Close'].Value, StrToBreakType(TokenRangeObject['CloseBreakType'].Value));
       end;
       { Sub rules }
       SubRulesObject := RangeObject['SubRules'].ObjectValue;

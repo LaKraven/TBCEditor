@@ -198,7 +198,6 @@ type
     function GetHookedCommandHandlersCount: Integer;
     function GetTextCaretPosition: TBCEditorTextPosition;
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
-//    function GetLeadingWhite(const ALine: string): string;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineHeight: Integer;
     function GetLineIndentChars(AStrings: TStrings; ALine: Integer): Integer;
@@ -218,7 +217,6 @@ type
     function GetWrapAtColumn: Integer;
     function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
     function IsKeywordAtLine(ALine: Integer): Boolean;
-//    function IsStringAllWhite(const ALine: string): Boolean;
     function LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
@@ -1299,20 +1297,6 @@ begin
   end;
 end;
 
-{function TBCBaseEditor.GetLeadingWhite(const ALine: string): string;
-var
-  i: Integer;
-begin
-  Result := '';
-
-  i := 1;
-  while (i <= Length(ALine)) and (ALine[i] < BCEDITOR_EXCLAMATION_MARK) do
-  begin
-    Result := Result + ALine[i];
-    Inc(i);
-  end;
-end;  }
-
 function TBCBaseEditor.GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
 begin
   if AWantTabs and not (toTabsToSpaces in FTabs.Options) and (ACharCount >= FTabs.Width) then
@@ -2205,19 +2189,6 @@ begin
   end;
 end;
 
-{function TBCBaseEditor.IsStringAllWhite(const ALine: string): Boolean;
-var
-  i: Integer;
-begin
-  Result := True;
-  for i := 1 to Length(ALine) do
-  if ALine[i] > BCEDITOR_SPACE_CHAR then
-  begin
-    Result := False;
-    Break;
-  end;
-end; }
-
 function TBCBaseEditor.LeftSpaceCount(const ALine: string; WantTabs: Boolean = False): Integer;
 var
   LPLine: PChar;
@@ -2672,7 +2643,7 @@ begin
   with AFoldRange do
   begin
     Collapsed := True;
-    //SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
+    SetParentCollapsedOfSubCodeFoldingRanges(True, FoldRangeLevel);
   end;
 
   CheckIfAtMatchingKeywords;
@@ -2773,7 +2744,7 @@ begin
   with AFoldRange do
   begin
     Collapsed := False;
-    //SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
+    SetParentCollapsedOfSubCodeFoldingRanges(False, FoldRangeLevel);
   end;
   CheckIfAtMatchingKeywords;
   Paint;
@@ -8929,7 +8900,6 @@ var
       LStr{, LWhite}: string;
       LStart: PChar;
       LTextPointer: PChar;
-      //LIndented: Boolean;
     begin
       Result := 0;
 
@@ -8937,12 +8907,6 @@ var
       if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
         LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
       LRightSide := Copy(LineText, LTextCaretPosition.Char, Length(ExpandedLineText) - (LTextCaretPosition.Char - 1));
-
-      {LIndented := False;
-      if (FLines.Count > 0) and (eoAutoIndent in fOptions) then
-        LWhite := GetLeadingWhite(FLines.List^[LTextCaretPosition.Line].FString)
-      else
-        LWhite := ''; }
 
       { insert the first line of Value into current line }
       LStart := PChar(AValue);
@@ -8984,14 +8948,7 @@ var
             LStr := LStr + LRightSide
         end;
 
-        {if (not IsStringAllWhite(LStr) and
-          (GetLeadingExpandedLength(LStr) < GetLeadingExpandedLength(LWhite))) or LIndented then
-        begin
-          FLines[i] := LWhite + LStr;
-          LIndented := True;
-        end
-        else }
-          FLines[i] := LStr;
+        FLines[i] := LStr;
 
         Inc(Result);
         Inc(i);

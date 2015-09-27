@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "26.9.2015",
+            "Date": "27.9.2015",
             "Sample": [
                "// Hello World in Pascal\r\n",
                "\r\n",
@@ -157,7 +157,8 @@
                   "TokenRange": {
                      "Open": "asm",
                      "OpenBreakType": "Term",
-                     "Close": "end"
+                     "Close": "end",
+                     "CloseBreakType": "Term"
                   },
                   "SubRules": {
                      "Range": [
@@ -194,6 +195,20 @@
                            },
                            "TokenRange": {
                               "Open": "//"
+                           }
+                        },
+                        {
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String",
+                              "ParentBackground": true
+                           },
+                           "Properties": {
+                              "CloseOnEndOfLine": true
+                           },
+                           "TokenRange": {
+                              "Open": "'",
+                              "Close": "'"
                            }
                         },
                         {

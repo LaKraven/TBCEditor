@@ -9149,7 +9149,7 @@ var
       Exit;
 
     if SelectionAvailable then
-      LTextCaretPosition := FSelectionBeginPosition
+      LTextCaretPosition := SelectionBeginPosition
     else
       LTextCaretPosition := TextCaretPosition;
     LStartLine := LTextCaretPosition.Line;

@@ -3916,7 +3916,8 @@ begin
         LLastFoldRange := LOpenTokenFoldRangeList.Last;
         if Assigned(LLastFoldRange) then
         begin
-          LLastFoldRange.ToLine := LLine + 1;
+          Inc(LLine);
+          LLastFoldRange.ToLine := LLine;
           LOpenTokenFoldRangeList.Remove(LLastFoldRange);
           Dec(LFoldCount);
           RegionItemsClose;

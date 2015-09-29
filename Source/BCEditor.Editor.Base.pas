@@ -7180,7 +7180,7 @@ var
 
   procedure PaintLineNumbers;
   var
-    i: Integer;
+    i, LTop: Integer;
     LLineNumber: string;
     LTextSize: TSize;
     LLeftMarginWidth: Integer;
@@ -7224,16 +7224,12 @@ var
                 LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
                 LOldColor := Canvas.Pen.Color;
                 Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
+                LTop := LLineRect.Top + ((LineHeight - 1) div 2);
                 if (LLine mod 5) = 0 then
-                begin
-                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-                  Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-                end
+                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), LTop)
                 else
-                begin
-                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 2) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-                  Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), 1 + LLineRect.Top + ((LineHeight - 1) div 2));
-                end;
+                  Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 2) div 2), LTop);
+                Canvas.LineTo(LLeftMarginWidth - ((FLeftMarginCharWidth - 1) div 2), LTop);
                 Canvas.Pen.Color := LOldColor;
 
                 Continue;

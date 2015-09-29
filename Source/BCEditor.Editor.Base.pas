@@ -224,7 +224,7 @@ type
     function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function RescanHighlighterRangesFrom(Index: Integer): Integer;
     function RowColumnToCharIndex(ATextPosition: TBCEditorTextPosition): Integer;
-    function SearchText(const ASearchText: string): Integer;
+    function SearchText(const ASearchText: string; AChanged: Boolean = False): Integer;
     function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
     function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
     function StringWordEnd(const ALine: string; AStart: Integer): Integer;
@@ -451,7 +451,7 @@ type
     function GetColorsFileName(AFileName: string): string;
     function GetHighlighterFileName(AFileName: string): string;
     function FindPrevious: Boolean;
-    function FindNext: Boolean;
+    function FindNext(AChanged: Boolean = False): Boolean;
     function GetBookmark(ABookmark: Integer; var ATextPosition: TBCEditorTextPosition): Boolean;
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
     function GetWordAtPixels(X, Y: Integer): string;
@@ -2378,7 +2378,7 @@ begin
   Result.Y := (ADisplayPosition.Row - FTopLine) * LineHeight;
 end;
 
-function TBCBaseEditor.SearchText(const ASearchText: string): Integer;
+function TBCBaseEditor.SearchText(const ASearchText: string; AChanged: Boolean = False): Integer;
 var
   LStartTextPosition, LEndTextPosition: TBCEditorTextPosition;
   LCurrentTextPosition: TBCEditorTextPosition;
@@ -2436,12 +2436,15 @@ begin
   else
   begin
     LStartTextPosition.Char := 1;
-    LStartTextPosition.Line := 1;
+    LStartTextPosition.Line := 0;
     LEndTextPosition.Line := FLines.Count;
     LEndTextPosition.Char := Length(FLines[LEndTextPosition.Line]) + 1;
     if LIsFromCursor then
       if LIsBackward then
         LEndTextPosition := TextCaretPosition
+      else
+      if AChanged and SelectionAvailable then
+        LStartTextPosition := SelectionBeginPosition
       else
         LStartTextPosition := TextCaretPosition;
     if LIsBackward then
@@ -3996,7 +3999,7 @@ begin
         if soBackwards in FSearch.Options then
           FindPrevious
         else
-          FindNext;
+          FindNext(True);
       end;
     end;
   end;
@@ -9425,13 +9428,16 @@ begin
     Result := True;
 end;
 
-function TBCBaseEditor.FindNext: Boolean;
+function TBCBaseEditor.FindNext(AChanged: Boolean = False): Boolean;
 begin
   Result := False;
   if Trim(FSearch.SearchText) = '' then
+  begin
+    FSearchEngine.Clear;
     Exit;
+  end;
   FSearch.Options := FSearch.Options - [soBackwards];
-  if SearchText(FSearch.SearchText) = 0 then
+  if SearchText(FSearch.SearchText, AChanged) = 0 then
   begin
     if soBeepIfStringNotFound in FSearch.Options then
       Beep;

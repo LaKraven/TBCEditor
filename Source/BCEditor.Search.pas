@@ -16,6 +16,7 @@ type
   public
     function FindAll(const NewText: string): Integer; virtual; abstract;
     function Replace(const aOccurrence, aReplacement: string): string; virtual; abstract;
+    procedure Clear; virtual; abstract;
     property Lengths[aIndex: Integer]: Integer read GetLength;
     property Pattern: string read GetPattern write SetPattern;
     property ResultCount: Integer read GetResultCount;
@@ -57,7 +58,8 @@ type
     function FindAll(const NewText: string): Integer; override;
     function FindFirst(const NewText: string): Integer;
     function Next: Integer;
-    function Replace(const aOccurrence, aReplacement: string): string; override;
+    function Replace(const AOccurrence, AReplacement: string): string; override;
+    procedure Clear; override;
     procedure FixResults(First, Delta: Integer);
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
     property Count: Integer read FCount write FCount;
@@ -225,11 +227,16 @@ begin
   end;
 end;
 
+procedure TBCEditorNormalSearch.Clear;
+begin
+  FResults.Count := 0;
+end;
+
 function TBCEditorNormalSearch.FindAll(const NewText: string): Integer;
 var
   Found: Integer;
 begin
-  FResults.Count := 0;
+  Clear;
   Found := FindFirst(NewText);
   while Found > 0 do
   begin
@@ -239,9 +246,9 @@ begin
   Result := FResults.Count;
 end;
 
-function TBCEditorNormalSearch.Replace(const aOccurrence, aReplacement: string): string;
+function TBCEditorNormalSearch.Replace(const AOccurrence, AReplacement: string): string;
 begin
-  Result := aReplacement;
+  Result := AReplacement;
 end;
 
 function TBCEditorNormalSearch.FindFirst(const NewText: string): Integer;

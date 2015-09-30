@@ -3403,28 +3403,28 @@ var
   function OddCountOfStringEscapeChars(ATextPtr: PChar): Boolean;
   begin
     Result := False;
-    if LCurrentCodeFoldingRegions.StringEscapeChar <> #0 then
+    if LCurrentCodeFoldingRegions.StringEscapeChar <> BCEDITOR_NONE_CHAR then
       Result := Odd(CountCharsBefore(ATextPtr, LCurrentCodeFoldingRegions.StringEscapeChar));
   end;
 
   function IsNextSkipChar(ATextPtr: PChar; ASkipRegionItem: TBCEditorSkipRegionItem): Boolean;
   begin
     Result := False;
-    if ASkipRegionItem.SkipIfNextCharIsNot <> #0 then
+    if ASkipRegionItem.SkipIfNextCharIsNot <> BCEDITOR_NONE_CHAR then
       Result := (ATextPtr + 1)^ = ASkipRegionItem.SkipIfNextCharIsNot;
   end;
 
   function IsPreviousCharStringEscape(ATextPtr: PChar): Boolean;
   begin
     Result := False;
-    if LCurrentCodeFoldingRegions.StringEscapeChar <> #0 then
+    if LCurrentCodeFoldingRegions.StringEscapeChar <> BCEDITOR_NONE_CHAR then
       Result := (ATextPtr - 1)^ = LCurrentCodeFoldingRegions.StringEscapeChar;
   end;
 
   function IsNextCharStringEscape(ATextPtr: PChar): Boolean;
   begin
     Result := False;
-    if LCurrentCodeFoldingRegions.StringEscapeChar <> #0 then
+    if LCurrentCodeFoldingRegions.StringEscapeChar <> BCEDITOR_NONE_CHAR then
       Result := (ATextPtr + 1)^ = LCurrentCodeFoldingRegions.StringEscapeChar;
   end;
 
@@ -5721,7 +5721,7 @@ end;
 
 procedure TBCBaseEditor.DoUndo;
 begin
-  CommandProcessor(ecUndo, #0, nil);
+  CommandProcessor(ecUndo, BCEDITOR_NONE_CHAR, nil);
 end;
 
 procedure TBCBaseEditor.DoInternalUndo;
@@ -7572,7 +7572,7 @@ begin
       X := Top + (Bottom - Top) shr 1;
 
     LCharPosition := 1;
-    while LPLine^ <> #0 do
+    while LPLine^ <> BCEDITOR_NONE_CHAR do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
       begin
@@ -7996,13 +7996,13 @@ var
       begin
         LDoSpacesTest := True;
         PToken := PChar(AToken);
-        while PToken^ <> #0 do
+        while PToken^ <> BCEDITOR_NONE_CHAR do
         begin
-          if PToken^ <> #32 then
+          if PToken^ <> BCEDITOR_SPACE_CHAR then
             Break;
           Inc(PToken);
         end;
-        LIsSpaces := PToken^ = #0;
+        LIsSpaces := PToken^ = BCEDITOR_NONE_CHAR;
       end;
       Result := LIsSpaces;
     end;
@@ -9398,7 +9398,7 @@ begin
     while LChar < Result.Char  do
     begin
       Inc(i);
-      if (i <= LLength) and (LTextLine[i] = #9) then
+      if (i <= LLength) and (LTextLine[i] = BCEDITOR_TAB_CHAR) then
         Inc(LChar, FTabs.Width)
       else
       if i <= LLength then
@@ -10340,7 +10340,7 @@ end;
 
 procedure TBCBaseEditor.CutToClipboard;
 begin
-  CommandProcessor(ecCut, #0, nil);
+  CommandProcessor(ecCut, BCEDITOR_NONE_CHAR, nil);
 end;
 
 procedure TBCBaseEditor.DeleteWhitespace;
@@ -11910,7 +11910,7 @@ end;
 
 procedure TBCBaseEditor.PasteFromClipboard;
 begin
-  CommandProcessor(ecPaste, #0, nil);
+  CommandProcessor(ecPaste, BCEDITOR_NONE_CHAR, nil);
 end;
 
 procedure TBCBaseEditor.DoPasteFromClipboard;
@@ -12009,7 +12009,7 @@ end;
 
 procedure TBCBaseEditor.DoRedo;
 begin
-  CommandProcessor(ecRedo, #0, nil);
+  CommandProcessor(ecRedo, BCEDITOR_NONE_CHAR, nil);
 end;
 
 procedure TBCBaseEditor.DoInternalRedo;
@@ -12426,23 +12426,23 @@ begin
   case FSelectedCaseCycle of
     cUpper: { UPPERCASE }
       if FSelection.ActiveMode = smColumn then
-        CommandProcessor(ecUpperCaseBlock, #0, nil)
+        CommandProcessor(ecUpperCaseBlock, BCEDITOR_NONE_CHAR, nil)
       else
-        CommandProcessor(ecUpperCase, #0, nil);
+        CommandProcessor(ecUpperCase, BCEDITOR_NONE_CHAR, nil);
     cLower: { lowercase }
       if FSelection.ActiveMode = smColumn then
-        CommandProcessor(ecLowerCaseBlock, #0, nil)
+        CommandProcessor(ecLowerCaseBlock, BCEDITOR_NONE_CHAR, nil)
       else
-        CommandProcessor(ecLowerCase, #0, nil);
+        CommandProcessor(ecLowerCase, BCEDITOR_NONE_CHAR, nil);
     cAlternating: { aLtErNaTiNg cAsE }
       if FSelection.ActiveMode = smColumn then
-        CommandProcessor(ecAlternatingCaseBlock, #0, nil)
+        CommandProcessor(ecAlternatingCaseBlock, BCEDITOR_NONE_CHAR, nil)
       else
-        CommandProcessor(ecAlternatingCase, #0, nil);
+        CommandProcessor(ecAlternatingCase, BCEDITOR_NONE_CHAR, nil);
     cSentence: { Sentence case }
-       CommandProcessor(ecSentenceCase, #0, nil);
+       CommandProcessor(ecSentenceCase, BCEDITOR_NONE_CHAR, nil);
     cTitle: { Title Case }
-      CommandProcessor(ecTitleCase, #0, nil);
+      CommandProcessor(ecTitleCase, BCEDITOR_NONE_CHAR, nil);
     cOriginal: { Original text }
       SelectedText := FSelectedCaseText;
   end;

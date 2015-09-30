@@ -681,7 +681,7 @@ begin
     while PValue <= PLastChar do
     begin
       PStartValue := PValue;
-      while (PValue^ <> #13) and (PValue^ <> #10) and (PValue^ <> WideChar($2028)) and (PValue <= PLastChar) do
+      while (PValue^ <> BCEDITOR_CARRIAGE_RETURN) and (PValue^ <> BCEDITOR_LINEFEED) and (PValue^ <> WideChar($2028)) and (PValue <= PLastChar) do
         Inc(PValue);
       if PValue <> PStartValue then
       begin
@@ -690,9 +690,9 @@ begin
       end
       else
         InsertItem(FCount, '');
-      if PValue^ = #13 then
+      if PValue^ = BCEDITOR_CARRIAGE_RETURN then
         Inc(PValue);
-      if PValue^ = #10 then
+      if PValue^ = BCEDITOR_LINEFEED then
         Inc(PValue);
       if PValue^ = WideChar($2028) then
         Inc(PValue);

@@ -3,7 +3,7 @@
         "Info": {
             "General": {
                 "Version": "1.0",
-                "Date": "20.9.2015"
+                "Date": "30.9.2015"
             },
             "Author": {
                 "Name": "Lasse Rautiainen",
@@ -41,6 +41,7 @@
                 "MatchingPairMatched": "clAqua",
                 "MatchingPairUnderline": "$00CC9999",
                 "MatchingPairUnmatched": "clYellow",
+                "MinimapBookmark":"clGreen",
                 "MinimapVisibleLines": "$00E6FAFF",
                 "RightMargin": "clSilver",
                 "RightMovingEdge": "clSilver",
@@ -58,7 +59,7 @@
                 "LineNumbers": "Courier New",
                 "Text": "Courier New",
                 "Minimap": "Courier New",
-                "CodeFoldingHint": "Courier New",
+                "CodeFoldingHint": "Arial",
                 "CompletionProposal": "Courier New"
             },
             "FontSizes": {

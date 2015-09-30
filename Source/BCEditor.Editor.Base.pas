@@ -3900,8 +3900,12 @@ begin
             RegionItemsOpen;
           end;
 
+
           if LTextPtr^ <> BCEDITOR_NONE_CHAR then
-            Inc(LTextPtr);
+            if LTextPtr^ = '\' then
+              Inc(LTextPtr, 2)
+            else
+              Inc(LTextPtr);
           LBeginningOfLine := False; { not in the beginning of the line anymore }
         end;
       end;

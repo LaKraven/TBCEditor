@@ -8102,7 +8102,7 @@ var
     begin
       LCurrentLine := GetDisplayTextLineNumber(LDisplayLine);
 
-      if AMinimap then
+      if AMinimap and (moShowBookmarks in FMinimap.Options) then
         LBookmarkOnCurrentLine := IsBookmarkOnCurrentLine;
 
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }

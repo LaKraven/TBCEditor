@@ -270,7 +270,8 @@ type
   TBCEditorMatchingPairOptions = set of TBCEditorMatchingPairOption;
 
   TBCEditorMinimapOption = (
-    moShowIndentGuides
+    moShowIndentGuides,
+    moShowBookmarks
   );
   TBCEditorMinimapOptions = set of TBCEditorMinimapOption;
 

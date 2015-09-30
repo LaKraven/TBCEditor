@@ -7716,11 +7716,27 @@ var
   LCustomBackgroundColor: TColor;
   LIsCustomBackgroundColor: Boolean;
   LFirstChar, LLastChar: Integer;
+  LBookmarkOnCurrentLine: Boolean;
+
+  function IsBookmarkOnCurrentLine: Boolean;
+  var
+    i: Integer;
+  begin
+    Result := False;
+
+    for i := 0 to 8 do
+    if Assigned(FBookMarks[i]) then
+      if FBookMarks[i].Line = LCurrentLine - 1 then
+        Exit(True);
+  end;
 
   function GetBackgroundColor: TColor;
   var
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
   begin
+    if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
+      Result := FMinimap.Colors.Bookmark
+    else
     if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Color <> clNone) then
       Result := FActiveLine.Color
     else
@@ -7752,6 +7768,9 @@ var
     with FTextDrawer do
     begin
       { Selection colors }
+      if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
+        LColor := FMinimap.Colors.Bookmark
+      else
       if ASelected then
       begin
         if FSelection.Colors.Foreground <> clNone then
@@ -8077,10 +8096,14 @@ var
 
     LScrolledXBy := (FLeftChar - 1) * FCharWidth;
     LDisplayLine := LFirstLine;
+    LBookmarkOnCurrentLine := False;
 
     while LDisplayLine <= LLastLine do
     begin
       LCurrentLine := GetDisplayTextLineNumber(LDisplayLine);
+
+      if AMinimap then
+        LBookmarkOnCurrentLine := IsBookmarkOnCurrentLine;
 
       { Get line with tabs converted to spaces. Trust me, you don't want to mess around with tabs when painting. }
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];

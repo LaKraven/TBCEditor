@@ -59,14 +59,8 @@ inherited MainForm: TMainForm
       Margins.Top = 5
       Margins.Right = 0
       Margins.Bottom = 5
-      Options = [goFixedVertLineEh, goVertLineEh, goEditingEh, goAlwaysShowEditorEh]
       Align = alClient
-      ContraColCount = 0
-      Flat = True
-      ParentColor = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 0
+      Options = [goVertLineEh, goEditingEh, goAlwaysShowEditorEh]
     end
   end
   object PanelLeft: TBCPanel [3]
@@ -216,7 +210,7 @@ inherited MainForm: TMainForm
               Height = 21
             end
           end
-          inherited PanelToolBar: TBCPanel
+          inherited PanelToolbar: TBCPanel
             inherited SpeedButtonFindPrevious: TBCSpeedButton
               Images = nil
             end

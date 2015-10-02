@@ -246,7 +246,8 @@ var
   Editor: TBCBaseEditor;
 begin
   Editor := Owner as TBCBaseEditor;
-  Editor.AddKeyPressHandler(EditorKeyPress);
+  if Assigned(Editor) then
+    Editor.AddKeyPressHandler(EditorKeyPress);
 end;
 
 procedure TBCEditorCompletionProposalForm.RemoveKeyPressHandler;
@@ -254,7 +255,8 @@ var
   Editor: TBCBaseEditor;
 begin
   Editor := Owner as TBCBaseEditor;
-  Editor.RemoveKeyPressHandler(EditorKeyPress);
+  if Assigned(Editor) then
+    Editor.RemoveKeyPressHandler(EditorKeyPress);
 end;
 
 procedure TBCEditorCompletionProposalForm.CreateParams(var Params: TCreateParams);
@@ -1012,20 +1014,24 @@ procedure TBCEditorCompletionProposalForm.HandleOnValidate(Sender: TObject; Shif
 var
   Editor: TBCBaseEditor;
   Value: string;
+  LTextPosition: TBCEditorTextPosition;
 begin
+  if not Assigned(Owner) then
+    Exit;
   Editor := Owner as TBCBaseEditor;
   with Editor do
   begin
     BeginUpdate;
     BeginUndoBlock;
     try
+      LTextPosition := Editor.TextCaretPosition;
       if FAdjustCompletionStart then
-        FCompletionStart := GetTextPosition(FCompletionStart, DisplayCaretY).Char;
-      SelectionBeginPosition := GetTextPosition(FCompletionStart, DisplayCaretY);
+        FCompletionStart := GetTextPosition(FCompletionStart, LTextPosition.Line).Char;
+      SelectionBeginPosition := GetTextPosition(FCompletionStart, LTextPosition.Line);
       if EndToken = BCEDITOR_NONE_CHAR then
-        SelectionEndPosition := GetTextPosition(WordEnd.Char, DisplayCaretY)
+        SelectionEndPosition := GetTextPosition(WordEnd.Char, LTextPosition.Line)
       else
-        SelectionEndPosition := GetTextPosition(DisplayCaretX, DisplayCaretY);
+        SelectionEndPosition := LTextPosition;
 
       if FAssignedList.Count > Position then
         Value := FAssignedList[Position]

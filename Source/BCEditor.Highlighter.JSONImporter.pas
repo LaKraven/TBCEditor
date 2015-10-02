@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, BCEditor.Editor.Base, BCEditor.Highlighter, BCEditor.Highlighter.Colors, BCEditor.Highlighter.Info,
   BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Rules, BCEditor.Editor.SkipRegions,
-  BCEditor.Editor.CodeFolding.Regions, JsonDataObjects;
+  BCEditor.Editor.CodeFolding.Regions, BCEditor.JsonDataObjects;
 
 type
   TBCEditorHighlighterJSONImporter = class(TObject)

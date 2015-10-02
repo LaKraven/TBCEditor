@@ -7097,7 +7097,7 @@ begin
             X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1) * FTextDrawer.CharWidth;
           Canvas.Pen.Color := FCodeFolding.Colors.Indent;
 
-          if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0 {Offset}) then
+          if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
           begin
             if AMinimap then
               X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X

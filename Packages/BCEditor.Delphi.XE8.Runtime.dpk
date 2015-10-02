@@ -5,7 +5,7 @@ package BCEditor.Delphi.XE8.Runtime;
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
@@ -15,8 +15,8 @@ package BCEditor.Delphi.XE8.Runtime;
 {$OPTIMIZATION OFF}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
-{$SAFEDIVIDE OFF}
+{$REFERENCEINFO OFF}
+{$SAFEDIVIDE ON}
 {$STACKFRAMES ON}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
@@ -123,6 +123,6 @@ contains
   BCEditor.TextDrawer in '..\Source\BCEditor.TextDrawer.pas',
   BCEditor.Types in '..\Source\BCEditor.Types.pas',
   BCEditor.Utils in '..\Source\BCEditor.Utils.pas',
-  JsonDataObjects in '..\Source\JsonDataObjects.pas';
+  BCEditor.JsonDataObjects in '..\Source\BCEditor.JsonDataObjects.pas';
 
 end.

@@ -383,7 +383,7 @@
         <DelphiCompile Include="..\Source\BCEditor.Utils.pas">
             <BuildOrder>89</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\JsonDataObjects.pas">
+        <DelphiCompile Include="..\Source\BCEditor.JsonDataObjects.pas">
             <BuildOrder>90</BuildOrder>
         </DelphiCompile>
         <BuildConfiguration Include="Release">

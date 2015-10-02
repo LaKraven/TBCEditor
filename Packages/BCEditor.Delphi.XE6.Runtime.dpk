@@ -123,6 +123,6 @@ contains
   BCEditor.TextDrawer in '..\Source\BCEditor.TextDrawer.pas',
   BCEditor.Types in '..\Source\BCEditor.Types.pas',
   BCEditor.Utils in '..\Source\BCEditor.Utils.pas',
-  JsonDataObjects in '..\Source\JsonDataObjects.pas';
+  BCEditor.JsonDataObjects in '..\Source\BCEditor.JsonDataObjects.pas';
 
 end.

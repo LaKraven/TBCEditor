@@ -2682,11 +2682,11 @@ end;
 procedure TBCBaseEditor.CodeFoldingResetCaches;
 var
   i, j: Integer;
-  {LMaxFromLine,} LMaxToLine: Integer;
+  //{LMaxFromLine,} LMaxToLine: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
   //LMaxFromLine := 0;
-  LMaxToLine := 0;
+  //LMaxToLine := 0;
 
   SetLength(FCodeFoldingTreeLine, 0); { empty }
   SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
@@ -2710,8 +2710,8 @@ begin
           for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
             FCodeFoldingTreeLine[j] := True;
 
-          if LCodeFoldingRange.ToLine >= LMaxToLine then
-            LMaxToLine := LCodeFoldingRange.ToLine;
+          //if LCodeFoldingRange.ToLine >= LMaxToLine then
+          //  LMaxToLine := LCodeFoldingRange.ToLine;
           FCodeFoldingRangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
         end;
       end;
@@ -2720,8 +2720,8 @@ begin
 
   //if Length(FCodeFoldingRangeFromLine) <> LMaxFromLine + 1 then
   //  SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
-  if Length(FCodeFoldingRangeToLine) <> LMaxToLine + 1 then
-    SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
+  //if Length(FCodeFoldingRangeToLine) <> LMaxToLine + 1 then
+  //  SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
 end;
 
 procedure TBCBaseEditor.CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
@@ -3902,7 +3902,8 @@ begin
 
 
           if LTextPtr^ <> BCEDITOR_NONE_CHAR then
-            if LTextPtr^ = '\' then
+            { TODO: Rethink this over... }
+            if (LTextPtr^ = '\') and ((LTextPtr + 1)^ <> '''') and ((LTextPtr + 1)^ <> '"') then
               Inc(LTextPtr, 2)
             else
               Inc(LTextPtr);

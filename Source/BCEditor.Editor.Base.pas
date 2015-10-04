@@ -2682,10 +2682,10 @@ end;
 procedure TBCBaseEditor.CodeFoldingResetCaches;
 var
   i, j: Integer;
-  LMaxFromLine, LMaxToLine: Integer;
+  {LMaxFromLine,} LMaxToLine: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  LMaxFromLine := 0;
+  //LMaxFromLine := 0;
   LMaxToLine := 0;
 
   SetLength(FCodeFoldingTreeLine, 0); { empty }
@@ -2701,8 +2701,8 @@ begin
     begin
       if (not LCodeFoldingRange.ParentCollapsed) and (LCodeFoldingRange.FromLine <> LCodeFoldingRange.ToLine) then
       begin
-        if LCodeFoldingRange.FromLine >= LMaxFromLine then
-          LMaxFromLine := LCodeFoldingRange.FromLine;
+        //if LCodeFoldingRange.FromLine >= LMaxFromLine then
+        //  LMaxFromLine := LCodeFoldingRange.FromLine;
         FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
 
         if LCodeFoldingRange.Collapsable then
@@ -2718,8 +2718,8 @@ begin
     end;
   end;
 
-  if Length(FCodeFoldingRangeFromLine) <> LMaxFromLine + 1 then
-    SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
+  //if Length(FCodeFoldingRangeFromLine) <> LMaxFromLine + 1 then
+  //  SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
   if Length(FCodeFoldingRangeToLine) <> LMaxToLine + 1 then
     SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
 end;
@@ -7077,9 +7077,18 @@ begin
   begin
     LLine := GetTextCaretY + 1;
     LTempLine := LLine;
-    while (LTempLine > 0) and not Assigned(FCodeFoldingRangeFromLine[LTempLine]) do
-      Dec(LTempLine);
-    LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
+    LCodeFoldingRange := nil;
+    while LTempLine > 0 do
+    begin
+      LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
+      if not Assigned(LCodeFoldingRange) then
+        Dec(LTempLine)
+      else
+      if (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
+        Break
+      else
+        Dec(LTempLine)
+    end;
     if Assigned(LCodeFoldingRange) then
       LDeepestLevel := LCodeFoldingRange.IndentLevel;
 

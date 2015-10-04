@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"20.9.2015",
+            "Date":"4.10.2015",
             "Sample":[
                "<?php\r\n",
                "  echo \"Hello World!\";\r\n",
@@ -73,7 +73,8 @@
                         {
                         "Type":"Method",
                            "Attributes":{
-                              "Element":"MethodName"
+                              "Element":"MethodName",
+                              "ParentBackground":true
                            },
                            "Properties":{
                               "AlternativeClose":[
@@ -317,7 +318,8 @@
                               "procedure"
                            ],
                            "Attributes":{
-                              "Element":"Method"
+                              "Element":"Method",
+                              "ParentBackground":true
                            }
                         },
                         {

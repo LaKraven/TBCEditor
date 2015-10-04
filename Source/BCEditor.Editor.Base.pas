@@ -3900,7 +3900,6 @@ begin
             RegionItemsOpen;
           end;
 
-
           if LTextPtr^ <> BCEDITOR_NONE_CHAR then
             { TODO: Rethink this over... }
             if (LTextPtr^ = '\') and ((LTextPtr + 1)^ <> '''') and ((LTextPtr + 1)^ <> '"') then
@@ -7068,7 +7067,7 @@ var
   i, X, Y, LLine, LTempLine: Integer;
   LOldColor, LTempColor: TColor;
   LDeepestLevel: Integer;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
+  LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
 begin
   LOldColor := Canvas.Pen.Color;
   LDeepestLevel := 0;
@@ -7082,11 +7081,18 @@ begin
     while LTempLine > 0 do
     begin
       LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
-      if not Assigned(LCodeFoldingRange) then
+      LCodeFoldingRangeTo := FCodeFoldingRangeToLine[LTempLine];
+      if not Assigned(LCodeFoldingRange) and not Assigned(LCodeFoldingRangeTo) then
         Dec(LTempLine)
       else
-      if (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
+      if Assigned(LCodeFoldingRange) and (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
         Break
+      else
+      if Assigned(LCodeFoldingRangeTo) and (LLine >= LCodeFoldingRangeTo.FromLine) and (LLine <= LCodeFoldingRangeTo.ToLine) then
+      begin
+        LCodeFoldingRange := LCodeFoldingRangeTo;
+        Break
+      end
       else
         Dec(LTempLine)
     end;

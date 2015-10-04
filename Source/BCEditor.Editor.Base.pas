@@ -8137,7 +8137,7 @@ var
 
           LCurrentLineText := LCurrentLineText + '..';
           if LFoldRange.RegionItem.CloseToken <> '' then
-            if Pos(LFoldRange.RegionItem.CloseToken, FLines.ExpandedStrings[LFoldRange.ToLine - 1]) <> 0 then
+            if Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines.ExpandedStrings[LFoldRange.ToLine - 1])) <> 0 then
               LCurrentLineText := LCurrentLineText + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then

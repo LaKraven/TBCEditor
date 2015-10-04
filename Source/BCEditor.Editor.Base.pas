@@ -3901,11 +3901,8 @@ begin
           end;
 
           if LTextPtr^ <> BCEDITOR_NONE_CHAR then
-            { TODO: Rethink this over... }
-            if (LTextPtr^ = '\') and ((LTextPtr + 1)^ <> '''') and ((LTextPtr + 1)^ <> '"') then
-              Inc(LTextPtr, 2)
-            else
-              Inc(LTextPtr);
+            Inc(LTextPtr);
+
           LBeginningOfLine := False; { not in the beginning of the line anymore }
         end;
       end;

@@ -7064,7 +7064,7 @@ end;
 
 procedure TBCBaseEditor.PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
 var
-  i, X, Y, LLine: Integer;
+  i, X, Y, LLine, LTempLine: Integer;
   LOldColor, LTempColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -7076,14 +7076,13 @@ begin
     ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
     LLine := GetTextCaretY + 1;
-    for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
-    begin
-      LCodeFoldingRange := FAllCodeFoldingRanges[i];
-      if Assigned(LCodeFoldingRange) then
-        if (LCodeFoldingRange.IndentLevel > LDeepestLevel) and (LLine >= LCodeFoldingRange.FromLine) and
-          (LLine <= LCodeFoldingRange.ToLine) then
-          LDeepestLevel := LCodeFoldingRange.IndentLevel;
-    end;
+    LTempLine := LLine;
+    while (LTempLine > 0) and not Assigned(FCodeFoldingRangeFromLine[LTempLine]) do
+      Dec(LTempLine);
+    LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
+    if Assigned(LCodeFoldingRange) then
+      LDeepestLevel := LCodeFoldingRange.IndentLevel;
+
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];

@@ -95,9 +95,12 @@ end;
 
 procedure TBCEditorSearch.SetEngine(const Value: TBCEditorSearchEngine);
 begin
-  FEngine := Value;
-  if Assigned(FOnChange) then
-    FOnChange(scEngineUpdate);
+  if FEngine <> Value then
+  begin
+    FEngine := Value;
+    if Assigned(FOnChange) then
+      FOnChange(scEngineUpdate);
+  end;
 end;
 
 procedure TBCEditorSearch.SetSearchText(const Value: String);

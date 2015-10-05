@@ -261,11 +261,14 @@ end;
 
 procedure TBCEditorCompletionProposalForm.CreateParams(var Params: TCreateParams);
 begin
+  BorderStyle := bsNone;
   inherited;
+  Params.Style := WS_POPUP or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_SYSMENU;
+  Params.ExStyle := Params.ExStyle or WS_EX_STATICEDGE;
 
-  with Params do
+  {with Params do
     if ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) and (Win32MajorVersion > 4) and (Win32MinorVersion > 0) then
-      WindowClass.Style := WindowClass.Style or CS_DROPSHADOW;
+      WindowClass.Style := WindowClass.Style or CS_DROPSHADOW; }
 end;
 
 procedure TBCEditorCompletionProposalForm.Activate;
@@ -522,7 +525,7 @@ begin
         if i + FScrollBar.Position = Position then
         with Canvas do
         begin
-          Brush.Color := FSelectedBackgroundColor;
+          Canvas.Brush.Color := FSelectedBackgroundColor;
           Pen.Color := FSelectedBackgroundColor;
           Rectangle(0, FEffectiveItemHeight * i, ClientWidth - FScrollBar.Width, FEffectiveItemHeight * (i + 1));
           Pen.Color := FSelectedTextColor;

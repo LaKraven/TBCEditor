@@ -417,7 +417,7 @@ type
     procedure PaintCodeFoldingCollapsedLine(AFoldRange: TBCEditorCodeFoldingRange; ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
-    procedure PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALastTextRow, ALastRow: Integer);
+    procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
@@ -7152,13 +7152,10 @@ begin
   Canvas.Pen.Color := LOldColor;
 end;
 
-procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstRow, ALastTextRow, ALastRow: Integer);
+procedure TBCBaseEditor.PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
 var
   LLine, LPreviousLine: Integer;
   LLineRect: TRect;
-  LFirstLine: Integer;
-  LLastLine: Integer;
-  LLastTextLine: Integer;
 
   procedure DrawMark(ABookMark: TBCEditorBookmark; var ALeftMarginOffset: Integer; AMarkRow: Integer);
   var
@@ -7201,6 +7198,7 @@ var
     LTextSize: TSize;
     LLeftMarginWidth: Integer;
     LOldColor: TColor;
+    LLastTextLine: Integer;
   begin
     if FLeftMargin.LineNumbers.Visible then
     begin
@@ -7210,10 +7208,11 @@ var
 
         LLineRect := AClipRect;
 
+        LLastTextLine := ALastTextLine;
         if lnoAfterLastLine in FLeftMargin.LineNumbers.Options then
-          LLastTextLine := LLastLine;
+          LLastTextLine := ALastLine;
 
-        for i := LFirstLine to LLastTextLine do
+        for i := AFirstLine to LLastTextLine do
         begin
           LLine := GetDisplayTextLineNumber(i);
 
@@ -7288,7 +7287,7 @@ var
       end;
       if FLeftMargin.Colors.ActiveLineBackground <> clNone then
       begin
-        for i := LFirstLine to LLastTextLine do
+        for i := AFirstLine to ALastTextLine do
         begin
           LLine := GetDisplayTextLineNumber(i);
 
@@ -7302,7 +7301,7 @@ var
         end;
       end;
       if Assigned(FBeforeBookmarkPanelPaint) then
-        FBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+        FBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
     end;
     Canvas.Brush.Style := bsClear;
   end;
@@ -7312,7 +7311,7 @@ var
     i: Integer;
   begin
     if FWordWrap.Enabled and FWordWrap.Indicator.Visible then
-    for i := LFirstLine to LLastLine do
+    for i := AFirstLine to ALastLine do
     begin
       LLine := GetDisplayTextLineNumber(i);
       LPreviousLine := GetDisplayTextLineNumber(i - 1);
@@ -7351,23 +7350,23 @@ var
     LBookmarkLine: Integer;
   begin
     if FLeftMargin.Bookmarks.Visible and FLeftMargin.Bookmarks.Visible and (Marks.Count > 0) and
-      (LLastLine >= LFirstLine) then
+      (ALastLine >= AFirstLine) then
     begin
-      LLeftMarginOffsets := AllocMem((aLastRow - aFirstRow + 1) * SizeOf(Integer));
+      LLeftMarginOffsets := AllocMem((ALastLine - AFirstLine + 1) * SizeOf(Integer));
       try
         LHasOtherMarks := False;
         for i := 0 to Marks.Count - 1 do
         begin
           LBookmark := Marks[i];
           LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
-          if LBookmark.Visible and (LBookmarkLine >= LFirstLine) and (LBookmarkLine <= LLastLine) then
+          if LBookmark.Visible and (LBookmarkLine >= AFirstLine) and (LBookmarkLine <= ALastLine) then
           begin
             if not LBookmark.IsBookmark then
               LHasOtherMarks := True
             else
             if not FCodeFolding.Visible or FCodeFolding.Visible then
-              if (LBookmarkLine - AFirstRow >= 0) and (LBookmarkLine - AFirstRow <= ALastRow - AFirstRow + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstRow], LBookmarkLine);
+              if (LBookmarkLine - AFirstLine >= 0) and (LBookmarkLine - AFirstLine <= ALastLine - AFirstLine + 1) then
+                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstLine], LBookmarkLine);
           end;
         end;
         if LHasOtherMarks then
@@ -7375,11 +7374,11 @@ var
         begin
           LBookmark := Marks[i];
           LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
-          if LBookmark.Visible and not LBookmark.IsBookmark and (LBookmarkLine >= LFirstLine) and (LBookmarkLine <= LLastLine) then
+          if LBookmark.Visible and not LBookmark.IsBookmark and (LBookmarkLine >= AFirstLine) and (LBookmarkLine <= ALastLine) then
           begin
             if not FCodeFolding.Visible or FCodeFolding.Visible then
-              if (LBookmarkLine - AFirstRow >= 0) and (LBookmarkLine - AFirstRow <= ALastRow - AFirstRow + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstRow], LBookmarkLine);
+              if (LBookmarkLine - AFirstLine >= 0) and (LBookmarkLine - AFirstLine <= ALastLine - AFirstLine + 1) then
+                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstLine], LBookmarkLine);
           end;
         end;
       finally
@@ -7406,7 +7405,7 @@ var
       LOldColor := Canvas.Brush.Color;
       LLineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
       LLineStateRect.Right := LLineStateRect.Left + FLeftMargin.LineState.Width;
-      for i := AFirstRow to ALastTextRow do
+      for i := AFirstLine to ALastTextLine do
       begin
         LLine := GetDisplayTextLineNumber(i);
 
@@ -7436,7 +7435,7 @@ var
     begin
       if Assigned(FBookmarkPanelLinePaint) then
       begin
-        for i := AFirstRow to ALastRow do
+        for i := AFirstLine to ALastLine do
         begin
           LLine := i;
           if FCodeFolding.Visible then
@@ -7449,15 +7448,11 @@ var
         end;
       end;
       if Assigned(FAfterBookmarkPanelPaint) then
-        FAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, LFirstLine, LLastLine);
+        FAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
     end;
   end;
 
 begin
-  LFirstLine := AFirstRow;
-  LLastLine := Min(ALastRow, FLineNumbersCount);
-  LLastTextLine := ALastTextRow;
-
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
   Canvas.FillRect(AClipRect); { fill left margin rect }
 

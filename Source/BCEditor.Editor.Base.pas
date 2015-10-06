@@ -12,7 +12,7 @@ uses
   BCEditor.Editor.LineSpacing, BCEditor.Editor.MatchingPair, BCEditor.Editor.Minimap, BCEditor.Editor.Replace,
   BCEditor.Editor.RightMargin, BCEditor.Editor.Scroll, BCEditor.Editor.Search, BCEditor.Editor.Directories,
   BCEditor.Editor.Selection, BCEditor.Editor.SkipRegions, BCEditor.Editor.SpecialChars, BCEditor.Editor.Tabs,
-  BCEditor.Editor.Undo, BCEditor.Editor.Undo.List, BCEditor.Editor.WordWrap,
+  BCEditor.Editor.Undo, BCEditor.Editor.Undo.List, BCEditor.Editor.WordWrap, BCEditor.Editor.CodeFolding.Hint.Form,
   BCEditor.Highlighter, BCEditor.Highlighter.Attributes, BCEditor.KeyboardHandler, BCEditor.Lines, BCEditor.Search,
   BCEditor.Search.RegularExpressions, BCEditor.Search.WildCard, BCEditor.TextDrawer,
   BCEditor.Types, BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
@@ -48,7 +48,7 @@ type
     FChainUndoAdded: TNotifyEvent;
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
-    FCodeFoldingHintForm: TBCEditorCompletionProposalForm;
+    FCodeFoldingHintForm: TBCEditorCodeFoldingHintForm;
     FCodeFoldingRangeFromLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingRangeToLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingTreeLine: array of Boolean;
@@ -389,7 +389,7 @@ type
     procedure DoTripleClick;
     procedure DragCanceled; override;
     procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
-    procedure FreeHintForm(var AForm: TBCEditorCompletionProposalForm);
+    procedure FreeHintForm(var AForm: TBCEditorCodeFoldingHintForm);
     procedure HideCaret;
     procedure IncPaintLock;
     procedure InvalidateRect(const ARect: TRect; AErase: Boolean = False);
@@ -6080,7 +6080,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.FreeHintForm(var AForm: TBCEditorCompletionProposalForm);
+procedure TBCBaseEditor.FreeHintForm(var AForm: TBCEditorCodeFoldingHintForm);
 var
   LRect: TRect;
   LDisplayPosition: TBCEditorDisplayPosition;
@@ -6629,13 +6629,12 @@ begin
 
           if not Assigned(FCodeFoldingHintForm) then
           begin
-            FCodeFoldingHintForm := TBCEditorCompletionProposalForm.Create(Self);
+            FCodeFoldingHintForm := TBCEditorCodeFoldingHintForm.Create(Self);
             with FCodeFoldingHintForm do
             begin
               BackgroundColor := FCodeFolding.Hint.Colors.Background;
               BorderColor := FCodeFolding.Hint.Colors.Border;
               Font := FCodeFolding.Hint.Font;
-              Resizeable := False;
             end;
 
             j := LFoldRange.ToLine - LFoldRange.FromLine - 1;
@@ -6646,7 +6645,7 @@ begin
             if j = FCodeFolding.Hint.RowCount then
               FCodeFoldingHintForm.ItemList.Add('...');
 
-            FCodeFoldingHintForm.Execute('', LPoint.X, LPoint.Y, ctHint);
+            FCodeFoldingHintForm.Execute('', LPoint.X, LPoint.Y);
           end;
         end
         else

@@ -241,6 +241,40 @@ begin
   inherited Destroy;
 end;
 
+{procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
+...
+procedure TForm2.WMNCHitTest(var Message: TWMNCHitTest);
+const
+  EDGEDETECT = 7;  //adjust to suit yourself
+var
+  deltaRect: TRect;  //not really used as a rect, just a convenient structure
+begin
+  inherited;
+  if BorderStyle = bsNone then
+    with Message, deltaRect do begin
+      Left := XPos - BoundsRect.Left;
+      Right := BoundsRect.Right - XPos;
+      Top := YPos - BoundsRect.Top;
+      Bottom := BoundsRect.Bottom - YPos;
+      if (Top<EDGEDETECT)and(Left<EDGEDETECT) then
+        Result := HTTOPLEFT
+      else if (Top<EDGEDETECT)and(Right<EDGEDETECT) then
+        Result := HTTOPRIGHT
+      else if (Bottom<EDGEDETECT)and(Left<EDGEDETECT) then
+        Result := HTBOTTOMLEFT
+      else if (Bottom<EDGEDETECT)and(Right<EDGEDETECT) then
+        Result := HTBOTTOMRIGHT
+      else if (Top<EDGEDETECT) then
+        Result := HTTOP
+      else if (Left<EDGEDETECT) then
+        Result := HTLEFT
+      else if (Bottom<EDGEDETECT) then
+        Result := HTBOTTOM
+      else if (Right<EDGEDETECT) then
+        Result := HTRIGHT
+    end;  //with Message, deltaRect; if BorderStyle = bsNone
+end; }
+
 procedure TBCEditorCompletionProposalForm.AddKeyPressHandler;
 var
   Editor: TBCBaseEditor;
@@ -265,10 +299,6 @@ begin
   inherited;
   Params.Style := WS_POPUP or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_SYSMENU;
   Params.ExStyle := Params.ExStyle or WS_EX_STATICEDGE;
-
-  {with Params do
-    if ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) and (Win32MajorVersion > 4) and (Win32MinorVersion > 0) then
-      WindowClass.Style := WindowClass.Style or CS_DROPSHADOW; }
 end;
 
 procedure TBCEditorCompletionProposalForm.Activate;

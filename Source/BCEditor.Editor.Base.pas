@@ -2684,21 +2684,12 @@ var
   i, j: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  if Length(FCodeFoldingTreeLine) <> FLines.Count + 1 then
-  begin
-    SetLength(FCodeFoldingTreeLine, 0); { empty }
-    SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
-  end;
-  if Length(FCodeFoldingRangeFromLine) <> FLines.Count + 1 then
-  begin
-    SetLength(FCodeFoldingRangeFromLine, 0); { empty }
-    SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
-  end;
-  if Length(FCodeFoldingRangeToLine) <> FLines.Count + 1 then
-  begin
-    SetLength(FCodeFoldingRangeToLine, 0); { empty }
-    SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
-  end;
+  SetLength(FCodeFoldingTreeLine, 0); { empty }
+  SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeFromLine, 0); { empty }
+  SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeToLine, 0); { empty }
+  SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];

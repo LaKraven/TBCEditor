@@ -5712,7 +5712,7 @@ begin
     if cpoParseItemsFromText in FCompletionProposal.Options then
       SplitTextIntoWords(ItemList, False);
 
-    Execute(GetCurrentInput, LPoint.X, LPoint.Y, ctCode);
+    Execute(GetCurrentInput, LPoint.X, LPoint.Y);
   end;
 end;
 

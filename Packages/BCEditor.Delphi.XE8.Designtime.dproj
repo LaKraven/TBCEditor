@@ -182,6 +182,7 @@
         <DCCReference Include="designide.dcp"/>
         <DCCReference Include="dbrtl.dcp"/>
         <DCCReference Include="vcldb.dcp"/>
+        <DCCReference Include="BCEditor.Delphi.XE8.Runtime.dcp"/>
         <DCCReference Include="..\Source\BCEditor.Register.pas"/>
         <DCCReference Include="..\Source\BCEditor.RegisterProperty.pas"/>
         <BuildConfiguration Include="Debug">
@@ -598,8 +599,8 @@
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

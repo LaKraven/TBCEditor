@@ -386,6 +386,9 @@
         <DelphiCompile Include="..\Source\BCEditor.JsonDataObjects.pas">
             <BuildOrder>91</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Form.pas">
+            <BuildOrder>92</BuildOrder>
+        </DelphiCompile>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

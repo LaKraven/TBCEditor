@@ -139,6 +139,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Form.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Ranges.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Types.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CompletionProposal.pas"/>

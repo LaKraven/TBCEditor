@@ -33,7 +33,8 @@ package BCEditor.Delphi.XE8.Designtime;
 requires
   designide,
   dbrtl,
-  vcldb;
+  vcldb,
+  BCEditor.Delphi.XE8.Runtime;
 
 contains
   BCEditor.Register in '..\Source\BCEditor.Register.pas',

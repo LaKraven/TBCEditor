@@ -2682,18 +2682,23 @@ end;
 procedure TBCBaseEditor.CodeFoldingResetCaches;
 var
   i, j: Integer;
-  //{LMaxFromLine,} LMaxToLine: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
-  //LMaxFromLine := 0;
-  //LMaxToLine := 0;
-
-  SetLength(FCodeFoldingTreeLine, 0); { empty }
-  SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
-  SetLength(FCodeFoldingRangeFromLine, 0); { empty }
-  SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
-  SetLength(FCodeFoldingRangeToLine, 0); { empty }
-  SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
+  if Length(FCodeFoldingTreeLine) <> FLines.Count + 1 then
+  begin
+    SetLength(FCodeFoldingTreeLine, 0); { empty }
+    SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
+  end;
+  if Length(FCodeFoldingRangeFromLine) <> FLines.Count + 1 then
+  begin
+    SetLength(FCodeFoldingRangeFromLine, 0); { empty }
+    SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
+  end;
+  if Length(FCodeFoldingRangeToLine) <> FLines.Count + 1 then
+  begin
+    SetLength(FCodeFoldingRangeToLine, 0); { empty }
+    SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
+  end;
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
@@ -2701,8 +2706,6 @@ begin
     begin
       if (not LCodeFoldingRange.ParentCollapsed) and (LCodeFoldingRange.FromLine <> LCodeFoldingRange.ToLine) then
       begin
-        //if LCodeFoldingRange.FromLine >= LMaxFromLine then
-        //  LMaxFromLine := LCodeFoldingRange.FromLine;
         FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
 
         if LCodeFoldingRange.Collapsable then
@@ -2710,18 +2713,11 @@ begin
           for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
             FCodeFoldingTreeLine[j] := True;
 
-          //if LCodeFoldingRange.ToLine >= LMaxToLine then
-          //  LMaxToLine := LCodeFoldingRange.ToLine;
           FCodeFoldingRangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
         end;
       end;
     end;
   end;
-
-  //if Length(FCodeFoldingRangeFromLine) <> LMaxFromLine + 1 then
-  //  SetLength(FCodeFoldingRangeFromLine, LMaxFromLine + 1); { actual size }
-  //if Length(FCodeFoldingRangeToLine) <> LMaxToLine + 1 then
-  //  SetLength(FCodeFoldingRangeToLine, LMaxToLine + 1); { actual size }
 end;
 
 procedure TBCBaseEditor.CodeFoldingOnChange(AEvent: TBCEditorCodeFoldingChanges);
@@ -3921,6 +3917,7 @@ begin
         if Assigned(LLastFoldRange) then
         begin
           Inc(LLine);
+          LLine := Min(LLine, FLines.Count);
           LLastFoldRange.ToLine := LLine;
           LOpenTokenFoldRangeList.Remove(LLastFoldRange);
           Dec(LFoldCount);

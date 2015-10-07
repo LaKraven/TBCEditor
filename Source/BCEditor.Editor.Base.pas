@@ -1392,7 +1392,7 @@ var
       begin
         GetMatchingToken := trOpenAndCloseTokenFound;
         AMatch.CloseToken := GetToken;
-        AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
+        AMatch.CloseTokenPos.Line := APoint.Line;
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Result := True;
       end
@@ -1450,7 +1450,8 @@ begin
     if GetEndOfLine then
       Exit;
 
-    if FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT then
+    if (FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) or
+      (FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
       Exit;
 
     I := 0;

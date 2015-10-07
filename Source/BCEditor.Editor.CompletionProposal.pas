@@ -12,7 +12,6 @@ type
     FCloseChars: string;
     FColors: TBCEditorCompletionProposalColors;
     FColumns: TBCEditorProposalColumns;
-    FDisplayType: TBCEditorCompletionType;
     FEnabled: Boolean;
     FFont: TFont;
     FItemList: TStrings;
@@ -29,7 +28,6 @@ type
     property CloseChars: string read FCloseChars write FCloseChars;
     property Colors: TBCEditorCompletionProposalColors read FColors write FColors;
     property Columns: TBCEditorProposalColumns read FColumns write FColumns;
-    property DisplayType: TBCEditorCompletionType read FDisplayType write FDisplayType default ctCode;
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property Font: TFont read FFont write FFont;
     property ItemList: TStrings read FItemList write FItemList;
@@ -54,7 +52,6 @@ begin
   FCloseChars := '()[]. ';
   FColors := TBCEditorCompletionProposalColors.Create;
   FColumns := TBCEditorProposalColumns.Create(Self, TBCEditorProposalColumn);
-  FDisplayType := ctCode;
   FEnabled := True;
   FFont := TFont.Create;
   FFont.Name := 'Courier New';
@@ -86,7 +83,6 @@ begin
     Self.FCloseChars := FCloseChars;
     Self.FColors.Assign(FColors);
     Self.FColumns.Assign(FColumns);
-    Self.FDisplayType := FDisplayType;
     Self.FEnabled := FEnabled;
     Self.FFont.Assign(FFont);
     Self.FItemList.Assign(FItemList);

@@ -232,11 +232,6 @@ type
     MatchingPairUnderline: Boolean;
   end;
 
-  TBCEditorCompletionType = (
-    ctNone,
-    ctCode,
-    ctHint
-  );
   TBCEditorSpecialCharsEndOfLineStyle = (
     eolArrow,
     eolEnter,

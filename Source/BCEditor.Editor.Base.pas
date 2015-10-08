@@ -7091,10 +7091,11 @@ begin
         if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
           (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) then
         begin
+          X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1);
           if AMinimap then
-            X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1) * FMinimap.CharWidth
+            X := X * FMinimap.CharWidth
           else
-            X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1) * FTextDrawer.CharWidth;
+            X := X * FTextDrawer.CharWidth;
           Canvas.Pen.Color := FCodeFolding.Colors.Indent;
 
           if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
@@ -10762,93 +10763,93 @@ begin
               end;
             end
             else
-              if LTextCaretPosition.Char = 1 then
+            if LTextCaretPosition.Char = 1 then
+            begin
+              if LTextCaretPosition.Line > 0 then
               begin
-                if LTextCaretPosition.Line > 0 then
+                SetTextCaretY(LTextCaretPosition.Line - 1);
+                SetTextCaretX(Length(Lines[LTextCaretPosition.Line - 1]) + 1);
+
+                FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, TextCaretPosition, LTextCaretPosition,
+                  sLineBreak, smNormal);
+
+                FLines.Delete(LTextCaretPosition.Line);
+                DoLinesDeleted(LTextCaretPosition.Line, 1);
+                if eoTrimTrailingSpaces in Options then
+                  LLineText := TrimRight(LLineText);
+
+                LineText := LineText + LLineText;
+                LHelper := BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+              end;
+            end
+            else
+            begin
+              LSpaceCount1 := LeftSpaceCount(LLineText);
+              LSpaceCount2 := 0;
+              if (LLineText[LTextCaretPosition.Char - 1] <= BCEDITOR_SPACE_CHAR) and (LSpaceCount1 = LTextCaretPosition.Char - 1) then
+              begin
+                LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText);
+                LVisualSpaceCount2 := 0;
+                LBackCounterLine := LTextCaretPosition.Line - 1;
+                while LBackCounterLine >= 0 do
                 begin
-                  SetTextCaretY(LTextCaretPosition.Line - 1);
-                  SetTextCaretX(Length(Lines[LTextCaretPosition.Line - 1]) + 1);
-
-                  FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, TextCaretPosition, LTextCaretPosition,
-                    sLineBreak, smNormal);
-
-                  FLines.Delete(LTextCaretPosition.Line);
-                  DoLinesDeleted(LTextCaretPosition.Line, 1);
-                  if eoTrimTrailingSpaces in Options then
-                    LLineText := TrimRight(LLineText);
-
-                  LineText := LineText + LLineText;
-                  LHelper := BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+                  LVisualSpaceCount2 := GetLeadingExpandedLength(FLines[LBackCounterLine]);
+                  if LVisualSpaceCount2 < LVisualSpaceCount1 then
+                  begin
+                    LSpaceCount2 := LeftSpaceCount(FLines[LBackCounterLine]);
+                    Break;
+                  end;
+                  Dec(LBackCounterLine);
                 end;
-              end
-              else
-              begin
-                LSpaceCount1 := LeftSpaceCount(LLineText);
-                LSpaceCount2 := 0;
-                if (LLineText[LTextCaretPosition.Char - 1] <= BCEDITOR_SPACE_CHAR) and (LSpaceCount1 = LTextCaretPosition.Char - 1) then
+
+                if (LBackCounterLine = -1) and (LSpaceCount2 > LSpaceCount1) then
+                  LSpaceCount2 := 0;
+                if LSpaceCount2 = LSpaceCount1 then
+                  LSpaceCount2 := 0;
+
+                if LSpaceCount2 > 0 then
                 begin
-                  LVisualSpaceCount1 := GetLeadingExpandedLength(LLineText);
-                  LVisualSpaceCount2 := 0;
-                  LBackCounterLine := LTextCaretPosition.Line - 1;
-                  while LBackCounterLine >= 0 do
+                  i := LTextCaretPosition.Char - 2;
+                  LLength := GetLeadingExpandedLength(LLineText, i);
+                  while LLength > LVisualSpaceCount2 do
                   begin
-                    LVisualSpaceCount2 := GetLeadingExpandedLength(FLines[LBackCounterLine]);
-                    if LVisualSpaceCount2 < LVisualSpaceCount1 then
-                    begin
-                      LSpaceCount2 := LeftSpaceCount(FLines[LBackCounterLine]);
-                      Break;
-                    end;
-                    Dec(LBackCounterLine);
+                    Dec(i);
+                    LLength := GetLeadingExpandedLength(LLineText, i);
                   end;
 
-                  if (LBackCounterLine = -1) and (LSpaceCount2 > LSpaceCount1) then
-                    LSpaceCount2 := 0;
-                  if LSpaceCount2 = LSpaceCount1 then
-                    LSpaceCount2 := 0;
-
-                  if LSpaceCount2 > 0 then
-                  begin
-                    i := LTextCaretPosition.Char - 2;
-                    LLength := GetLeadingExpandedLength(LLineText, i);
-                    while LLength > LVisualSpaceCount2 do
-                    begin
-                      Dec(i);
-                      LLength := GetLeadingExpandedLength(LLineText, i);
-                    end;
-
-                    LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
-                    Delete(LLineText, i + 1, LSpaceCount1 - i);
-                    FUndoList.BeginBlock;
-                    try
-                      FUndoList.AddChange(crSilentDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
-                      if LVisualSpaceCount2 - LLength > 0 then
-                        LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
-                      Insert(LSpaceBuffer, LLineText, i + 1);
-                    finally
-                      FUndoList.EndBlock;
-                    end;
-                    SetTextCaretX(i + Length(LSpaceBuffer) + 1);
-                  end
-                  else
-                  begin
-                    LVisualSpaceCount2 := LVisualSpaceCount1 - (LVisualSpaceCount1 mod FTabs.Width);
-
-                    if LVisualSpaceCount2 = LVisualSpaceCount1 then
-                      LVisualSpaceCount2 := Max(LVisualSpaceCount2 - FTabs.Width, 0);
-
-                    i := LTextCaretPosition.Char - 2;
-                    LLength := GetLeadingExpandedLength(LLineText, i);
-                    while (i > 0) and (LLength > LVisualSpaceCount2) do
-                    begin
-                      Dec(i);
-                      LLength := GetLeadingExpandedLength(LLineText, i);
-                    end;
-
-                    LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
-                    Delete(LLineText, i + 1, LSpaceCount1 - i);
+                  LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
+                  Delete(LLineText, i + 1, LSpaceCount1 - i);
+                  FUndoList.BeginBlock;
+                  try
                     FUndoList.AddChange(crSilentDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
-                    SetTextCaretX(i + 1);
+                    if LVisualSpaceCount2 - LLength > 0 then
+                      LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
+                    Insert(LSpaceBuffer, LLineText, i + 1);
+                  finally
+                    FUndoList.EndBlock;
                   end;
+                  SetTextCaretX(i + Length(LSpaceBuffer) + 1);
+                end
+                else
+                begin
+                  LVisualSpaceCount2 := LVisualSpaceCount1 - (LVisualSpaceCount1 mod FTabs.Width);
+
+                  if LVisualSpaceCount2 = LVisualSpaceCount1 then
+                    LVisualSpaceCount2 := Max(LVisualSpaceCount2 - FTabs.Width, 0);
+
+                  i := LTextCaretPosition.Char - 2;
+                  LLength := GetLeadingExpandedLength(LLineText, i);
+                  while (i > 0) and (LLength > LVisualSpaceCount2) do
+                  begin
+                    Dec(i);
+                    LLength := GetLeadingExpandedLength(LLineText, i);
+                  end;
+
+                  LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
+                  Delete(LLineText, i + 1, LSpaceCount1 - i);
+                  FUndoList.AddChange(crSilentDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
+                  SetTextCaretX(i + 1);
+                end;
                 FLines[LTextCaretPosition.Line] := LLineText;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end

@@ -3,7 +3,7 @@ unit BCEditor.Editor.CodeFolding.Hint.Form;
 interface
 
 uses
-  Winapi.Messages, System.Classes, System.Types, Vcl.StdCtrls, Vcl.Forms, Vcl.Controls, Vcl.Graphics;
+  Winapi.Windows, Winapi.Messages, System.Classes, System.Types, Vcl.StdCtrls, Vcl.Forms, Vcl.Controls, Vcl.Graphics;
 
 type
   TBCEditorCodeFoldingHintForm = class(TCustomForm)
@@ -27,6 +27,8 @@ type
     procedure SetFont(const Value: TFont);
     procedure SetItemHeight(const Value: Integer);
     procedure SetItemList(const Value: TStrings);
+    procedure WMEraseBackgrnd(var Message: TMessage); message WM_ERASEBKGND;
+    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
   protected
     procedure Activate; override;
     procedure CreateParams(var Params: TCreateParams); override;
@@ -35,10 +37,8 @@ type
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure KeyPressW(var Key: Char); virtual;
     procedure Paint; override;
-    procedure WMEraseBackgrnd(var Message: TMessage); message WM_ERASEBKGND;
-    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); overload; override;
     destructor Destroy; override;
 
     procedure Execute(ACurrentString: string; X, Y: Integer);
@@ -56,7 +56,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils, System.UITypes, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Utils,
+  System.SysUtils, System.UITypes, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Utils,
   BCEditor.Editor.Utils, BCEditor.Consts, System.Math{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
 
 { TBCEditorCodeFoldingHintForm }
@@ -68,6 +68,10 @@ var
 {$ENDIF}
 begin
   CreateNew(AOwner);
+
+  ControlStyle := ControlStyle + [csNoDesignVisible, csReplicatable];
+  if not (csDesigning in ComponentState) then
+    ControlStyle := ControlStyle + [csAcceptsControls];
 
   FBufferBitmap := Vcl.Graphics.TBitmap.Create;
   Visible := False;
@@ -85,6 +89,7 @@ begin
 
   FCaseSensitive := False;
 
+  BorderStyle := bsNone;
   FormStyle := fsStayOnTop;
 
   FItemHeight := 0;
@@ -95,7 +100,7 @@ begin
   FHeightBuffer := 0;
   FFont.OnChange := FontChange;
 
-  {$IFDEF USE_ALPHASKINS}
+{$IFDEF USE_ALPHASKINS}
   LSkinProvider := TsSkinProvider(SendMessage(Handle, SM_ALPHACMD, MakeWParam(0, AC_GETPROVIDER), 0));
   if Assigned(LSkinProvider) then
   begin
@@ -103,7 +108,7 @@ begin
     LSkinProvider.DrawNonClientArea := False;
     LSkinProvider.DrawClientArea := False;
   end;
-  {$ENDIF}
+{$ENDIF}
 end;
 
 destructor TBCEditorCodeFoldingHintForm.Destroy;
@@ -117,9 +122,7 @@ end;
 
 procedure TBCEditorCodeFoldingHintForm.CreateParams(var Params: TCreateParams);
 begin
-  BorderStyle := bsNone;
-  inherited;
-  Params.Style := WS_POPUP or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_SYSMENU;
+  inherited CreateParams(Params);
 
   with Params do
     if ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) and (Win32MajorVersion > 4) and (Win32MinorVersion > 0) then
@@ -243,7 +246,7 @@ begin
   AdjustMetrics;
 end;
 
-procedure TBCEditorCodeFoldingHintForm.Execute(ACurrentString: string; x, y: Integer);
+procedure TBCEditorCodeFoldingHintForm.Execute(ACurrentString: string; X, Y: Integer);
 
   function GetWorkAreaWidth: Integer;
   begin
@@ -298,16 +301,16 @@ procedure TBCEditorCodeFoldingHintForm.Execute(ACurrentString: string; x, y: Int
         LY := 0;
     end;
 
+    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW or SWP_NOSIZE);
+
     Width := LWidth;
     Height := LHeight;
-    Top := LY;
-    Left := LX;
   end;
 
 begin
   RecalcFormPlacement;
   AdjustMetrics;
-  Show;
+  Visible := True;
 end;
 
 procedure TBCEditorCodeFoldingHintForm.AdjustMetrics;

@@ -76,6 +76,11 @@ type
     procedure ScrollBarOnEnter(Sender: TObject);
     procedure ScrollBarOnScroll(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure StringListChange(Sender: TObject);
+    procedure WMChar(var Msg: TWMChar); message WM_CHAR;
+    procedure WMEraseBackgrnd(var Message: TMessage); message WM_ERASEBKGND;
+    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
+    procedure WMMouseActivate(var Msg: TMessage); message WM_MOUSEACTIVATE;
+    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
   protected
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
     procedure Activate; override;
@@ -87,10 +92,6 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure Paint; override;
     procedure Resize; override;
-    procedure WMChar(var Msg: TWMChar); message WM_CHAR;
-    procedure WMEraseBackgrnd(var Message: TMessage); message WM_ERASEBKGND;
-    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
-    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -236,40 +237,6 @@ begin
 
   inherited Destroy;
 end;
-
-{procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
-...
-procedure TForm2.WMNCHitTest(var Message: TWMNCHitTest);
-const
-  EDGEDETECT = 7;  //adjust to suit yourself
-var
-  deltaRect: TRect;  //not really used as a rect, just a convenient structure
-begin
-  inherited;
-  if BorderStyle = bsNone then
-    with Message, deltaRect do begin
-      Left := XPos - BoundsRect.Left;
-      Right := BoundsRect.Right - XPos;
-      Top := YPos - BoundsRect.Top;
-      Bottom := BoundsRect.Bottom - YPos;
-      if (Top<EDGEDETECT)and(Left<EDGEDETECT) then
-        Result := HTTOPLEFT
-      else if (Top<EDGEDETECT)and(Right<EDGEDETECT) then
-        Result := HTTOPRIGHT
-      else if (Bottom<EDGEDETECT)and(Left<EDGEDETECT) then
-        Result := HTBOTTOMLEFT
-      else if (Bottom<EDGEDETECT)and(Right<EDGEDETECT) then
-        Result := HTBOTTOMRIGHT
-      else if (Top<EDGEDETECT) then
-        Result := HTTOP
-      else if (Left<EDGEDETECT) then
-        Result := HTLEFT
-      else if (Bottom<EDGEDETECT) then
-        Result := HTBOTTOM
-      else if (Right<EDGEDETECT) then
-        Result := HTRIGHT
-    end;  //with Message, deltaRect; if BorderStyle = bsNone
-end; }
 
 procedure TBCEditorCompletionProposalForm.AddKeyPressHandler;
 var
@@ -901,10 +868,9 @@ procedure TBCEditorCompletionProposalForm.Execute(ACurrentString: string; X, Y: 
         LY := 0;
     end;
 
+    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW or SWP_NOSIZE);
     Width := LWidth;
     Height := LHeight;
-    Top := LY;
-    Left := LX;
   end;
 
 begin
@@ -914,10 +880,15 @@ begin
     FScrollBar.Visible := True;
     RecalcFormPlacement;
     CurrentString := ACurrentString;
-    Show;
+    Visible := True;
   end;
 
   FNoNextKey := Visible;
+end;
+
+procedure TBCEditorCompletionProposalForm.WMMouseActivate(var Msg: TMessage);
+begin
+  Msg.Result := MA_NOACTIVATE;
 end;
 
 procedure TBCEditorCompletionProposalForm.HandleOnCancel(Sender: TObject);

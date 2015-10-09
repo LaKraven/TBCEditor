@@ -200,7 +200,7 @@ type
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineHeight: Integer;
-    function GetLineIndentChars(AStrings: TStrings; ALine: Integer): Integer;
+    function GetLineIndentChars(ALine: Integer): Integer;
     function GetLineText: string;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
     function GetSelectionAvailable: Boolean;
@@ -424,7 +424,6 @@ type
     procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure RecalculateCharExtent;
     procedure RedoItem;
-    procedure RepaintGuides;
     procedure ResetCaret(DoUpdate: Boolean = True);
     procedure ScanCodeFoldingRanges; virtual;
     procedure ScanMatchingPair;
@@ -1311,14 +1310,14 @@ begin
   Result := FTextHeight + ExtraLineSpacing;
 end;
 
-function TBCBaseEditor.GetLineIndentChars(AStrings: TStrings; ALine: Integer): Integer;
+function TBCBaseEditor.GetLineIndentChars(ALine: Integer): Integer;
 var
   LPLine: PChar;
 begin
   Result := 0;
-  if ALine >= AStrings.Count then
+  if ALine >= FLines.Count then
     Exit;
-  LPLine := PChar(AStrings[ALine]);
+  LPLine := PChar(FLines[ALine]);
   repeat
     if LPLine^ = BCEDITOR_TAB_CHAR then
       while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LPLine^ = BCEDITOR_TAB_CHAR) do
@@ -3584,7 +3583,7 @@ var
                         else
                           LFoldRanges := FAllCodeFoldingRanges;
 
-                        LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(FLines, LLine - 1), LFoldCount,
+                        LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(LLine - 1), LFoldCount,
                           LRegionItem, LLine);
                         { open keyword found }
                         LOpenTokenFoldRangeList.Add(LCodeFoldingRange);
@@ -3739,7 +3738,7 @@ var
                 else
                   LFoldRanges := FAllCodeFoldingRanges;
 
-                LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(FLines, LLine - 1), LFoldCount,
+                LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(LLine - 1), LFoldCount,
                   LRegionItem, LLine);
                 { open keyword found }
                 LOpenTokenFoldRangeList.Add(LCodeFoldingRange);
@@ -5877,8 +5876,6 @@ begin
   case ACommand of
     ecCut, ecPaste, ecUndo, ecRedo, ecBackspace, ecDeleteChar:
       CheckIfAtMatchingKeywords;
-    ecUp, ecDown, ecPageUp, ecPageDown, ecPageTop, ecPageBottom, ecEditorTop, ecEditorBottom, ecGotoXY:
-      RepaintGuides;
   end;
   if Assigned(FOnCommandProcessed) then
     FOnCommandProcessed(Self, ACommand, AChar, AData);
@@ -6502,9 +6499,7 @@ begin
     end;
 
   if X <= LLeftMarginWidth then
-    DoOnLeftMarginClick(Button, X, Y)
-  else
-    RepaintGuides;
+    DoOnLeftMarginClick(Button, X, Y);
 
   if FMatchingPair.Enabled then
     ScanMatchingPair;
@@ -7046,7 +7041,9 @@ end;
 
 procedure TBCBaseEditor.PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
 var
-  i, X, Y, LLine, LTempLine: Integer;
+  i: Integer;
+  X, Y: Integer;
+  LLine, LTempLine: Integer;
   LOldColor, LTempColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
@@ -7088,7 +7085,7 @@ begin
         if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
           (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) then
         begin
-          X := GetLineIndentChars(FLines, LCodeFoldingRange.ToLine - 1);
+          X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
           if AMinimap then
             X := X * FMinimap.CharWidth
           else
@@ -8559,34 +8556,6 @@ begin
       FScroll.Options := FScroll.Options - [soPastEndOfLine];
     LUndoItem.Free;
     DecPaintLock;
-  end;
-end;
-
-procedure TBCBaseEditor.RepaintGuides;
-var
-  i, LCurrentLine, LScrolledXBy, LTopLine: Integer;
-  LLineRect: TRect;
-begin
-  if csDestroying in ComponentState then
-    Exit;
-  if FCodeFolding.Visible then
-  try
-    HideCaret;
-    LLineRect.Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-    LLineRect.Right := LLineRect.Left + FVisibleChars * CharWidth;
-    LLineRect.Top := 0;
-    LLineRect.Bottom := GetLineHeight;
-    LScrolledXBy := (LeftChar - 1) * CharWidth;
-    LTopLine := TopLine;
-    for i := LTopLine to LTopLine + VisibleLines do
-    begin
-      LCurrentLine := GetDisplayTextLineNumber(i);
-      PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, False);
-      LLineRect.Top := LLineRect.Bottom;
-      Inc(LLineRect.Bottom, GetLineHeight);
-    end;
-  finally
-    UpdateCaret;
   end;
 end;
 

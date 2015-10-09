@@ -6048,10 +6048,7 @@ begin
   if (Source is TBCBaseEditor) and not ReadOnly then
   begin
     Accept := True;
-    if GetKeyState(VK_CONTROL) < 0 then
-      DragCursor := crMultiDrag
-    else
-      DragCursor := crDrag;
+
     if Dragging then
     begin
       if State = dsDragLeave then
@@ -6381,13 +6378,12 @@ end;
 procedure TBCBaseEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   LWasSelected: Boolean;
-  //LStartDrag: Boolean;
   LLeftMarginWidth: Integer;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
   LWasSelected := False;
-  //LStartDrag := False;
+
   if Button = mbLeft then
   begin
     LWasSelected := SelectionAvailable;
@@ -6473,13 +6469,9 @@ begin
     Exclude(FStateFlags, sfWaitForDragging);
     if LWasSelected and (eoDragDropEditing in FOptions) and (X > LLeftMarginWidth) and
       (FSelection.Mode = smNormal) and IsPointInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
-      Include(FStateFlags, sfWaitForDragging); //LStartDrag := True
+      Include(FStateFlags, sfWaitForDragging);
   end;
 
-  {if (Button = mbLeft) and LStartDrag then
-    Include(FStateFlags, sfWaitForDragging)
-  else
-  begin   }
   if not (sfWaitForDragging in FStateFlags) then
     if not (sfDblClicked in FStateFlags) then
     begin
@@ -6508,7 +6500,6 @@ begin
         SelectionBeginPosition := TextCaretPosition;
       end;
     end;
-  //end;
 
   if X <= LLeftMarginWidth then
     DoOnLeftMarginClick(Button, X, Y)

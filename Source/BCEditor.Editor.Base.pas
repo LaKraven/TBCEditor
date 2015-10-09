@@ -2757,7 +2757,7 @@ begin
   if FWordWrap.Enabled then
     if FWordWrapLineLengths[LCaretNearestPosition.Row] <> 0 then
       LCaretNearestPosition.Column := MinMax(LCaretNearestPosition.Column, 1, FWordWrapLineLengths[LCaretNearestPosition.Row] + 1);
-  SetDisplayCaretPosition(LCaretNearestPosition);
+  SetDisplayCaretPosition(True, LCaretNearestPosition);
 end;
 
 procedure TBCBaseEditor.ComputeScroll(X, Y: Integer);
@@ -6042,6 +6042,7 @@ end;
 procedure TBCBaseEditor.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 var
   LDisplayPosition: TBCEditorDisplayPosition;
+  LOldTextCaretPosition: TBCEditorTextPosition;
 begin
   inherited;
   if (Source is TBCBaseEditor) and not ReadOnly then
@@ -6057,11 +6058,15 @@ begin
         ComputeCaret(FMouseDownX, FMouseDownY)
       else
       begin
+        LOldTextCaretPosition := TextCaretPosition;
         LDisplayPosition := PixelsToNearestRowColumn(X, Y);
         LDisplayPosition.Column := MinMax(LDisplayPosition.Column, LeftChar, LeftChar + FVisibleChars - 1);
         LDisplayPosition.Row := MinMax(LDisplayPosition.Row, TopLine, TopLine + VisibleLines - 1);
         TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
         ComputeScroll(X, Y);
+        if (LOldTextCaretPosition.Line <> TextCaretPosition.Line) or
+          (LOldTextCaretPosition.Char <> TextCaretPosition.Char) then
+          Refresh;
       end;
     end
     else
@@ -6376,13 +6381,13 @@ end;
 procedure TBCBaseEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   LWasSelected: Boolean;
-  LStartDrag: Boolean;
+  //LStartDrag: Boolean;
   LLeftMarginWidth: Integer;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
   LWasSelected := False;
-  LStartDrag := False;
+  //LStartDrag := False;
   if Button = mbLeft then
   begin
     LWasSelected := SelectionAvailable;
@@ -6468,13 +6473,14 @@ begin
     Exclude(FStateFlags, sfWaitForDragging);
     if LWasSelected and (eoDragDropEditing in FOptions) and (X > LLeftMarginWidth) and
       (FSelection.Mode = smNormal) and IsPointInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
-      LStartDrag := True
+      Include(FStateFlags, sfWaitForDragging); //LStartDrag := True
   end;
 
-  if (Button = mbLeft) and LStartDrag then
+  {if (Button = mbLeft) and LStartDrag then
     Include(FStateFlags, sfWaitForDragging)
   else
-  begin
+  begin   }
+  if not (sfWaitForDragging in FStateFlags) then
     if not (sfDblClicked in FStateFlags) then
     begin
       if ssShift in Shift then
@@ -6502,7 +6508,7 @@ begin
         SelectionBeginPosition := TextCaretPosition;
       end;
     end;
-  end;
+  //end;
 
   if X <= LLeftMarginWidth then
     DoOnLeftMarginClick(Button, X, Y)

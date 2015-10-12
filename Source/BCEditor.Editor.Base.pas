@@ -7,7 +7,7 @@ uses
   Vcl.Forms, Vcl.Controls, Vcl.Graphics, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Dialogs,
   BCEditor.Consts, BCEditor.Editor.ActiveLine, BCEditor.Editor.Bookmarks, BCEditor.Editor.Caret,
   BCEditor.Editor.CodeFolding, BCEditor.Editor.CodeFolding.Regions, BCEditor.Editor.CodeFolding.Ranges,
-  BCEditor.Editor.CodeFolding.Types, BCEditor.Editor.CompletionProposal, BCEditor.Editor.CompletionProposal.Form,
+  BCEditor.Editor.CodeFolding.Types, BCEditor.Editor.CompletionProposal, BCEditor.Editor.CompletionProposal.PopupWindow,
   BCEditor.Editor.Glyph, BCEditor.Editor.InternalImage, BCEditor.Editor.KeyCommands, BCEditor.Editor.LeftMargin,
   BCEditor.Editor.LineSpacing, BCEditor.Editor.MatchingPair, BCEditor.Editor.Minimap, BCEditor.Editor.Replace,
   BCEditor.Editor.RightMargin, BCEditor.Editor.Scroll, BCEditor.Editor.Search, BCEditor.Editor.Directories,
@@ -64,7 +64,7 @@ type
     FDirectories: TBCEditorDirectories;
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
-    FFocusList: TList;
+    //FFocusList: TList;
     FFontDummy: TFont;
     FHighlightedFoldRange: TBCEditorCodeFoldingRange;
     FHighlighter: TBCEditorHighlighter;
@@ -466,7 +466,7 @@ type
     function WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function WordStart: TBCEditorTextPosition; overload;
     function WordStart(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
-    procedure AddFocusControl(AControl: TWinControl);
+    //procedure AddFocusControl(AControl: TWinControl);
     procedure AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word; ASecondaryShift: TShiftState = []; ASecondaryKey: Word = 0);
     procedure AddKeyDownHandler(AHandler: TKeyEvent);
     procedure AddKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
@@ -519,7 +519,7 @@ type
     procedure DoRedo;
     procedure RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);
     procedure RemoveChainedEditor;
-    procedure RemoveFocusControl(AControl: TWinControl);
+    //procedure RemoveFocusControl(AControl: TWinControl);
     procedure RemoveKeyDownHandler(AHandler: TKeyEvent);
     procedure RemoveKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
     procedure RemoveKeyUpHandler(AHandler: TKeyEvent);
@@ -780,7 +780,7 @@ begin
   { Text }
   TabStop := True;
   FInsertMode := True;
-  FFocusList := TList.Create;
+  //FFocusList := TList.Create;
   FKeyboardHandler := TBCEditorKeyboardHandler.Create;
   FKeyCommands := TBCEditorKeyCommands.Create(Self);
   SetDefaultKeyCommands;
@@ -861,7 +861,7 @@ begin
   FKeyCommands.Free;
   FKeyCommands := nil;
   FKeyboardHandler.Free;
-  FFocusList.Free;
+  //FFocusList.Free;
   FSelection.Free;
   FOriginalUndoList.Free;
   FOriginalRedoList.Free;
@@ -5678,11 +5678,16 @@ end;
 procedure TBCBaseEditor.DoExecuteCompletionProposal;
 var
   LPoint: TPoint;
+  LCompletionProposalForm: TBCEditorCompletionProposalPopupWindow;
 begin
   LPoint := ClientToScreen(RowColumnToPixels(DisplayCaretPosition));
   Inc(LPoint.Y, LineHeight);
-  with CompletionProposalHintForm(Self) do
+
+  LCompletionProposalForm := TBCEditorCompletionProposalPopupWindow.Create(Self);
+  with LCompletionProposalForm do
   begin
+    Parent := Self;
+    // TODO assign
     BackgroundColor := FCompletionProposal.Colors.Background;
     BorderColor := FCompletionProposal.Colors.Border;
     CaseSensitive := cpoCaseSensitive in FCompletionProposal.Options;
@@ -5691,7 +5696,6 @@ begin
     Filtered := cpoFiltered in FCompletionProposal.Options;
     Font.Assign(FCompletionProposal.Font);
     FormWidth := FCompletionProposal.Width;
-    Resizeable := cpoResizeable in FCompletionProposal.Options;
     SelectedBackgroundColor := FCompletionProposal.Colors.SelectedBackground;
     SelectedTextColor := FCompletionProposal.Colors.SelectedText;
     TriggerChars := FCompletionProposal.Trigger.Chars;
@@ -9994,10 +9998,10 @@ begin
   Result.Line := Y;
 end;
 
-procedure TBCBaseEditor.AddFocusControl(aControl: TWinControl);
+{procedure TBCBaseEditor.AddFocusControl(aControl: TWinControl);
 begin
   FFocusList.Add(aControl);
-end;
+end;}
 
 procedure TBCBaseEditor.AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word;
   ASecondaryShift: TShiftState; ASecondaryKey: Word);
@@ -12077,10 +12081,10 @@ begin
   UnhookEditorLines;
 end;
 
-procedure TBCBaseEditor.RemoveFocusControl(AControl: TWinControl);
+{procedure TBCBaseEditor.RemoveFocusControl(AControl: TWinControl);
 begin
   FFocusList.Remove(AControl);
-end;
+end; }
 
 procedure TBCBaseEditor.RemoveKeyDownHandler(AHandler: TKeyEvent);
 begin
@@ -12216,12 +12220,12 @@ end;
 
 procedure TBCBaseEditor.SetFocus;
 begin
-  if FFocusList.Count > 0 then
+  {if FFocusList.Count > 0 then
   begin
     if TWinControl(FFocusList.Last).CanFocus then
       TWinControl(FFocusList.Last).SetFocus;
     Exit;
-  end;
+  end; }
   Winapi.Windows.SetFocus(Handle);
   inherited;
 end;

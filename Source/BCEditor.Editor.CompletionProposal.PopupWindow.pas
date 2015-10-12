@@ -1,21 +1,23 @@
-unit BCEditor.Editor.CompletionProposal.Form;
+unit BCEditor.Editor.CompletionProposal.PopupWindow;
 
 interface
 
 uses
   Winapi.Messages, System.Classes, System.Types, Vcl.StdCtrls, Vcl.Forms, Vcl.Controls, Vcl.Graphics, BCEditor.Utils,
-  BCEditor.Types, BCEditor.Editor.CompletionProposal.Columns{$IFDEF USE_ALPHASKINS}, sScrollBar{$ENDIF};
+  BCEditor.Types, BCEditor.Editor.CompletionProposal.Columns{$IFDEF USE_ALPHASKINS}, sScrollBar{$ENDIF},
+  BCEditor.Editor.PopupWindow;
 
 type
   TBCEditorValidateEvent = procedure(Sender: TObject; Shift: TShiftState; EndToken: Char) of object;
 
-  TBCEditorCompletionProposalForm = class(TCustomForm)
+  TBCEditorCompletionProposalPopupWindow = class(TBCEditorPopupWindow)
   strict private
     FAdjustCompletionStart: Boolean;
     FAssignedList: TStrings;
     FBackgroundColor: TColor;
     FBitmap: TBitmap;
     FBorderColor: TColor;
+    FBorderWidth: Integer;
     FCaseSensitive: Boolean;
     FCloseChars: string;
     FColumns: TBCEditorProposalColumns;
@@ -33,30 +35,26 @@ type
     FMargin: Integer;
     FMouseWheelAccumulator: Integer;
     FNoNextKey: Boolean;
-    FOldShowCaret: Boolean;
     FOnCancel: TNotifyEvent;
     FOnValidate: TBCEditorValidateEvent;
     FPosition: Integer;
-    FResizeable: Boolean;
-    {$IFDEF USE_ALPHASKINS}
+{$IFDEF USE_ALPHASKINS}
     FScrollBar: TsScrollBar;
-    {$ELSE}
+{$ELSE}
     FScrollBar: TScrollBar;
-    {$ENDIF}
+{$ENDIF}
     FSelectedBackgroundColor: TColor;
     FSelectedTextColor: TColor;
     FTriggerChars: string;
     FVisibleLines: Integer;
     function IsWordBreakChar(AChar: Char): Boolean;
+    function GetItemList: TStrings;
     procedure AddKeyPressHandler;
     procedure AdjustScrollBarPosition;
     procedure AdjustMetrics;
     procedure DoDoubleClick(Sender: TObject);
-    procedure DoFormHide(Sender: TObject);
-    procedure DoFormShow(Sender: TObject);
     procedure EditorKeyPress(Sender: TObject; var Key: Char);
     procedure FontChange(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure HandleOnCancel(Sender: TObject);
     procedure HandleDblClick(Sender: TObject);
     procedure HandleOnKeyPress(Sender: TObject; var Key: Char);
@@ -71,21 +69,14 @@ type
     procedure SetItemHeight(const Value: Integer);
     procedure SetItemList(const Value: TStrings);
     procedure SetPosition(const Value: Integer);
-    procedure SetResizeable(const Value: Boolean);
     procedure ScrollBarOnChange(Sender: TObject);
-    procedure ScrollBarOnEnter(Sender: TObject);
+    //procedure ScrollBarOnEnter(Sender: TObject);
     procedure ScrollBarOnScroll(Sender: TObject; ScrollCode: TScrollCode; var ScrollPos: Integer);
     procedure StringListChange(Sender: TObject);
-    procedure WMChar(var Msg: TWMChar); message WM_CHAR;
-    procedure WMEraseBackgrnd(var Message: TMessage); message WM_ERASEBKGND;
-    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
-    procedure WMMouseActivate(var Msg: TMessage); message WM_MOUSEACTIVATE;
     procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
+    procedure WMChar(var Msg: TWMChar); message WM_CHAR;
   protected
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
-    procedure Activate; override;
-    procedure CreateParams(var Params: TCreateParams); override;
-    procedure Deactivate; override;
     procedure DoKeyPressW(Key: Char);
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure KeyPressW(var Key: Char); virtual;
@@ -97,10 +88,10 @@ type
     destructor Destroy; override;
 
     function GetCurrentInput: string;
-    procedure CancelCompletion;
     procedure Execute(ACurrentString: string; X, Y: Integer);
 
     property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor default clWindow;
+    property BorderWidth: Integer read FBorderWidth write FBorderWidth default 3;
     property BorderColor: TColor read FBorderColor write FBorderColor default clBtnFace;
     property CaseSensitive: Boolean read FCaseSensitive write FCaseSensitive default False;
     property CloseChars: string read FCloseChars write FCloseChars;
@@ -111,12 +102,11 @@ type
     property FormWidth: Integer read FFormWidth write FFormWidth; { Don't use the width because it triggers resizing }
     property Images: TImageList read FImages write SetImages;
     property ItemHeight: Integer read FItemHeight write SetItemHeight default 0;
-    property ItemList: TStrings read FItemList write SetItemList;
+    property ItemList: TStrings read GetItemList write SetItemList;
     property Margin: Integer read FMargin write FMargin default 2;
     property OnCancel: TNotifyEvent read FOnCancel write FOnCancel;
     property OnValidate: TBCEditorValidateEvent read FOnValidate write FOnValidate;
     property Position: Integer read FPosition write SetPosition;
-    property Resizeable: Boolean read FResizeable write SetResizeable default True;
     property SelectedBackgroundColor: TColor read FSelectedBackgroundColor write FSelectedBackgroundColor
       default clHighlight;
     property SelectedTextColor: TColor read FSelectedTextColor write FSelectedTextColor default clHighlightText;
@@ -124,56 +114,40 @@ type
     property VisibleLines: Integer read FVisibleLines write FVisibleLines;
   end;
 
-function CompletionProposalHintForm(AOwner: TComponent): TBCEditorCompletionProposalForm;
-
 implementation
 
 uses
   Winapi.Windows, System.SysUtils, System.UITypes, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands,
-  BCEditor.Editor.Utils, BCEditor.Consts, System.Math{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
+  BCEditor.Editor.Utils, BCEditor.Consts, System.Math, Vcl.Dialogs;
 
-var
-  FCompletionProposalHintForm: TBCEditorCompletionProposalForm;
+{ TBCEditorCompletionProposalPopupWindow }
 
-function CompletionProposalHintForm(AOwner: TComponent): TBCEditorCompletionProposalForm;
+constructor TBCEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
 begin
-  if not Assigned(FCompletionProposalHintForm) then
-    FCompletionProposalHintForm := TBCEditorCompletionProposalForm.Create(AOwner);
-  Result := FCompletionProposalHintForm;
-end;
-
-{ TBCEditorCompletionProposalForm }
-
-constructor TBCEditorCompletionProposalForm.Create(AOwner: TComponent);
-{$IFDEF USE_ALPHASKINS}
-var
-  LSkinProvider: TsSkinProvider;
-{$ENDIF}
-begin
-  CreateNew(AOwner);
+  inherited Create(AOwner);
 
   AddKeyPressHandler;
 
   Visible := False;
-  FResizeable := True;
+  FBorderWidth := 3;
 
   FBitmap := Vcl.Graphics.TBitmap.Create;
   FItemList := TStringList.Create;
   FAssignedList := TStringList.Create;
   FFiltered := False;
 
-  {$IFDEF USE_ALPHASKINS}
+{$IFDEF USE_ALPHASKINS}
   FScrollBar := TsScrollBar.Create(Self);
-  {$ELSE}
+{$ELSE}
   FScrollBar := TScrollBar.Create(Self);
-  {$ENDIF}
+{$ENDIF}
   with FScrollBar do
   begin
     Kind := sbVertical;
     ParentCtl3D := False;
     OnChange := ScrollBarOnChange;
     OnScroll := ScrollBarOnScroll;
-    OnEnter := ScrollBarOnEnter;
+    //OnEnter := ScrollBarOnEnter;
     Parent := Self;
   end;
 
@@ -189,8 +163,6 @@ begin
   (FItemList as TStringList).OnChange := StringListChange;
   FCaseSensitive := False;
 
-  FormStyle := fsStayOnTop;
-
   FColumns := TBCEditorProposalColumns.Create(AOwner, TBCEditorProposalColumn);
 
   FItemHeight := 0;
@@ -202,33 +174,19 @@ begin
   FFont.OnChange := FontChange;
 
   OnDblClick := DoDoubleClick;
-  OnShow := DoFormShow;
-  OnHide := DoFormHide;
 
   OnKeyPress := HandleOnKeyPress;
   OnValidate := HandleOnValidate;
   OnCancel := HandleOnCancel;
   OnDblClick := HandleDblClick;
-  OnDestroy := FormDestroy;
   TriggerChars := '.';
   FNoNextKey := False;
-
-  {$IFDEF USE_ALPHASKINS}
-  LSkinProvider := TsSkinProvider(SendMessage(Handle, SM_ALPHACMD, MakeWParam(0, AC_GETPROVIDER), 0));
-  if Assigned(LSkinProvider) then
-  begin
-    LSkinProvider.AllowExtBorders := False;
-    LSkinProvider.DrawNonClientArea := False;
-    LSkinProvider.DrawClientArea := False;
-  end;
-  {$ENDIF}
 end;
 
-destructor TBCEditorCompletionProposalForm.Destroy;
+destructor TBCEditorCompletionProposalPopupWindow.Destroy;
 begin
   RemoveKeyPressHandler;
-  if Visible then
-    CancelCompletion;
+
   FColumns.Free;
   FBitmap.Free;
   FItemList.Free;
@@ -238,7 +196,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorCompletionProposalForm.AddKeyPressHandler;
+procedure TBCEditorCompletionProposalPopupWindow.AddKeyPressHandler;
 var
   Editor: TBCBaseEditor;
 begin
@@ -247,7 +205,7 @@ begin
     Editor.AddKeyPressHandler(EditorKeyPress);
 end;
 
-procedure TBCEditorCompletionProposalForm.RemoveKeyPressHandler;
+procedure TBCEditorCompletionProposalPopupWindow.RemoveKeyPressHandler;
 var
   Editor: TBCBaseEditor;
 begin
@@ -256,29 +214,7 @@ begin
     Editor.RemoveKeyPressHandler(EditorKeyPress);
 end;
 
-procedure TBCEditorCompletionProposalForm.CreateParams(var Params: TCreateParams);
-begin
-  BorderStyle := bsNone;
-  inherited;
-  Params.Style := WS_POPUP or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_SYSMENU;
-  Params.ExStyle := Params.ExStyle or WS_EX_STATICEDGE;
-end;
-
-procedure TBCEditorCompletionProposalForm.Activate;
-begin
-  Visible := True;
-  if Assigned(Owner) then
-    (Owner as TBCBaseEditor).AddFocusControl(Self);
-end;
-
-procedure TBCEditorCompletionProposalForm.Deactivate;
-begin
-  if Assigned(Owner) then
-    (Owner as TBCBaseEditor).RemoveFocusControl(Self);
-  Close;
-end;
-
-procedure TBCEditorCompletionProposalForm.KeyDown(var Key: Word; Shift: TShiftState);
+procedure TBCEditorCompletionProposalPopupWindow.KeyDown(var Key: Word; Shift: TShiftState);
 var
   LChar: Char;
 begin
@@ -371,20 +307,16 @@ begin
     VK_DELETE:
       if Assigned(Owner) then
         (Owner as TBCBaseEditor).CommandProcessor(ecDeleteChar, BCEDITOR_NONE_CHAR, nil);
-  end;
-  Invalidate;
-end;
+    end;
+    Invalidate;
+    end;
 
-procedure TBCEditorCompletionProposalForm.DoKeyPressW(Key: Char);
-begin
-  if Key <> BCEDITOR_NONE_CHAR then
-    KeyPressW(Key);
-end;
+    procedure TBCEditorCompletionProposalPopupWindow.DoKeyPressW(Key: Char);
+    begin if Key <> BCEDITOR_NONE_CHAR then KeyPressW(Key);
+    end;
 
-procedure TBCEditorCompletionProposalForm.KeyPressW(var Key: Char);
-begin
-  case Key of
-    BCEDITOR_CARRIAGE_RETURN, BCEDITOR_ESCAPE:
+    procedure TBCEditorCompletionProposalPopupWindow.KeyPressW(var Key: Char);
+    begin case Key of BCEDITOR_CARRIAGE_RETURN, BCEDITOR_ESCAPE:
       ;
     BCEDITOR_SPACE_CHAR .. high(Char):
       begin
@@ -406,7 +338,7 @@ begin
         OnKeyPress(Self, Key);
   else
     with Owner as TBCBaseEditor do
-    CommandProcessor(ecChar, Key, nil);
+      CommandProcessor(ecChar, Key, nil);
 
     if Assigned(OnCancel) then
       OnCancel(Self);
@@ -415,26 +347,21 @@ begin
   Invalidate;
 end;
 
-procedure TBCEditorCompletionProposalForm.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TBCEditorCompletionProposalPopupWindow.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   Y := (Y - FHeightBuffer) div FEffectiveItemHeight;
   Position := FScrollBar.Position + Y;
 end;
 
-function TBCEditorCompletionProposalForm.CanResize(var NewWidth, NewHeight: Integer): Boolean;
+function TBCEditorCompletionProposalPopupWindow.CanResize(var NewWidth, NewHeight: Integer): Boolean;
 var
   NewVisibleLines: Integer;
-  BorderWidth: Integer;
 begin
   Result := True;
-  if Resizeable then
-    BorderWidth := 2 * GetSystemMetrics(SM_CYSIZEFRAME)
-  else
-    BorderWidth := 0;
 
   if FEffectiveItemHeight <> 0 then
   begin
-    NewVisibleLines := (NewHeight - BorderWidth - FHeightBuffer) div FEffectiveItemHeight;
+    NewVisibleLines := (NewHeight - FBorderWidth - FHeightBuffer) div FEffectiveItemHeight;
     if NewVisibleLines < 1 then
       NewVisibleLines := 1;
   end
@@ -442,25 +369,25 @@ begin
     NewVisibleLines := 0;
 
   FVisibleLines := NewVisibleLines;
-  NewHeight := FEffectiveItemHeight * FVisibleLines + FHeightBuffer + BorderWidth;
-  if (NewWidth - BorderWidth) < FScrollBar.Width then
-    NewWidth := FScrollBar.Width + BorderWidth;
+  NewHeight := FEffectiveItemHeight * FVisibleLines + FHeightBuffer + FBorderWidth;
+  if (NewWidth - FBorderWidth) < FScrollBar.Width then
+    NewWidth := FScrollBar.Width + FBorderWidth;
 end;
 
-procedure TBCEditorCompletionProposalForm.Resize;
+procedure TBCEditorCompletionProposalPopupWindow.Resize;
 begin
   inherited;
   if FEffectiveItemHeight <> 0 then
     FVisibleLines := (ClientHeight - FHeightBuffer) div FEffectiveItemHeight;
 
-  if not (csCreating in ControlState) then
+  if not(csCreating in ControlState) then
     AdjustMetrics;
 
   AdjustScrollBarPosition;
   Invalidate;
 end;
 
-procedure TBCEditorCompletionProposalForm.Paint;
+procedure TBCEditorCompletionProposalPopupWindow.Paint;
 
   procedure ResetCanvas;
   begin
@@ -472,8 +399,6 @@ procedure TBCEditorCompletionProposalForm.Paint;
     end;
   end;
 
-const
-  TitleMargin = 2;
 var
   i: Integer;
 begin
@@ -486,15 +411,15 @@ begin
       if i + FScrollBar.Position >= FAssignedList.Count then
         Continue;
       if i + FScrollBar.Position = Position then
-      with Canvas do
-      begin
-        Canvas.Brush.Color := FSelectedBackgroundColor;
-        Pen.Color := FSelectedBackgroundColor;
-        Rectangle(0, FEffectiveItemHeight * i, ClientWidth - FScrollBar.Width, FEffectiveItemHeight * (i + 1));
-        Pen.Color := FSelectedTextColor;
-        Font.Assign(FFont);
-        Font.Color := FSelectedTextColor;
-      end;
+        with Canvas do
+        begin
+          Canvas.Brush.Color := FSelectedBackgroundColor;
+          Pen.Color := FSelectedBackgroundColor;
+          Rectangle(0, FEffectiveItemHeight * i, ClientWidth - FScrollBar.Width, FEffectiveItemHeight * (i + 1));
+          Pen.Color := FSelectedTextColor;
+          Font.Assign(FFont);
+          Font.Color := FSelectedTextColor;
+        end;
       BCEditor.Utils.TextOut(Canvas, FMargin, FEffectiveItemHeight * i, FAssignedList[FScrollBar.Position + i]);
 
       if i + FScrollBar.Position = Position then
@@ -502,31 +427,19 @@ begin
     end;
   end;
   Canvas.Draw(0, FHeightBuffer, FBitmap);
-
-  if not Resizeable then
-  with Canvas do
-  begin
-    Pen.Color := FBorderColor;
-    PenPos := Point(ClientWidth - 1, ClientHeight - 1);
-    LineTo(ClientWidth - 1, 0);
-    LineTo(0, 0);
-    LineTo(0, ClientHeight - 1);
-    LineTo(ClientWidth - 1, ClientHeight - 1);
-  end;
 end;
 
-procedure TBCEditorCompletionProposalForm.ScrollBarOnChange(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.ScrollBarOnChange(Sender: TObject);
 begin
   if Position < FScrollBar.Position then
     Position := FScrollBar.Position
-  else
-  if Position > FScrollBar.Position + FVisibleLines - 1 then
+  else if Position > FScrollBar.Position + FVisibleLines - 1 then
     Position := FScrollBar.Position + FVisibleLines - 1
   else
     Repaint;
 end;
 
-procedure TBCEditorCompletionProposalForm.ScrollBarOnScroll(Sender: TObject; ScrollCode: TScrollCode;
+procedure TBCEditorCompletionProposalPopupWindow.ScrollBarOnScroll(Sender: TObject; ScrollCode: TScrollCode;
   var ScrollPos: Integer);
 begin
   with Owner as TBCBaseEditor do
@@ -538,12 +451,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.ScrollBarOnEnter(Sender: TObject);
-begin
-  ActiveControl := nil;
-end;
-
-procedure TBCEditorCompletionProposalForm.MoveLine(LineCount: Integer);
+procedure TBCEditorCompletionProposalPopupWindow.MoveLine(LineCount: Integer);
 begin
   if LineCount > 0 then
   begin
@@ -561,7 +469,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetCurrentString(const Value: string);
+procedure TBCEditorCompletionProposalPopupWindow.SetCurrentString(const Value: string);
 
   function MatchItem(AIndex: Integer; UseItemList: Boolean): Boolean;
   var
@@ -617,20 +525,20 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetItemList(const Value: TStrings);
+procedure TBCEditorCompletionProposalPopupWindow.SetItemList(const Value: TStrings);
 begin
   FItemList.Assign(Value);
   FAssignedList.Assign(Value);
   CurrentString := CurrentString;
 end;
 
-procedure TBCEditorCompletionProposalForm.DoDoubleClick(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.DoDoubleClick(Sender: TObject);
 begin
   if Assigned(OnValidate) then
     OnValidate(Self, [], BCEDITOR_NONE_CHAR);
 end;
 
-procedure TBCEditorCompletionProposalForm.SetPosition(const Value: Integer);
+procedure TBCEditorCompletionProposalPopupWindow.SetPosition(const Value: Integer);
 begin
   if ((Value <= 0) and (FPosition = 0)) or (FPosition = Value) then
     exit;
@@ -648,19 +556,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetResizeable(const Value: Boolean);
-begin
-  FResizeable := Value;
-
-  if FResizeable then
-    SetWindowLong(Handle, GWL_STYLE, (GetWindowLong(Handle, GWL_STYLE) or WS_BORDER or WS_SIZEBOX or WS_DLGFRAME) and
-      not WS_CAPTION)
-  else
-    SetWindowLong(Handle, GWL_STYLE, GetWindowLong(Handle, GWL_STYLE) and not WS_BORDER and not WS_SIZEBOX and
-      not WS_DLGFRAME);
-end;
-
-procedure TBCEditorCompletionProposalForm.SetItemHeight(const Value: Integer);
+procedure TBCEditorCompletionProposalPopupWindow.SetItemHeight(const Value: Integer);
 begin
   if Value <> FItemHeight then
   begin
@@ -669,7 +565,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetImages(const Value: TImageList);
+procedure TBCEditorCompletionProposalPopupWindow.SetImages(const Value: TImageList);
 begin
   if FImages <> Value then
   begin
@@ -681,7 +577,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.RecalcItemHeight;
+procedure TBCEditorCompletionProposalPopupWindow.RecalcItemHeight;
 begin
   Canvas.Font.Assign(FFont);
   FFontHeight := TextHeight(Canvas, 'X');
@@ -693,30 +589,30 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.StringListChange(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.StringListChange(Sender: TObject);
 begin
   FScrollBar.Position := Position;
 end;
 
-function TBCEditorCompletionProposalForm.IsWordBreakChar(AChar: Char): Boolean;
+function TBCEditorCompletionProposalPopupWindow.IsWordBreakChar(AChar: Char): Boolean;
 begin
   Result := (Owner as TBCBaseEditor).IsWordBreakChar(AChar);
 end;
 
-procedure TBCEditorCompletionProposalForm.WMMouseWheel(var Msg: TMessage);
+procedure TBCEditorCompletionProposalPopupWindow.WMMouseWheel(var Msg: TMessage);
 var
   Delta: Integer;
   WheelClicks: Integer;
 begin
   if csDesigning in ComponentState then
-    Exit;
+    exit;
 
   if GetKeyState(VK_CONTROL) >= 0 then
     Delta := Mouse.WheelScrollLines
   else
     Delta := FVisibleLines;
 
-  Inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
+  inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
   WheelClicks := FMouseWheelAccumulator div WHEEL_DELTA;
   FMouseWheelAccumulator := FMouseWheelAccumulator mod WHEEL_DELTA;
   if (Delta = Integer(WHEEL_PAGESCROLL)) or (Delta > FVisibleLines) then
@@ -725,61 +621,30 @@ begin
   Position := Position - (Delta * WheelClicks);
 end;
 
-procedure TBCEditorCompletionProposalForm.WMChar(var Msg: TWMChar);
+procedure TBCEditorCompletionProposalPopupWindow.WMChar(var Msg: TWMChar);
 begin
   DoKeyPressW(Char(Msg.CharCode))
 end;
 
-procedure TBCEditorCompletionProposalForm.DoFormHide(Sender: TObject);
-begin
-  if Assigned(Owner) then
-    (Owner as TBCBaseEditor).AlwaysShowCaret := FOldShowCaret;
-end;
-
-procedure TBCEditorCompletionProposalForm.DoFormShow(Sender: TObject);
-begin
-  if Assigned(Owner) then
-  begin
-    with Owner as TBCBaseEditor do
-    begin
-      FOldShowCaret := AlwaysShowCaret;
-      AlwaysShowCaret := Focused;
-    end;
-  end;
-end;
-
-procedure TBCEditorCompletionProposalForm.WMEraseBackgrnd(var Message: TMessage);
-begin
-  message.Result := 1;
-end;
-
-procedure TBCEditorCompletionProposalForm.WMGetDlgCode(var Message: TWMGetDlgCode);
-begin
-  inherited;
-  message.Result := message.Result or DLGC_WANTTAB;
-end;
-
-procedure TBCEditorCompletionProposalForm.AdjustMetrics;
+procedure TBCEditorCompletionProposalPopupWindow.AdjustMetrics;
 begin
   FHeightBuffer := 0;
 
-  if (ClientWidth >= FScrollBar.Width) and (ClientHeight >= FHeightBuffer) then
-  begin
-    FBitmap.Width := ClientWidth - FScrollBar.Width;
-    FBitmap.Height := ClientHeight - FHeightBuffer;
-  end;
+  if Assigned(FScrollBar) then
+    if (ClientWidth >= FScrollBar.Width) and (ClientHeight >= FHeightBuffer) then
+    begin
+      FBitmap.Width := ClientWidth - FScrollBar.Width;
+      FBitmap.Height := ClientHeight - FHeightBuffer;
+    end;
 end;
 
-procedure TBCEditorCompletionProposalForm.AdjustScrollBarPosition;
+procedure TBCEditorCompletionProposalPopupWindow.AdjustScrollBarPosition;
 var
   LOffset: Integer;
 begin
   if Assigned(FScrollBar) then
   begin
-    if Resizeable then
-      LOffset := 0
-    else
-      LOffset := 1;
+    LOffset := 0;
     FScrollBar.Top := FHeightBuffer + LOffset;
     FScrollBar.Height := ClientHeight - FHeightBuffer - 2 * LOffset;
     FScrollBar.Left := ClientWidth - FScrollBar.Width - LOffset;
@@ -806,25 +671,25 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetFont(const Value: TFont);
+procedure TBCEditorCompletionProposalPopupWindow.SetFont(const Value: TFont);
 begin
   FFont.Assign(Value);
   RecalcItemHeight;
   AdjustMetrics;
 end;
 
-procedure TBCEditorCompletionProposalForm.SetColumns(Value: TBCEditorProposalColumns);
+procedure TBCEditorCompletionProposalPopupWindow.SetColumns(Value: TBCEditorProposalColumns);
 begin
   FColumns.Assign(Value);
 end;
 
-procedure TBCEditorCompletionProposalForm.FontChange(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.FontChange(Sender: TObject);
 begin
   RecalcItemHeight;
   AdjustMetrics;
 end;
 
-procedure TBCEditorCompletionProposalForm.Execute(ACurrentString: string; X, Y: Integer);
+procedure TBCEditorCompletionProposalPopupWindow.Execute(ACurrentString: string; X, Y: Integer);
 
   function GetWorkAreaWidth: Integer;
   begin
@@ -842,17 +707,12 @@ procedure TBCEditorCompletionProposalForm.Execute(ACurrentString: string; X, Y: 
     LHeight: Integer;
     LX: Integer;
     LY: Integer;
-    LBorderWidth: Integer;
   begin
-    LX := x;
-    LY := y;
+    LX := X;
+    LY := Y;
 
-    if Resizeable then
-      LBorderWidth := 2 * GetSystemMetrics(SM_CYSIZEFRAME)
-    else
-      LBorderWidth := 0;
     LWidth := FFormWidth;
-    LHeight := FHeightBuffer + FEffectiveItemHeight * FVisibleLines + LBorderWidth;
+    LHeight := FHeightBuffer + FEffectiveItemHeight * FVisibleLines + FBorderWidth;
 
     if LX + LWidth > GetWorkAreaWidth then
     begin
@@ -868,7 +728,8 @@ procedure TBCEditorCompletionProposalForm.Execute(ACurrentString: string; X, Y: 
         LY := 0;
     end;
 
-    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW or SWP_NOSIZE);
+    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW);
+
     Width := LWidth;
     Height := LHeight;
   end;
@@ -886,29 +747,24 @@ begin
   FNoNextKey := Visible;
 end;
 
-procedure TBCEditorCompletionProposalForm.WMMouseActivate(var Msg: TMessage);
-begin
-  Msg.Result := MA_NOACTIVATE;
-end;
-
-procedure TBCEditorCompletionProposalForm.HandleOnCancel(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.HandleOnCancel(Sender: TObject);
 var
   Editor: TBCBaseEditor;
 begin
   Editor := Owner as TBCBaseEditor;
   FNoNextKey := False;
-  Close;
+
   Editor.SetFocus;
 end;
 
-procedure TBCEditorCompletionProposalForm.HandleOnValidate(Sender: TObject; Shift: TShiftState; EndToken: Char);
+procedure TBCEditorCompletionProposalPopupWindow.HandleOnValidate(Sender: TObject; Shift: TShiftState; EndToken: Char);
 var
   Editor: TBCBaseEditor;
   Value: string;
   LTextPosition: TBCEditorTextPosition;
 begin
   if not Assigned(Owner) then
-    Exit;
+    exit;
   Editor := Owner as TBCBaseEditor;
   with Editor do
   begin
@@ -934,7 +790,6 @@ begin
 
       with Editor do
       begin
-        CancelCompletion;
         if CanFocus then
           SetFocus;
         EnsureCursorPositionVisible;
@@ -948,7 +803,7 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalForm.HandleOnKeyPress(Sender: TObject; var Key: Char);
+procedure TBCEditorCompletionProposalPopupWindow.HandleOnKeyPress(Sender: TObject; var Key: Char);
 var
   Editor: TBCBaseEditor;
 begin
@@ -957,7 +812,7 @@ begin
     CommandProcessor(ecChar, Key, nil);
 end;
 
-procedure TBCEditorCompletionProposalForm.EditorKeyPress(Sender: TObject; var Key: Char);
+procedure TBCEditorCompletionProposalPopupWindow.EditorKeyPress(Sender: TObject; var Key: Char);
 begin
   if FNoNextKey then
   begin
@@ -966,27 +821,12 @@ begin
   end
 end;
 
-procedure TBCEditorCompletionProposalForm.HandleDblClick(Sender: TObject);
+procedure TBCEditorCompletionProposalPopupWindow.HandleDblClick(Sender: TObject);
 begin
   HandleOnValidate(Sender, [], BCEDITOR_NONE_CHAR);
 end;
 
-procedure TBCEditorCompletionProposalForm.CancelCompletion;
-begin
-  FNoNextKey := False;
-  if Visible then
-  begin
-    Deactivate;
-    Close;
-  end;
-end;
-
-procedure TBCEditorCompletionProposalForm.FormDestroy(Sender: TObject);
-begin
-  FCompletionProposalHintForm := nil;
-end;
-
-function TBCEditorCompletionProposalForm.GetCurrentInput: string;
+function TBCEditorCompletionProposalPopupWindow.GetCurrentInput: string;
 var
   S: string;
   i: Integer;
@@ -1009,6 +849,11 @@ begin
     FAdjustCompletionStart := True;
 
   FCompletionStart := i + 1;
+end;
+
+function TBCEditorCompletionProposalPopupWindow.GetItemList: TStrings;
+begin
+  Result := FItemList;
 end;
 
 end.

@@ -6019,8 +6019,8 @@ var
   LTextCaretY: Integer;
 begin
   LTextCaretY := GetTextCaretY;
-  SelectionBeginPosition := GetTextPosition(0, LTextCaretY);
-  SelectionEndPosition := GetTextPosition(0, LTextCaretY + 1);
+  SelectionBeginPosition := GetTextPosition(1, LTextCaretY);
+  SelectionEndPosition := GetTextPosition(FLines.AccessStringLength(LTextCaretY) + 1, LTextCaretY);
   FLastDblClick := 0;
 end;
 

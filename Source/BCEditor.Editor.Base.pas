@@ -3200,7 +3200,7 @@ begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
   if FMinimap.Visible and (FLineNumbersCount > 0) then
-    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / (FLineNumbersCount - FVisibleLines)))), 1);
+    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / Max(FLineNumbersCount - FVisibleLines, 1)))), 1);
 end;
 
 procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);

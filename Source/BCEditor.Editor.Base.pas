@@ -58,6 +58,7 @@ type
     FCommonData: TsScrollWndData;
     {$ENDIF}
     FCompletionProposal: TBCEditorCompletionProposal;
+    FCompletionProposalPopupWindow: TBCEditorCompletionProposalPopupWindow;
     FCompletionProposalTimer: TTimer;
     FCurrentMatchingPair: TBCEditorMatchingTokenResult;
     FCurrentMatchingPairMatch: TBCEditorMatchingPairMatch;
@@ -390,6 +391,7 @@ type
     procedure DragCanceled; override;
     procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
     procedure FreeHintForm(var AForm: TBCEditorCodeFoldingHintForm);
+    procedure FreeCompletionProposalPopupWindow;
     procedure HideCaret;
     procedure IncPaintLock;
     procedure InvalidateRect(const ARect: TRect; AErase: Boolean = False);
@@ -850,7 +852,7 @@ begin
   FHighlighter := nil;
   if Assigned(FChainedEditor) or (FLines <> FOriginalLines) then
     RemoveChainedEditor;
-
+  FreeCompletionProposalPopupWindow;
   { Do not use FreeAndNil, it first nils and then freey causing problems with code accessing FHookedCommandHandlers
     while destruction }
   FHookedCommandHandlers.Free;
@@ -5024,6 +5026,7 @@ end;
 procedure TBCBaseEditor.WMKillFocus(var Msg: TWMKillFocus);
 begin
   inherited;
+  FreeCompletionProposalPopupWindow;
   CommandProcessor(ecLostFocus, BCEDITOR_NONE_CHAR, nil);
   if Focused or FAlwaysShowCaret then
     Exit;
@@ -5678,32 +5681,19 @@ end;
 procedure TBCBaseEditor.DoExecuteCompletionProposal;
 var
   LPoint: TPoint;
-  LCompletionProposalForm: TBCEditorCompletionProposalPopupWindow;
 begin
   LPoint := ClientToScreen(RowColumnToPixels(DisplayCaretPosition));
   Inc(LPoint.Y, LineHeight);
 
-  LCompletionProposalForm := TBCEditorCompletionProposalPopupWindow.Create(Self);
-  with LCompletionProposalForm do
+  FreeCompletionProposalPopupWindow;
+
+  FCompletionProposalPopupWindow := TBCEditorCompletionProposalPopupWindow.Create(Self);
+  with FCompletionProposalPopupWindow do
   begin
     Parent := Self;
-    // TODO assign
-    BackgroundColor := FCompletionProposal.Colors.Background;
-    BorderColor := FCompletionProposal.Colors.Border;
-    CaseSensitive := cpoCaseSensitive in FCompletionProposal.Options;
-    CloseChars := FCompletionProposal.CloseChars;
-    Columns.Assign(FCompletionProposal.Columns);
-    Filtered := cpoFiltered in FCompletionProposal.Options;
-    Font.Assign(FCompletionProposal.Font);
-    FormWidth := FCompletionProposal.Width;
-    SelectedBackgroundColor := FCompletionProposal.Colors.SelectedBackground;
-    SelectedTextColor := FCompletionProposal.Colors.SelectedText;
-    TriggerChars := FCompletionProposal.Trigger.Chars;
-    VisibleLines := FCompletionProposal.VisibleLines;
-
+    Assign(FCompletionProposal);
     if cpoParseItemsFromText in FCompletionProposal.Options then
       SplitTextIntoWords(ItemList, False);
-
     Execute(GetCurrentInput, LPoint.X, LPoint.Y);
   end;
 end;
@@ -6099,6 +6089,15 @@ begin
   UpdateMouseCursor;
 end;
 
+procedure TBCBaseEditor.FreeCompletionProposalPopupWindow;
+begin
+  if Assigned(FCompletionProposalPopupWindow) then
+  begin
+    FCompletionProposalPopupWindow.Free;
+    FCompletionProposalPopupWindow := nil;
+  end;
+end;
+
 procedure TBCBaseEditor.HideCaret;
 begin
   if sfCaretVisible in FStateFlags then
@@ -6392,6 +6391,7 @@ begin
     FMouseDownY := Y;
     if FMinimap.Visible then
       FMinimapBufferBmp.Height := 0;
+    FreeCompletionProposalPopupWindow;
   end;
 
   if not FMinimap.Dragging and FMinimap.Visible and

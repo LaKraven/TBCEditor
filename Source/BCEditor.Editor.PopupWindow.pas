@@ -13,8 +13,12 @@ type
     FEditor: TWinControl;
     FCloseUp: TCloseUpEvent;
     FDropShadow: Boolean;
+    procedure WMEraseBkgnd(var Msg: TMessage); message WM_ERASEBKGND;
     procedure WMMouseActivate(var Msg: TMessage); message WM_MOUSEACTIVATE;
     procedure WMActivate(var Msg: TWMActivate); message WM_ACTIVATE;
+    {$IFDEF USE_VCL_STYLES}
+    procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
+   {$ENDIF}
   protected
     FActiveControl: TWinControl;
     FIsFocusable: Boolean;
@@ -126,5 +130,42 @@ begin
   else
     Msg.Result := MA_NOACTIVATE;
 end;
+
+procedure TBCEditorPopupWindow.WMEraseBkgnd(var Msg: TMessage);
+begin
+  Msg.Result := -1;
+end;
+
+{$IFDEF USE_VCL_STYLES}
+procedure TBCEditorPopupWindow.WMNCPaint(var Message: TMessage);
+var
+  LRect: TRect;
+  LExStyle: Integer;
+  LTempRgn: HRGN;
+  LBorderWidth, LBorderHeight: Integer;
+begin
+  if StyleServices.Enabled then
+  begin
+    LExStyle := GetWindowLong(Handle, GWL_EXSTYLE);
+    if (LExStyle and WS_EX_CLIENTEDGE) <> 0 then
+    begin
+      GetWindowRect(Handle, LRect);
+      LBorderWidth := GetSystemMetrics(SM_CXEDGE);
+      LBorderHeight := GetSystemMetrics(SM_CYEDGE);
+      InflateRect(LRect, -LBorderWidth, -LBorderHeight);
+      LTempRgn := CreateRectRgnIndirect(LRect);
+      DefWindowProc(Handle, Message.Msg, wParam(LTempRgn), 0);
+      DeleteObject(LTempRgn);
+    end
+    else
+      DefaultHandler(Message);
+  end
+  else
+    DefaultHandler(Message);
+
+  if StyleServices.Enabled then
+    StyleServices.PaintBorder(Self, False);
+end;
+{$ENDIF}
 
 end.

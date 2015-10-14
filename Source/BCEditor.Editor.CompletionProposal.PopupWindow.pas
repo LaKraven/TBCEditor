@@ -17,7 +17,6 @@ type
     FBackgroundColor: TColor;
     FBufferBmp: TBitmap;
     FBorderColor: TColor;
-   // FBorderWidth: Integer;
     FCaseSensitive: Boolean;
     FCloseChars: string;
     FColumns: TBCEditorProposalColumns;
@@ -61,10 +60,7 @@ type
     procedure MoveLine(LineCount: Integer);
     procedure RecalcItemHeight;
     procedure RemoveKeyPressHandler;
-    // procedure SetColumns(Value: TBCEditorProposalColumns);
     procedure SetCurrentString(const Value: string);
-    // procedure SetFont(const Value: TFont);
-    // procedure SetItemHeight(const Value: Integer);
     procedure SetTopLine(const Value: Integer);
     procedure UpdateScrollBar;
     procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
@@ -77,6 +73,7 @@ type
     procedure KeyPressW(var Key: Char); virtual;
     procedure Paint; override;
     procedure Resize; override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -87,27 +84,6 @@ type
     procedure Execute(ACurrentString: string; X, Y: Integer);
     procedure Assign(Source: TPersistent); override;
     procedure WndProc(var Message: TMessage); override;
-
-    (* property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor default clWindow;
-      property BorderWidth: Integer read FBorderWidth write FBorderWidth default 3;
-      property BorderColor: TColor read FBorderColor write FBorderColor default clBtnFace;
-      property CaseSensitive: Boolean read FCaseSensitive write FCaseSensitive default False;
-      property CloseChars: string read FCloseChars write FCloseChars;
-      property Columns: TBCEditorProposalColumns read FColumns write SetColumns;
-
-      property Filtered: Boolean read FFiltered write FFiltered;
-      property Font: TFont read FFont write SetFont;
-      property FormWidth: Integer read FFormWidth write FFormWidth; { Don't use the width because it triggers resizing }
-      property ItemHeight: Integer read FItemHeight write SetItemHeight default 0;
-
-      property Margin: Integer read FMargin write FMargin default 2;
-
-
-      property SelectedBackgroundColor: TColor read FSelectedBackgroundColor write FSelectedBackgroundColor
-      default clHighlight;
-      property SelectedTextColor: TColor read FSelectedTextColor write FSelectedTextColor default clHighlightText;
-      property TriggerChars: string read FTriggerChars write FTriggerChars;
-      property VisibleLines: Integer read FVisibleLines write FVisibleLines; *)
     property CurrentString: string read FCurrentString write SetCurrentString;
     property ItemList: TStrings read GetItemList;
     property TopLine: Integer read FTopLine write SetTopLine;
@@ -612,7 +588,7 @@ procedure TBCEditorCompletionProposalPopupWindow.Execute(ACurrentString: string;
     LY := Y;
 
     LWidth := FFormWidth;
-    LHeight := FHeightBuffer + FEffectiveItemHeight * FVisibleLines; // + FBorderWidth;
+    LHeight := FHeightBuffer + FEffectiveItemHeight * FVisibleLines + 2; // + FBorderWidth;
 
     if LX + LWidth > Screen.DesktopWidth then
     begin
@@ -766,8 +742,8 @@ begin
   if Visible then
     SendMessage(Handle, WM_SETREDRAW, 0, 0);
 
-  LScrollInfo.nMin := 1;
-  LScrollInfo.nMax := Max(1, FItemList.Count);
+  LScrollInfo.nMin := 0;
+  LScrollInfo.nMax := Max(0, FItemList.Count - 2);
   LScrollInfo.nPage := FVisibleLines;
   LScrollInfo.nPos := TopLine;
 
@@ -779,9 +755,10 @@ begin
   else
   begin
     EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
-    if FSelectedLine <= 1 then
+    if TopLine <= 0 then
       EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
-    else if FSelectedLine - FItemList.Count + 1 = 0 then
+    else
+    if TopLine + FVisibleLines >= FItemList.Count then
       EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
   end;
 
@@ -801,19 +778,19 @@ begin
   case Msg.ScrollCode of
     { Scrolls to start / end of the text }
     SB_TOP:
-      TopLine := 1;
+      TopLine := 0;
     SB_BOTTOM:
-      TopLine := FItemList.Count;
+      TopLine := FItemList.Count - 1;
     { Scrolls one line up / down }
     SB_LINEDOWN:
-      TopLine := TopLine + 1;
+      TopLine := Min(FItemList.Count - FVisibleLines, TopLine + 1);
     SB_LINEUP:
-      TopLine := TopLine - 1;
+      TopLine := Max(0, TopLine - 1);
     { Scrolls one page of lines up / down }
     SB_PAGEDOWN:
-      TopLine := TopLine + FVisibleLines;
+      TopLine := Min(FItemList.Count - FVisibleLines, TopLine + FVisibleLines);
     SB_PAGEUP:
-      TopLine := TopLine - FVisibleLines;
+      TopLine := Max(0, TopLine - FVisibleLines);
     { Scrolls to the current scroll bar position }
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
@@ -901,6 +878,13 @@ begin
 {$ELSE}
   inherited;
 {$ENDIF}
+end;
+
+procedure TBCEditorCompletionProposalPopupWindow.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  FSelectedLine := Max(0, TopLine + (Y div FEffectiveItemHeight));
+  inherited MouseDown(Button, Shift, X, Y);
+  Refresh;
 end;
 
 end.

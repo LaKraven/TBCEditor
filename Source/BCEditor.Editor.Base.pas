@@ -10304,9 +10304,9 @@ begin
           LCodeFoldingRange := FCodeFoldingRangeFromLine[SelectionBeginPosition.Line + 1];
           if Assigned(LCodeFoldingRange) then
             if LCodeFoldingRange.Collapsed then
-              if SelectionEndPosition.Char > FLines.ExpandedStringLengths[SelectionBeginPosition.Line] + 2 then
+              if SelectionEndPosition.Char > FLines.ExpandedStringLengths[SelectionBeginPosition.Line] + 2 then { +2 = '..' }
                 FSelectionEndPosition := GetTextPosition(SelectionEndPosition.Char -
-                  FLines.ExpandedStringLengths[SelectionBeginPosition.Line] - 2,
+                  FLines.ExpandedStringLengths[SelectionBeginPosition.Line] - 2, { -2 = '..' }
                   SelectionBeginPosition.Line + LCodeFoldingRange.ToLine - LCodeFoldingRange.FromLine);
         end;
       LText := SelectedText;

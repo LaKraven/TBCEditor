@@ -10288,8 +10288,15 @@ procedure TBCBaseEditor.CopyToClipboard;
 var
   LText: string;
   LChangeTrim: Boolean;
-  LCodeFoldingRange: TBCEditorCodeFoldingRange;
   LOldSelectionEndPosition: TBCEditorTextPosition;
+
+  procedure SetEndPosition(ACodeFoldingRange: TBCEditorCodeFoldingRange);
+  begin
+    if Assigned(ACodeFoldingRange) then
+      if ACodeFoldingRange.Collapsed then
+        FSelectionEndPosition := DisplayToTextPosition(GetDisplayPosition(1, SelectionEndPosition.Line + 2));
+  end;
+
 begin
   if SelectionAvailable then
   begin
@@ -10300,15 +10307,9 @@ begin
       LOldSelectionEndPosition := FSelectionEndPosition;
       if FCodeFolding.Visible then
         if SelectionBeginPosition.Line = SelectionEndPosition.Line then
-        begin
-          LCodeFoldingRange := FCodeFoldingRangeFromLine[SelectionBeginPosition.Line + 1];
-          if Assigned(LCodeFoldingRange) then
-            if LCodeFoldingRange.Collapsed then
-              if SelectionEndPosition.Char > FLines.ExpandedStringLengths[SelectionBeginPosition.Line] + 2 then { +2 = '..' }
-                FSelectionEndPosition := GetTextPosition(SelectionEndPosition.Char -
-                  FLines.ExpandedStringLengths[SelectionBeginPosition.Line] - 2, { -2 = '..' }
-                  SelectionBeginPosition.Line + LCodeFoldingRange.ToLine - LCodeFoldingRange.FromLine);
-        end;
+          SetEndPosition(FCodeFoldingRangeFromLine[SelectionBeginPosition.Line + 1])
+        else
+          SetEndPosition(FCodeFoldingRangeFromLine[SelectionEndPosition.Line + 1]);
       LText := SelectedText;
       FSelectionEndPosition := LOldSelectionEndPosition;
     finally

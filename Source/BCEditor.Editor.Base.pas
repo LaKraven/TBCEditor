@@ -10288,6 +10288,8 @@ procedure TBCBaseEditor.CopyToClipboard;
 var
   LText: string;
   LChangeTrim: Boolean;
+  LCodeFoldingRange: TBCEditorCodeFoldingRange;
+  LOldSelectionEndPosition: TBCEditorTextPosition;
 begin
   if SelectionAvailable then
   begin
@@ -10295,7 +10297,20 @@ begin
     try
       if LChangeTrim then
         Exclude(FOptions, eoTrimTrailingSpaces);
+      LOldSelectionEndPosition := FSelectionEndPosition;
+      if FCodeFolding.Visible then
+        if SelectionBeginPosition.Line = SelectionEndPosition.Line then
+        begin
+          LCodeFoldingRange := FCodeFoldingRangeFromLine[SelectionBeginPosition.Line + 1];
+          if Assigned(LCodeFoldingRange) then
+            if LCodeFoldingRange.Collapsed then
+              if SelectionEndPosition.Char > FLines.ExpandedStringLengths[SelectionBeginPosition.Line] + 2 then
+                FSelectionEndPosition := GetTextPosition(SelectionEndPosition.Char -
+                  FLines.ExpandedStringLengths[SelectionBeginPosition.Line] - 2,
+                  SelectionBeginPosition.Line + LCodeFoldingRange.ToLine - LCodeFoldingRange.FromLine);
+        end;
       LText := SelectedText;
+      FSelectionEndPosition := LOldSelectionEndPosition;
     finally
       if LChangeTrim then
         Include(FOptions, eoTrimTrailingSpaces);

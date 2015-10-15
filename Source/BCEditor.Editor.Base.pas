@@ -418,7 +418,7 @@ type
     procedure PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
     procedure PaintCodeFoldingCollapsedLine(AFoldRange: TBCEditorCodeFoldingRange; ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine, AScrolledXBy: Integer; ALineRect: TRect);
-    procedure PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+    procedure PaintGuideForLine(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
@@ -7043,12 +7043,12 @@ begin
   Canvas.Pen.Color := LOldPenColor;
 end;
 
-procedure TBCBaseEditor.PaintGuides(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+procedure TBCBaseEditor.PaintGuideForLine(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
 var
   i: Integer;
   X, Y: Integer;
   LLine, LTempLine: Integer;
-  LOldColor, LTempColor: TColor;
+  LOldColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
 begin
@@ -7061,6 +7061,12 @@ begin
     LLine := GetTextCaretY + 1;
     LTempLine := LLine;
     LCodeFoldingRange := nil;
+
+    if ColorToRGB(FBackgroundColor) < ColorToRGB(FCodeFolding.Colors.Indent) then
+      Canvas.Pen.Mode := pmMerge
+    else
+      Canvas.Pen.Mode := pmMask;
+
     while LTempLine > 0 do
     begin
       LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
@@ -7094,7 +7100,6 @@ begin
             X := X * FMinimap.CharWidth
           else
             X := X * FTextDrawer.CharWidth;
-          Canvas.Pen.Color := FCodeFolding.Colors.Indent;
 
           if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
           begin
@@ -7102,28 +7107,19 @@ begin
               X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
             else
               X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - AScrolledXBy;
-            LTempColor := Canvas.Pen.Color;
-            Canvas.Pen.Color := FBackgroundColor;
-            if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
-              (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
-              if cfoHighlightIndentGuides in FCodeFolding.Options then
-                Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
+
             Y := ALineRect.Top;
-            Canvas.MoveTo(X, Y);
-            Canvas.LineTo(X, ALineRect.Bottom);
-            Canvas.Pen.Color := LTempColor;
-            if LineHeight mod 2 = 0 then
-            while Y < ALineRect.Bottom do
+            if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
+              (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) and
+              (cfoHighlightIndentGuides in FCodeFolding.Options) then
             begin
+              Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
               Canvas.MoveTo(X, Y);
-              Inc(Y);
-              Canvas.LineTo(X, Y);
-              Inc(Y);
+              Canvas.LineTo(X, ALineRect.Bottom);
             end
             else
             begin
-              if ALine mod 2 = 1 then
-                Inc(Y);
+              Canvas.Pen.Color := FCodeFolding.Colors.Indent;
               while Y < ALineRect.Bottom do
               begin
                 Canvas.MoveTo(X, Y);
@@ -7135,6 +7131,7 @@ begin
           end;
         end;
     end;
+    Canvas.Pen.Mode := pmCopy;
   end;
   Canvas.Pen.Color := LOldColor;
 end;
@@ -7839,6 +7836,8 @@ var
       X := ColumnToWidth(AFirst, AMinimap);
       Dec(AFirst, ACharsBefore);
       LText := ShrinkAtWideGlyphs(AToken, AFirst, ATokenLength);
+
+
       FTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), ATokenLength);
 
       if LTokenHelper.MatchingPairUnderline then
@@ -8319,6 +8318,7 @@ var
         end;
 
         PaintHighlightToken(True);
+        PaintGuideForLine(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
 
         if not AMinimap then
         begin
@@ -8326,8 +8326,6 @@ var
           PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect);
           PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
         end;
-
-        PaintGuides(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
 
         if Assigned(FOnAfterLinePaint) then
           FOnAfterLinePaint(Self, Canvas, LLineRect, LCurrentLine, AMinimap);

@@ -382,7 +382,7 @@ type
     procedure DoOnBeforeBookmarkPlaced(var ABookmark: TBCEditorBookmark);
     procedure DoOnBeforeClearBookmark(var ABookmark: TBCEditorBookmark);
     procedure DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
-    procedure DoOnLeftMarginClick(Button: TMouseButton; X, Y: Integer);
+    procedure DoOnLeftMarginClick(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoOnMinimapClick(Button: TMouseButton; X, Y: Integer);
     procedure DoOnPaint;
     procedure DoOnProcessCommand(var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer); virtual;
@@ -5875,7 +5875,7 @@ begin
     FOnCommandProcessed(Self, ACommand, AChar, AData);
 end;
 
-procedure TBCBaseEditor.DoOnLeftMarginClick(Button: TMouseButton; X, Y: Integer);
+procedure TBCBaseEditor.DoOnLeftMarginClick(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   i: Integer;
   LOffset: Integer;
@@ -5884,12 +5884,18 @@ var
   LMark: TBCEditorBookmark;
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
-  FDisplayCaretX := 1;
-  FDisplayCaretY := PixelsToRowColumn(X, Y).Row;
+  LTextCaretPosition := DisplayToTextPosition(GetDisplayPosition(1, PixelsToRowColumn(X, Y).Row));
+  TextCaretPosition := LTextCaretPosition;
   { Clear selection }
-  FSelectionBeginPosition := TextCaretPosition;
-  FSelectionEndPosition := FSelectionBeginPosition;
+  if ssShift in Shift then
+    SelectionEndPosition := LTextCaretPosition
+  else
+  begin
+    SelectionBeginPosition := LTextCaretPosition;
+    SelectionEndPosition := FSelectionBeginPosition;
+  end;
 
   if (X < LeftMargin.Bookmarks.Panel.Width) and (Y div LineHeight <= DisplayCaretY - TopLine) and
      LeftMargin.Bookmarks.Visible and
@@ -6503,7 +6509,7 @@ begin
     end;
 
   if X <= LLeftMarginWidth then
-    DoOnLeftMarginClick(Button, X, Y);
+    DoOnLeftMarginClick(Button, Shift, X, Y);
 
   if FMatchingPair.Enabled then
     ScanMatchingPair;

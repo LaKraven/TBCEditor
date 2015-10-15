@@ -7051,22 +7051,10 @@ var
   LOldColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
-begin
-  LOldColor := Canvas.Pen.Color;
-  LDeepestLevel := 0;
 
-  if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
-    ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
+  function GetDeepestLevel: Integer;
   begin
-    LLine := GetTextCaretY + 1;
-    LTempLine := LLine;
-    LCodeFoldingRange := nil;
-
-    if ColorToRGB(FBackgroundColor) < ColorToRGB(FCodeFolding.Colors.Indent) then
-      Canvas.Pen.Mode := pmMerge
-    else
-      Canvas.Pen.Mode := pmMask;
-
+    Result := 0;
     while LTempLine > 0 do
     begin
       LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
@@ -7086,7 +7074,25 @@ begin
         Dec(LTempLine)
     end;
     if Assigned(LCodeFoldingRange) then
-      LDeepestLevel := LCodeFoldingRange.IndentLevel;
+      Result := LCodeFoldingRange.IndentLevel;
+  end;
+
+begin
+  LOldColor := Canvas.Pen.Color;
+
+  if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
+    ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
+  begin
+    LLine := GetTextCaretY + 1;
+    LTempLine := LLine;
+    LCodeFoldingRange := nil;
+
+    if ColorToRGB(FBackgroundColor) < ColorToRGB(FCodeFolding.Colors.Indent) then
+      Canvas.Pen.Mode := pmMerge
+    else
+      Canvas.Pen.Mode := pmMask;
+
+    LDeepestLevel := GetDeepestLevel;
 
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
     begin
@@ -7120,6 +7126,11 @@ begin
             else
             begin
               Canvas.Pen.Color := FCodeFolding.Colors.Indent;
+
+              if LineHeight mod 2 <> 0 then
+                if ALine mod 2 = 0 then
+                  inc(Y);
+
               while Y < ALineRect.Bottom do
               begin
                 Canvas.MoveTo(X, Y);

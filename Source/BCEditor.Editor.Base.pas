@@ -7051,6 +7051,7 @@ var
   LOldColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
+  LIncY: Boolean;
 
   function GetDeepestLevel: Integer;
   begin
@@ -7086,6 +7087,7 @@ begin
     LLine := GetTextCaretY + 1;
     LTempLine := LLine;
     LCodeFoldingRange := nil;
+    LIncY := Odd(LineHeight) and not Odd(ALine);
 
     if ColorToRGB(FBackgroundColor) < ColorToRGB(FCodeFolding.Colors.Indent) then
       Canvas.Pen.Mode := pmMerge
@@ -7127,9 +7129,8 @@ begin
             begin
               Canvas.Pen.Color := FCodeFolding.Colors.Indent;
 
-              if LineHeight mod 2 <> 0 then
-                if ALine mod 2 = 0 then
-                  inc(Y);
+              if LIncY then
+                Inc(Y);
 
               while Y < ALineRect.Bottom do
               begin

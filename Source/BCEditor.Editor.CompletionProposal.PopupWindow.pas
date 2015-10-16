@@ -36,7 +36,6 @@ type
     FItemList: TStrings;
     FMargin: Integer;
     FMouseWheelAccumulator: Integer;
-    FNoNextKey: Boolean;
     FOnCancel: TNotifyEvent;
     FOnValidate: TBCEditorValidateEvent;
 {$IFDEF USE_ALPHASKINS}
@@ -49,28 +48,23 @@ type
     FVisibleLines: Integer;
     function IsWordBreakChar(AChar: Char): Boolean;
     function GetItemList: TStrings;
-    procedure AddKeyPressHandler;
-    procedure DoDoubleClick(Sender: TObject);
+    procedure AddKeyHandlers;
     procedure EditorKeyPress(Sender: TObject; var Key: Char);
     procedure FontChange(Sender: TObject);
-    procedure HandleOnCancel(Sender: TObject);
     procedure HandleDblClick(Sender: TObject);
-    procedure HandleOnKeyPress(Sender: TObject; var Key: Char);
     procedure HandleOnValidate(Sender: TObject; Shift: TShiftState; EndToken: Char);
     procedure MoveLine(LineCount: Integer);
+    procedure MoveSelectedLine(LineCount: Integer);
     procedure RecalcItemHeight;
-    procedure RemoveKeyPressHandler;
+    procedure RemoveKeyHandlers;
     procedure SetCurrentString(const Value: string);
     procedure SetTopLine(const Value: Integer);
     procedure UpdateScrollBar;
     procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
-    procedure WMChar(var Msg: TWMChar); message WM_CHAR;
     procedure WMVScroll(var Msg: TWMScroll); message WM_VSCROLL;
+    procedure EditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   protected
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
-    procedure DoKeyPressW(Key: Char);
-    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure KeyPressW(var Key: Char); virtual;
     procedure Paint; override;
     procedure Resize; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -113,7 +107,7 @@ begin
   if FCommonData.SkinSection = '' then
     FCommonData.SkinSection := s_Edit;
 {$ENDIF}
-  AddKeyPressHandler;
+  AddKeyHandlers;
 
   Visible := False;
   //FBorderWidth := 3;
@@ -144,14 +138,9 @@ begin
   FHeightBuffer := 0;
   FFont.OnChange := FontChange;
 
-  OnDblClick := DoDoubleClick;
-
-  OnKeyPress := HandleOnKeyPress;
   OnValidate := HandleOnValidate;
-  OnCancel := HandleOnCancel;
   OnDblClick := HandleDblClick;
   FTriggerChars := '.';
-  FNoNextKey := False;
 end;
 
 destructor TBCEditorCompletionProposalPopupWindow.Destroy;
@@ -162,7 +151,7 @@ begin
   if Assigned(FCommonData) then
     FreeAndNil(FCommonData);
 {$ENDIF}
-  RemoveKeyPressHandler;
+  RemoveKeyHandlers;
 
   FColumns.Free;
   FBufferBmp.Free;
@@ -174,7 +163,6 @@ begin
 end;
 
 {$IFDEF USE_ALPHASKINS}
-
 procedure TBCEditorCompletionProposalPopupWindow.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -205,25 +193,31 @@ begin
     inherited;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.AddKeyPressHandler;
+procedure TBCEditorCompletionProposalPopupWindow.AddKeyHandlers;
 var
   Editor: TBCBaseEditor;
 begin
   Editor := Owner as TBCBaseEditor;
   if Assigned(Editor) then
+  begin
     Editor.AddKeyPressHandler(EditorKeyPress);
+    Editor.AddKeyDownHandler(EditorKeyDown);
+  end;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.RemoveKeyPressHandler;
+procedure TBCEditorCompletionProposalPopupWindow.RemoveKeyHandlers;
 var
   Editor: TBCBaseEditor;
 begin
   Editor := Owner as TBCBaseEditor;
   if Assigned(Editor) then
+  begin
     Editor.RemoveKeyPressHandler(EditorKeyPress);
+    Editor.RemoveKeyDownHandler(EditorKeyDown);
+  end;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.KeyDown(var Key: Word; Shift: TShiftState);
+procedure TBCEditorCompletionProposalPopupWindow.EditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   LChar: Char;
 begin
@@ -286,14 +280,14 @@ begin
       TopLine := 0;
     VK_UP:
       if ssCtrl in Shift then
-        TopLine := 0
+        FSelectedLine := 0
       else
-        MoveLine(-1);
+        MoveSelectedLine(-1);
     VK_DOWN:
       if ssCtrl in Shift then
-        TopLine := FAssignedList.Count - 1
+        FSelectedLine := FAssignedList.Count - 1
       else
-        MoveLine(1);
+        MoveSelectedLine(1);
     VK_BACK:
       if Shift = [] then
       begin
@@ -317,20 +311,15 @@ begin
       if Assigned(Owner) then
         (Owner as TBCBaseEditor).CommandProcessor(ecDeleteChar, BCEDITOR_NONE_CHAR, nil);
   end;
+  Key := 0;
   Invalidate;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.DoKeyPressW(Key: Char);
-begin
-  if Key <> BCEDITOR_NONE_CHAR then
-    KeyPressW(Key);
-end;
-
-procedure TBCEditorCompletionProposalPopupWindow.KeyPressW(var Key: Char);
+procedure TBCEditorCompletionProposalPopupWindow.EditorKeyPress(Sender: TObject; var Key: Char);
 begin
   case Key of
     BCEDITOR_CARRIAGE_RETURN, BCEDITOR_ESCAPE:
-      ;
+      Hide;
     BCEDITOR_SPACE_CHAR .. high(Char):
       begin
         if IsWordBreakChar(Key) and Assigned(OnValidate) then
@@ -449,13 +438,22 @@ begin
   end;
 end;
 
+procedure TBCEditorCompletionProposalPopupWindow.MoveSelectedLine(LineCount: Integer);
+begin
+  FSelectedLine := MinMax(FSelectedLine + LineCount, 0, FAssignedList.Count - 1);
+  if FSelectedLine >= TopLine + FVisibleLines then
+    TopLine := FSelectedLine - FVisibleLines + 1;
+  if FSelectedLine < TopLine then
+    TopLine := FSelectedLine;
+end;
+
 procedure TBCEditorCompletionProposalPopupWindow.SetCurrentString(const Value: string);
 
   function MatchItem(AIndex: Integer; UseItemList: Boolean): Boolean;
   var
     CompareString: string;
   begin
-    if (FFiltered) and (not UseItemList) then
+    if FFiltered and (not UseItemList) then
       CompareString := FAssignedList[AIndex]
     else
       CompareString := FItemList[AIndex];
@@ -504,12 +502,6 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.DoDoubleClick(Sender: TObject);
-begin
-  if Assigned(OnValidate) then
-    OnValidate(Self, [], BCEDITOR_NONE_CHAR);
-end;
-
 procedure TBCEditorCompletionProposalPopupWindow.SetTopLine(const Value: Integer);
 var
   LDelta: Integer;
@@ -556,18 +548,13 @@ begin
   else
     Delta := FVisibleLines;
 
-  inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
+  Inc(FMouseWheelAccumulator, Integer(Msg.wParamHi));
   WheelClicks := FMouseWheelAccumulator div WHEEL_DELTA;
   FMouseWheelAccumulator := FMouseWheelAccumulator mod WHEEL_DELTA;
   if (Delta = Integer(WHEEL_PAGESCROLL)) or (Delta > FVisibleLines) then
     Delta := FVisibleLines;
 
   TopLine := TopLine - (Delta * WheelClicks);
-end;
-
-procedure TBCEditorCompletionProposalPopupWindow.WMChar(var Msg: TWMChar);
-begin
-  DoKeyPressW(Char(Msg.CharCode))
 end;
 
 procedure TBCEditorCompletionProposalPopupWindow.FontChange(Sender: TObject);
@@ -619,17 +606,6 @@ begin
     UpdateScrollBar;
     Visible := True;
   end;
-  FNoNextKey := Visible;
-end;
-
-procedure TBCEditorCompletionProposalPopupWindow.HandleOnCancel(Sender: TObject);
-var
-  Editor: TBCBaseEditor;
-begin
-  Editor := Owner as TBCBaseEditor;
-  FNoNextKey := False;
-
-  Editor.SetFocus;
 end;
 
 procedure TBCEditorCompletionProposalPopupWindow.HandleOnValidate(Sender: TObject; Shift: TShiftState; EndToken: Char);
@@ -655,8 +631,8 @@ begin
       else
         SelectionEndPosition := LTextPosition;
 
-      if FAssignedList.Count > TopLine then
-        Value := FAssignedList[TopLine]
+      if FSelectedLine < FAssignedList.Count then
+        Value := FAssignedList[FSelectedLine]
       else
         Value := SelectedText;
 
@@ -678,27 +654,11 @@ begin
   end;
 end;
 
-procedure TBCEditorCompletionProposalPopupWindow.HandleOnKeyPress(Sender: TObject; var Key: Char);
-var
-  Editor: TBCBaseEditor;
-begin
-  Editor := Owner as TBCBaseEditor;
-  with Editor do
-    CommandProcessor(ecChar, Key, nil);
-end;
-
-procedure TBCEditorCompletionProposalPopupWindow.EditorKeyPress(Sender: TObject; var Key: Char);
-begin
-  if FNoNextKey then
-  begin
-    FNoNextKey := False;
-    Key := BCEDITOR_NONE_CHAR;
-  end
-end;
-
 procedure TBCEditorCompletionProposalPopupWindow.HandleDblClick(Sender: TObject);
 begin
-  HandleOnValidate(Sender, [], BCEDITOR_NONE_CHAR);
+  if Assigned(OnValidate) then
+    OnValidate(Self, [], BCEDITOR_NONE_CHAR);
+  Hide;
 end;
 
 function TBCEditorCompletionProposalPopupWindow.GetCurrentInput: string;

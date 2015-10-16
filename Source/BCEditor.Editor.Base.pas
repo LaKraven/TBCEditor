@@ -6147,8 +6147,12 @@ begin
   begin
     Key := 0;
     DoExecuteCompletionProposal;
+    Include(FStateFlags, sfIgnoreNextChar);
     Exit;
   end;
+
+  if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
+    FreeCompletionProposalPopupWindow;
 
   FKeyboardHandler.ExecuteKeyDown(Self, Key, Shift);
 

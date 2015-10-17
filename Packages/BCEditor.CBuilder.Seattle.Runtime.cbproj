@@ -176,7 +176,7 @@
         <DelphiCompile Include="..\Source\BCEditor.Editor.CompletionProposal.Columns.pas">
             <BuildOrder>19</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\BCEditor.Editor.CompletionProposal.Form.pas">
+        <DelphiCompile Include="..\Source\BCEditor.Editor.CompletionProposal.PopupWindow.pas">
             <BuildOrder>20</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.CompletionProposal.pas">
@@ -235,6 +235,9 @@
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.Minimap.pas">
             <BuildOrder>39</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\Source\BCEditor.Editor.PopupWindow.pas">
+            <BuildOrder>92</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.pas">
             <BuildOrder>40</BuildOrder>

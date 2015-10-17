@@ -193,7 +193,7 @@ type
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
-    function GetExpandedLineText: string;
+    function GetExpandedLineText(ALine: Integer): string;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
       var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
@@ -355,7 +355,7 @@ type
     function DoOnReplaceText(const ASearch, AReplace: string; ALine, AColumn: Integer; DeleteLine: Boolean): TBCEditorReplaceAction;
     function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function GetReadOnly: Boolean; virtual;
-    function GetSelectedLength: Integer;
+    function GetSelectionLength: Integer;
     function PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
     function RowColumnToPixels(const ADisplayPosition: TBCEditorDisplayPosition): TPoint;
@@ -564,7 +564,6 @@ type
     property Cursor default crIBeam;
     property Directories: TBCEditorDirectories read FDirectories write FDirectories;
     property Encoding: TEncoding read FEncoding write FEncoding;
-    property ExpandedLineText: string read GetExpandedLineText;
     property Font;
     property Highlighter: TBCEditorHighlighter read FHighlighter;
     property InsertMode: Boolean read FInsertMode write SetInsertMode default True;
@@ -1214,13 +1213,10 @@ begin
       Inc(Result);
 end;
 
-function TBCBaseEditor.GetExpandedLineText: string;
-var
-  LLine: Integer;
+function TBCBaseEditor.GetExpandedLineText(ALine: Integer): string;
 begin
-  LLine := GetTextCaretY;
-  if (LLine >= 0) and (LLine < FLines.Count) then
-    Result := FLines.ExpandedStrings[LLine]
+  if (ALine >= 0) and (ALine < FLines.Count) then
+    Result := FLines.ExpandedStrings[ALine]
   else
     Result := '';
 end;
@@ -1991,11 +1987,13 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
   var
     LPosition, i, j: Integer;
     LKeyword: PChar;
-    LLine: String;
+    LLine, LTempLine: String;
     LFoldRegions: TBCEditorCodeFoldingRegions;
     LOffset: Byte;
   begin
     Result := False;
+
+    LLine := UpperCase(GetExpandedLineText(GetTextCaretY));
 
     for i := 0 to Length(FHighlighter.CodeFoldingRanges) - 1 do
     begin
@@ -2007,11 +2005,11 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
 
       for j := 0 to LFoldRegions.Count - 1 do
       begin
-        LLine := UpperCase(ExpandedLineText);
+        LTempLine := LLine;
         LKeyword := PChar(LFoldRegions[j].OpenToken);
 
         repeat
-          LPosition := Pos(LKeyword, LLine);
+          LPosition := Pos(LKeyword, LTempLine);
           if LPosition > 0 then
           begin
             if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
@@ -2024,17 +2022,17 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
               Exit;
             end
             else
-              Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
+              Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
           end;
         until LPosition = 0;
 
         if LFoldRegions[j].OpenTokenCanBeFollowedBy <> '' then
         begin
-          LLine := UpperCase(ExpandedLineText);
+          LTempLine := LLine;
           LKeyword := PChar(LFoldRegions[j].OpenTokenCanBeFollowedBy);
 
           repeat
-            LPosition := Pos(LKeyword, LLine);
+            LPosition := Pos(LKeyword, LTempLine);
             if LPosition > 0 then
             begin
               if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
@@ -2047,16 +2045,16 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
                 Exit;
               end
               else
-                Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
+                Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
             end;
           until LPosition = 0;
         end;
 
-        LLine := UpperCase(ExpandedLineText);
+        LTempLine := LLine;
         LKeyword := PChar(LFoldRegions[i].CloseToken);
 
         repeat
-          LPosition := Pos(LKeyword, LLine);
+          LPosition := Pos(LKeyword, LTempLine);
 
           if LPosition > 0 then
           begin
@@ -2070,7 +2068,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
               Exit;
             end
             else
-              Delete(LLine, 1, LPosition + Integer(StrLen(LKeyword)));
+              Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)));
           end;
         until LPosition = 0;
       end;
@@ -2898,8 +2896,11 @@ begin
 end;
 
 procedure TBCBaseEditor.DoEndKey(ASelection: Boolean);
+var
+  LCaretY: Integer;
 begin
-  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(Length(ExpandedLineText) + 1, GetTextCaretY), ASelection);
+  LCaretY := GetTextCaretY;
+  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(Length(FLines[LCaretY]) + 1, LCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoHomeKey(ASelection: Boolean);
@@ -3061,8 +3062,9 @@ var
   LCaretStyle: TBCEditorCaretStyle;
   LCaretWidth, LCaretHeight, Y: Integer;
   LTempBitmap: Vcl.Graphics.TBitmap;
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
-  if GetSelectedLength > 0 then
+  if GetSelectionLength > 0 then
     Exit;
 
   LPoint := RowColumnToPixels(GetDisplayCaretPosition);
@@ -3117,7 +3119,8 @@ begin
     LTempBitmap.Canvas.Font.Style := Font.Style;
     LTempBitmap.Canvas.Font.Height := Font.Height;
     LTempBitmap.Canvas.Font.Size := Font.Size;
-    LTempBitmap.Canvas.TextOut(0, 0, Copy(ExpandedLineText, DisplayCaretX, 1));
+    LTextCaretPosition := GetTextCaretPosition;
+    LTempBitmap.Canvas.TextOut(0, 0, Copy(FLines[LTextCaretPosition.Line], LTextCaretPosition.Char, 1));
     { Copy rect }
     ACanvas.CopyRect(Rect(LPoint.X + FCaret.Offsets.X, LPoint.Y + FCaret.Offsets.Y, LPoint.X + FCaret.Offsets.X + LCaretWidth,
       LPoint.Y + FCaret.Offsets.Y + LCaretHeight), LTempBitmap.Canvas, Rect(0, Y, LCaretWidth, Y + LCaretHeight));
@@ -3225,18 +3228,19 @@ end;
 
 procedure TBCBaseEditor.MoveCaretHorizontally(const X: Integer; SelectionCommand: Boolean);
 var
-  LZeroPosition, LDestinationPosition: TBCEditorTextPosition;
+  LZeroPosition, LDestinationPosition, LTextCaretPosition: TBCEditorTextPosition;
   LCurrentLineLength: Integer;
   LChangeY: Boolean;
   LCaretRowColumn: TBCEditorDisplayPosition;
 begin
+  LTextCaretPosition := TextCaretPosition;
   if not SelectionAvailable and SelectionCommand then
-    FSelectionBeginPosition := TextCaretPosition;
+    FSelectionBeginPosition := LTextCaretPosition;
 
-  LZeroPosition := TextCaretPosition;
+  LZeroPosition := LTextCaretPosition;
   LDestinationPosition := LZeroPosition;
 
-  LCurrentLineLength := FLines.AccessStringLength(GetTextCaretY);
+  LCurrentLineLength := FLines.AccessStringLength(LTextCaretPosition.Line);
   LChangeY := not (soPastEndOfLine in FScroll.Options);
 
   if LChangeY and (X = -1) and (LZeroPosition.Char = 1) and (LZeroPosition.Line > 1) then
@@ -3268,7 +3272,7 @@ begin
 
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationPosition, SelectionCommand);
 
-  if FWordWrap.Enabled and (X > 0) and (DisplayCaretX < Length(ExpandedLineText)) then
+  if FWordWrap.Enabled and (X > 0) and (DisplayCaretX < Length(GetExpandedLineText(LTextCaretPosition.Line))) then
   begin
     LCaretRowColumn := DisplayCaretPosition;
 
@@ -5253,7 +5257,7 @@ begin
   Result := FReadOnly;
 end;
 
-function TBCBaseEditor.GetSelectedLength: Integer;
+function TBCBaseEditor.GetSelectionLength: Integer;
 begin
   if SelectionAvailable then
     Result := RowColumnToCharIndex(SelectionEndPosition) - RowColumnToCharIndex(SelectionBeginPosition)
@@ -8921,7 +8925,7 @@ var
       LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
       if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
         LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
-      LRightSide := Copy(LineText, LTextCaretPosition.Char, Length(ExpandedLineText) - (LTextCaretPosition.Char - 1));
+      LRightSide := Copy(LineText, LTextCaretPosition.Char, FLines.AccessStringLength(LTextCaretPosition.Line) - (LTextCaretPosition.Char - 1));
 
       { insert the first line of Value into current line }
       LStart := PChar(AValue);

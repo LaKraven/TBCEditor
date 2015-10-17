@@ -39,7 +39,6 @@ type
     procedure ClearAll;
     procedure Delete(FoldRange: TBCEditorCodeFoldingRange); overload;
     procedure Delete(AIndex: Integer); overload;
-    //procedure Assign(Source: TPersistent); override;
     procedure UpdateFoldRanges;
     procedure SetParentCollapsedOfSubCodeFoldingRanges(AFoldRange: TBCEditorCodeFoldingRange);
 
@@ -107,36 +106,6 @@ begin
 
   inherited;
 end;
-
-{procedure TBCEditorAllCodeFoldingRanges.Assign(Source: TPersistent);
-
-  procedure RecursiveAssign(ADestinationCodeFoldingRanges: TBCEditorCodeFoldingRanges; ASourceCodeFoldingRanges: TBCEditorCodeFoldingRanges);
-  var
-    i: Integer;
-    LDestinationCodeFoldingRange: TBCEditorCodeFoldingRange;
-    LSourceCodeFoldingRange: TBCEditorCodeFoldingRange;
-  begin
-    if Assigned(ASourceCodeFoldingRanges) then
-    for i := 0 to ASourceCodeFoldingRanges.Count - 1 do
-    begin
-      LSourceCodeFoldingRange := ASourceCodeFoldingRanges[i];
-
-      LDestinationCodeFoldingRange := ADestinationCodeFoldingRanges.Add(Self, LSourceCodeFoldingRange.FromLine, LSourceCodeFoldingRange.IndentLevel,
-        LSourceCodeFoldingRange.FoldRangeLevel, LSourceCodeFoldingRange.RegionItem, LSourceCodeFoldingRange.ToLine);
-      LDestinationCodeFoldingRange.CollapsedBy := LSourceCodeFoldingRange.CollapsedBy;
-      LDestinationCodeFoldingRange.Collapsed := LSourceCodeFoldingRange.Collapsed;
-      LDestinationCodeFoldingRange.ParentCollapsed := LSourceCodeFoldingRange.ParentCollapsed;
-      if Assigned(LSourceCodeFoldingRange.CollapsedLines) then
-        LDestinationCodeFoldingRange.CollapsedLines.Assign(LSourceCodeFoldingRange.CollapsedLines);
-
-      RecursiveAssign(LDestinationCodeFoldingRange.SubCodeFoldingRanges, LSourceCodeFoldingRange.SubCodeFoldingRanges);
-    end;
-  end;
-
-begin
-  if Assigned(Source) and (Source is TBCEditorAllCodeFoldingRanges) then
-    RecursiveAssign(Self, Source as TBCEditorAllCodeFoldingRanges);
-end; }
 
 procedure TBCEditorAllCodeFoldingRanges.ClearAll;
 begin

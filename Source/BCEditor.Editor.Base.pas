@@ -3737,7 +3737,10 @@ var
                 end;
 
                 if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '') and not LCodeFoldingRange.IsExtraTokenFound then
+                begin
                   LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
+                  Dec(LFoldCount);
+                end;
 
                 if LOpenTokenFoldRangeList.Count > 0 then
                   LFoldRanges := TBCEditorCodeFoldingRange(LOpenTokenFoldRangeList.Last).SubCodeFoldingRanges
@@ -6324,7 +6327,7 @@ begin
 
   LLength := FLeftMargin.RealLeftMarginWidth(FLeftMarginCharWidth);
   if FLeftMargin.Autosize and (FLeftMargin.GetWidth <> LLength) then
-   SetLeftMarginWidth(LLength);
+    SetLeftMarginWidth(LLength);
 
   InvalidateLines(Index + 1, Index + FVisibleLines + 1);
   InvalidateLeftMarginLines(Index + 1, Index + FVisibleLines + 1);

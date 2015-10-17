@@ -6678,6 +6678,8 @@ begin
     begin
       TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
       SelectionEndPosition := TextCaretPosition;
+      if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
+        FUndoList.AddGroupBreak;
     end;
     FLastSortOrder := soDesc;
     Include(FStateFlags, sfInSelection);
@@ -9225,7 +9227,6 @@ begin
       crDeleteAfterCursor, crDelete, crSilentDelete, crSilentDeleteAfterCursor, crDeleteAll:
         begin
           TextCaretPosition := LUndoItem.ChangeStartPosition;
-          //SetCaretAndSelection(LUndoItem.ChangeStartPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
 
           if (LUndoItem.ChangeReason in [crDeleteAfterCursor, crSilentDeleteAfterCursor]) and
             (LTempPosition.Line > FLines.Count) then
@@ -9236,10 +9237,7 @@ begin
 
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False);
 
-          //if LUndoItem.ChangeReason in [crSilentDelete, crSilentDeleteAfterCursor] then
-            TextCaretPosition := LUndoItem.ChangeCaretPosition;
-          //else
-          //  SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition, LUndoItem.ChangeEndPosition);
+          TextCaretPosition := LUndoItem.ChangeCaretPosition;
 
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);

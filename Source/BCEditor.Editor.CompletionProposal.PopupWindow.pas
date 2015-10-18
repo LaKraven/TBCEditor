@@ -19,7 +19,7 @@ type
     FBitmapBuffer: TBitmap;
     FCaseSensitive: Boolean;
     FCloseChars: string;
-    FColumns: TBCEditorProposalColumns;
+    FColumns: TBCEditorProposalColumns; // TODO
 {$IFDEF USE_ALPHASKINS}
     FCommonData: TsScrollWndData;
 {$ENDIF}

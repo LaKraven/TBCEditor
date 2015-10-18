@@ -9461,7 +9461,7 @@ begin
       Beep;
     SelectionBeginPosition := SelectionEndPosition;
     TextCaretPosition := SelectionBeginPosition;
-    if (DisplayCaretX = 1) and (GetTextCaretY = 1) then
+    if GetSearchResultCount = 0 then
     begin
       if soShowStringNotFound in FSearch.Options then
         DoSearchStringNotFoundDialog;

@@ -90,7 +90,7 @@ type
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
 
-    function AccessStringLength(Index: Integer): Integer;
+    function StringLength(Index: Integer): Integer;
     function Add(const S: string): Integer; override;
     function GetLengthOfLongestLine: Integer; overload;
     function GetIsLineWhitespaceOnly(AIndex: Integer): Boolean;
@@ -227,7 +227,7 @@ begin
   end;
 end;
 
-function TBCEditorLines.AccessStringLength(Index: Integer): Integer;
+function TBCEditorLines.StringLength(Index: Integer): Integer;
 begin
   Result := 0;
   if (Index < 0) or (Index > FCount - 1) then

@@ -2412,7 +2412,7 @@ begin
     Exit;
 
   LIsBackward := soBackwards in FSearch.Options;
-  LIsFromCursor := not (soEntireScope in FSearch.Options);
+  LIsFromCursor := not AChanged or AChanged and not (soEntireScope in FSearch.Options);
   if not SelectionAvailable then
     FSearch.Options := FSearch.Options - [soSelectedOnly];
   if soSelectedOnly in FSearch.Options then
@@ -2422,7 +2422,7 @@ begin
     if FSelection.ActiveMode = smLine then
     begin
       LStartTextPosition.Char := 1;
-      LEndTextPosition.Char := Length(FLines[LEndTextPosition.Line]) + 1;
+      LEndTextPosition.Char := FLines.StringLength(LEndTextPosition.Line);
     end
     else
     if FSelection.ActiveMode = smColumn then
@@ -2437,8 +2437,8 @@ begin
   begin
     LStartTextPosition.Char := 1;
     LStartTextPosition.Line := 0;
-    LEndTextPosition.Line := FLines.Count;
-    LEndTextPosition.Char := Length(FLines[LEndTextPosition.Line]) + 1;
+    LEndTextPosition.Line := FLines.Count - 1;
+    LEndTextPosition.Char := FLines.StringLength(LEndTextPosition.Line);
     if LIsFromCursor then
       if LIsBackward then
         LEndTextPosition := TextCaretPosition
@@ -3240,14 +3240,14 @@ begin
   LZeroPosition := LTextCaretPosition;
   LDestinationPosition := LZeroPosition;
 
-  LCurrentLineLength := FLines.AccessStringLength(LTextCaretPosition.Line);
+  LCurrentLineLength := FLines.StringLength(LTextCaretPosition.Line);
   LChangeY := not (soPastEndOfLine in FScroll.Options);
 
   if LChangeY and (X = -1) and (LZeroPosition.Char = 1) and (LZeroPosition.Line > 1) then
   with LDestinationPosition do
   begin
     Line := Line - 1;
-    Char := FLines.AccessStringLength(Line) + 1;
+    Char := FLines.StringLength(Line) + 1;
   end
   else
   if LChangeY and (X = 1) and (LZeroPosition.Char > LCurrentLineLength) and (LZeroPosition.Line < FLines.Count) then
@@ -6037,7 +6037,7 @@ var
 begin
   LTextCaretY := GetTextCaretY;
   SelectionBeginPosition := GetTextPosition(1, LTextCaretY);
-  SelectionEndPosition := GetTextPosition(FLines.AccessStringLength(LTextCaretY) + 1, LTextCaretY);
+  SelectionEndPosition := GetTextPosition(FLines.StringLength(LTextCaretY) + 1, LTextCaretY);
   FLastDblClick := 0;
 end;
 
@@ -8932,7 +8932,7 @@ var
       LLeftSide := Copy(LineText, 1, LTextCaretPosition.Char - 1);
       if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
         LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
-      LRightSide := Copy(LineText, LTextCaretPosition.Char, FLines.AccessStringLength(LTextCaretPosition.Line) - (LTextCaretPosition.Char - 1));
+      LRightSide := Copy(LineText, LTextCaretPosition.Char, FLines.StringLength(LTextCaretPosition.Line) - (LTextCaretPosition.Char - 1));
 
       { insert the first line of Value into current line }
       LStart := PChar(AValue);
@@ -9081,8 +9081,8 @@ var
       if LTextCaretPosition.Char = 0 then
         LIsAfterLine := False
       else
-        LIsAfterLine := LTextCaretPosition.Char > FLines.AccessStringLength(LTextCaretPosition.Line);
-      LDoReplace := FLines.AccessStringLength(LTextCaretPosition.Line) = 0;
+        LIsAfterLine := LTextCaretPosition.Char > FLines.StringLength(LTextCaretPosition.Line);
+      LDoReplace := FLines.StringLength(LTextCaretPosition.Line) = 0;
       LDoCaretFix := False;
 
       { Insert strings }
@@ -11210,7 +11210,7 @@ begin
                 begin
                   repeat
                     Dec(LBackCounterLine);
-                    if FLines.AccessStringLength(LBackCounterLine) > 0 then
+                    if FLines.StringLength(LBackCounterLine) > 0 then
                     begin
                       if toTabsToSpaces in FTabs.Options then
                       begin
@@ -11268,7 +11268,7 @@ begin
               if (ACommand = ecLineBreak) and (eoAutoIndent in FOptions) and (FLines.Count > 1) then
               begin
                 Dec(LBackCounterLine);
-                if FLines.AccessStringLength(LBackCounterLine) > 0 then
+                if FLines.StringLength(LBackCounterLine) > 0 then
                 begin
                   if toTabsToSpaces in FTabs.Options then
                   begin

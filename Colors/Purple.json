@@ -3,7 +3,7 @@
       "Info":{
          "General":{
             "Version":"1.0",
-            "Date":"30.9.2015"
+            "Date":"17.10.2015"
          },
          "Author":{
             "Name":"Lasse Rautiainen",
@@ -25,8 +25,7 @@
             "CodeFoldingHintBorder":"$00CC9999",
             "CodeFoldingHintText":"clNone",
             "CompletionProposalBackground":"clWindow",
-            "CompletionProposalForeground":"clNone",
-            "CompletionProposalBorder":"$00CC9999",
+            "CompletionProposalForeground":"clWindowText",
             "CompletionProposalSelectedBackground":"clHighlight",
             "CompletionProposalSelectedText":"clHighlightText",
             "LeftMarginActiveLineBackground":"$00E6FAFF",

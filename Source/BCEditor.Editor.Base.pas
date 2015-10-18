@@ -4928,6 +4928,8 @@ var
 begin
   Msg.Result := 0;
 
+  FreeCompletionProposalPopupWindow;
+
   inherited;
 
   case Msg.ScrollCode of
@@ -5135,6 +5137,8 @@ var
 begin
   Invalidate;
   Msg.Result := 0;
+
+  FreeCompletionProposalPopupWindow;
 
   case Msg.ScrollCode of
     { Scrolls to start / end of the text }

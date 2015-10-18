@@ -9,7 +9,7 @@ type
   TBCEditorCompletionProposalColors = class(TPersistent)
   strict private
     FBackground: TColor;
-    FBorder: TColor;
+    FForeground: TColor;
     FSelectedBackground: TColor;
     FSelectedText: TColor;
   public
@@ -17,7 +17,7 @@ type
     procedure Assign(Source: TPersistent); override;
   published
     property Background: TColor read FBackground write FBackground default clWindow;
-    property Border: TColor read FBorder write FBorder default clBtnFace;
+    property Foreground: TColor read FForeground write FForeground default clWindowText;
     property SelectedBackground: TColor read FSelectedBackground write FSelectedBackground default clHighlight;
     property SelectedText: TColor read FSelectedText write FSelectedText default clHighlightText;
   end;
@@ -31,7 +31,7 @@ begin
   inherited;
 
   FBackground := clWindow;
-  FBorder := clBtnFace;
+  FForeground := clWindowText;
   FSelectedBackground := clHighlight;
   FSelectedText := clHighlightText;
 end;
@@ -42,7 +42,7 @@ begin
   with Source as TBCEditorCompletionProposalColors do
   begin
     Self.FBackground := FBackground;
-    Self.FBorder := FBorder;
+    Self.FForeground := FForeground;
     Self.FSelectedBackground := FSelectedBackground;
     Self.FSelectedText := FSelectedText;
   end

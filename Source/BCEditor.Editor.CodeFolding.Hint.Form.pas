@@ -193,7 +193,7 @@ begin
   FBufferBitmap.Canvas.Rectangle(TmpRect);
 
   for i := 0 to FItemList.Count - 1 do
-    BCEditor.Utils.TextOut(FBufferBitmap.Canvas, FMargin + 1, FEffectiveItemHeight * i + FMargin, FItemList[i]);
+    FBufferBitmap.Canvas.TextOut(FMargin + 1, FEffectiveItemHeight * i + FMargin, FItemList[i]);
 
   Canvas.Draw(0, 0, FBufferBitmap);
 end;

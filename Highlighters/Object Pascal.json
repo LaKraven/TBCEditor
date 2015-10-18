@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "2.10.2015",
+            "Date": "18.10.2015",
             "Sample": [
                "// Hello World in Pascal\r\n",
                "\r\n",
@@ -654,7 +654,8 @@
                   "OpenToken": "$REGION",
                   "CloseToken": "$ENDREGION",
                   "Properties": {
-                     "OpenTokenEnd": "}"
+                     "OpenTokenEnd": "}",
+                     "ShowGuideLine": false
                   }
                }
             ]

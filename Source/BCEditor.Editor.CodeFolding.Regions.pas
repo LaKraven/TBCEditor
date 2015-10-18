@@ -24,6 +24,7 @@ type
     FOpenTokenLength: Integer;
     FParentRegionItem: TBCEditorCodeFoldingRegionItem;
     FSharedClose: Boolean;
+    FShowGuideLine: Boolean;
     FSkipIfFoundAfterOpenTokenArray: TBCEditorArrayOfString;
     FSkipIfFoundAfterOpenTokenArrayCount: Integer;
     FTokenEndIsPreviousLine: Boolean;
@@ -44,6 +45,7 @@ type
     property OpenTokenLength: Integer read FOpenTokenLength write FOpenTokenLength;
     property ParentRegionItem: TBCEditorCodeFoldingRegionItem read FParentRegionItem write FParentRegionItem;
     property SharedClose: Boolean read FSharedClose write FSharedClose default False;
+    property ShowGuideLine: Boolean read FShowGuideLine write FShowGuideLine default True;
     property SkipIfFoundAfterOpenTokenArray: TBCEditorArrayOfString read FSkipIfFoundAfterOpenTokenArray write FSkipIfFoundAfterOpenTokenArray;
     property SkipIfFoundAfterOpenTokenArrayCount: Integer read FSkipIfFoundAfterOpenTokenArrayCount write SetSkipIfFoundAfterOpenTokenArrayCount;
     property TokenEndIsPreviousLine: Boolean read FTokenEndIsPreviousLine write FTokenEndIsPreviousLine;

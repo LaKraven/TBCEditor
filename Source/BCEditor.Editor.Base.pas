@@ -7126,6 +7126,8 @@ begin
         if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
           (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) then
         begin
+          if not LCodeFoldingRange.RegionItem.ShowGuideLine then
+            Continue;
           X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
           if AMinimap then
             X := X * FMinimap.CharWidth

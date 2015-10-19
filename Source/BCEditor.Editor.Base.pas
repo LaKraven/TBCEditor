@@ -1164,7 +1164,7 @@ var
   LPivot: Integer;
   LFound: Boolean;
 begin
-  Result := ADisplayLineNumber; //-1;
+  Result := ADisplayLineNumber;
   if Assigned(FLineNumbersCache) and (FLineNumbersCache[ADisplayLineNumber] = ADisplayLineNumber) then
     Result := ADisplayLineNumber
   else
@@ -7364,7 +7364,7 @@ var
 
   procedure PaintBookmarks;
   var
-    i: Integer;
+    i, j: Integer;
     LLeftMarginOffsets: PIntegerArray;
     LHasOtherMarks: Boolean;
     LBookmark: TBCEditorBookmark;
@@ -7376,30 +7376,31 @@ var
       LLeftMarginOffsets := AllocMem((ALastLine - AFirstLine + 1) * SizeOf(Integer));
       try
         LHasOtherMarks := False;
-        for i := 0 to Marks.Count - 1 do
+        for i := AFirstLine to ALastLine do
         begin
-          LBookmark := Marks[i];
-          LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
-          if LBookmark.Visible and (LBookmarkLine >= AFirstLine) and (LBookmarkLine <= ALastLine) then
+          LBookmarkLine := GetDisplayTextLineNumber(i);
+
+          for j := 0 to Marks.Count - 1 do
           begin
-            if not LBookmark.IsBookmark then
-              LHasOtherMarks := True
-            else
-            if not FCodeFolding.Visible or FCodeFolding.Visible then
-              if (LBookmarkLine - AFirstLine >= 0) and (LBookmarkLine - AFirstLine <= ALastLine - AFirstLine + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstLine], LBookmarkLine);
+            LBookmark := Marks[j];
+            if LBookmark.Line + 1 = LBookmarkLine then
+              if LBookmark.Visible then
+              begin
+                if not LBookmark.IsBookmark then
+                  LHasOtherMarks := True
+                else
+                if not FCodeFolding.Visible or FCodeFolding.Visible then
+                  DrawMark(LBookmark, LLeftMarginOffsets[ALastLine - i], LBookmarkLine);
+              end;
           end;
-        end;
-        if LHasOtherMarks then
-        for i := 0 to Marks.Count - 1 do
-        begin
-          LBookmark := Marks[i];
-          LBookmarkLine := GetDisplayLineNumber(Marks[i].Line + 1);
-          if LBookmark.Visible and not LBookmark.IsBookmark and (LBookmarkLine >= AFirstLine) and (LBookmarkLine <= ALastLine) then
+          if LHasOtherMarks then
+          for j := 0 to Marks.Count - 1 do
           begin
-            if not FCodeFolding.Visible or FCodeFolding.Visible then
-              if (LBookmarkLine - AFirstLine >= 0) and (LBookmarkLine - AFirstLine <= ALastLine - AFirstLine + 1) then
-                DrawMark(Marks[i], LLeftMarginOffsets[LBookmarkLine - AFirstLine], LBookmarkLine);
+            LBookmark := Marks[j];
+            if LBookmark.Line + 1 = LBookmarkLine then
+              if LBookmark.Visible and not LBookmark.IsBookmark then
+                if not FCodeFolding.Visible or FCodeFolding.Visible then
+                  DrawMark(LBookmark, LLeftMarginOffsets[ALastLine - i], LBookmarkLine);
           end;
         end;
       finally

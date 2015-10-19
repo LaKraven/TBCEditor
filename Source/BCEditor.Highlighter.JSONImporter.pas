@@ -677,7 +677,7 @@ begin
 
       LRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
       LRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
-      LRegionItem.ShowGuideLine := LMemberObject.B['ShowGuideLine'];
+      LRegionItem.ShowGuideLine := StrToBoolDef(LMemberObject['ShowGuideLine'].Value, True);
     end;
     if LOpenToken <> '' then
       FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);

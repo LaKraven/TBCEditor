@@ -120,6 +120,7 @@ type
     property Owner: TObject read FOwner write FOwner;
     property Ranges[Index: Integer]: TBCEditorLinesRange read GetRange write PutRange;
     property Strings[Index: Integer]: string read Get write Put; default;
+    property Streaming: Boolean read FStreaming;
     property TabWidth: Integer read FTabWidth write SetTabWidth;
     property Text: string read GetTextStr write SetTextStr;
   end;

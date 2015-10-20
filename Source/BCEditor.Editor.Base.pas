@@ -253,8 +253,6 @@ type
     procedure DoHomeKey(ASelection: Boolean);
     procedure DoInternalUndo;
     procedure DoInternalRedo;
-    procedure DoLinesDeleted(AFirstLine, ACount: Integer);
-    procedure DoLinesInserted(AFirstLine, ACount: Integer);
     procedure DoPasteFromClipboard;
     procedure DoSelectedText(const Value: string); overload;
     procedure DoSelectedText(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean); overload;
@@ -504,7 +502,7 @@ type
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer); virtual;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
-    procedure HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
+    procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
     procedure InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
     procedure InvalidateLeftMargin;
     procedure InvalidateLeftMarginLine(ALine: Integer);
@@ -2906,42 +2904,6 @@ end;
 procedure TBCBaseEditor.DoHomeKey(ASelection: Boolean);
 begin
   MoveCaretAndSelection(TextCaretPosition, GetTextPosition(1, GetTextCaretY), ASelection);
-end;
-
-procedure TBCBaseEditor.DoLinesDeleted(AFirstLine, ACount: Integer);
-var
-  i: Integer;
-begin
-  for i := 0 to Marks.Count - 1 do
-    if Marks[i].Line >= AFirstLine + ACount then
-      Marks[i].Line := Marks[i].Line - ACount
-    else
-    if Marks[i].Line > AFirstLine then
-      Marks[i].Line := AFirstLine;
-
-  if FCodeFolding.Visible then
-    CodeFoldingLinesDeleted(AFirstLine + 1, ACount);
-
-  FResetLineNumbersCache := True;
-  CreateLineNumbersCache;
-
-  if Assigned(FOnLinesDeleted) then
-    FOnLinesDeleted(Self, AFirstLine, ACount);
-end;
-
-procedure TBCBaseEditor.DoLinesInserted(AFirstLine, ACount: Integer);
-var
-  i: Integer;
-begin
-  for i := 0 to Marks.Count - 1 do
-    if Marks[i].Line >= AFirstLine then
-      Marks[i].Line := Marks[i].Line + ACount;
-
-  if FCodeFolding.Visible then
-    UpdateFoldRanges(AFirstLine, ACount);
-
-  FResetLineNumbersCache := True;
-  CreateLineNumbersCache;
 end;
 
 procedure TBCBaseEditor.DoShiftTabKey;
@@ -5861,11 +5823,6 @@ begin
       ((ACommand = ecLineBreak) and IsKeywordAtLine(LTextCaretY - 1)) or { the caret is already in the new line }
       (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
-    else
-    case ACommand of
-      ecInsertLine, ecLineBreak, ecDeleteLine, ecBackspace, ecDeleteChar, ecClear:
-        CodeFoldingResetCaches;
-    end;
   end;
 
   if FMatchingPair.Enabled then
@@ -6280,9 +6237,24 @@ end;
 
 procedure TBCBaseEditor.ListDeleted(Sender: TObject; AIndex: Integer; ACount: Integer);
 var
-  LNativeIndex, LRunner: Integer;
+  i, LNativeIndex, LRunner: Integer;
 begin
+  for i := 0 to Marks.Count - 1 do
+    if Marks[i].Line >= AIndex + ACount then
+      Marks[i].Line := Marks[i].Line - ACount
+    else
+    if Marks[i].Line > AIndex then
+      Marks[i].Line := AIndex;
+
+  if FCodeFolding.Visible then
+    CodeFoldingLinesDeleted(AIndex + 1, ACount);
+
   FResetLineNumbersCache := True;
+  CreateLineNumbersCache;
+  CodeFoldingResetCaches;
+
+  if Assigned(FOnLinesDeleted) then
+    FOnLinesDeleted(Self, AIndex, ACount);
 
   LNativeIndex := AIndex;
   if Assigned(FHighlighter) then
@@ -6299,19 +6271,27 @@ begin
     end;
   end;
 
-  if FWordWrap.Enabled then
-    FResetLineNumbersCache := True;
-
   InvalidateLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
   InvalidateLeftMarginLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
 end;
 
 procedure TBCBaseEditor.ListInserted(Sender: TObject; Index: Integer; ACount: Integer);
 var
-  LLength: Integer;
+  i, LLength: Integer;
   LLastScan: Integer;
 begin
-  FResetLineNumbersCache := True;
+  if not FLines.Streaming then
+  begin
+    for i := 0 to Marks.Count - 1 do
+      if Marks[i].Line >= Index + 1 then
+        Marks[i].Line := Marks[i].Line + ACount;
+
+    if FCodeFolding.Visible then
+      UpdateFoldRanges(Index + 1, ACount);
+    FResetLineNumbersCache := True;
+    CreateLineNumbersCache;
+    CodeFoldingResetCaches;
+  end;
 
   if Assigned(Parent) then
     if Assigned(FHighlighter) and (FLines.Count > 0) then
@@ -6322,9 +6302,6 @@ begin
         Inc(LLastScan);
       until LLastScan >= Index + ACount;
     end;
-
-  if FWordWrap.Enabled then
-    FResetLineNumbersCache := True;
 
   if FLeftMargin.LineNumbers.Visible and FLeftMargin.Autosize then
     FLeftMargin.AutosizeDigitCount(Lines.Count);
@@ -8838,13 +8815,9 @@ var
   procedure DeleteSelection;
   var
     i: Integer;
-    LMarkOffset: Integer;
     LFirstLine, LLastLine, LCurrentLine: Integer;
     LDeletePosition, LDisplayDeletePosition, LDeletePositionEnd, LDisplayDeletePositionEnd: Integer;
-    LUpdateMarks: Boolean;
   begin
-    LUpdateMarks := False;
-    LMarkOffset := 0;
     case FSelection.ActiveMode of
       smNormal:
         begin
@@ -8856,7 +8829,6 @@ var
               LBeginTextPosition.Line));
             FLines[LBeginTextPosition.Line] := LTempString;
           end;
-          LUpdateMarks := True;
           TextCaretPosition := LBeginTextPosition;
         end;
       smColumn:
@@ -8894,13 +8866,8 @@ var
         begin
           FLines.DeleteLines(LBeginTextPosition.Line, (LEndTextPosition.Line - LBeginTextPosition.Line) + 1);
           TextCaretPosition := GetTextPosition(1, LBeginTextPosition.Line);
-          LUpdateMarks := True;
-          LMarkOffset := 0;
         end;
     end;
-
-    if LUpdateMarks then
-      DoLinesDeleted(LBeginTextPosition.Line, LEndTextPosition.Line - LBeginTextPosition.Line + LMarkOffset);
   end;
 
   procedure InsertText;
@@ -9163,8 +9130,6 @@ var
       if eoTrimTrailingSpaces in Options then
         for I := LStartLine to LStartLine + LInsertedLines do
           DoTrimTrailingSpaces(I);
-
-      DoLinesInserted(LStartLine, LInsertedLines);
     end;
 
     { Force caret reset }
@@ -9277,7 +9242,6 @@ begin
           end
           else
             SetLineWithRightTrim(LUndoItem.ChangeEndPosition.Line, LUndoItem.ChangeString);
-          DoLinesDeleted(LUndoItem.ChangeEndPosition.Line, 1);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeStartPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
         end;
@@ -10275,7 +10239,6 @@ begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
 
-
     if (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
 
       ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
@@ -10581,7 +10544,6 @@ var
   LCaretNewPosition: TBCEditorTextPosition;
   LOldSelectionMode: TBCEditorSelectionMode;
   LCounter: Integer;
-  LInsertCount: Integer;
   LUndoBeginPosition, LUndoEndPosition: TBCEditorTextPosition;
   LCaretRow: Integer;
   S: string;
@@ -10797,7 +10759,7 @@ begin
                   sLineBreak, smNormal);
 
                 FLines.Delete(LTextCaretPosition.Line);
-                DoLinesDeleted(LTextCaretPosition.Line, 1);
+
                 if eoTrimTrailingSpaces in Options then
                   LLineText := TrimRight(LLineText);
 
@@ -10941,7 +10903,6 @@ begin
                 FLines[LTextCaretPosition.Line - 1] := LLineText + LSpaceBuffer + FLines[LTextCaretPosition.Line];
                 FLines.Attributes[LTextCaretPosition.Line - 1].LineState := lsModified;
                 FLines.Delete(LTextCaretPosition.Line);
-                DoLinesDeleted(LTextCaretPosition.Line, 1);
               end;
             end;
           end;
@@ -11035,7 +10996,6 @@ begin
             LHelper := LHelper + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
             FUndoList.AddChange(crSilentDeleteAfterCursor, LTextCaretPosition, GetTextPosition(1, LTextCaretPosition.Line), GetTextPosition(1, LTextCaretPosition.Line + 1),
               LHelper, smNormal);
-            DoLinesDeleted(LTextCaretPosition.Line, 1);
           end;
           TextCaretPosition := GetTextPosition(1, LTextCaretPosition.Line);
         end;
@@ -11123,10 +11083,8 @@ begin
         begin
           UndoList.BeginBlock;
           try
-            LInsertCount := 1;
             if SelectionAvailable then
             begin
-              LInsertCount := 0;
               SetSelectedTextEmpty;
               if LTextCaretPosition.Line > FLines.Count then
                 LTextCaretPosition.Line := FLines.Count - 1;
@@ -11319,7 +11277,6 @@ begin
             end;
             DoTrimTrailingSpaces(LTextCaretPosition.Line);
 
-            DoLinesInserted(LTextCaretPosition.Line + 1 {- LInsertDelta}, LInsertCount);
             SelectionBeginPosition := LTextCaretPosition;
             SelectionEndPosition := LTextCaretPosition;
             EnsureCursorPositionVisible;
@@ -11637,7 +11594,7 @@ begin
   EnsureCursorPositionVisible(True);
 end;
 
-procedure TBCBaseEditor.HookEditorLines(ABuffer: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
+procedure TBCBaseEditor.HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
 var
   LOldWrap: Boolean;
 begin
@@ -11653,25 +11610,25 @@ begin
   if FLines <> FOriginalLines then
     UnhookEditorLines;
 
-  FChainListCleared := ABuffer.OnCleared;
-  ABuffer.OnCleared := ChainListCleared;
-  FChainListDeleted := ABuffer.OnDeleted;
-  ABuffer.OnDeleted := ChainListDeleted;
-  FChainListInserted := ABuffer.OnInserted;
-  ABuffer.OnInserted := ChainListInserted;
-  FChainListPutted := ABuffer.OnPutted;
-  ABuffer.OnPutted := ChainListPutted;
-  FChainLinesChanging := ABuffer.OnChanging;
-  ABuffer.OnChanging := ChainLinesChanging;
-  FChainLinesChanged := ABuffer.OnChange;
-  ABuffer.OnChange := ChainLinesChanged;
+  FChainListCleared := ALines.OnCleared;
+  ALines.OnCleared := ChainListCleared;
+  FChainListDeleted := ALines.OnDeleted;
+  ALines.OnDeleted := ChainListDeleted;
+  FChainListInserted := ALines.OnInserted;
+  ALines.OnInserted := ChainListInserted;
+  FChainListPutted := ALines.OnPutted;
+  ALines.OnPutted := ChainListPutted;
+  FChainLinesChanging := ALines.OnChanging;
+  ALines.OnChanging := ChainLinesChanging;
+  FChainLinesChanged := ALines.OnChange;
+  ALines.OnChange := ChainLinesChanged;
 
   FChainUndoAdded := AUndo.OnAddedUndo;
   AUndo.OnAddedUndo := ChainUndoRedoAdded;
   FChainRedoAdded := ARedo.OnAddedUndo;
   ARedo.OnAddedUndo := ChainUndoRedoAdded;
 
-  FLines := ABuffer;
+  FLines := ALines;
   FUndoList := AUndo;
   FRedoList := ARedo;
   LinesHookChanged;

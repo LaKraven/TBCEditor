@@ -10099,6 +10099,11 @@ end;
 
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);
 begin
+  if Highlighter.FileName = '' then
+    Highlighter.LoadFromFile(AEditor.Highlighter.FileName);
+  if Highlighter.Colors.FileName = '' then
+    Highlighter.Colors.LoadFromFile(AEditor.Highlighter.Colors.FileName);
+
   HookEditorLines(AEditor.Lines, AEditor.UndoList, AEditor.RedoList);
   InitCodeFolding;
   FChainedEditor := AEditor;

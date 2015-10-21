@@ -281,9 +281,8 @@ type
 
   TBCEditorSortOrder = (soToggle, soAsc, soDesc);
 
-  TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDeleteAfterCursor, crDelete,
-    crLineBreak, crIndent, crUnindent, crSilentDelete, crSilentDeleteAfterCursor, crAutoCompleteBegin,
-    crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak, crDeleteAll);
+  TBCEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent,
+    crAutoCompleteBegin, crAutoCompleteEnd, crCaret, crSelection, crNothing, crGroupBreak);
 
   TBCEditorWordWrapStyle = (wwsClientWidth, wwsRightMargin, wwsSpecified);
 

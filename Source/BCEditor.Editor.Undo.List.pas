@@ -34,7 +34,7 @@ type
     function PopItem: TBCEditorUndoItem;
     function LastChangeReason: TBCEditorChangeReason;
     function LastChangeString: string;
-    procedure AddChange(AReason: TBCEditorChangeReason; const ACaretPosition, ASelectionStartPosition, ASelectionEndPosition: TBCEditorTextPosition;
+    procedure AddChange(AReason: TBCEditorChangeReason; const ACaretPosition, ASelectionBeginPosition, ASelectionEndPosition: TBCEditorTextPosition;
       const ChangeText: string; SelectionMode: TBCEditorSelectionMode; Data: Pointer = nil; Index: Integer = 0);
     procedure BeginBlock;
     procedure Clear;
@@ -107,7 +107,7 @@ begin
 end;
 
 procedure TBCEditorUndoList.AddChange(AReason: TBCEditorChangeReason;
-  const ACaretPosition, ASelectionStartPosition, ASelectionEndPosition: TBCEditorTextPosition;
+  const ACaretPosition, ASelectionBeginPosition, ASelectionEndPosition: TBCEditorTextPosition;
   const ChangeText: string; SelectionMode: TBCEditorSelectionMode; Data: Pointer = nil; Index: Integer = 0);
 var
   LNewItem: TBCEditorUndoItem;
@@ -120,7 +120,7 @@ begin
       ChangeReason := AReason;
       ChangeSelectionMode := SelectionMode;
       ChangeCaretPosition := ACaretPosition;
-      ChangeStartPosition := ASelectionStartPosition;
+      ChangeBeginPosition := ASelectionBeginPosition;
       ChangeEndPosition := ASelectionEndPosition;
       ChangeString := ChangeText;
       ChangeData := Data;

@@ -18,6 +18,10 @@ uses
   BCEditor.Types, BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
 type
+  TTest = record
+     Test: record end;
+  end;
+
   TBCBaseEditor = class(TCustomControl)
   strict private
     FActiveLine: TBCEditorActiveLine;
@@ -2492,7 +2496,11 @@ begin
         if LIsBackward then
           TextCaretPosition := SelectionBeginPosition
         else
+        begin
+          if TopLine + VisibleLines <= LCurrentTextPosition.Line then
+            TopLine := LCurrentTextPosition.Line - VisibleLines div 2 + 1;
           TextCaretPosition := LCurrentTextPosition;
+        end;
         Exit;
       end;
       if LIsBackward then

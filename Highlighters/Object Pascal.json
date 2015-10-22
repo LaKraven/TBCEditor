@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "20.10.2015",
+            "Date": "22.10.2015",
             "Sample": [
                "// Hello World in Pascal\r\n",
                "\r\n",
@@ -600,10 +600,6 @@
                },
                {
                   "OpenToken": "RECORD",
-                  "CloseToken": "END"
-               },
-               {
-                  "OpenToken": "PACKED RECORD",
                   "CloseToken": "END",
                   "Properties": {
                      "NoSubs": true

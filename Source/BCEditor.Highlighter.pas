@@ -501,19 +501,19 @@ begin
     try
       if LEditor.Visible then
         LCaretPosition := LEditor.TextCaretPosition;
-      if LEditor.Lines.Count <> 0 then
+      if Trim(LEditor.Lines.Text) <> '' then
       begin
         LTopLine := LEditor.TopLine;
         LTempLines.Text := LEditor.Lines.Text;
-        LEditor.Lines.Clear;
       end;
+      LEditor.Lines.Clear;
       with TBCEditorHighlighterJSONImporter.Create(Self) do
       try
         ImportFromStream(AStream);
       finally
         Free;
       end;
-      if LTempLines.Count <> 0 then
+      if Trim(LTempLines.Text) <> '' then
       begin
         LEditor.Lines.Text := LTempLines.Text;
         LEditor.TopLine := LTopLine;

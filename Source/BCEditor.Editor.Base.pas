@@ -3845,7 +3845,10 @@ begin
       if LLine < Length(FCodeFoldingRangeFromLine) then
         LCodeFoldingRange := FCodeFoldingRangeFromLine[LLine];
       if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
+      begin
+        LPreviousLine := LLine;
         Continue;
+      end;
 
       if LPreviousLine <> LLine then
       begin

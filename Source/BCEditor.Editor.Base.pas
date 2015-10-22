@@ -7073,26 +7073,29 @@ var
   function GetDeepestLevel: Integer;
   begin
     Result := 0;
-    while LTempLine > 0 do
+    if Length(FCodeFoldingRangeFromLine) > 1 then
     begin
-      LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
-      LCodeFoldingRangeTo := FCodeFoldingRangeToLine[LTempLine];
-      if not Assigned(LCodeFoldingRange) and not Assigned(LCodeFoldingRangeTo) then
-        Dec(LTempLine)
-      else
-      if Assigned(LCodeFoldingRange) and (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
-        Break
-      else
-      if Assigned(LCodeFoldingRangeTo) and (LLine >= LCodeFoldingRangeTo.FromLine) and (LLine <= LCodeFoldingRangeTo.ToLine) then
+    while LTempLine > 0 do
       begin
-        LCodeFoldingRange := LCodeFoldingRangeTo;
-        Break
-      end
-      else
-        Dec(LTempLine)
+        LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
+        LCodeFoldingRangeTo := FCodeFoldingRangeToLine[LTempLine];
+        if not Assigned(LCodeFoldingRange) and not Assigned(LCodeFoldingRangeTo) then
+          Dec(LTempLine)
+        else
+        if Assigned(LCodeFoldingRange) and (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
+          Break
+        else
+        if Assigned(LCodeFoldingRangeTo) and (LLine >= LCodeFoldingRangeTo.FromLine) and (LLine <= LCodeFoldingRangeTo.ToLine) then
+        begin
+          LCodeFoldingRange := LCodeFoldingRangeTo;
+          Break
+        end
+        else
+          Dec(LTempLine)
+      end;
+      if Assigned(LCodeFoldingRange) then
+        Result := LCodeFoldingRange.IndentLevel;
     end;
-    if Assigned(LCodeFoldingRange) then
-      Result := LCodeFoldingRange.IndentLevel;
   end;
 
 begin

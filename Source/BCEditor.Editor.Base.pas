@@ -5703,7 +5703,6 @@ procedure TBCBaseEditor.DoInternalUndo;
   procedure RemoveGroupBreak;
   var
     LUndoItem: TBCEditorUndoItem;
-    LOldBlockNumber: Integer;
   begin
     if FUndoList.LastChangeReason = crGroupBreak then
     begin
@@ -12017,7 +12016,6 @@ procedure TBCBaseEditor.DoInternalRedo;
   procedure RemoveGroupBreak;
   var
     LUndoItem: TBCEditorUndoItem;
-    LOldBlockNumber: Integer;
   begin
     if FRedoList.LastChangeReason = crGroupBreak then
     begin

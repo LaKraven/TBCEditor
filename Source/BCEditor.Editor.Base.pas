@@ -519,7 +519,6 @@ type
     procedure DoRedo;
     procedure RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);
     procedure RemoveChainedEditor;
-    //procedure RemoveFocusControl(AControl: TWinControl);
     procedure RemoveKeyDownHandler(AHandler: TKeyEvent);
     procedure RemoveKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
     procedure RemoveKeyUpHandler(AHandler: TKeyEvent);
@@ -1346,7 +1345,7 @@ function TBCBaseEditor.GetMatchingToken(APoint: TBCEditorTextPosition; var AMatc
 var
   i, j: Integer;
   LTokenMatch: PBCEditorMatchingPairToken;
-  LToken, OriginalToken: string;
+  LToken, LOriginalToken, LElement: string;
   LLevel, LDeltaLevel: Integer;
   LMatchStackID: Integer;
   LOpenDuplicateLength, LCloseDuplicateLength: Integer;
@@ -1437,7 +1436,7 @@ begin
       ResetCurrentRange
     else
       SetCurrentRange(FLines.Ranges[APoint.Line]);
-    SetCurrentLine(FLines.ExpandedStrings[APoint.Line]);
+    SetCurrentLine(FLines[APoint.Line]);
 
     while not GetEndOfLine and (APoint.Char >= GetTokenPosition + Length(GetToken)) do
       Next;
@@ -1445,14 +1444,15 @@ begin
     if GetEndOfLine then
       Exit;
 
-    if (FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) or
-      (FHighlighter.GetCurrentRangeAttribute.Element = BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
+    LElement := FHighlighter.GetCurrentRangeAttribute.Element;
+    if (LElement = BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) or
+      (LElement = BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
       Exit;
 
     I := 0;
     J := FHighlighter.MatchingPairs.Count;
-    OriginalToken := GetToken;
-    LToken := Trim(LowerCase(OriginalToken));
+    LOriginalToken := GetToken;
+    LToken := Trim(LowerCase(LOriginalToken));
     if LToken = '' then
       Exit;
     while I < J do
@@ -1460,7 +1460,7 @@ begin
       if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.CloseToken then
       begin
         Result := trCloseTokenFound;
-        AMatch.CloseToken := OriginalToken;
+        AMatch.CloseToken := LOriginalToken;
         AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Break;
@@ -1469,7 +1469,7 @@ begin
       if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.OpenToken then
       begin
         Result := trOpenTokenFound;
-        AMatch.OpenToken := OriginalToken;
+        AMatch.OpenToken := LOriginalToken;
         AMatch.OpenTokenPos.Line := APoint.Line {+ 1};
         AMatch.OpenTokenPos.Char := GetTokenPosition + 1;
         Break;
@@ -8647,6 +8647,7 @@ begin
       Dec(LTextPosition.Char);
       FCurrentMatchingPair := GetMatchingToken(LTextPosition, FCurrentMatchingPairMatch);
     end;
+
   if FHighlighter.MatchingPairHighlight and (cfoHighlightMatchingPair in FCodeFolding.Options) then
   begin
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LTextPosition.Line + 1);

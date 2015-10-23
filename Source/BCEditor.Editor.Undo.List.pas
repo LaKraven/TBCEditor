@@ -8,23 +8,18 @@ uses
 type
   TBCEditorUndoList = class(TPersistent)
   protected
-    FBlockChangeNumber: Integer;
     FBlockCount: Integer;
     FFullUndoImposible: Boolean;
-    FInitialChangeNumber: Integer;
     FInsideRedo: Boolean;
     FItems: TList;
     FLockCount: Integer;
     FMaxUndoActions: Integer;
-    FNextChangeNumber: Integer;
     FOnAddedUndo: TNotifyEvent;
     function GetCanUndo: Boolean;
-    function GetInitialState: Boolean;
     function GetItemCount: Integer;
     function GetItems(Index: Integer): TBCEditorUndoItem;
     procedure EnsureMaxEntries;
     procedure SetMaxUndoActions(Value: Integer);
-    procedure SetInitialState(const Value: Boolean);
     procedure SetItems(Index: Integer; const Value: TBCEditorUndoItem);
   public
     constructor Create;
@@ -46,11 +41,9 @@ type
     procedure AddGroupBreak;
     procedure Assign(Source: TPersistent); override;
     procedure DeleteItem(AIndex: Integer);
-    property BlockChangeNumber: Integer read FBlockChangeNumber write FBlockChangeNumber;
     property BlockCount: Integer read FBlockCount;
     property CanUndo: Boolean read GetCanUndo;
     property FullUndoImpossible: Boolean read FFullUndoImposible;
-    property InitialState: Boolean read GetInitialState write SetInitialState;
     property InsideRedo: Boolean read FInsideRedo write FInsideRedo default False;
     property ItemCount: Integer read GetItemCount;
     property Items[index: Integer]: TBCEditorUndoItem read GetItems write SetItems;
@@ -68,7 +61,6 @@ begin
 
   FItems := TList.Create;
   FMaxUndoActions := BCEDITOR_MAX_UNDO_ACTIONS;
-  FNextChangeNumber := 1;
   FInsideRedo := False;
 end;
 
@@ -94,12 +86,10 @@ begin
       LUndoItem.Assign(FItems[i]);
       Self.FItems.Add(LUndoItem);
     end;
-    Self.FBlockChangeNumber := FBlockChangeNumber;
     Self.FBlockCount := FBlockCount;
     Self.FFullUndoImposible := FFullUndoImposible;
     Self.FLockCount := FLockCount;
     Self.FMaxUndoActions := FMaxUndoActions;
-    Self.FNextChangeNumber := FNextChangeNumber;
     Self.FInsideRedo := FInsideRedo;
   end
   else
@@ -125,7 +115,7 @@ begin
       ChangeString := ChangeText;
       ChangeData := Data;
 
-      if FBlockChangeNumber <> 0 then
+      {if FBlockChangeNumber <> 0 then
         ChangeNumber := FBlockChangeNumber
       else
       begin
@@ -136,7 +126,7 @@ begin
           if FNextChangeNumber = 0 then
             Inc(FNextChangeNumber);
         end;
-      end;
+      end;  }
     end;
     PushItem(LNewItem);
   end;
@@ -145,7 +135,6 @@ end;
 procedure TBCEditorUndoList.BeginBlock;
 begin
   Inc(FBlockCount);
-  FBlockChangeNumber := FNextChangeNumber;
 end;
 
 procedure TBCEditorUndoList.Clear;
@@ -159,23 +148,9 @@ begin
 end;
 
 procedure TBCEditorUndoList.EndBlock;
-var
-  LBlockID: Integer;
 begin
   if FBlockCount > 0 then
-  begin
     Dec(FBlockCount);
-    if FBlockCount = 0 then
-    begin
-      LBlockID := FBlockChangeNumber;
-      FBlockChangeNumber := 0;
-      Inc(FNextChangeNumber);
-      if FNextChangeNumber = 0 then
-        Inc(FNextChangeNumber);
-      if (FItems.Count > 0) and (PeekItem.ChangeNumber = LBlockID) and Assigned(OnAddedUndo) then
-        OnAddedUndo(Self);
-    end;
-  end;
 end;
 
 procedure TBCEditorUndoList.EnsureMaxEntries;
@@ -282,34 +257,6 @@ var
 begin
   if LastChangeReason <> crGroupBreak then
     AddChange(crGroupBreak, vDummy, vDummy, vDummy, '', smNormal);
-end;
-
-procedure TBCEditorUndoList.SetInitialState(const Value: Boolean);
-begin
-  if Value then
-  begin
-    if ItemCount = 0 then
-      FInitialChangeNumber := 0
-    else
-      FInitialChangeNumber := PeekItem.ChangeNumber;
-  end
-  else
-  if ItemCount = 0 then
-  begin
-    if FInitialChangeNumber = 0 then
-      FInitialChangeNumber := -1;
-  end
-  else
-  if PeekItem.ChangeNumber = FInitialChangeNumber then
-    FInitialChangeNumber := -1;
-end;
-
-function TBCEditorUndoList.GetInitialState: Boolean;
-begin
-  if ItemCount = 0 then
-    Result := FInitialChangeNumber = 0
-  else
-    Result := PeekItem.ChangeNumber = FInitialChangeNumber;
 end;
 
 function TBCEditorUndoList.GetItems(Index: Integer): TBCEditorUndoItem;

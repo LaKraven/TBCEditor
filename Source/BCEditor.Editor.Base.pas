@@ -18,10 +18,6 @@ uses
   BCEditor.Types, BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
 type
-  TTest = record
-     Test: record end;
-  end;
-
   TBCBaseEditor = class(TCustomControl)
   strict private
     FActiveLine: TBCEditorActiveLine;
@@ -69,7 +65,6 @@ type
     FDirectories: TBCEditorDirectories;
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
-    //FFocusList: TList;
     FFontDummy: TFont;
     FHighlightedFoldRange: TBCEditorCodeFoldingRange;
     FHighlighter: TBCEditorHighlighter;
@@ -472,7 +467,6 @@ type
     function WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function WordStart: TBCEditorTextPosition; overload;
     function WordStart(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
-    //procedure AddFocusControl(AControl: TWinControl);
     procedure AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word; ASecondaryShift: TShiftState = []; ASecondaryKey: Word = 0);
     procedure AddKeyDownHandler(AHandler: TKeyEvent);
     procedure AddKeyPressHandler(AHandler: TBCEditorKeyPressWEvent);
@@ -2989,8 +2983,11 @@ begin
 
     if SelectionAvailable then
     begin
+      FUndoList.BeginBlock;
       FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode);
+      FUndoList.EndBlock;
       DoSelectedText('');
+      DoChange;
     end;
 
     if toTabsToSpaces in FTabs.Options then
@@ -4244,7 +4241,7 @@ begin
     FModified := Value;
     if (uoGroupUndo in FUndo.Options) and (not Value) and UndoList.CanUndo then
       UndoList.AddGroupBreak;
-    UndoList.InitialState := not Value;
+
     if not FModified then
     begin
       for i := 0 to FLines.Count - 1 do
@@ -4651,7 +4648,7 @@ end;
 
 procedure TBCBaseEditor.UpdateModifiedStatus;
 begin
-  Modified := not UndoList.InitialState;
+  Modified := UndoList.ItemCount > 0;
 end;
 
 procedure TBCBaseEditor.UpdateScrollBars;
@@ -5710,22 +5707,14 @@ procedure TBCBaseEditor.DoInternalUndo;
   begin
     if FUndoList.LastChangeReason = crGroupBreak then
     begin
-      LOldBlockNumber := RedoList.BlockChangeNumber;
-      try
-        LUndoItem := FUndoList.PopItem;
-        RedoList.BlockChangeNumber := LUndoItem.ChangeNumber;
-        LUndoItem.Free;
-        FRedoList.AddGroupBreak;
-      finally
-        RedoList.BlockChangeNumber := LOldBlockNumber;
-      end;
+      LUndoItem := FUndoList.PopItem;
+      LUndoItem.Free;
+      FRedoList.AddGroupBreak;
     end;
   end;
 
 var
   LUndoItem: TBCEditorUndoItem;
-  LOldChangeNumber: Integer;
-  LSaveChangeNumber: Integer;
   LLastChangeReason: TBCEditorChangeReason;
   LLastChangeString: string;
   LIsAutoComplete: Boolean;
@@ -5745,39 +5734,29 @@ begin
   LUndoItem := FUndoList.PeekItem;
   if Assigned(LUndoItem) then
   begin
-    LOldChangeNumber := LUndoItem.ChangeNumber;
-    LSaveChangeNumber := FRedoList.BlockChangeNumber;
-    FRedoList.BlockChangeNumber := LUndoItem.ChangeNumber;
-    try
-      repeat
-        Self.UndoItem;
-        LUndoItem := FUndoList.PeekItem;
-        if not Assigned(LUndoItem) then
-          LIsKeepGoing := False
-        else
-        begin
-          if LIsAutoComplete then
-            LIsKeepGoing := FUndoList.LastChangeReason <> crAutoCompleteBegin
-          else
-          if LIsPasteAction then
-            LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
-          else
-          if LUndoItem.ChangeNumber = LOldChangeNumber then
-            LIsKeepGoing := True
-          else
-            LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
-              not (LLastChangeReason in [crIndent, crUnindent]);
-          LLastChangeReason := LUndoItem.ChangeReason;
-        end;
-      until not LIsKeepGoing;
-
-      if LIsAutoComplete and (FUndoList.LastChangeReason = crAutoCompleteBegin) then
+    repeat
+      Self.UndoItem;
+      LUndoItem := FUndoList.PeekItem;
+      if not Assigned(LUndoItem) then
+        LIsKeepGoing := False
+      else
       begin
-        Self.UndoItem;
-        UpdateModifiedStatus;
+        if LIsAutoComplete then
+          LIsKeepGoing := FUndoList.LastChangeReason <> crAutoCompleteBegin
+        else
+        if LIsPasteAction then
+          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
+        else
+          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
+            not (LLastChangeReason in [crIndent, crUnindent]);
+        LLastChangeReason := LUndoItem.ChangeReason;
       end;
-    finally
-      FRedoList.BlockChangeNumber := LSaveChangeNumber;
+    until not LIsKeepGoing;
+
+    if LIsAutoComplete and (FUndoList.LastChangeReason = crAutoCompleteBegin) then
+    begin
+      Self.UndoItem;
+      UpdateModifiedStatus;
     end;
   end;
 end;
@@ -8818,13 +8797,16 @@ begin
     LBlockStartPosition := SelectionBeginPosition;
     if FSelection.ActiveMode = smLine then
       LBlockStartPosition.Char := 1;
-    FUndoList.BeginBlock;
   end;
+  FUndoList.BeginBlock;
   FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
+  FUndoList.EndBlock;
   DoSelectedText(AChangeString);
+  DoChange;
   if AChangeString <> '' then
   begin
+    FUndoList.BeginBlock;
     FUndoList.AddChange(crInsert, LBlockStartPosition, LBlockStartPosition, SelectionEndPosition, '', smNormal);
     FUndoList.EndBlock;
   end;
@@ -10020,11 +10002,6 @@ begin
   Result.Line := Y;
 end;
 
-{procedure TBCBaseEditor.AddFocusControl(aControl: TWinControl);
-begin
-  FFocusList.Add(aControl);
-end;}
-
 procedure TBCBaseEditor.AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word;
   ASecondaryShift: TShiftState; ASecondaryKey: Word);
 var
@@ -10782,15 +10759,17 @@ begin
                 LCaretNewPosition.Line := LTextCaretPosition.Line - 1;
                 LCaretNewPosition.Char := Length(Lines[LTextCaretPosition.Line - 1]) + 1;
 
+                FUndoList.BeginBlock;
                 FUndoList.AddChange(crDelete, LTextCaretPosition, LCaretNewPosition, LTextCaretPosition,
                   sLineBreak, smNormal);
+                FUndoList.EndBlock;
 
                 FLines.Delete(LTextCaretPosition.Line);
 
                 if eoTrimTrailingSpaces in Options then
                   LLineText := TrimRight(LLineText);
-
                 FLines[LCaretNewPosition.Line] := FLines[LCaretNewPosition.Line] + LLineText;
+                DoChange;
 
                 LHelper := BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
 
@@ -10841,15 +10820,14 @@ begin
 
                   LHelper := Copy(LLineText, i + 1, LSpaceCount1 - i);
                   Delete(LLineText, i + 1, LSpaceCount1 - i);
+
                   FUndoList.BeginBlock;
-                  try
-                    FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
-                    if LVisualSpaceCount2 - LLength > 0 then
-                      LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
-                    Insert(LSpaceBuffer, LLineText, i + 1);
-                  finally
-                    FUndoList.EndBlock;
-                  end;
+                  FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(i + 1, LTextCaretPosition.Line), LTextCaretPosition, LHelper, smNormal);
+                  if LVisualSpaceCount2 - LLength > 0 then
+                    LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LVisualSpaceCount2 - LLength);
+                  Insert(LSpaceBuffer, LLineText, i + 1);
+                  FUndoList.EndBlock;
+
                   SetTextCaretX(i + Length(LSpaceBuffer) + 1);
                 end
                 else
@@ -10882,11 +10860,14 @@ begin
                 if LChar.IsSurrogate then
                   i := 2;
                 LHelper := Copy(LLineText, LTextCaretPosition.Char - i, i);
+                FUndoList.BeginBlock;
                 FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(LTextCaretPosition.Char - i, LTextCaretPosition.Line), LTextCaretPosition,
                   LHelper, smNormal);
+                FUndoList.EndBlock;
 
                 Delete(LLineText, LTextCaretPosition.Char - i, i);
                 FLines[LTextCaretPosition.Line] := LLineText;
+                DoChange;
 
                 SetTextCaretX(LTextCaretPosition.Char - i);
               end;
@@ -10930,16 +10911,15 @@ begin
                   Line := Line + 1;
                 end;
 
-                if LSpaceCount1 > 0 then
-                  FUndoList.BeginBlock;
+                FUndoList.BeginBlock;
                 LHelper := sLineBreak;
                 FUndoList.AddChange(crDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, LHelper, smNormal);
-                if LSpaceCount1 > 0 then
-                  FUndoList.EndBlock;
+                FUndoList.EndBlock;
 
                 FLines[LTextCaretPosition.Line - 1] := LLineText + LSpaceBuffer + FLines[LTextCaretPosition.Line];
                 FLines.Attributes[LTextCaretPosition.Line - 1].LineState := lsModified;
                 FLines.Delete(LTextCaretPosition.Line);
+                DoChange;
               end;
             end;
           end;
@@ -11541,7 +11521,9 @@ begin
           begin
             BeginUndoBlock;
             try
+              FUndoList.BeginBlock;
               FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, LHelper, smNormal);
+              FUndoList.EndBlock;
               LBlockStartPosition := FSelectionBeginPosition;
               DoSelectedText(S);
               FUndoList.AddChange(crInsert, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, LHelper, smNormal);
@@ -11983,7 +11965,12 @@ begin
       LPasteMode := smColumn;
 
     if SelectionAvailable then
-      FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText, FSelection.ActiveMode)
+    begin
+      FUndoList.BeginBlock;
+      FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText,
+        FSelection.ActiveMode);
+      FUndoList.EndBlock;
+    end
     else
       FSelection.ActiveMode := Selection.Mode;
 
@@ -12034,13 +12021,10 @@ procedure TBCBaseEditor.DoInternalRedo;
   begin
     if FRedoList.LastChangeReason = crGroupBreak then
     begin
-      LOldBlockNumber := UndoList.BlockChangeNumber;
       LUndoItem := FRedoList.PopItem;
       try
-        UndoList.BlockChangeNumber := LUndoItem.ChangeNumber;
         FUndoList.AddGroupBreak;
       finally
-        UndoList.BlockChangeNumber := LOldBlockNumber;
         LUndoItem.Free;
       end;
       UpdateModifiedStatus;
@@ -12049,8 +12033,6 @@ procedure TBCBaseEditor.DoInternalRedo;
 
 var
   LUndoItem: TBCEditorUndoItem;
-  LOldChangeNumber: Integer;
-  LSaveChangeNumber: Integer;
   LLastChangeReason: TBCEditorChangeReason;
   LLastChangeString: string;
   LAutoComplete: Boolean;
@@ -12068,43 +12050,33 @@ begin
   LUndoItem := FRedoList.PeekItem;
   if Assigned(LUndoItem) then
   begin
-    LOldChangeNumber := LUndoItem.ChangeNumber;
-    LSaveChangeNumber := FUndoList.BlockChangeNumber;
-    FUndoList.BlockChangeNumber := LUndoItem.ChangeNumber;
-    try
-      repeat
-        RedoItem;
-        LUndoItem := FRedoList.PeekItem;
-        if not Assigned(LUndoItem) then
-          LKeepGoing := False
+    repeat
+      RedoItem;
+      LUndoItem := FRedoList.PeekItem;
+      if not Assigned(LUndoItem) then
+        LKeepGoing := False
+      else
+      begin
+        if LAutoComplete then
+          LKeepGoing := FRedoList.LastChangeReason <> crAutoCompleteEnd
+        else
+        if LPasteAction then
+          LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
         else
         begin
-          if LAutoComplete then
-            LKeepGoing := FRedoList.LastChangeReason <> crAutoCompleteEnd
-          else
-          if LPasteAction then
-            LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
-          else
-          if LUndoItem.ChangeNumber = LOldChangeNumber then
-            LKeepGoing := True
-          else
-          begin
-            LKeepGoing := ((uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
-              not (LLastChangeReason in [crIndent, crUnindent]));
-          end;
-          LLastChangeReason := LUndoItem.ChangeReason;
+          LKeepGoing := ((uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
+            not (LLastChangeReason in [crIndent, crUnindent]));
         end;
-      until not LKeepGoing;
-
-      if LAutoComplete and (FRedoList.LastChangeReason = crAutoCompleteEnd) then
-      begin
-        RedoItem;
-        UpdateModifiedStatus;
+        LLastChangeReason := LUndoItem.ChangeReason;
       end;
+    until not LKeepGoing;
 
-    finally
-      FUndoList.BlockChangeNumber := LSaveChangeNumber;
+    if LAutoComplete and (FRedoList.LastChangeReason = crAutoCompleteEnd) then
+    begin
+      RedoItem;
+      UpdateModifiedStatus;
     end;
+
     RemoveGroupBreak;
   end;
 end;
@@ -12127,11 +12099,6 @@ begin
 
   UnhookEditorLines;
 end;
-
-{procedure TBCBaseEditor.RemoveFocusControl(AControl: TWinControl);
-begin
-  FFocusList.Remove(AControl);
-end; }
 
 procedure TBCBaseEditor.RemoveKeyDownHandler(AHandler: TKeyEvent);
 begin
@@ -12268,12 +12235,6 @@ end;
 
 procedure TBCBaseEditor.SetFocus;
 begin
-  {if FFocusList.Count > 0 then
-  begin
-    if TWinControl(FFocusList.Last).CanFocus then
-      TWinControl(FFocusList.Last).SetFocus;
-    Exit;
-  end; }
   Winapi.Windows.SetFocus(Handle);
   inherited;
 end;

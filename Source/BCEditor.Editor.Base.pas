@@ -9235,6 +9235,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode);
 
+          TextCaretPosition := LUndoItem.ChangeCaretPosition;
           EnsureCursorPositionVisible;
         end;
       crLineBreak:

@@ -9,13 +9,18 @@ type
   TBCCustomEditor = class(TBCBaseEditor)
   strict private
     FDocumentName: string;
+    FFilePath: string;
+    FFileName: string;
     FFileDateTime: TDateTime;
     FSearchString: string;
     FMacroRecorder: TBCEditorMacroRecorder;
+    procedure SetDocumentName(const AName: string);
   protected
     procedure DoOnProcessCommand(var Command: TBCEditorCommand; var AChar: Char; Data: Pointer); override;
   public
-    property DocumentName: string read FDocumentName write FDocumentName;
+    property DocumentName: string read FDocumentName write SetDocumentName;
+    property FilePath: string read FFilePath;
+    property FileName: string read FFileName;
     property FileDateTime: TDateTime read FFileDateTime write FFileDateTime;
     property MacroRecorder: TBCEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property SearchString: string read FSearchString write FSearchString;
@@ -119,7 +124,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Classes;
+  Winapi.Windows, System.Classes, System.SysUtils;
 
 procedure TBCCustomEditor.DoOnProcessCommand(var Command: TBCEditorCommand; var AChar: Char; Data: Pointer);
 begin
@@ -127,6 +132,13 @@ begin
   if Assigned(FMacroRecorder) then
     if FMacroRecorder.State = msRecording then
       FMacroRecorder.AddEvent(Command, AChar, Data);
+end;
+
+procedure TBCCustomEditor.SetDocumentName(const AName: string);
+begin
+  FDocumentName := AName;
+  FFilePath := ExtractFilePath(FDocumentName);
+  FFileName := ExtractFileName(FDocumentName);
 end;
 
 end.

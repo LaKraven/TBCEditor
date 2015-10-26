@@ -3,8 +3,8 @@ unit BCEditor.Editor.CompletionProposal.PopupWindow;
 interface
 
 uses
-  Winapi.Messages, System.Classes, System.Types, Vcl.StdCtrls, Vcl.Forms, Vcl.Controls, Vcl.Graphics, BCEditor.Utils,
-  BCEditor.Types, BCEditor.Editor.CompletionProposal.Columns, BCEditor.Editor.PopupWindow, Vcl.ExtCtrls
+  Winapi.Messages, System.Classes, System.Types, Vcl.Forms, Vcl.Controls, Vcl.Graphics, BCEditor.Utils,
+  BCEditor.Types, BCEditor.Editor.CompletionProposal.Columns, BCEditor.Editor.PopupWindow
 {$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
 type

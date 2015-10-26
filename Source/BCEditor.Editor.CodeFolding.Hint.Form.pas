@@ -3,7 +3,7 @@ unit BCEditor.Editor.CodeFolding.Hint.Form;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, System.Types, Vcl.StdCtrls, Vcl.Forms, Vcl.Controls, Vcl.Graphics;
+  Winapi.Windows, Winapi.Messages, System.Classes, System.Types, Vcl.Forms, Vcl.Controls, Vcl.Graphics;
 
 type
   TBCEditorCodeFoldingHintForm = class(TCustomForm)
@@ -57,7 +57,7 @@ implementation
 
 uses
   System.SysUtils, System.UITypes, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Utils,
-  BCEditor.Editor.Utils, BCEditor.Consts, System.Math{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
+  BCEditor.Consts, System.Math{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
 
 { TBCEditorCodeFoldingHintForm }
 

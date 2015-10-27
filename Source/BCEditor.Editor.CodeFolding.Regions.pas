@@ -6,7 +6,7 @@ uses
   System.Classes, System.SysUtils, BCEditor.Editor.SkipRegions, BCEditor.Types, BCEditor.Consts;
 
 type
-  TBCEditorCodeFoldingRegions = class;
+  TBCEditorCodeFoldingRegion = class;
 
   TBCEditorCodeFoldingRegionItem = class(TCollectionItem)
   strict private
@@ -51,7 +51,7 @@ type
     property TokenEndIsPreviousLine: Boolean read FTokenEndIsPreviousLine write FTokenEndIsPreviousLine;
   end;
 
-  TBCEditorCodeFoldingRegions = class(TCollection)
+  TBCEditorCodeFoldingRegion = class(TCollection)
   strict private
     FCloseToken: string;
     FOpenToken: string;
@@ -70,7 +70,7 @@ type
     property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default BCEDITOR_NONE_CHAR;
   end;
 
-  TBCEditorCodeFoldingRanges = array of TBCEditorCodeFoldingRegions;
+  TBCEditorCodeFoldingRegions = array of TBCEditorCodeFoldingRegion;
 
 implementation
 
@@ -90,7 +90,7 @@ end;
 
 { TBCEditorCodeFoldingRegions }
 
-function TBCEditorCodeFoldingRegions.Add(AOpenToken: string; ACloseToken: string): TBCEditorCodeFoldingRegionItem;
+function TBCEditorCodeFoldingRegion.Add(AOpenToken: string; ACloseToken: string): TBCEditorCodeFoldingRegionItem;
 begin
   Result := TBCEditorCodeFoldingRegionItem(inherited Add);
   with Result do
@@ -108,20 +108,20 @@ begin
   end;
 end;
 
-constructor TBCEditorCodeFoldingRegions.Create(ItemClass: TCollectionItemClass);
+constructor TBCEditorCodeFoldingRegion.Create(ItemClass: TCollectionItemClass);
 begin
   inherited Create(ItemClass);
   FSkipRegions := TBCEditorSkipRegions.Create(TBCEditorSkipRegionItem);
   FStringEscapeChar := BCEDITOR_NONE_CHAR;
 end;
 
-destructor TBCEditorCodeFoldingRegions.Destroy;
+destructor TBCEditorCodeFoldingRegion.Destroy;
 begin
   FSkipRegions.Free;
   inherited;
 end;
 
-function TBCEditorCodeFoldingRegions.Contains(const AOpenToken, ACloseToken: string): Boolean;
+function TBCEditorCodeFoldingRegion.Contains(const AOpenToken, ACloseToken: string): Boolean;
 var
   i: Integer;
 begin
@@ -131,7 +131,7 @@ begin
       Exit(True);
 end;
 
-function TBCEditorCodeFoldingRegions.GetItem(Index: Integer): TBCEditorCodeFoldingRegionItem;
+function TBCEditorCodeFoldingRegion.GetItem(Index: Integer): TBCEditorCodeFoldingRegionItem;
 begin
   Result := TBCEditorCodeFoldingRegionItem(inherited Items[index]);
 end;

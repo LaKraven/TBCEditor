@@ -14,9 +14,9 @@ type
     procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject;
       AElementPrefix: string);
     procedure ImportCodeFolding(ACodeFoldingObject: TJsonObject);
-    procedure ImportCodeFoldingFoldRegions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions; ACodeFoldingObject: TJsonObject);
-    procedure ImportCodeFoldingOptions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions; ACodeFoldingObject: TJsonObject);
-    procedure ImportCodeFoldingSkipRegions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions; ACodeFoldingObject: TJsonObject);
+    procedure ImportCodeFoldingFoldRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion; ACodeFoldingObject: TJsonObject);
+    procedure ImportCodeFoldingOptions(ACodeFoldingRegion: TBCEditorCodeFoldingRegion; ACodeFoldingObject: TJsonObject);
+    procedure ImportCodeFoldingSkipRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion; ACodeFoldingObject: TJsonObject);
     procedure ImportColors(AJSONObject: TJsonObject);
     procedure ImportColorsEditorProperties(AEditorObject: TJsonObject);
     procedure ImportColorsInfo(AInfoObject: TJsonObject);
@@ -540,7 +540,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingSkipRegions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions;
+procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingSkipRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   i: Integer;
@@ -573,21 +573,21 @@ begin
         if Assigned(LJSONObject) then
         try
           if LJSONObject.Contains('CodeFolding') then
-            ImportCodeFoldingSkipRegions(ACodeFoldingRegions, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
+            ImportCodeFoldingSkipRegion(ACodeFoldingRegion, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
         finally
           LJSONObject.Free;
           LFileStream.Free;
         end;
       end;
       { Skip duplicates }
-      if ACodeFoldingRegions.SkipRegions.Contains(LOpenToken, LCloseToken) then
+      if ACodeFoldingRegion.SkipRegions.Contains(LOpenToken, LCloseToken) then
         Continue;
     end;
 
     LSkipRegionType := StrToRegionType(LJsonDataValue.ObjectValue['RegionType'].Value);
     if (LSkipRegionType = ritMultiLineComment) and (cfoFoldMultilineComments in TBCBaseEditor(FHighlighter.Editor).CodeFolding.Options) then
     begin
-      LRegionItem := ACodeFoldingRegions.Add(LOpenToken, LCloseToken);
+      LRegionItem := ACodeFoldingRegion.Add(LOpenToken, LCloseToken);
       LRegionItem.NoSubs := True;
       FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
       if LCloseToken <> '' then
@@ -595,7 +595,7 @@ begin
     end
     else
     begin
-      LSkipRegionItem := ACodeFoldingRegions.SkipRegions.Add(LOpenToken, LCloseToken);
+      LSkipRegionItem := ACodeFoldingRegion.SkipRegions.Add(LOpenToken, LCloseToken);
       LSkipRegionItem.RegionType := LSkipRegionType;
       LSkipRegionItem.SkipEmptyChars := LJsonDataValue.ObjectValue.B['SkipEmptyChars'];
       LSkipRegionItem.SkipIfNextCharIsNot := BCEDITOR_NONE_CHAR;
@@ -609,7 +609,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingFoldRegions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions;
+procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingFoldRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   i, j: Integer;
@@ -642,18 +642,18 @@ begin
         if Assigned(LJSONObject) then
         try
           if LJSONObject.Contains('CodeFolding') then
-            ImportCodeFoldingFoldRegions(ACodeFoldingRegions, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
+            ImportCodeFoldingFoldRegion(ACodeFoldingRegion, LJSONObject['CodeFolding']['Ranges'].ArrayValue.Items[0].ObjectValue);
         finally
           LJSONObject.Free;
           LFileStream.Free;
         end;
       end;
       { Skip duplicates }
-      if ACodeFoldingRegions.Contains(LOpenToken, LCloseToken) then
+      if ACodeFoldingRegion.Contains(LOpenToken, LCloseToken) then
         Continue;
     end;
 
-    LRegionItem := ACodeFoldingRegions.Add(LOpenToken, LCloseToken);
+    LRegionItem := ACodeFoldingRegion.Add(LOpenToken, LCloseToken);
 
     LMemberObject := LJsonDataValue.ObjectValue['Properties'].ObjectValue;
     if Assigned(LMemberObject) then
@@ -688,25 +688,25 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingOptions(ACodeFoldingRegions: TBCEditorCodeFoldingRegions;
+procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingOptions(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   LCodeFoldingObject: TJsonObject;
 begin
-  ACodeFoldingRegions.StringEscapeChar := BCEDITOR_NONE_CHAR;
+  ACodeFoldingRegion.StringEscapeChar := BCEDITOR_NONE_CHAR;
 
   if ACodeFoldingObject.Contains('Options') then
   begin
     LCodeFoldingObject := ACodeFoldingObject['Options'].ObjectValue;
 
     if LCodeFoldingObject.Contains('OpenToken') then
-      ACodeFoldingRegions.OpenToken := LCodeFoldingObject['OpenToken'].Value;
+      ACodeFoldingRegion.OpenToken := LCodeFoldingObject['OpenToken'].Value;
 
     if LCodeFoldingObject.Contains('CloseToken') then
-      ACodeFoldingRegions.CloseToken := LCodeFoldingObject['CloseToken'].Value;
+      ACodeFoldingRegion.CloseToken := LCodeFoldingObject['CloseToken'].Value;
 
     if LCodeFoldingObject.Contains('StringEscapeChar') then
-      ACodeFoldingRegions.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
+      ACodeFoldingRegion.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
 
     if LCodeFoldingObject.Contains('MatchingPairHighlight') then
       FHighlighter.MatchingPairHighlight := LCodeFoldingObject.B['MatchingPairHighlight'];
@@ -728,12 +728,12 @@ begin
     FHighlighter.CodeFoldingRangeCount := LCount;
     for i := 0 to LCount - 1 do
     begin
-      FHighlighter.CodeFoldingRanges[i] := TBCEditorCodeFoldingRegions.Create(TBCEditorCodeFoldingRegionItem);
+      FHighlighter.CodeFoldingRegions[i] := TBCEditorCodeFoldingRegion.Create(TBCEditorCodeFoldingRegionItem);
       LCodeFoldingObject := LArray.Items[i].ObjectValue;
 
-      ImportCodeFoldingOptions(FHighlighter.CodeFoldingRanges[i], LCodeFoldingObject);
-      ImportCodeFoldingSkipRegions(FHighlighter.CodeFoldingRanges[i], LCodeFoldingObject);
-      ImportCodeFoldingFoldRegions(FHighlighter.CodeFoldingRanges[i], LCodeFoldingObject);
+      ImportCodeFoldingOptions(FHighlighter.CodeFoldingRegions[i], LCodeFoldingObject);
+      ImportCodeFoldingSkipRegion(FHighlighter.CodeFoldingRegions[i], LCodeFoldingObject);
+      ImportCodeFoldingFoldRegion(FHighlighter.CodeFoldingRegions[i], LCodeFoldingObject);
     end;
   end;
 end;

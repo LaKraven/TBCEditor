@@ -12,7 +12,7 @@ type
   strict private
     FAttributes: TStringList;
     FBeginningOfLine: Boolean;
-    FCodeFoldingRanges: TBCEditorCodeFoldingRanges;
+    FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FCodeFoldingRangeCount: Integer;
     FColors: TBCEditorHighlighterColors;
     FCompletionProposalSkipRegions: TBCEditorSkipRegions;
@@ -72,7 +72,7 @@ type
 
     property Attribute[Index: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
-    property CodeFoldingRanges: TBCEditorCodeFoldingRanges read FCodeFoldingRanges write FCodeFoldingRanges;
+    property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
     property CompletionProposalSkipRegions: TBCEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
@@ -344,7 +344,7 @@ procedure TBCEditorHighlighter.SetCodeFoldingRangeCount(Value: Integer);
 begin
   if Value <> FCodeFoldingRangeCount then
   begin
-    SetLength(FCodeFoldingRanges, Value);
+    SetLength(FCodeFoldingRegions, Value);
     FCodeFoldingRangeCount := Value;
   end;
 end;
@@ -411,8 +411,8 @@ begin
   FMatchingPairs.Clear;
   for i := 0 to FCodeFoldingRangeCount - 1 do
   begin
-    FCodeFoldingRanges[i].Free;
-    FCodeFoldingRanges[i] := nil;
+    FCodeFoldingRegions[i].Free;
+    FCodeFoldingRegions[i] := nil;
   end;
   CodeFoldingRangeCount := 0;
   (Editor as TBCBaseEditor).ClearMatchingPair;

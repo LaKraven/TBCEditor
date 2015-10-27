@@ -46,6 +46,9 @@ TBCEditor Control Demo v. 1.0b.
 The latest update: 22.10.2015 20:35, UTC+02:00
 
 Demo source build requires <a href="http://www.alphaskins.com/">AlphaSkins</a> and <a href="http://www.ehlib.com/">EhLib</a>. 
+<h3>Documentation</h3>
+
+Documentation will be written after the project stabilizes and dust settles. This project is developed in my spare time without sources of income and as long as this is the case there is no timetable for anything. 
 
 <h3>Projects using the control</h3>
 

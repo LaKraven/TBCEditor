@@ -569,7 +569,7 @@ begin
     if SF.nPos <> FScrollPos then
       FScrollPos := SF.nPos;
 
-    FScrollPos := RoundCorrect(FScrollPos + (SF.nMax - SF.nMin) * (Mouse.CursorPos.Y - FPrevScrollPos) / FVertScrollBarSliderTrackRect.Height);
+    FScrollPos := Round(FScrollPos + (SF.nMax - SF.nMin) * (Mouse.CursorPos.Y - FPrevScrollPos) / FVertScrollBarSliderTrackRect.Height);
 
     if FScrollPos < SF.nMin then
       FScrollPos := SF.nMin;
@@ -603,7 +603,7 @@ begin
     if SF.nPos <> FScrollPos then
       FScrollPos := SF.nPos;
 
-    FScrollPos := RoundCorrect(FScrollPos + (SF.nMax - SF.nMin) * (Mouse.CursorPos.X - FPrevScrollPos) / FHorzScrollBarSliderTrackRect.Width);
+    FScrollPos := Round(FScrollPos + (SF.nMax - SF.nMin) * (Mouse.CursorPos.X - FPrevScrollPos) / FHorzScrollBarSliderTrackRect.Width);
     if FScrollPos < SF.nMin then
       FScrollPos := SF.nMin;
     if FScrollPos > SF.nMax then

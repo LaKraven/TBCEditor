@@ -65,28 +65,28 @@ function TBCEditorPrinterInfo.PixFromBottom(mmValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
-  Result := RoundCorrect(mmValue * FYPixPermm - FBottomMargin);
+  Result := Round(mmValue * FYPixPermm - FBottomMargin);
 end;
 
 function TBCEditorPrinterInfo.PixFromLeft(mmValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
-  Result := RoundCorrect(mmValue * FXPixPermm - FLeftMargin);
+  Result := Round(mmValue * FXPixPermm - FLeftMargin);
 end;
 
 function TBCEditorPrinterInfo.PixFromRight(mmValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
-  Result := RoundCorrect(mmValue * FXPixPermm - FRightMargin);
+  Result := Round(mmValue * FXPixPermm - FRightMargin);
 end;
 
 function TBCEditorPrinterInfo.PixFromTop(mmValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
-  Result := RoundCorrect(mmValue * FYPixPermm - FTopMargin);
+  Result := Round(mmValue * FYPixPermm - FTopMargin);
 end;
 
 procedure TBCEditorPrinterInfo.FillDefault;

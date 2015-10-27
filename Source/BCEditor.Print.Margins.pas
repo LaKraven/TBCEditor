@@ -247,10 +247,10 @@ begin
   PixelBottom := PrinterInfo.PrintableHeight - PrinterInfo.PixFromBottom(FBottom);
   PixelHeader := PrinterInfo.PixFromTop(FHeader);
   PixelFooter := PrinterInfo.PrintableHeight - PrinterInfo.PixFromBottom(FFooter);
-  PixelInternalMargin := RoundCorrect(PrinterInfo.YPixPermm * FInternalMargin);
-  PixelMargin := RoundCorrect(PrinterInfo.XPixPermm * FMargin);
-  PixelRightTextIndent := PixelRight - RoundCorrect(PrinterInfo.XPixPermm * FRightTextIndent);
-  PixelLeftTextIndent := PixelLeft + RoundCorrect(PrinterInfo.XPixPermm * FLeftTextIndent);
+  PixelInternalMargin := Round(PrinterInfo.YPixPermm * FInternalMargin);
+  PixelMargin := Round(PrinterInfo.XPixPermm * FMargin);
+  PixelRightTextIndent := PixelRight - Round(PrinterInfo.XPixPermm * FRightTextIndent);
+  PixelLeftTextIndent := PixelLeft + Round(PrinterInfo.XPixPermm * FLeftTextIndent);
 end;
 
 procedure TBCEditorPrintMargins.Assign(Source: TPersistent);

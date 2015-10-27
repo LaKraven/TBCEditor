@@ -11,7 +11,6 @@ function GetTabConvertProc(TabWidth: Integer): TBCEditorTabConvertProc;
 function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
 function MessageDialog(const Msg: string; DlgType: TMsgDlgType; Buttons: TMsgDlgButtons): Integer;
 function MinMax(Value, MinValue, MaxValue: Integer): Integer;
-function RoundCorrect(Value: Real): LongInt;
 function TextExtent(ACanvas: TCanvas; const Text: string): TSize;
 function TextWidth(ACanvas: TCanvas; const Text: string): Integer;
 function TextHeight(ACanvas: TCanvas; const Text: string): Integer;
@@ -160,13 +159,6 @@ end;
 function TextHeight(ACanvas: TCanvas; const Text: string): Integer;
 begin
   Result := TextExtent(ACanvas, Text).cy;
-end;
-
-function RoundCorrect(Value: Real): LongInt;
-begin
-  Result := Trunc(Value);
-  if Frac(Value) >= 0.5 then
-    Result := Result + 1;
 end;
 
 end.

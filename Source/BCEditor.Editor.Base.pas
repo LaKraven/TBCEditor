@@ -1043,7 +1043,7 @@ begin
     lsSingle:
       Result := 2;
     lsOneAndHalf:
-      Result := RoundCorrect(FTextHeight * 0.5) + 2;
+      Result := FTextHeight div 2 + 2;
     lsDouble:
       Result := FTextHeight + 2;
     lsSpecified:
@@ -5169,7 +5169,7 @@ begin
             GetScrollInfo(Handle, SB_VERT, LScrollInfo);
 
             LScrollHintPoint := ClientToScreen(Point(ClientWidth - LScrollHintRect.Right - 4, ((LScrollHintRect.Bottom - LScrollHintRect.Top) shr 1) +
-              RoundCorrect((LScrollInfo.nTrackPos / LScrollInfo.nMax) * (ClientHeight - (LScrollButtonHeight * 2 ))) - 2));
+              Round((LScrollInfo.nTrackPos / LScrollInfo.nMax) * (ClientHeight - (LScrollButtonHeight * 2 ))) - 2));
           end
           else
             LScrollHintPoint := ClientToScreen(Point(ClientWidth - LScrollHintRect.Right - 4, 4));
@@ -7515,8 +7515,8 @@ begin
   Canvas.FillRect(AClipRect); { fill search map rect }
   { Lines in window }
   LHeight := ClientRect.Height / Max(Lines.Count, 1);
-  AClipRect.Top := RoundCorrect((TopLine - 1) * LHeight);
-  AClipRect.Bottom := RoundCorrect((TopLine - 1 + VisibleLines) * LHeight);
+  AClipRect.Top := Round((TopLine - 1) * LHeight);
+  AClipRect.Bottom := Round((TopLine - 1 + VisibleLines) * LHeight);
   Canvas.Brush.Color := FBackgroundColor;
   Canvas.FillRect(AClipRect); { fill lines in window rect }
 
@@ -7540,7 +7540,7 @@ begin
   Canvas.Pen.Style := psSolid;
   for i := 0 to FSearchLines.Count - 1 do
   begin
-    j := RoundCorrect((PBCEditorTextPosition(FSearchLines.Items[i])^.Line - 1) * LHeight);
+    j := Round((PBCEditorTextPosition(FSearchLines.Items[i])^.Line - 1) * LHeight);
     Canvas.MoveTo(AClipRect.Left, j);
     Canvas.LineTo(AClipRect.Right, j);
     Canvas.MoveTo(AClipRect.Left, j + 1);
@@ -7553,7 +7553,7 @@ begin
       Canvas.Pen.Color := FSearch.Map.Colors.ActiveLine
     else
       Canvas.Pen.Color := FActiveLine.Color;
-    j := RoundCorrect((DisplayCaretY - 1) * LHeight);
+    j := Round((DisplayCaretY - 1) * LHeight);
     Canvas.MoveTo(AClipRect.Left, j);
     Canvas.LineTo(AClipRect.Right, j);
     Canvas.MoveTo(AClipRect.Left, j + 1);

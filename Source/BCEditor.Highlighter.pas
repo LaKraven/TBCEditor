@@ -429,31 +429,32 @@ procedure TBCEditorHighlighter.UpdateAttributes(ARange: TBCEditorRange; AParentR
 var
   i: Integer;
 
-  procedure SetAttributes(Attribute: TBCEditorHighlighterAttribute);
+  procedure SetAttributes(AAttribute: TBCEditorHighlighterAttribute; AParentRange: TBCEditorRange);
   var
     Element: PBCEditorHighlighterElement;
   begin
-    Element := FColors.GetElement(Attribute.Element);
+    Element := FColors.GetElement(AAttribute.Element);
+
+    if AAttribute.ParentBackground and Assigned(AParentRange) then
+      AAttribute.Background := AParentRange.Attribute.Background
+    else
     if Assigned(Element) then
-    begin
-      if Attribute.ParentBackground and Assigned(AParentRange) then
-        Attribute.Background := AParentRange.Attribute.Background
-      else
-        Attribute.Background := Element.Background;
-      if Attribute.ParentForeground and Assigned(AParentRange) then
-        Attribute.Foreground := AParentRange.Attribute.Foreground
-      else
-        Attribute.Foreground := Element.Foreground;
-      Attribute.Style := Element.Style;
-    end;
+      AAttribute.Background := Element.Background;
+    if AAttribute.ParentForeground and Assigned(AParentRange) then
+      AAttribute.Foreground := AParentRange.Attribute.Foreground
+    else
+    if Assigned(Element) then
+      AAttribute.Foreground := Element.Foreground;
+    if Assigned(Element) then
+      AAttribute.Style := Element.Style;
   end;
 
 begin
-  SetAttributes(ARange.Attribute);
+  SetAttributes(ARange.Attribute, AParentRange);
   for i := 0 to ARange.KeyListCount - 1 do
-    SetAttributes(ARange.KeyList[i].Attribute);
+    SetAttributes(ARange.KeyList[i].Attribute, ARange);
   for i := 0 to ARange.SetCount - 1 do
-    SetAttributes(ARange.Sets[i].Attribute);
+    SetAttributes(ARange.Sets[i].Attribute, ARange);
 
   if ARange.RangeCount > 0 then
   for i := 0 to ARange.RangeCount - 1 do

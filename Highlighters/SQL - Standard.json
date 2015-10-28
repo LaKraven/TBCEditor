@@ -1,10 +1,10 @@
 {
-   "Highlighter":{
-      "Info":{
-         "General":{
-            "Version":"1.0",
-            "Date":"29.8.2015",
-            "Sample":[
+   "Highlighter": {
+      "Info": {
+         "General": {
+            "Version": "1.0",
+            "Date": "28.10.2015",
+            "Sample": [
                "CREATE TABLE DUAL\r\n",
                "(\r\n",
                "  DUMMY VARCHAR(1)\r\n",
@@ -15,74 +15,70 @@
                "SELECT \"Hello world!\" FROM DUAL;"
             ]
          },
-         "Author":{
-            "Name":"Lasse Rautiainen",
-            "Mail":"lasse@bonecode.com"
+         "Author": {
+            "Name": "Lasse Rautiainen",
+            "Mail": "lasse@bonecode.com"
          }
       },
-      "MainRules":{
-         "Attributes":{
-            "Element":"Editor"
+      "MainRules": {
+         "Attributes": {
+            "Element": "Editor"
          },
-         "SubRules":{
-            "Range":[
+         "SubRules": {
+            "Range": [
                {
-                  "Type":"Comment",
-                  "Attributes":{
-                     "Element":"Comment",
-                     "ParentBackground":true
+                  "Type": "Comment",
+                  "Attributes": {
+                     "Element": "Comment"
                   },
-                  "TokenRange":{
-                     "Open":"/*",
-                     "Close":"*/"
+                  "TokenRange": {
+                     "Open": "/*",
+                     "Close": "*/"
                   }
                },
                {
-                  "Type":"Comment",
-                  "Attributes":{
-                     "Element":"Comment",
-                     "ParentBackground":true
+                  "Type": "Comment",
+                  "Attributes": {
+                     "Element": "Comment"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"--"
+                  "TokenRange": {
+                     "Open": "--"
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"String",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "String"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"'",
-                     "Close":"'"
+                  "TokenRange": {
+                     "Open": "'",
+                     "Close": "'"
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"String",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "String"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"\"",
-                     "Close":"\""
+                  "TokenRange": {
+                     "Open": "\"",
+                     "Close": "\""
                   }
                }
             ],
-            "KeyList":[
+            "KeyList": [
                {
-                  "Type":"ReservedWord",
-                  "Words":[
+                  "Type": "ReservedWord",
+                  "Words": [
                      "absolute",
                      "action",
                      "add",
@@ -421,14 +417,13 @@
                      "year",
                      "zone"
                   ],
-                  "Attributes":{
-                     "Element":"ReservedWord",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "ReservedWord"
                   }
                },
                {
-                  "Type":"Symbol",
-                  "Words":[
+                  "Type": "Symbol",
+                  "Words": [
                      "..",
                      ":",
                      ";",
@@ -449,98 +444,95 @@
                      "}",
                      "|"
                   ],
-                  "Attributes":{
-                     "Element":"Symbol",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "Symbol"
                   }
                }
             ],
-            "Set":[
+            "Set": [
                {
-                  "Type":"Numbers",
-                  "Symbols":"0123456789",
-                  "Attributes":{
-                     "Element":"Number",
-                     "ParentBackground":true
+                  "Type": "Numbers",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                     "Element": "Number"
                   }
                },
                {
-                  "Type":"Float",
-                  "Symbols":".0123456789",
-                  "Attributes":{
-                     "Element":"Number",
-                     "ParentBackground":true
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                     "Element": "Number"
                   }
                }
             ]
          }
       }
    },
-   "CodeFolding":{
-      "Ranges":[
+   "CodeFolding": {
+      "Ranges": [
          {
-            "SkipRegion":[
+            "SkipRegion": [
                {
-                  "OpenToken":"'",
-                  "CloseToken":"'",
-                  "RegionType":"String"
+                  "OpenToken": "'",
+                  "CloseToken": "'",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"\"",
-                  "CloseToken":"\"",
-                  "RegionType":"String"
+                  "OpenToken": "\"",
+                  "CloseToken": "\"",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"--",
-                  "RegionType":"SingleLine"
+                  "OpenToken": "--",
+                  "RegionType": "SingleLine"
                },
                {
-                  "OpenToken":"/*",
-                  "CloseToken":"*/",
-                  "RegionType":"MultiLine"
+                  "OpenToken": "/*",
+                  "CloseToken": "*/",
+                  "RegionType": "MultiLine"
                }
             ],
-            "FoldRegion":[
+            "FoldRegion": [
                {
-                  "OpenToken":"BEGIN",
-                  "CloseToken":"END;"
+                  "OpenToken": "BEGIN",
+                  "CloseToken": "END;"
                }
             ]
          }
       ]
    },
-   "MatchingPair":{
-      "Pairs":[
+   "MatchingPair": {
+      "Pairs": [
          {
-            "OpenToken":"(",
-            "CloseToken":")"
+            "OpenToken": "(",
+            "CloseToken": ")"
          },
          {
-            "OpenToken":"[",
-            "CloseToken":"]"
+            "OpenToken": "[",
+            "CloseToken": "]"
          }
       ]
    },
-   "CompletionProposal":{
-      "SkipRegion":[
+   "CompletionProposal": {
+      "SkipRegion": [
          {
-            "OpenToken":"'",
-            "CloseToken":"'",
-            "RegionType":"String"
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "String"
          },
          {
-            "OpenToken":"\"",
-            "CloseToken":"\"",
-            "RegionType":"String"
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "String"
          },
          {
-            "OpenToken":"--",
-            "RegionType":"SingleLine"
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
          },
          {
-            "OpenToken":"/*",
-            "CloseToken":"*/",
-            "RegionType":"MultiLine"
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
          }
       ]
    }

@@ -334,7 +334,7 @@ begin
   begin
     AHighlighterAttribute.Element := AElementPrefix + AAttributesObject['Element'].Value;
     AHighlighterAttribute.ParentForeground := AAttributesObject.B['ParentForeground'];
-    AHighlighterAttribute.ParentBackground := AAttributesObject.B['ParentBackground'];
+    AHighlighterAttribute.ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
   end;
 end;
 

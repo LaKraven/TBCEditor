@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "4.10.2015",
+            "Date": "28.10.2015",
             "Sample": [
                "\\documentclass{article}\r\n",
                "\\usepackage{graphicx}\r\n",
@@ -57,8 +57,7 @@
                {
                   "Type": "Comment",
                   "Attributes": {
-                     "Element": "Comment",
-                     "ParentBackground": true
+                     "Element": "Comment"
                   },
                   "Properties": {
                      "CloseOnEndOfLine": true
@@ -70,8 +69,7 @@
                {
                   "Type": "String",
                   "Attributes": {
-                     "Element": "String",
-                     "ParentBackground": true
+                     "Element": "String"
                   },
                   "TokenRange": {
                      "Open": "{",
@@ -82,8 +80,7 @@
                         {
                            "Type": "Command",
                            "Attributes": {
-                              "Element": "Method",
-                              "ParentBackground": true
+                              "Element": "Method"
                            },
                            "Properties": {
                               "CloseOnTerm": true
@@ -101,8 +98,7 @@
                               "}"
                            ],
                            "Attributes": {
-                              "Element": "Symbol",
-                              "ParentBackground": true
+                              "Element": "Symbol"
                            }
                         }
                      ]
@@ -111,8 +107,7 @@
                {
                   "Type": "String",
                   "Attributes": {
-                     "Element": "MethodName",
-                     "ParentBackground": true
+                     "Element": "MethodName"
                   },
                   "TokenRange": {
                      "Open": "[",
@@ -122,8 +117,7 @@
                {
                   "Type": "Command",
                   "Attributes": {
-                     "Element": "Method",
-                     "ParentBackground": true
+                     "Element": "Method"
                   },
                   "Properties": {
                      "CloseOnTerm": true
@@ -143,8 +137,7 @@
                      "\\usepackage"
                   ],
                   "Attributes": {
-                     "Element": "ReservedWord",
-                     "ParentBackground": true
+                     "Element": "ReservedWord"
                   }
                },
                {
@@ -170,8 +163,7 @@
                      "}"
                   ],
                   "Attributes": {
-                     "Element": "Symbol",
-                     "ParentBackground": true
+                     "Element": "Symbol"
                   }
                }
             ],
@@ -180,16 +172,14 @@
                   "Type": "Numbers",
                   "Symbols": "0123456789",
                   "Attributes": {
-                     "Element": "Number",
-                     "ParentBackground": true
+                     "Element": "Number"
                   }
                },
                {
                   "Type": "Float",
                   "Symbols": ".0123456789",
                   "Attributes": {
-                     "Element": "Number",
-                     "ParentBackground": true
+                     "Element": "Number"
                   }
                }
             ]

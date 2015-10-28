@@ -1,245 +1,231 @@
 {
-   "Highlighter":{
-      "Info":{
-         "General":{
-            "Version":"1.0",
-            "Date":"29.8.2015",
-            "Sample":[
+   "Highlighter": {
+      "Info": {
+         "General": {
+            "Version": "1.0",
+            "Date": "28.10.2015",
+            "Sample": [
                "// Hello World in JavaScript\r\n",
                "\r\n",
                "document.write('Hello, world!');"
             ]
          },
-         "Author":{
-            "Name":"Lasse Rautiainen",
-            "Mail":"lasse@bonecode.com"
+         "Author": {
+            "Name": "Lasse Rautiainen",
+            "Mail": "lasse@bonecode.com"
          }
       },
-      "MainRules":{
-         "Name":"JavaScript",
-         "Attributes":{
-            "Element":"Editor"
+      "MainRules": {
+         "Name": "JavaScript",
+         "Attributes": {
+            "Element": "Editor"
          },
-         "SubRules":{
-            "Range":[
+         "SubRules": {
+            "Range": [
                {
-                  "Type":"Comment",
-                  "Attributes":{
-                     "Element":"Comment",
-                     "ParentBackground":true
+                  "Type": "Comment",
+                  "Attributes": {
+                     "Element": "Comment"
                   },
-                  "TokenRange":{
-                     "Open":"/*",
-                     "Close":"*/"
+                  "TokenRange": {
+                     "Open": "/*",
+                     "Close": "*/"
                   }
                },
                {
-                  "Type":"Comment",
-                  "Attributes":{
-                     "Element":"Comment",
-                     "ParentBackground":true
+                  "Type": "Comment",
+                  "Attributes": {
+                     "Element": "Comment"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"//"
+                  "TokenRange": {
+                     "Open": "//"
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"Editor",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "Editor"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"/\"/",
-                     "Close":","
+                  "TokenRange": {
+                     "Open": "/\"/",
+                     "Close": ","
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"Editor",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "Editor"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"/'/",
-                     "Close":","
+                  "TokenRange": {
+                     "Open": "/'/",
+                     "Close": ","
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"String",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "String"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"\"",
-                     "Close":"\""
+                  "TokenRange": {
+                     "Open": "\"",
+                     "Close": "\""
                   },
-                  "SubRules":{
-                     "Range":[
+                  "SubRules": {
+                     "Range": [
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"\\\"",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "\\\"",
+                              "Close": ""
                            }
                         },
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"\\\\",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "\\\\",
+                              "Close": ""
                            }
                         },
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"^\"",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "^\"",
+                              "Close": ""
                            }
                         }
                      ]
                   }
                },
                {
-                  "Type":"String",
-                  "Attributes":{
-                     "Element":"String",
-                     "ParentBackground":true
+                  "Type": "String",
+                  "Attributes": {
+                     "Element": "String"
                   },
-                  "Properties":{
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"'",
-                     "Close":"'"
+                  "TokenRange": {
+                     "Open": "'",
+                     "Close": "'"
                   },
-                  "SubRules":{
-                     "Range":[
+                  "SubRules": {
+                     "Range": [
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"\\'",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "\\'",
+                              "Close": ""
                            }
                         },
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"\\\\",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "\\\\",
+                              "Close": ""
                            }
                         },
                         {
-                           "Type":"String",
-                           "Attributes":{
-                              "Element":"String",
-                              "ParentBackground":true
+                           "Type": "String",
+                           "Attributes": {
+                              "Element": "String"
                            },
-                           "Properties":{
-                              "CloseOnEndOfLine":true,
-                              "CloseOnTerm":true
+                           "Properties": {
+                              "CloseOnEndOfLine": true,
+                              "CloseOnTerm": true
                            },
-                           "TokenRange":{
-                              "Open":"^'",
-                              "Close":""
+                           "TokenRange": {
+                              "Open": "^'",
+                              "Close": ""
                            }
                         }
                      ]
                   }
                },
                {
-                  "Type":"HexNumber",
-                  "Attributes":{
-                     "Element":"HexNumber",
-                     "ParentBackground":true
+                  "Type": "HexNumber",
+                  "Attributes": {
+                     "Element": "HexNumber"
                   },
-                  "Properties":{
-                     "CloseOnTerm":true,
-                     "CloseOnEndOfLine":true
+                  "Properties": {
+                     "CloseOnTerm": true,
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"$",
-                     "Close":" "
+                  "TokenRange": {
+                     "Open": "$",
+                     "Close": " "
                   }
                },
                {
-                  "Type":"Hex",
-                  "Attributes":{
-                     "Element":"Number",
-                     "ParentBackground":true
+                  "Type": "Hex",
+                  "Attributes": {
+                     "Element": "Number"
                   },
-                  "Delimiters":"*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
-                  "Properties":{
-                     "CloseOnTerm":true,
-                     "CloseOnEndOfLine":true
+                  "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+                  "Properties": {
+                     "CloseOnTerm": true,
+                     "CloseOnEndOfLine": true
                   },
-                  "TokenRange":{
-                     "Open":"0"
+                  "TokenRange": {
+                     "Open": "0"
                   }
                },
                {
-                  "File":"PHP.json",
-                  "IncludeRange":"PHP"
+                  "File": "PHP.json",
+                  "IncludeRange": "PHP"
                }
             ],
-            "KeyList":[
+            "KeyList": [
                {
-                  "Name":"JavaScript Keywords",
-                  "Type":"ReservedWord",
-                  "Words":[
+                  "Name": "JavaScript Keywords",
+                  "Type": "ReservedWord",
+                  "Words": [
                      "/script",
                      "abstract",
                      "arguments",
@@ -305,27 +291,25 @@
                      "with",
                      "yield"
                   ],
-                  "Attributes":{
-                     "Element":"ReservedWord",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "ReservedWord"
                   }
                },
                {
-                  "Name":"JavaScript Attributes",
-                  "Type":"Attribute",
-                  "Words":[
+                  "Name": "JavaScript Attributes",
+                  "Type": "Attribute",
+                  "Words": [
                      "src",
                      "type"
                   ],
-                  "Attributes":{
-                     "Element":"Attribute",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "Attribute"
                   }
                },
                {
-                  "Name":"Windows Reserved Words",
-                  "Type":"ReservedWord",
-                  "Words":[
+                  "Name": "Windows Reserved Words",
+                  "Type": "ReservedWord",
+                  "Words": [
                      "alert",
                      "all",
                      "anchor",
@@ -412,14 +396,13 @@
                      "untaint",
                      "window"
                   ],
-                  "Attributes":{
-                     "Element":"ReservedWord",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "ReservedWord"
                   }
                },
                {
-                  "Type":"Symbol",
-                  "Words":[
+                  "Type": "Symbol",
+                  "Words": [
                      "..",
                      ":",
                      ";",
@@ -439,125 +422,122 @@
                      "{",
                      "}"
                   ],
-                  "Attributes":{
-                     "Element":"Symbol",
-                     "ParentBackground":true
+                  "Attributes": {
+                     "Element": "Symbol"
                   }
                }
             ],
-            "Set":[
+            "Set": [
                {
-                  "Type":"Number",
-                  "Symbols":"0123456789",
-                  "Attributes":{
-                     "Element":"Number",
-                     "ParentBackground":true
+                  "Type": "Number",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                     "Element": "Number"
                   }
                },
                {
-                  "Type":"Float",
-                  "Symbols":".0123456789",
-                  "Attributes":{
-                     "Element":"Number",
-                     "ParentBackground":true
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                     "Element": "Number"
                   }
                }
             ]
          }
       }
    },
-   "CodeFolding":{
-      "Ranges":[
+   "CodeFolding": {
+      "Ranges": [
          {
-            "Options":{
-               "StringEscapeChar":"\\"
+            "Options": {
+               "StringEscapeChar": "\\"
             },
-            "SkipRegion":[
+            "SkipRegion": [
                {
-                  "OpenToken":"'",
-                  "CloseToken":"'",
-                  "RegionType":"String"
+                  "OpenToken": "'",
+                  "CloseToken": "'",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"\"",
-                  "CloseToken":"\"",
-                  "RegionType":"String"
+                  "OpenToken": "\"",
+                  "CloseToken": "\"",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"/'/",
-                  "CloseToken":",",
-                  "RegionType":"String"
+                  "OpenToken": "/'/",
+                  "CloseToken": ",",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"/\"/",
-                  "CloseToken":",",
-                  "RegionType":"String"
+                  "OpenToken": "/\"/",
+                  "CloseToken": ",",
+                  "RegionType": "String"
                },
                {
-                  "OpenToken":"=/",
-                  "CloseToken":"/;",
-                  "RegionType":"String",
-                  "SkipEmptyChars":true
+                  "OpenToken": "=/",
+                  "CloseToken": "/;",
+                  "RegionType": "String",
+                  "SkipEmptyChars": true
                },
                {
-                  "OpenToken":"//",
-                  "RegionType":"SingleLine"
+                  "OpenToken": "//",
+                  "RegionType": "SingleLine"
                },
                {
-                  "OpenToken":"=/",
-                  "RegionType":"SingleLine"
+                  "OpenToken": "=/",
+                  "RegionType": "SingleLine"
                },
                {
-                  "OpenToken":"/*",
-                  "CloseToken":"*/",
-                  "RegionType":"MultiLine"
+                  "OpenToken": "/*",
+                  "CloseToken": "*/",
+                  "RegionType": "MultiLine"
                }
             ],
-            "FoldRegion":[
+            "FoldRegion": [
                {
-                  "OpenToken":"{",
-                  "CloseToken":"}"
+                  "OpenToken": "{",
+                  "CloseToken": "}"
                }
             ]
          }
       ]
    },
-   "MatchingPair":{
-      "Pairs":[
+   "MatchingPair": {
+      "Pairs": [
          {
-            "OpenToken":"(",
-            "CloseToken":")"
+            "OpenToken": "(",
+            "CloseToken": ")"
          },
          {
-            "OpenToken":"[",
-            "CloseToken":"]"
+            "OpenToken": "[",
+            "CloseToken": "]"
          },
          {
-            "OpenToken":"{",
-            "CloseToken":"}"
+            "OpenToken": "{",
+            "CloseToken": "}"
          }
       ]
    },
-   "CompletionProposal":{
-      "SkipRegion":[
+   "CompletionProposal": {
+      "SkipRegion": [
          {
-            "OpenToken":"'",
-            "CloseToken":"'",
-            "RegionType":"String"
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "String"
          },
          {
-            "OpenToken":"\"",
-            "CloseToken":"\"",
-            "RegionType":"String"
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "String"
          },
          {
-            "OpenToken":"//",
-            "RegionType":"SingleLine"
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
          },
          {
-            "OpenToken":"/*",
-            "CloseToken":"*/",
-            "RegionType":"MultiLine"
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
          }
       ]
    }

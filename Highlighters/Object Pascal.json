@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "22.10.2015",
+            "Date": "28.10.2015",
             "Sample": [
                "// Hello World in Pascal\r\n",
                "\r\n",
@@ -27,8 +27,7 @@
                {
                   "Type": "Comment",
                   "Attributes": {
-                     "Element": "Comment",
-                     "ParentBackground": true
+                     "Element": "Comment"
                   },
                   "TokenRange": {
                      "Open": "{",
@@ -38,8 +37,7 @@
                {
                   "Type": "Comment",
                   "Attributes": {
-                     "Element": "Comment",
-                     "ParentBackground": true
+                     "Element": "Comment"
                   },
                   "TokenRange": {
                      "Open": "(*",
@@ -49,8 +47,7 @@
                {
                   "Type": "Comment",
                   "Attributes": {
-                     "Element": "Comment",
-                     "ParentBackground": true
+                     "Element": "Comment"
                   },
                   "Properties": {
                      "CloseOnEndOfLine": true
@@ -62,8 +59,7 @@
                {
                   "Type": "String",
                   "Attributes": {
-                     "Element": "String",
-                     "ParentBackground": true
+                     "Element": "String"
                   },
                   "Properties": {
                      "CloseOnEndOfLine": true
@@ -110,8 +106,7 @@
                               "("
                            ],
                            "Attributes": {
-                              "Element": "Symbol",
-                              "ParentBackground": true
+                              "Element": "Symbol"
                            }
                         }
                      ]
@@ -143,8 +138,7 @@
                               "("
                            ],
                            "Attributes": {
-                              "Element": "Symbol",
-                              "ParentBackground": true
+                              "Element": "Symbol"
                            }
                         }
                      ]
@@ -153,7 +147,8 @@
                {
                   "Type": "ReservedWord",
                   "Attributes": {
-                     "Element": "HighlightedBlock"
+                     "Element": "HighlightedBlock",
+                     "ParentBackground": false
                   },
                   "TokenRange": {
                      "Open": "asm",
@@ -166,8 +161,7 @@
                         {
                            "Type": "AssemblerComment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "TokenRange": {
                               "Open": "{",
@@ -177,8 +171,7 @@
                         {
                            "Type": "AssemblerComment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "TokenRange": {
                               "Open": "(*",
@@ -188,8 +181,7 @@
                         {
                            "Type": "AssemblerComment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "Properties": {
                               "CloseOnEndOfLine": true
@@ -201,8 +193,7 @@
                         {
                            "Type": "String",
                            "Attributes": {
-                              "Element": "String",
-                              "ParentBackground": true
+                              "Element": "String"
                            },
                            "Properties": {
                               "CloseOnEndOfLine": true
@@ -215,8 +206,7 @@
                         {
                            "Type": "Directive",
                            "Attributes": {
-                              "Element": "Directive",
-                              "ParentBackground": true
+                              "Element": "Directive"
                            },
                            "TokenRange": {
                               "Open": "{$",
@@ -231,8 +221,8 @@
                               "end"
                            ],
                            "Attributes": {
-                              "Element": "ReservedWord",
-                              "ParentBackground": true
+                              "Element": "AssemblerReservedWord",
+                              "ParentBackground": false
                            }
                         }
                      ]
@@ -241,8 +231,7 @@
                {
                   "Type": "HexNumber",
                   "Attributes": {
-                     "Element": "HexNumber",
-                     "ParentBackground": true
+                     "Element": "HexNumber"
                   },
                   "Properties": {
                      "CloseOnTerm": true,
@@ -256,8 +245,7 @@
                {
                   "Type": "Character",
                   "Attributes": {
-                     "Element": "Number",
-                     "ParentBackground": true
+                     "Element": "Number"
                   },
                   "Properties": {
                      "CloseOnTerm": true,
@@ -271,8 +259,7 @@
                {
                   "Type": "Address",
                   "Attributes": {
-                     "Element": "Character",
-                     "ParentBackground": true
+                     "Element": "Character"
                   },
                   "Properties": {
                      "CloseOnTerm": true
@@ -294,8 +281,7 @@
                         {
                            "Type": "Comment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "TokenRange": {
                               "Open": "{",
@@ -305,8 +291,7 @@
                         {
                            "Type": "Comment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "TokenRange": {
                               "Open": "(*",
@@ -316,8 +301,7 @@
                         {
                            "Type": "Comment",
                            "Attributes": {
-                              "Element": "Comment",
-                              "ParentBackground": true
+                              "Element": "Comment"
                            },
                            "Properties": {
                               "CloseOnEndOfLine": true
@@ -329,8 +313,7 @@
                         {
                            "Type": "String",
                            "Attributes": {
-                              "Element": "String",
-                              "ParentBackground": true
+                              "Element": "String"
                            },
                            "Properties": {
                               "CloseOnEndOfLine": true
@@ -345,14 +328,13 @@
                         {
                            "Type": "ReservedWord",
                            "Words": [
-                              "default", 
+                              "default",
                               "index",
                               "read",
                               "write"
                            ],
                            "Attributes": {
-                              "Element": "ReservedWord",
-                              "ParentBackground": true
+                              "Element": "ReservedWord"
                            }
                         }
                      ]
@@ -464,8 +446,7 @@
                      "xor"
                   ],
                   "Attributes": {
-                     "Element": "ReservedWord",
-                     "ParentBackground": true
+                     "Element": "ReservedWord"
                   }
                },
                {
@@ -499,8 +480,7 @@
                      "]"
                   ],
                   "Attributes": {
-                     "Element": "Symbol",
-                     "ParentBackground": true
+                     "Element": "Symbol"
                   }
                },
                {
@@ -518,16 +498,14 @@
                   "Type": "Numbers",
                   "Symbols": "0123456789",
                   "Attributes": {
-                     "Element": "Number",
-                     "ParentBackground": true
+                     "Element": "Number"
                   }
                },
                {
                   "Type": "Float",
                   "Symbols": ".0123456789",
                   "Attributes": {
-                     "Element": "Number",
-                     "ParentBackground": true
+                     "Element": "Number"
                   }
                }
             ]

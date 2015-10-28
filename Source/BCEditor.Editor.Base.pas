@@ -3800,7 +3800,8 @@ var
         LTextPtr := LBookmarkTextPtr; { return pointer always back }
         if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
         begin
-          LCodeFoldingRangeIndexList.Delete(LCodeFoldingRangeIndexList.Count - 1);
+          if LCodeFoldingRangeIndexList.Count > 0 then
+            LCodeFoldingRangeIndexList.Delete(LCodeFoldingRangeIndexList.Count - 1);
           if LCodeFoldingRangeIndexList.Count > 0 then
             LCurrentCodeFoldingRegion := Highlighter.CodeFoldingRegions[Integer(LCodeFoldingRangeIndexList.Last)]
           else

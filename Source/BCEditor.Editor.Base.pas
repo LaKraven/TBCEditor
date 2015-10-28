@@ -4414,6 +4414,7 @@ begin
   SelectedText := Value;
   EndUndoBlock;
   DecPaintLock;
+  DoChange;
 end;
 
 procedure TBCBaseEditor.SetTopLine(Value: Integer);

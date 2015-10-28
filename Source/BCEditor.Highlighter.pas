@@ -451,6 +451,7 @@ var
 
 begin
   SetAttributes(ARange.Attribute, AParentRange);
+
   for i := 0 to ARange.KeyListCount - 1 do
     SetAttributes(ARange.KeyList[i].Attribute, ARange);
   for i := 0 to ARange.SetCount - 1 do

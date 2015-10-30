@@ -229,7 +229,6 @@ inherited MainForm: TMainForm
     end
   end
   inherited SkinManager: TBCSkinManager
-    IsDefault = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
     OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
     Left = 166
@@ -245,6 +244,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Height = 22
         Index = 0
         Name = 'TitleBarItemFile'
@@ -260,6 +260,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Height = 21
         Index = 1
         Name = 'TitleBarItemCaption'
@@ -276,6 +277,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Height = 22
         Index = 2
         Name = 'TitleBarItemHighlighter'
@@ -290,6 +292,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Index = 3
         Name = 'TitleBarItemSpacing2'
         ShowHint = False
@@ -305,6 +308,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Height = 22
         Index = 4
         Name = 'TitleBarItemColors'
@@ -319,6 +323,7 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
+        FontData.UseSysFontName = False
         Index = 5
         Name = 'TitleBarItemSpacing3'
         ShowHint = False

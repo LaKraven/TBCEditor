@@ -1947,7 +1947,7 @@ var
   LLength, LStop: Integer;
 begin
   Result := '';
-  if (ATextPosition.Line >= 1) and (ATextPosition.Line <= FLines.Count) then
+  if (ATextPosition.Line >= 0) and (ATextPosition.Line < FLines.Count) then
   begin
     LTextLine := FLines[ATextPosition.Line];
     LLength := Length(LTextLine);

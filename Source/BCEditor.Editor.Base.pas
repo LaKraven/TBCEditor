@@ -10329,6 +10329,7 @@ end;
 procedure TBCBaseEditor.CutToClipboard;
 begin
   CommandProcessor(ecCut, BCEDITOR_NONE_CHAR, nil);
+  DoChange;
 end;
 
 procedure TBCBaseEditor.DeleteWhitespace;
@@ -10349,6 +10350,7 @@ begin
     end
     else
       Text := BCEditor.Utils.DeleteWhiteSpace(Text);
+    DoChange;
   end;
 end;
 
@@ -11909,6 +11911,7 @@ end;
 procedure TBCBaseEditor.PasteFromClipboard;
 begin
   CommandProcessor(ecPaste, BCEDITOR_NONE_CHAR, nil);
+  DoChange;
 end;
 
 procedure TBCBaseEditor.DoPasteFromClipboard;

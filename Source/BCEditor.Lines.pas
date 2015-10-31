@@ -605,7 +605,10 @@ end;
 procedure TBCEditorLines.Put(Index: Integer; const S: string);
 begin
   if ((Index = 0) and (FCount = 0)) or (FCount = Index) then
-    Add(S)
+  begin
+    Add(S);
+    FList^[Index].FAttribute.LineState := lsModified;
+  end
   else
   begin
     if (Index < 0) or (Index >= FCount) then

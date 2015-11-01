@@ -859,7 +859,6 @@ begin
   FKeyCommands.Free;
   FKeyCommands := nil;
   FKeyboardHandler.Free;
-  //FFocusList.Free;
   FSelection.Free;
   FOriginalUndoList.Free;
   FOriginalRedoList.Free;
@@ -2381,7 +2380,7 @@ var
   LStartTextPosition, LEndTextPosition: TBCEditorTextPosition;
   LCurrentTextPosition: TBCEditorTextPosition;
   LSearchLength, LSearchIndex, LFound: Integer;
-  LCurrentLine: Integer;
+  LFindAllCount: Integer;
   LIsBackward, LIsFromCursor: Boolean;
   LIsEndUndoBlock: Boolean;
   LResultOffset: Integer;
@@ -2446,9 +2445,9 @@ begin
       else
         LStartTextPosition := TextCaretPosition;
     if LIsBackward then
-      LCurrentTextPosition := LEndTextPosition
+      LCurrentTextPosition := SelectionBeginPosition
     else
-      LCurrentTextPosition := LStartTextPosition;
+      LCurrentTextPosition := SelectionEndPosition
   end;
   FSearchEngine.Pattern := ASearchText;
   case FSearch.Engine of
@@ -2462,13 +2461,13 @@ begin
   try
     while (LCurrentTextPosition.Line >= LStartTextPosition.Line) and (LCurrentTextPosition.Line <= LEndTextPosition.Line) do
     begin
-      LCurrentLine := FSearchEngine.FindAll(FLines[LCurrentTextPosition.Line]);
+      LFindAllCount := FSearchEngine.FindAll(FLines[LCurrentTextPosition.Line]);
       LResultOffset := 0;
       if LIsBackward then
         LSearchIndex := FSearchEngine.ResultCount - 1
       else
         LSearchIndex := 0;
-      while LCurrentLine > 0 do
+      while LFindAllCount > 0 do
       begin
         LFound := FSearchEngine.Results[LSearchIndex] + LResultOffset;
         LSearchLength := FSearchEngine.Lengths[LSearchIndex];
@@ -2476,7 +2475,7 @@ begin
           Dec(LSearchIndex)
         else
           Inc(LSearchIndex);
-        Dec(LCurrentLine);
+        Dec(LFindAllCount);
         if not InValidSearchRange(LFound, LFound + LSearchLength) then
           Continue;
         Inc(Result);

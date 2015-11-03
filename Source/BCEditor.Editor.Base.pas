@@ -391,7 +391,7 @@ type
     procedure FreeCompletionProposalPopupWindow;
     procedure HideCaret;
     procedure IncPaintLock;
-    procedure InvalidateRect(const ARect: TRect; AErase: Boolean = False);
+    procedure InvalidateRect(const ARect: TRect);
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure KeyPressW(var Key: Char);
     procedure KeyUp(var Key: Word; Shift: TShiftState); override;
@@ -4872,7 +4872,7 @@ end;
 
 procedure TBCBaseEditor.WMEraseBkgnd(var Msg: TMessage);
 begin
-  Msg.Result := -1;
+  Msg.Result := 1;
 end;
 
 procedure TBCBaseEditor.WMGetDlgCode(var Msg: TWMGetDlgCode);
@@ -6080,9 +6080,9 @@ begin
   Inc(FPaintLock);
 end;
 
-procedure TBCBaseEditor.InvalidateRect(const ARect: TRect; AErase: Boolean = False);
+procedure TBCBaseEditor.InvalidateRect(const ARect: TRect);
 begin
-  Winapi.Windows.InvalidateRect(Handle, @ARect, AErase);
+  Winapi.Windows.InvalidateRect(Canvas.Handle, @ARect, False);
 end;
 
 procedure TBCBaseEditor.KeyDown(var Key: Word; Shift: TShiftState);
@@ -6838,7 +6838,8 @@ begin
         begin
           LLine1 := FTopLine;
           LLine2 := FTopLine + FVisibleLines;
-          Canvas.CopyRect(DrawRect, FMinimapBufferBmp.Canvas, Rect(0, 0, DrawRect.Width, DrawRect.Height));
+          //Canvas.CopyRect(DrawRect, FMinimapBufferBmp.Canvas, Rect(0, 0, DrawRect.Width, DrawRect.Height));
+          BitBlt(Canvas.Handle, DrawRect.Left, DrawRect.Top, DrawRect.Width, DrawRect.Height, FMinimapBufferBmp.Canvas.Handle, 0, 0, SRCCOPY);
         end
         else
         begin
@@ -6850,8 +6851,9 @@ begin
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
-        FMinimapBufferBmp.Canvas.CopyRect(Rect(0, 0, DrawRect.Width, DrawRect.Height), Canvas, DrawRect);
-
+        //FMinimapBufferBmp.Canvas.CopyRect(Rect(0, 0, DrawRect.Width, DrawRect.Height), Canvas, DrawRect);
+        BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
+          DrawRect.Top, SRCCOPY);
         FTextDrawer.SetBaseFont(Font);
         FTextDrawer.Style := Font.Style;
       end;
@@ -6871,7 +6873,8 @@ begin
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
     FTextDrawer.EndDrawing;
-    FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
+    //FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
+    BitBlt(FBufferBmp.Canvas.Handle, 0, 0, ClientRect.Width, ClientRect.Height, Canvas.Handle, 0, 0, SRCCOPY);
     FBufferBmp.Canvas.Handle := Canvas.Handle;
     Canvas.Handle := LHandle;
     UpdateCaret;
@@ -7714,7 +7717,7 @@ var
   LLineSelectionStart, LLineSelectionEnd: Integer;
   LRightMarginPosition: Integer;
   LSelectionEndPosition: TBCEditorDisplayPosition;
-  LSelectionStartPosition: TBCEditorDisplayPosition;
+  LSelectionBeginPosition: TBCEditorDisplayPosition;
   LTokenHelper: TBCEditorTokenHelper;
   LCustomLineColors: Boolean;
   LCustomForegroundColor: TColor;
@@ -7761,7 +7764,7 @@ var
     LAnySelection := SelectionAvailable;
     if LAnySelection then
     begin
-      LSelectionStartPosition := TextToDisplayPosition(GetSelectionBeginPosition, True);
+      LSelectionBeginPosition := TextToDisplayPosition(GetSelectionBeginPosition, True);
       LSelectionEndPosition := TextToDisplayPosition(GetSelectionEndPosition, True);
     end;
   end;
@@ -8172,22 +8175,22 @@ var
         LLineSelectionStart := 0;
         LLineSelectionEnd := 0;
 
-        if LAnySelection and (LDisplayLine >= LSelectionStartPosition.Row) and (LDisplayLine <= LSelectionEndPosition.Row) then
+        if LAnySelection and (LDisplayLine >= LSelectionBeginPosition.Row) and (LDisplayLine <= LSelectionEndPosition.Row) then
         begin
           LLineSelectionStart := LFirstChar;
           LLineSelectionEnd := LLastChar + 1;
           if (FSelection.ActiveMode = smColumn) or
-            ((FSelection.ActiveMode = smNormal) and (LDisplayLine = LSelectionStartPosition.Row)) then
+            ((FSelection.ActiveMode = smNormal) and (LDisplayLine = LSelectionBeginPosition.Row)) then
           begin
-            if LSelectionStartPosition.Column > LLastChar then
+            if LSelectionBeginPosition.Column > LLastChar then
             begin
               LLineSelectionStart := 0;
               LLineSelectionEnd := 0;
             end
             else
-            if LSelectionStartPosition.Column > LFirstChar then
+            if LSelectionBeginPosition.Column > LFirstChar then
             begin
-              LLineSelectionStart := LSelectionStartPosition.Column;
+              LLineSelectionStart := LSelectionBeginPosition.Column;
               LIsComplexLine := True;
             end;
           end;
@@ -11798,6 +11801,7 @@ procedure TBCBaseEditor.InvalidateMinimap;
 var
   LInvalidationRect: TRect;
 begin
+  FMinimapBufferBmp.Height := 0;
   LInvalidationRect := Rect(ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth, 0, ClientWidth - FSearch.Map.GetWidth,
     ClientHeight);
   InvalidateRect(LInvalidationRect);

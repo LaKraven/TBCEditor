@@ -357,6 +357,8 @@ function TBCEditorDefaultParser.GetToken(ACurrentRange: TBCEditorRange; APLine: 
   var AToken: TBCEditorToken): Boolean;
 begin
   Inc(ARun);
+  while APLine[ARun] = BCEDITOR_FILLER_CHAR do
+    Inc(ARun);
   Result := False;
 end;
 
@@ -376,6 +378,8 @@ end;
 function TDelimitersParser.GetToken(ACurrentRange: TBCEditorRange; APLine: PChar; var ARun: Integer; var AToken: TBCEditorToken): Boolean;
 begin
   if APLine[ARun] <> BCEDITOR_NONE_CHAR then
+    Inc(ARun);
+  while APLine[ARun] = BCEDITOR_FILLER_CHAR do
     Inc(ARun);
   AToken := Self.Token;
   Result := True;

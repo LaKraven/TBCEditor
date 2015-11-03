@@ -52,7 +52,6 @@ type
     FCodeFoldingRangeFromLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingRangeToLine: array of TBCEditorCodeFoldingRange;
     FCodeFoldingTreeLine: array of Boolean;
-    FColumnWidths: PIntegerArray;
     FCommandDrop: Boolean;
     {$IFDEF USE_ALPHASKINS}
     FCommonData: TsScrollWndData;
@@ -191,7 +190,7 @@ type
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
-    function GetExpandedLineText(ALine: Integer): string;
+    function GetExpandedLineText(ALine: Integer): string; // TODO: Obsolete?
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
       var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
@@ -883,11 +882,6 @@ begin
   FCaret.Free;
   FMatchingPair.Free;
   FCompletionProposal.Free;
-  if Assigned(FColumnWidths) then
-  begin
-    FreeMem(FColumnWidths);
-    FColumnWidths := nil;
-  end;
   if Assigned(FSearchEngine) then
   begin
     FSearchEngine.Free;
@@ -965,6 +959,7 @@ end;
 function TBCBaseEditor.DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
 begin
   Result := False;
+
   AForeground := clNone;
   ABackground := clNone;
 
@@ -1005,6 +1000,7 @@ begin
       end;
     end;
   end;
+
   Result := False;
 end;
 
@@ -2966,7 +2962,7 @@ var
   LNewCaretX: Integer;
   LChangeScroll: Boolean;
 begin
-  if (toSelectedBlockIndent in FTabs.Options) and SelectionAvailable then
+  if SelectionAvailable and (toSelectedBlockIndent in FTabs.Options) then
   begin
     DoBlockIndent;
     Exit;
@@ -7765,8 +7761,8 @@ var
     LAnySelection := SelectionAvailable;
     if LAnySelection then
     begin
-      LSelectionStartPosition := TextToDisplayPosition(GetSelectionBeginPosition, False);
-      LSelectionEndPosition := TextToDisplayPosition(GetSelectionEndPosition, False);
+      LSelectionStartPosition := TextToDisplayPosition(GetSelectionBeginPosition, True);
+      LSelectionEndPosition := TextToDisplayPosition(GetSelectionEndPosition, True);
     end;
   end;
 
@@ -7799,7 +7795,7 @@ var
     end;
   end;
 
-  function ColumnToWidth(AColumn: Integer; AMinimap: Boolean = False; ARealWidth: Boolean = True): Integer;
+  function CharWidth(AIndex: Integer; AMinimap: Boolean = False): Integer;
   var
     LCharWidth: Integer;
   begin
@@ -7813,10 +7809,7 @@ var
     else
       LCharWidth := FTextDrawer.CharWidth;
 
-    if ARealWidth then
-      Result := Result + FColumnWidths[AColumn - 1]
-    else
-      Result := Result + LCharWidth * (AColumn - 1);
+    Result := Result + LCharWidth * (AIndex - 1);
   end;
 
   procedure PaintToken(AToken: string; ATokenLength, ACharsBefore, AFirst, ALast: Integer);
@@ -7827,13 +7820,15 @@ var
   const
     ETOOptions = [tooOpaque, tooClipped];
 
-    function ShrinkAtWideGlyphs(const AToken: string; AFirst: Integer; var ACharCount: Integer): string;
+    function RemoveMultiByteFillerChars(const AToken: string; AFirst: Integer; var ACharCount: Integer): string;
     var
       i, j, k: Integer;
     begin
       Result := AToken;
       i := AFirst;
       j := 0;
+      while AToken[i] = BCEDITOR_FILLER_CHAR do
+        Dec(i);
       k := Min(AFirst + ACharCount, Length(Result));
       while i < k do
       begin
@@ -7851,10 +7846,14 @@ var
   begin
     if (ALast > AFirst) and (LTokenRect.Right > LTokenRect.Left) then
     begin
-      X := ColumnToWidth(AFirst, AMinimap);
+      X := CharWidth(AFirst, AMinimap);
       Dec(AFirst, ACharsBefore);
-      LText := ShrinkAtWideGlyphs(AToken, AFirst, ATokenLength);
-
+      LText := RemoveMultiByteFillerChars(AToken, AFirst, ATokenLength);
+      while AToken[AFirst] = BCEDITOR_FILLER_CHAR do
+      begin
+        X := X - FTextDrawer.CharWidth;
+        Inc(AFirst);
+      end;
 
       FTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), ATokenLength);
 
@@ -7917,7 +7916,7 @@ var
         if LFirstUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := ColumnToWidth(LLineSelectionStart, AMinimap);
+          LTokenRect.Right := CharWidth(LLineSelectionStart, AMinimap);
           with LTokenHelper do
             PaintToken(Text, LLineSelectionStart, CharsBefore, LFirstColumn, LLineSelectionStart);
         end;
@@ -7925,14 +7924,14 @@ var
         SetDrawingColors(True);
         LSelectionStart := Max(LLineSelectionStart, LFirstColumn);
         LSelectionEnd := Min(LLineSelectionEnd, LLastColumn);
-        LTokenRect.Right := ColumnToWidth(LSelectionEnd, AMinimap);
+        LTokenRect.Right := CharWidth(LSelectionEnd, AMinimap);
         with LTokenHelper do
           PaintToken(Text, LSelectionEnd - LSelectionStart, CharsBefore, LSelectionStart, LSelectionEnd);
         { second unselected part of the token }
         if LSecondUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := ColumnToWidth(LLastColumn, AMinimap);
+          LTokenRect.Right := CharWidth(LLastColumn, AMinimap);
           with LTokenHelper do
             PaintToken(Text, LLastColumn - LSelectionEnd, CharsBefore, LLineSelectionEnd, LLastColumn);
         end;
@@ -7940,7 +7939,7 @@ var
       else
       begin
         SetDrawingColors(LSelected);
-        LTokenRect.Right := ColumnToWidth(LLastColumn, AMinimap);
+        LTokenRect.Right := CharWidth(LLastColumn, AMinimap);
         with LTokenHelper do
           PaintToken(Text, Length, CharsBefore, LFirstColumn, LLastColumn);
       end;
@@ -7960,8 +7959,8 @@ var
 
       if LIsComplexLine then
       begin
-        X1 := ColumnToWidth(LLineSelectionStart, AMinimap, False);
-        X2 := ColumnToWidth(LLineSelectionEnd, AMinimap, False);
+        X1 := CharWidth(LLineSelectionStart, AMinimap);
+        X2 := CharWidth(LLineSelectionEnd, AMinimap);
         if LTokenRect.Left < X1 then
         begin
           SetDrawingColors(False);
@@ -8063,17 +8062,18 @@ var
     end;
   end;
 
-  procedure InitColumnWidths(AText: PChar; ACharWidth: Integer; ALength: Integer);
+  function AddMultiByteFillerChars(AText: PChar; ALength: Integer): string;
   var
-    i, LWidthSum: Integer;
+    i, j: Integer;
+    LCharCount: Integer;
   begin
-    LIsCurrentLine := False;
-    ReallocMem(FColumnWidths, (ALength + 1) * SizeOf(Integer));
-    LWidthSum := 0;
-    for i := 0 to ALength do
+    Result := '';
+    for i := 0 to ALength - 1 do
     begin
-      FColumnWidths[i] := LWidthSum;
-      LWidthSum := LWidthSum + FTextDrawer.GetCharCount(@AText[i]) * ACharWidth;
+      LCharCount := FTextDrawer.GetCharCount(@AText[i]);
+      Result := Result + AText[i];
+      for j := 1 to LCharCount - 1 do
+        Result := Result + BCEDITOR_FILLER_CHAR;
     end;
   end;
 
@@ -8105,7 +8105,7 @@ var
       SetLength(LTokenHelper.Text, LTokenHelper.MaxLength);
     end;
 
-    LScrolledXBy := (FLeftChar - 1) * FCharWidth;
+    LScrolledXBy := (FLeftChar - 1) * FTextDrawer.CharWidth;
     LDisplayLine := LFirstLine;
     LBookmarkOnCurrentLine := False;
 
@@ -8147,7 +8147,9 @@ var
           end;
         end;
       end;
-      InitColumnWidths(PChar(LCurrentLineText), FTextDrawer.CharWidth, Length(LCurrentLineText));
+      LIsCurrentLine := False;
+
+      LCurrentLineText := AddMultiByteFillerChars(PChar(LCurrentLineText), Length(LCurrentLineText));
 
       LTokenPosition := 0;
       LTokenLength := 0;
@@ -9385,8 +9387,8 @@ begin
     Result := FDirectories.Colors;
   if Trim(ExtractFilePath(Result)) = '' then
   {$WARN SYMBOL_PLATFORM OFF}
-    Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
-  Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
+    Result := IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)) + Result;
+  Result := IncludeTrailingBackslash(Result) + ExtractFileName(AFileName);
   {$WARN SYMBOL_PLATFORM ON}
 end;
 
@@ -9397,8 +9399,8 @@ begin
     Result := FDirectories.Highlighters;
   if Trim(ExtractFilePath(Result)) = '' then
   {$WARN SYMBOL_PLATFORM OFF}
-    Result := Format('%s%s', [IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)), Result]);
-  Result := Format('%s%s', [IncludeTrailingBackslash(Result), ExtractFileName(AFileName)]);
+    Result := IncludeTrailingBackslash(ExtractFilePath(Application.ExeName)) + Result;
+  Result := IncludeTrailingBackslash(Result) + ExtractFileName(AFileName);
   {$WARN SYMBOL_PLATFORM ON}
 end;
 

@@ -6766,7 +6766,6 @@ var
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
-  {$IFDEF DEBUG}OutputDebugString(PChar('Paint'));{$ENDIF}
   if FHighlighter.Loading then
     Exit;
 

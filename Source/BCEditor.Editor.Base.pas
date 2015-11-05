@@ -1348,7 +1348,11 @@ var
     Result := True;
     for i := 0 to LOpenDuplicateLength - 1 do
     if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[FMatchingPairOpenDuplicate[i]])^.OpenToken then
-      Exit;
+    begin
+      LElement := FHighlighter.GetCurrentRangeAttribute.Element;
+      if (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) and (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
+        Exit;
+    end;
     Result := False
   end;
 
@@ -1359,7 +1363,11 @@ var
     Result := True;
     for i := 0 to LCloseDuplicateLength - 1 do
     if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[FMatchingPairCloseDuplicate[i]])^.CloseToken then
-      Exit;
+    begin
+      LElement := FHighlighter.GetCurrentRangeAttribute.Element;
+      if (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) and (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
+        Exit;
+    end;
     Result := False
   end;
 
@@ -6082,7 +6090,7 @@ end;
 
 procedure TBCBaseEditor.InvalidateRect(const ARect: TRect);
 begin
-  Winapi.Windows.InvalidateRect(Canvas.Handle, @ARect, False);
+  Winapi.Windows.InvalidateRect(Handle, ARect, False);
 end;
 
 procedure TBCBaseEditor.KeyDown(var Key: Word; Shift: TShiftState);
@@ -6838,7 +6846,6 @@ begin
         begin
           LLine1 := FTopLine;
           LLine2 := FTopLine + FVisibleLines;
-          //Canvas.CopyRect(DrawRect, FMinimapBufferBmp.Canvas, Rect(0, 0, DrawRect.Width, DrawRect.Height));
           BitBlt(Canvas.Handle, DrawRect.Left, DrawRect.Top, DrawRect.Width, DrawRect.Height, FMinimapBufferBmp.Canvas.Handle, 0, 0, SRCCOPY);
         end
         else
@@ -6851,7 +6858,6 @@ begin
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
-        //FMinimapBufferBmp.Canvas.CopyRect(Rect(0, 0, DrawRect.Width, DrawRect.Height), Canvas, DrawRect);
         BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
           DrawRect.Top, SRCCOPY);
         FTextDrawer.SetBaseFont(Font);
@@ -6873,7 +6879,6 @@ begin
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
     FTextDrawer.EndDrawing;
-    //FBufferBmp.Canvas.CopyRect(ClientRect, Canvas, ClientRect);
     BitBlt(FBufferBmp.Canvas.Handle, 0, 0, ClientRect.Width, ClientRect.Height, Canvas.Handle, 0, 0, SRCCOPY);
     FBufferBmp.Canvas.Handle := Canvas.Handle;
     Canvas.Handle := LHandle;

@@ -1924,7 +1924,7 @@ end;
 
 function TBCBaseEditor.GetTextOffset: Integer;
 begin
-  Result := FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2 - (LeftChar - 1) * FCharWidth;
+  Result := FLeftMargin.GetWidth + FCodeFolding.GetWidth - (LeftChar - 1) * FCharWidth;
 end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
@@ -5386,7 +5386,7 @@ begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
 
-  if (LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) and
+  if (LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth) and
     (LCursorPoint.X < ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
   begin
     if FSelection.Visible then
@@ -6568,9 +6568,10 @@ begin
   begin
     FRightMargin.MouseOver := Abs(RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X - X) < 3;
 
-    if FRightMargin.Moving and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2) then
+    if FRightMargin.Moving then
     begin
-      FRightMarginMovePosition := X;
+      if X > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
+        FRightMarginMovePosition := X;
       if rmoShowMovingHint in FRightMargin.Options then
       begin
         LHintWindow := GetRightMarginHint;
@@ -6765,6 +6766,7 @@ var
   LHandle: HDC;
   LSelectionAvailable: Boolean;
 begin
+  {$IFDEF DEBUG}OutputDebugString(PChar('Paint'));{$ENDIF}
   if FHighlighter.Loading then
     Exit;
 
@@ -6790,7 +6792,7 @@ begin
     if LClipRect.Right > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
     begin
       DrawRect := LClipRect;
-      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth + 2;
+      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
       DrawRect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
       DeflateMinimapRect(DrawRect);
       FTextDrawer.SetBaseFont(Font);
@@ -6810,13 +6812,13 @@ begin
       if FLeftMargin.Visible then
       begin
         DrawRect := LClipRect;
-        DrawRect.Right := FLeftMargin.GetWidth + 2;
+        DrawRect.Right := FLeftMargin.GetWidth;
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
       end;
 
       if FCodeFolding.Visible and (Lines.Count > 0) then
       begin
-        DrawRect.Left := FLeftMargin.GetWidth + 2;
+        DrawRect.Left := FLeftMargin.GetWidth;
         DrawRect.Right := DrawRect.Left + FCodeFolding.GetWidth;
         PaintCodeFolding(DrawRect, LLine1, LLine2);
       end;

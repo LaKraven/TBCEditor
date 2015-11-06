@@ -3170,13 +3170,6 @@ procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
 begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
-  if FMinimap.Visible and (FLineNumbersCount > 0) then
-  begin
-    FTextDrawer.SetBaseFont(FMinimap.Font);
-    FMinimap.CharHeight := FTextDrawer.CharHeight - 1;
-    FMinimap.VisibleLines := ClientHeight div FMinimap.CharHeight;
-    FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / Max(FLineNumbersCount - FVisibleLines, 1)))), 1);
-  end;
 end;
 
 procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
@@ -4516,6 +4509,14 @@ begin
     FVisibleChars := Max(ClientWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2 - FMinimap.GetWidth -
       FSearch.Map.GetWidth, 0) div FCharWidth;
     FVisibleLines := ClientHeight div LineHeight;
+
+    if FMinimap.Visible and (FLineNumbersCount > 0) then
+    begin
+      FTextDrawer.SetBaseFont(FMinimap.Font);
+      FMinimap.CharHeight := FTextDrawer.CharHeight - 1;
+      FMinimap.VisibleLines := ClientHeight div FMinimap.CharHeight;
+      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / Max(FLineNumbersCount - FVisibleLines, 1)))), 1);
+    end;
 
     if FWordWrap.Enabled then
     begin
@@ -6765,6 +6766,7 @@ var
   LLine1, LLine2, LLine3, LTemp: Integer;
   LHandle: HDC;
   LSelectionAvailable: Boolean;
+  LMinimapLeft, LSearchMapLeft, LTextLinesLeft: Integer;
 begin
   if FHighlighter.Loading then
     Exit;
@@ -6775,6 +6777,10 @@ begin
   LTemp := (LClipRect.Bottom + FTextHeight - 1) div LineHeight;
   LLine2 := MinMax(FTopLine + LTemp, 1, FLineNumbersCount);
   LLine3 := FTopLine + LTemp;
+
+  LMinimapLeft := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
+  LSearchMapLeft := ClientRect.Width - FSearch.Map.GetWidth;
+  LTextLinesLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
   HideCaret;
   FBufferBmp.Width := Width;
@@ -6787,13 +6793,12 @@ begin
 
   FTextDrawer.BeginDrawing(LHandle);
   try
-    { Paint the text area if it was (partly) invalidated }
-    if LClipRect.Right > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
+    { Text lines }
+    if LClipRect.Right > LTextLinesLeft then
     begin
       DrawRect := LClipRect;
-      DrawRect.Left := DrawRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-      DrawRect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
-      DeflateMinimapRect(DrawRect);
+      DrawRect.Left := LTextLinesLeft;
+      DrawRect.Right := LMinimapLeft;
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
@@ -6806,8 +6811,9 @@ begin
 
     DoOnPaint;
 
-    if LClipRect.Left <= FLeftMargin.GetWidth then
+    if LClipRect.Left < LTextLinesLeft then
     begin
+      { Left margin }
       if FLeftMargin.Visible then
       begin
         DrawRect := LClipRect;
@@ -6815,6 +6821,7 @@ begin
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
       end;
 
+      { Code folding }
       if FCodeFolding.Visible and (Lines.Count > 0) then
       begin
         DrawRect.Left := FLeftMargin.GetWidth;
@@ -6823,17 +6830,17 @@ begin
       end;
     end;
 
-    { Paint minimap text lines }
+    { Minimap }
     if FMinimap.Visible then
-      if (LClipRect.Right >= ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+      if LClipRect.Right > LMinimapLeft then
       begin
         DrawRect := LClipRect;
-        DrawRect.Left := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
-        DrawRect.Right := ClientRect.Width - FSearch.Map.GetWidth;
+        DrawRect.Left := LMinimapLeft;
+        DrawRect.Right := LSearchMapLeft;
 
         FTextDrawer.SetBaseFont(FMinimap.Font);
         FTextDrawer.Style := FMinimap.Font.Style;
-        FMinimap.CharWidth := FTextDrawer.CharWidth;
+
         FMinimap.CharHeight := FTextDrawer.CharHeight - 1;
         FMinimap.VisibleLines := ClientHeight div FMinimap.CharHeight;
 
@@ -6852,7 +6859,7 @@ begin
         else
         begin
           LLine1 := Max(FMinimap.TopLine, 1);
-          LLine2 := Min(FLineNumbersCount, LLine1 + (LClipRect.Height div FMinimap.CharHeight) - 1);
+          LLine2 := Min(FLineNumbersCount, LLine1 + LClipRect.Height div FMinimap.CharHeight - 1);
         end;
 
         PaintTextLines(DrawRect, LLine1, LLine2, True);
@@ -6865,12 +6872,12 @@ begin
         FTextDrawer.Style := Font.Style;
       end;
 
-    { Paint search map }
+    { Search map }
     if FSearch.Map.Visible then
-      if LClipRect.Right >= ClientRect.Width - FSearch.Map.GetWidth then
+      if LClipRect.Right > LSearchMapLeft then
       begin
         DrawRect := LClipRect;
-        DrawRect.Left := ClientRect.Width - FSearch.Map.GetWidth;
+        DrawRect.Left := LSearchMapLeft;
         PaintSearchMap(DrawRect);
       end;
 
@@ -7114,10 +7121,7 @@ begin
           if not LCodeFoldingRange.RegionItem.ShowGuideLine then
             Continue;
           X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
-          if AMinimap then
-            X := X * FMinimap.CharWidth
-          else
-            X := X * FTextDrawer.CharWidth;
+          X := X * FTextDrawer.CharWidth;
 
           if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
           begin
@@ -7813,10 +7817,7 @@ var
     else
       Result := FTextOffset;
 
-    if AMinimap then
-      LCharWidth := FMinimap.CharWidth
-    else
-      LCharWidth := FTextDrawer.CharWidth;
+    LCharWidth := FTextDrawer.CharWidth;
 
     Result := Result + LCharWidth * (AIndex - 1);
   end;

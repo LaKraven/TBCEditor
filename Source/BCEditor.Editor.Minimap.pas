@@ -9,7 +9,6 @@ type
   TBCEditorMinimap = class(TPersistent)
   strict private
     FCharHeight: Integer;
-    FCharWidth: Integer;
     FClicked: Boolean;
     FColors: TBCEditorMinimapColors;
     FCursor: TCursor;
@@ -33,7 +32,6 @@ type
 
     function GetWidth: Integer;
     procedure Assign(Source: TPersistent); override;
-    property CharWidth: Integer read FCharWidth write FCharWidth;
     property CharHeight: Integer read FCharHeight write FCharHeight;
     property Clicked: Boolean read FClicked write FClicked;
     property Dragging: Boolean read FDragging write FDragging;

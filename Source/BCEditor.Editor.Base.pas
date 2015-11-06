@@ -5563,7 +5563,7 @@ begin
           LFirstIndent := LLength;
         LLineText := FLines[i{ - 1}];
         Delete(LLineText, LDeleteIndex, LLength);
-        FLines[i{ - 1}] := LLineText;
+        FLines[i] := LLineText;
       end;
       LLastIndent := LLength;
       FUndoList.AddChange(crUnindent, LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition, LFullStringToDelete, FSelection.ActiveMode);
@@ -10862,6 +10862,7 @@ begin
                   SetTextCaretX(i + 1);
                 end;
                 FLines[LTextCaretPosition.Line] := LLineText;
+                DoChange;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end
               else

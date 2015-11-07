@@ -279,7 +279,7 @@ begin
           Break;
         end;
 
-        if Assigned(CurrentTokenNode.Token) then //if CanBeToken then
+        if Assigned(CurrentTokenNode.Token) then
         begin
           FindTokenNode := CurrentTokenNode;
           PreviousPosition := ARun;
@@ -319,6 +319,7 @@ begin
     until not Assigned(StartTokenNode);
   end;
   ARun := StartPosition;
+
   AllowedDelimiters := ACurrentRange.Delimiters;
   for i := 0 to Sets.Count - 1 do
     AllowedDelimiters := AllowedDelimiters - TBCEditorSet(Sets[i]).CharSet;
@@ -639,20 +640,6 @@ begin
 
   FDelimiters := FDelimiters + BCEDITOR_ABSOLUTE_DELIMITERS;
 
-  {if not Assigned(AParent) then
-    if Assigned(Parent) then
-    for j := 0 to OpenToken.SymbolCount - 1 do
-    begin
-      if OpenToken.Symbols[j] = '' then
-        Continue;
-      LToken := Parent.FindToken(OpenToken.Symbols[j]);
-      Token := TBCEditorToken.Create(CloseToken, j);
-      LToken.ClosingToken := InsertTokenDefault(Token, Self, Attribute);
-      Token.Free;
-    end
-    else
-      FParent := AParent;  }
-
   if Assigned(FRanges) then
   for i := 0 to FRanges.Count - 1 do
   begin
@@ -790,7 +777,6 @@ var
 begin
   OpenToken.Clear;
   CloseToken.Clear;
-  //AddTokenRange('', '');
   CloseOnTerm := False;
   CloseOnEndOfLine := False;
   CloseParent := False;

@@ -240,16 +240,11 @@ procedure TBCEditorLines.Clear;
 begin
   if FCount <> 0 then
   begin
-    //BeginUpdate;
-    try
-      Finalize(FList^[0], FCount);
-      FCount := 0;
-      SetCapacity(0);
-      if Assigned(FOnCleared) then
-        FOnCleared(Self);
-    finally
-      //EndUpdate;
-    end;
+    Finalize(FList^[0], FCount);
+    FCount := 0;
+    SetCapacity(0);
+    if Assigned(FOnCleared) then
+      FOnCleared(Self);
   end;
   { Clear information about longest line }
   FIndexOfLongestLine := -1;

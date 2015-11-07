@@ -3287,10 +3287,10 @@ procedure TBCBaseEditor.OpenLink(AURI: string; ALinkType: Integer);
 begin
   case TBCEditorRangeType(ALinkType) of
     ttMailtoLink:
-      if (Pos('mailto:', AURI) <> 1) then
-        AURI := 'mailto:' + AURI;
+      if (Pos(BCEDITOR_MAILTO, AURI) <> 1) then
+        AURI := BCEDITOR_MAILTO + AURI;
     ttWebLink:
-      AURI := 'http://' + AURI;
+      AURI := BCEDITOR_HTTP + AURI;
   end;
 
   ShellExecute(0, nil, PChar(AURI), nil, nil, SW_SHOWNORMAL);
@@ -4075,8 +4075,7 @@ begin
         GlobalUnlock(LGlobalMem);
       end;
     end;
-    { Don't free Mem! It belongs to the clipboard now, and it will free it
-      when it is done with it. }
+    { Don't free Mem! It belongs to the clipboard now, and it will free it when it is done with it. }
   finally
     Clipboard.Close;
   end;
@@ -4919,7 +4918,6 @@ begin
   inherited;
 
   case Msg.ScrollCode of
-    { Scrolls to start / end of the line }
     SB_LEFT:
       LeftChar := 1;
     SB_RIGHT:
@@ -4927,21 +4925,16 @@ begin
         if soPastEndOfLine in FScroll.Options then
           LeftChar := FScroll.MaxWidth - FVisibleChars + 1
         else
-          { Simply set LeftChar property to the LengthOfLongestLine,
-            it would do the range checking and constrain the value if necessary }
           LeftChar := FLines.GetLengthOfLongestLine;
       end;
-    { Scrolls one char left / right }
     SB_LINERIGHT:
       LeftChar := LeftChar + 1;
     SB_LINELEFT:
       LeftChar := LeftChar - 1;
-    { Scrolls one page of chars left / right }
     SB_PAGERIGHT:
       LeftChar := LeftChar + FVisibleChars;
     SB_PAGELEFT:
       LeftChar := LeftChar - FVisibleChars;
-    { Scrolls to the current scroll bar position }
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         FIsScrolling := True;
@@ -5178,7 +5171,6 @@ begin
 
           OffsetRect(LScrollHintRect, LScrollHintPoint.X, LScrollHintPoint.Y);
           LScrollHintWindow.ActivateHint(LScrollHintRect, LScrollHint);
-          LScrollHintWindow.Invalidate;
           LScrollHintWindow.Update;
         end;
       end;
@@ -5562,7 +5554,7 @@ begin
         Inc(j);
         if LFirstIndent = -1 then
           LFirstIndent := LLength;
-        LLineText := FLines[i{ - 1}];
+        LLineText := FLines[i];
         Delete(LLineText, LDeleteIndex, LLength);
         FLines[i] := LLineText;
       end;
@@ -6232,12 +6224,16 @@ end;
 
 procedure TBCBaseEditor.ListCleared(Sender: TObject);
 begin
-  ClearUndo;
-  FillChar(FInvalidateRect, SizeOf(TRect), 0);
-  Invalidate;
-  TextCaretPosition := GetTextPosition(1, 1);
-  TopLine := 1;
-  LeftChar := 1;
+  CaretZero;
+  ClearCodeFolding;
+  ClearMatchingPair;
+  ClearSelection;
+  FMarkList.Clear;
+  FillChar(FBookmarks, SizeOf(FBookmarks), 0);
+  FUndoList.Clear;
+  FRedoList.Clear;
+  FResetLineNumbersCache := True;
+  Modified := False;
 end;
 
 procedure TBCBaseEditor.ListDeleted(Sender: TObject; AIndex: Integer; ACount: Integer);
@@ -6942,7 +6938,7 @@ end;
 
 procedure TBCBaseEditor.PaintCodeFoldingLine(AClipRect: TRect; ALine: Integer);
 var
-  X, Y, LHeight: Integer;
+  X, Y, LHeight, LTemp: Integer;
   LFoldRange: TBCEditorCodeFoldingRange;
 begin
   if CodeFolding.Padding > 0 then
@@ -6985,14 +6981,16 @@ begin
     end;
 
     { minus }
-    Canvas.MoveTo(AClipRect.Left + 2, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) div 2));
-    Canvas.LineTo(AClipRect.Right - 2, AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) div 2));
+    LTemp := AClipRect.Top + ((AClipRect.Bottom - AClipRect.Top) div 2);
+    Canvas.MoveTo(AClipRect.Left + 2, LTemp);
+    Canvas.LineTo(AClipRect.Right - 2, LTemp);
 
     if LFoldRange.Collapsed then
     begin
       { plus }
-      Canvas.MoveTo(AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2), AClipRect.Top + 2);
-      Canvas.LineTo(AClipRect.Left + ((AClipRect.Right - AClipRect.Left) div 2), AClipRect.Bottom - 2);
+      LTemp := (AClipRect.Right - AClipRect.Left) div 2;
+      Canvas.MoveTo(AClipRect.Left + LTemp, AClipRect.Top + 2);
+      Canvas.LineTo(AClipRect.Left + LTemp, AClipRect.Bottom - 2);
     end;
   end;
 end;
@@ -7017,7 +7015,7 @@ procedure TBCBaseEditor.PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFo
 var
   LOldPenColor: TColor;
   LCollapseMarkRect: TRect;
-  X, Y: Integer;
+  i, X, Y: Integer;
   LBrush: TBrush;
 begin
   LOldPenColor := Canvas.Pen.Color;
@@ -7045,11 +7043,11 @@ begin
       { paint [...] }
       Y := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2;
       X := LCollapseMarkRect.Left + FCharWidth - 1;
-      Canvas.Rectangle(X, Y, X + 2, Y + 2);
-      X := X + FCharWidth - 1;
-      Canvas.Rectangle(X, Y, X + 2, Y + 2);
-      X := X + FCharWidth - 1;
-      Canvas.Rectangle(X, Y, X + 2, Y + 2);
+      for i := 1 to 3 do
+      begin
+        Canvas.Rectangle(X, Y, X + 2, Y + 2);
+        X := X + FCharWidth - 1;
+      end;
     end;
   end;
   Canvas.Pen.Color := LOldPenColor;
@@ -7250,7 +7248,7 @@ var
                 LOldColor := Canvas.Pen.Color;
                 Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
                 LTop := LLineRect.Top + ((LineHeight - 1) div 2);
-                if (LLine mod 5) = 0 then
+                if LLine mod 5 = 0 then
                   Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 9) div 2), LTop)
                 else
                   Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + ((FLeftMarginCharWidth - 2) div 2), LTop);
@@ -8936,7 +8934,7 @@ var
       begin
         LStr := LLeftSide + Copy(AValue, 1, LTextPointer - LStart);
         FLines[LTextCaretPosition.Line] := LStr;
-        FLines.InsertLines(LTextCaretPosition.Line + 1, CountLines(LTextPointer));
+        FLines.InsertLines(LTextCaretPosition.Line, CountLines(LTextPointer));
       end
       else
       begin
@@ -10069,9 +10067,14 @@ begin
 end;
 
 procedure TBCBaseEditor.CaretZero;
+var
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
-  DisplayCaretX := 0;
-  DisplayCaretY := 0;
+  LTextCaretPosition.Char := 1;
+  LTextCaretPosition.Line := 0;
+  TextCaretPosition := LTextCaretPosition;
+  //DisplayCaretX := 0;
+  //DisplayCaretY := 0;
 end;
 
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);
@@ -10090,11 +10093,6 @@ end;
 procedure TBCBaseEditor.Clear;
 begin
   FLines.Clear;
-  FMarkList.Clear;
-  FillChar(FBookmarks, SizeOf(FBookmarks), 0);
-  FUndoList.Clear;
-  FRedoList.Clear;
-  Modified := False;
 end;
 
 procedure TBCBaseEditor.ClearBookmark(ABookmark: Integer);

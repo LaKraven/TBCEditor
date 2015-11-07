@@ -8,6 +8,8 @@ uses
 const
   BCEDITOR_WHEEL_DIVISOR = 120;
   BCEDITOR_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing];
+  BCEDITOR_MAILTO = 'mailto:';
+  BCEDITOR_HTTP = 'http://';
   { Clipboard formats }
   BCEDITOR_CLIPBOARD_FORMAT_BCEDITOR = 'BCEditor Control Block Type';
   BCEDITOR_CLIPBOARD_FORMAT_BORLAND = 'Borland IDE Block Type';

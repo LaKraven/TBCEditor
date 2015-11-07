@@ -6790,6 +6790,7 @@ begin
 
   FTextDrawer.BeginDrawing(LHandle);
   try
+    Canvas.Brush.Color := FBackgroundColor;
     Canvas.FillRect(ClientRect); { fill background }
 
     { Text lines }

@@ -6790,6 +6790,8 @@ begin
 
   FTextDrawer.BeginDrawing(LHandle);
   try
+    Canvas.FillRect(ClientRect); { fill background }
+
     { Text lines }
     if LClipRect.Right > LTextLinesLeft then
     begin
@@ -6851,7 +6853,7 @@ begin
         else
         begin
           LLine1 := Max(FMinimap.TopLine, 1);
-          LLine2 := Min(FLineNumbersCount, LLine1 + LClipRect.Height div FMinimap.CharHeight - 1);
+          LLine2 := Min(FLineNumbersCount, LLine1 + LClipRect.Height div Max(FMinimap.CharHeight - 1, 1));
         end;
 
         PaintTextLines(DrawRect, LLine1, LLine2, True);
@@ -7771,7 +7773,7 @@ var
     end;
   end;
 
-  procedure SetDrawingColors(ASelected: Boolean; AHighlight: Boolean = False);
+  procedure SetDrawingColors(ASelected: Boolean);
   var
     LColor: TColor;
   begin
@@ -7873,7 +7875,7 @@ var
     LIsTokenSelected: Boolean;
     LFirstColumn, LLastColumn, LSelectionStart, LSelectionEnd: Integer;
     LFirstUnselectedPartOfToken, LSelected, LSecondUnselectedPartOfToken: Boolean;
-    X1, X2: Integer;
+    {X1,} X2: Integer;
   begin
     { Compute some helper variables. }
     LFirstColumn := Max(LFirstChar, LTokenHelper.CharsBefore + 1);
@@ -7957,15 +7959,15 @@ var
 
       if LIsComplexLine then
       begin
-        X1 := CharWidth(LLineSelectionStart, AMinimap);
+ //       X1 := CharWidth(LLineSelectionStart, AMinimap);
         X2 := CharWidth(LLineSelectionEnd, AMinimap);
-        if LTokenRect.Left < X1 then
+       (* if LTokenRect.Left < X1 then
         begin
           SetDrawingColors(False);
           LTokenRect.Right := X1;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
           LTokenRect.Left := X1;
-        end;
+        end;  *)
         if LTokenRect.Left < X2 then
         begin
           SetDrawingColors(not (soToEndOfLine in FSelection.Options));
@@ -7973,12 +7975,12 @@ var
           Canvas.FillRect(LTokenRect); { fill end of line rect }
           LTokenRect.Left := X2;
         end;
-        if LTokenRect.Left < LLineRect.Right then
+     (*   if LTokenRect.Left < LLineRect.Right then
         begin
           SetDrawingColors(False);
           LTokenRect.Right := LLineRect.Right;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
-        end;
+        end;  *)
       end
       else
       begin
@@ -8388,19 +8390,20 @@ begin
   end;
 
   { If there is anything visible below the last line, then fill this as well }
-  LTokenRect := AClipRect;
-
-  if not AMinimap then
-  begin
+  (*LTokenRect := AClipRect;
+  if AMinimap then
+    LTokenRect.Top := Max(VisibleLines, FLines.Count) * FMinimap.CharHeight
+  else
     LTokenRect.Top := (ALastRow - TopLine + 1) * LineHeight;
 
-    if LTokenRect.Top < LTokenRect.Bottom then
-    begin
-      LBackgroundColor := FBackgroundColor;
-      SetDrawingColors(False);
-      Canvas.FillRect(LTokenRect);
-    end;
+  if LTokenRect.Top < LTokenRect.Bottom then
+  begin
+    LBackgroundColor := FBackgroundColor;
+    SetDrawingColors(False);
+    Canvas.FillRect(LTokenRect);
+  end; *)
 
+  if not AMinimap then
     if FRightMargin.Visible then
     begin
       LRightMarginPosition := FTextOffset + FRightMargin.Position * FTextDrawer.CharWidth;
@@ -8411,7 +8414,6 @@ begin
         Canvas.LineTo(LRightMarginPosition, Height);
       end;
     end;
-  end;
 end;
 
 procedure TBCBaseEditor.RecalculateCharExtent;

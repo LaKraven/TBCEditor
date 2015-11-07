@@ -1990,7 +1990,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
   begin
     Result := False;
 
-    LLine := UpperCase(GetExpandedLineText(GetTextCaretY));
+    LLine := AnsiUpperCase(GetExpandedLineText(GetTextCaretY));
 
     for i := 0 to Length(FHighlighter.CodeFoldingRegions) - 1 do
     begin
@@ -2335,7 +2335,7 @@ end;
 
 function TBCBaseEditor.RescanHighlighterRangesFrom(Index: Integer): Integer;
 var
-  LCurrentRange: TBCEditorLinesRange;
+  LCurrentRange: TBCEditorRange;
 begin
   Result := Index;
   if Result > FLines.Count then
@@ -2809,8 +2809,8 @@ procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
     i: Integer;
     S: string;
   begin
-    Result := UpperCase(Value);
-    S := LowerCase(Value);
+    Result := AnsiUpperCase(Value);
+    S := AnsiLowerCase(Value);
     for i := 1 to Length(Value) do
     begin
       if Result[i] = Value[i] then
@@ -2831,12 +2831,12 @@ procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
       if i > 1 then
       begin
         if AString[i - 1] = ' ' then
-          s := UpperCase(s)
+          s := AnsiUpperCase(s)
         else
-          s := LowerCase(s);
+          s := AnsiLowerCase(s);
       end
       else
-        s := UpperCase(s);
+        s := AnsiUpperCase(s);
       Result := Result + s;
       Inc(i);
     end;
@@ -2863,13 +2863,13 @@ begin
     begin
       case ACommand of
         ecUpperCase, ecUpperCaseBlock:
-          LSelectedText := UpperCase(LSelectedText);
+          LSelectedText := AnsiUpperCase(LSelectedText);
         ecLowerCase, ecLowerCaseBlock:
-          LSelectedText := LowerCase(LSelectedText);
+          LSelectedText := AnsiLowerCase(LSelectedText);
         ecAlternatingCase, ecAlternatingCaseBlock:
           LSelectedText := ToggleCase(LSelectedText);
         ecSentenceCase:
-          LSelectedText := UpperCase(LSelectedText[1]) + LowerCase(Copy(LSelectedText, 2, Length(LSelectedText)));
+          LSelectedText := AnsiUpperCase(LSelectedText[1]) + AnsiLowerCase(Copy(LSelectedText, 2, Length(LSelectedText)));
         ecTitleCase:
           LSelectedText := TitleCase(LSelectedText);
       end;
@@ -3121,12 +3121,12 @@ begin
   if LKeyword = '' then
     Exit;
   if not (soCaseSensitive in FSearch.Options) then
-    LKeyword := UpperCase(LKeyword);
+    LKeyword := AnsiUpperCase(LKeyword);
   for i := 0 to FLines.Count - 1 do
   begin
     LLine := FLines[i];
     if not (soCaseSensitive in FSearch.Options) then
-      LLine := UpperCase(LLine);
+      LLine := AnsiUpperCase(LLine);
     LTextPtr := PChar(LLine);
     while LTextPtr^ <> BCEDITOR_NONE_CHAR do
     begin
@@ -4543,6 +4543,9 @@ begin
       LeftChar := LeftChar;
     if not (soPastEndOfFileMarker in FScroll.Options) then
       TopLine := TopLine;
+
+    FBufferBmp.Width := ClientRect.Width;
+    FBufferBmp.Height := ClientRect.Height;
   end;
 end;
 
@@ -4617,7 +4620,7 @@ begin
       else
       if LCodeFoldingRange.FromLine = ACurrentLine then
       begin
-        LPosition := Pos(LCodeFoldingRange.RegionItem.OpenToken, UpperCase(Lines[LCodeFoldingRange.FromLine]));
+        LPosition := Pos(LCodeFoldingRange.RegionItem.OpenToken, AnsiUpperCase(Lines[LCodeFoldingRange.FromLine]));
 
         if LPosition > 0 then
         begin
@@ -6779,8 +6782,6 @@ begin
   LTextLinesLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
 
   HideCaret;
-  FBufferBmp.Width := Width;
-  FBufferBmp.Height := Height;
 
   LHandle := Canvas.Handle;
   Canvas.Handle := FBufferBmp.Canvas.Handle;
@@ -6798,8 +6799,6 @@ begin
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
-      FTextDrawer.SetBaseFont(Font);
-      FTextDrawer.Style := Font.Style;
     end;
 
     if FCaret.NonBlinking.Enabled then
@@ -6809,10 +6808,10 @@ begin
 
     if LClipRect.Left < LTextLinesLeft then
     begin
+      DrawRect := LClipRect;
       { Left margin }
       if FLeftMargin.Visible then
       begin
-        DrawRect := LClipRect;
         DrawRect.Right := FLeftMargin.GetWidth;
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
       end;
@@ -6836,9 +6835,6 @@ begin
 
         FTextDrawer.SetBaseFont(FMinimap.Font);
         FTextDrawer.Style := FMinimap.Font.Style;
-
-        FMinimap.CharHeight := FTextDrawer.CharHeight - 1;
-        FMinimap.VisibleLines := ClientHeight div FMinimap.CharHeight;
 
         LSelectionAvailable := SelectionAvailable;
 
@@ -6864,8 +6860,6 @@ begin
         FMinimapBufferBmp.Height := DrawRect.Height;
         BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
           DrawRect.Top, SRCCOPY);
-        FTextDrawer.SetBaseFont(Font);
-        FTextDrawer.Style := Font.Style;
       end;
 
     { Search map }
@@ -7807,24 +7801,20 @@ var
   end;
 
   function CharWidth(AIndex: Integer; AMinimap: Boolean = False): Integer;
-  var
-    LCharWidth: Integer;
   begin
     if AMinimap then
       Result := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth
     else
       Result := FTextOffset;
 
-    LCharWidth := FTextDrawer.CharWidth;
-
-    Result := Result + LCharWidth * (AIndex - 1);
+    Result := Result + FTextDrawer.CharWidth * (AIndex - 1);
   end;
 
   procedure PaintToken(AToken: string; ATokenLength, ACharsBefore, AFirst, ALast: Integer);
   var
     LText: string;
     X: Integer;
-    OldPenColor: TColor;
+    LOldPenColor: TColor;
   const
     ETOOptions = [tooOpaque, tooClipped];
 
@@ -7867,11 +7857,11 @@ var
 
       if LTokenHelper.MatchingPairUnderline then
       begin
-        OldPenColor := Canvas.Pen.Color;
+        LOldPenColor := Canvas.Pen.Color;
         Canvas.Pen.Color := FMatchingPair.Colors.Underline;
         Canvas.MoveTo(LTokenRect.Left, LTokenRect.Bottom - 1);
         Canvas.LineTo(LTokenRect.Right, LTokenRect.Bottom - 1);
-        Canvas.Pen.Color := OldPenColor;
+        Canvas.Pen.Color := LOldPenColor;
       end;
 
       LTokenRect.Left := LTokenRect.Right;
@@ -8136,15 +8126,15 @@ var
         begin
           if LFoldRange.RegionItem.OpenTokenEnd <> '' then
             LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1, Pos(LFoldRange.RegionItem.OpenTokenEnd,
-               UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])))
+               AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])))
           else
             LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1,
               Length(LFoldRange.RegionItem.OpenToken) + Pos(LFoldRange.RegionItem.OpenToken,
-              UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
+              AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
 
           LCurrentLineText := LCurrentLineText + '..';
           if LFoldRange.RegionItem.CloseToken <> '' then
-            if Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines.ExpandedStrings[LFoldRange.ToLine - 1])) <> 0 then
+            if Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.ToLine - 1])) <> 0 then
               LCurrentLineText := LCurrentLineText + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
@@ -8309,8 +8299,8 @@ var
                 LKeyword := FSearch.SearchText;
                 if not (soCaseSensitive in FSearch.Options) then
                 begin
-                  LKeyword := UpperCase(LKeyword);
-                  LWord := UpperCase(LWord);
+                  LKeyword := AnsiUpperCase(LKeyword);
+                  LWord := AnsiUpperCase(LWord);
                 end;
               end
               else
@@ -8400,22 +8390,17 @@ begin
   { If there is anything visible below the last line, then fill this as well }
   LTokenRect := AClipRect;
 
-  if AMinimap then
+  if not AMinimap then
   begin
-    ALastRow := Min(FLineNumbersCount, Max(FMinimap.TopLine, 1) + (AClipRect.Height div FMinimap.CharHeight) - 1);
-    LTokenRect.Top := (ALastRow - FMinimap.TopLine + 1) * FMinimap.CharHeight
-  end
-  else
     LTokenRect.Top := (ALastRow - TopLine + 1) * LineHeight;
 
-  if LTokenRect.Top < LTokenRect.Bottom then
-  begin
-    LBackgroundColor := FBackgroundColor;
-    SetDrawingColors(False);
-    Canvas.FillRect(LTokenRect);
-  end;
+    if LTokenRect.Top < LTokenRect.Bottom then
+    begin
+      LBackgroundColor := FBackgroundColor;
+      SetDrawingColors(False);
+      Canvas.FillRect(LTokenRect);
+    end;
 
-  if not AMinimap then
     if FRightMargin.Visible then
     begin
       LRightMarginPosition := FTextOffset + FRightMargin.Position * FTextDrawer.CharWidth;
@@ -8426,6 +8411,7 @@ begin
         Canvas.LineTo(LRightMarginPosition, Height);
       end;
     end;
+  end;
 end;
 
 procedure TBCBaseEditor.RecalculateCharExtent;
@@ -8666,7 +8652,7 @@ begin
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
 
-        LOpenLineText :=  UpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]);
+        LOpenLineText :=  AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]);
         LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
 
         FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1],
@@ -8674,7 +8660,7 @@ begin
         FCurrentMatchingPairMatch.OpenTokenPos := GetTextPosition(LTempPosition, LFoldRange.FromLine - 1);
 
         LLine := LFoldRange.ToLine;
-        LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, UpperCase(FLines.ExpandedStrings[LLine - 1]));
+        LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(FLines.ExpandedStrings[LLine - 1]));
         FCurrentMatchingPairMatch.CloseToken := System.Copy(FLines.ExpandedStrings[LLine - 1], LTempPosition,
           Length(LFoldRange.RegionItem.CloseToken));
         if not LFoldRange.Collapsed then
@@ -10615,12 +10601,12 @@ begin
       ecUp, ecSelectionUp:
         begin
           MoveCaretVertically(-1, ACommand = ecSelectionUp);
-          Update;
+          Invalidate;
         end;
       ecDown, ecSelectionDown:
         begin
           MoveCaretVertically(1, ACommand = ecSelectionDown);
-          Update;
+          Invalidate;
         end;
       ecPageUp, ecSelectionPageUp, ecPageDown, ecSelectionPageDown:
         begin
@@ -10630,19 +10616,19 @@ begin
             LCounter := -LCounter;
           TopLine := TopLine + LCounter;
           MoveCaretVertically(LCounter, ACommand in [ecSelectionPageUp, ecSelectionPageDown]);
-          Update;
+          Invalidate;
         end;
       ecPageTop, ecSelectionPageTop:
         begin
           LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine));
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageTop);
-          Update;
+          Invalidate;
         end;
       ecPageBottom, ecSelectionPageBottom:
         begin
           LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine + VisibleLines - 1));
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageBottom);
-          Update;
+          Invalidate;
         end;
       ecEditorTop, ecSelectionEditorTop:
         begin
@@ -10652,7 +10638,7 @@ begin
             Line := 0;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorTop);
-          Update;
+          Invalidate;
         end;
       ecEditorBottom, ecSelectionEditorBottom:
         begin
@@ -10664,13 +10650,13 @@ begin
               Char := Length(Lines.ExpandedStrings[Line]) + 1;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
-          Update;
+          Invalidate;
         end;
       ecGotoXY, ecSelectionGotoXY:
         if Assigned(AData) then
         begin
           MoveCaretAndSelection(LTextCaretPosition, TBCEditorTextPosition(AData^), ACommand = ecSelectionGotoXY);
-          Update;
+          Invalidate;
         end;
       ecGotoBookmark1 .. ecGotoBookmark9:
         begin
@@ -11480,7 +11466,7 @@ begin
                 MoveCaretVertically(TopLine - LCaretRow, False);
             end;
             EnsureCursorPositionVisible;
-            Update;
+            Invalidate;
           end;
         end;
       ecScrollLeft:
@@ -12404,7 +12390,7 @@ procedure TBCBaseEditor.ToggleSelectedCase(ACase: TBCEditorCase = cNone);
 var
   LSelectionStart, LSelectionEnd: TBCEditorTextPosition;
 begin
-  if UpperCase(SelectedText) <> UpperCase(FSelectedCaseText) then
+  if AnsiUpperCase(SelectedText) <> AnsiUpperCase(FSelectedCaseText) then
   begin
     FSelectedCaseCycle := cUpper;
     FSelectedCaseText := SelectedText;

@@ -555,7 +555,7 @@ begin
   if not Value then
   begin
     FCaseFunct := UpCase;
-    FStringCaseFunct := UpperCase;
+    FStringCaseFunct := AnsiUpperCase;
   end
   else
   begin

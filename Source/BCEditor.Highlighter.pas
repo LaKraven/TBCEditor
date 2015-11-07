@@ -50,7 +50,7 @@ type
     constructor Create(AOwner: TWinControl);
     destructor Destroy; override;
 
-    function GetCurrentRange: Pointer;
+    function GetCurrentRange: TBCEditorRange;
     function GetCurrentRangeAttribute: TBCEditorHighlighterAttribute;
     function GetEndOfLine: Boolean;
     function GetToken: string;
@@ -309,7 +309,7 @@ begin
   Result := FEndOfLine;
 end;
 
-function TBCEditorHighlighter.GetCurrentRange: Pointer;
+function TBCEditorHighlighter.GetCurrentRange: TBCEditorRange;
 begin
   Result := FCurrentRange;
 end;

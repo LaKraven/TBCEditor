@@ -141,7 +141,7 @@ var
     Macro: string;
   begin
     Result := True;
-    Macro := UpperCase(Copy(FText, Start, Run - Start + 1));
+    Macro := AnsiUpperCase(Copy(FText, Start, Run - Start + 1));
     if Macro = '$PAGENUM$' then
     begin
       if Roman then

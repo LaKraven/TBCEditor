@@ -526,6 +526,7 @@ type
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
     procedure RescanCodeFoldingRanges;
     procedure SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+    procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(AIndex: Integer; ATextPosition: TBCEditorTextPosition);
     procedure SetCaretAndSelection(ACaretPosition, ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition);
@@ -12177,13 +12178,18 @@ var
 begin
   LFileStream := TFileStream.Create(AFileName, fmCreate);
   try
-    if Assigned(AEncoding) then
-      FEncoding := AEncoding;
-    FLines.SaveToStream(LFileStream, FEncoding);
-    Modified := False;
+    SaveToStream(LFileStream, AEncoding);
   finally
     LFileStream.Free;
   end;
+end;
+
+procedure TBCBaseEditor.SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
+begin
+  if Assigned(AEncoding) then
+    FEncoding := AEncoding;
+  FLines.SaveToStream(AStream, FEncoding);
+  Modified := False;
 end;
 
 procedure TBCBaseEditor.SelectAll;

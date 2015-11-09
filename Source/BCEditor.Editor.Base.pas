@@ -511,6 +511,7 @@ type
     procedure InvalidateSelection;
     procedure LeftMarginChanged(Sender: TObject);
     procedure LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+    procedure LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
     procedure LockUndo;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
     procedure PasteFromClipboard;
@@ -10062,8 +10063,6 @@ begin
   LTextCaretPosition.Char := 1;
   LTextCaretPosition.Line := 0;
   TextCaretPosition := LTextCaretPosition;
-  //DisplayCaretX := 0;
-  //DisplayCaretY := 0;
 end;
 
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);
@@ -11833,6 +11832,17 @@ end;
 procedure TBCBaseEditor.LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LFileStream: TFileStream;
+begin
+  LFileStream := TFileStream.Create(AFileName, fmOpenRead);
+  try
+    LoadFromStream(LFileStream, AEncoding);
+  finally
+    LFileStream.Free;
+  end;
+end;
+
+procedure TBCBaseEditor.LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
+var
   LBuffer: TBytes;
   LWithBOM: Boolean;
   LWordWrapEnabled: Boolean;
@@ -11843,33 +11853,30 @@ begin
   FWordWrap.Enabled := False;
   ClearCodeFolding;
   ClearBookmarks;
-  LFileStream := TFileStream.Create(AFileName, fmOpenRead);
-  try
-    if Assigned(AEncoding) then
-      FEncoding := AEncoding
+
+  if Assigned(AEncoding) then
+    FEncoding := AEncoding
+  else
+  { Identify encoding }
+  if IsUTF8(AStream, LWithBOM) then
+  begin
+    if LWithBOM then
+      FEncoding := TEncoding.UTF8
     else
-    { Identify encoding }
-    if IsUTF8(LFileStream, LWithBOM) then
-    begin
-      if LWithBOM then
-        FEncoding := TEncoding.UTF8
-      else
-        FEncoding := BCEditor.Encoding.TEncoding.UTF8WithoutBOM;
-    end
-    else
-    { Read file into buffer }
-    begin
-      SetLength(LBuffer, LFileStream.Size);
-      LFileStream.ReadBuffer(pointer(LBuffer)^, Length(LBuffer));
-      TEncoding.GetBufferEncoding(LBuffer, FEncoding);
-    end;
-    LFileStream.Position := 0;
-    FLines.LoadFromStream(LFileStream, FEncoding);
-    FResetLineNumbersCache := True;
-    CreateLineNumbersCache;
-  finally
-    LFileStream.Free;
+      FEncoding := BCEditor.Encoding.TEncoding.UTF8WithoutBOM;
+  end
+  else
+  { Read file into buffer }
+  begin
+    SetLength(LBuffer, AStream.Size);
+    AStream.ReadBuffer(pointer(LBuffer)^, Length(LBuffer));
+    TEncoding.GetBufferEncoding(LBuffer, FEncoding);
   end;
+  AStream.Position := 0;
+  FLines.LoadFromStream(AStream, FEncoding);
+  FResetLineNumbersCache := True;
+  CreateLineNumbersCache;
+
   if FCodeFolding.Visible then
     InitCodeFolding;
   if CanFocus then

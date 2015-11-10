@@ -8925,7 +8925,7 @@ var
       begin
         LStr := LLeftSide + Copy(AValue, 1, LTextPointer - LStart);
         FLines[LTextCaretPosition.Line] := LStr;
-        FLines.InsertLines(LTextCaretPosition.Line, CountLines(LTextPointer));
+        FLines.InsertLines(LTextCaretPosition.Line + 1, CountLines(LTextPointer));
       end
       else
       begin

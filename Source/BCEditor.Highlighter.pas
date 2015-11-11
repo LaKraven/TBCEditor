@@ -465,7 +465,6 @@ end;
 procedure TBCEditorHighlighter.UpdateColors;
 begin
   UpdateAttributes(MainRules, nil);
-  //MainRules.Prepare(MainRules);
 end;
 
 procedure TBCEditorHighlighter.LoadFromFile(AFileName: string);

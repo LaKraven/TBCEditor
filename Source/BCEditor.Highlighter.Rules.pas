@@ -135,7 +135,7 @@ type
     procedure AddKeyList(NewKeyList: TBCEditorKeyList);
     procedure AddRange(NewRange: TBCEditorRange);
     procedure AddSet(NewSet: TBCEditorSet);
-    procedure AddToken(NewToken: TBCEditorToken);
+    procedure AddToken(AToken: TBCEditorToken);
     procedure AddTokenRange(AOpenToken: string; AOpenTokenBreakType: TBCEditorBreakType; ACloseToken: string;
       ACloseTokenBreakType: TBCEditorBreakType);
     procedure Clear;
@@ -409,7 +409,7 @@ begin
 
   FOpenToken := TBCEditorMultiToken.Create;
   FCloseToken := TBCEditorMultiToken.Create;
-  AddTokenRange(AOpenToken, btAny, ACloseToken, btAny);
+  AddTokenRange(AOpenToken, btUnspecified, ACloseToken, btUnspecified);
 
   SetCaseSensitive(False);
 
@@ -449,13 +449,13 @@ begin
   inherited;
 end;
 
-procedure TBCEditorRange.AddToken(NewToken: TBCEditorToken);
+procedure TBCEditorRange.AddToken(AToken: TBCEditorToken);
 var
   Token: TBCEditorToken;
 begin
-  Token := FindToken(NewToken.Symbol);
+  Token := FindToken(AToken.Symbol);
   if not Assigned(Token) then
-    FTokens.Add(NewToken);
+    FTokens.Add(AToken);
 end;
 
 function TBCEditorRange.FindToken(AString: string): TBCEditorToken;
@@ -592,39 +592,40 @@ end;
 procedure TBCEditorRange.Prepare(AParent: TBCEditorRange);
 var
   i, j, LLength: Integer;
-  Token: TBCEditorToken;
-  Symbol: string;
-  FirstChar: Char;
-  BreakType: TBCEditorBreakType;
+  LSymbol: string;
+  LFirstChar: Char;
+  LBreakType: TBCEditorBreakType;
 
-  function InsertTokenDefault(AToken: TBCEditorToken; Rules: TBCEditorRange; Attribute: TBCEditorHighlighterAttribute): TBCEditorToken;
+  function InsertTokenDefault(AToken: TBCEditorToken; ARules: TBCEditorRange; AAttribute: TBCEditorHighlighterAttribute): TBCEditorToken;
   begin
-    Result := Rules.FindToken(AToken.Symbol);
+    Result := ARules.FindToken(AToken.Symbol);
     if not Assigned(Result) then
-    begin
-      Result := TBCEditorToken.Create(AToken);
-      Rules.AddToken(Result);
-    end;
+      Result := AToken
+    else
+      AToken.Free;
+    ARules.AddToken(Result);
     if not Assigned(Result.Attribute) then
-      Result.Attribute := Attribute;
+      Result.Attribute := AAttribute;
   end;
 
-  function InsertToken(Token: TBCEditorToken; Rules: TBCEditorRange): TBCEditorToken;
+  procedure InsertToken(AToken: TBCEditorToken; ARules: TBCEditorRange);
+  var
+    LToken: TBCEditorToken;
   begin
-    Result := Rules.FindToken(Token.Symbol);
-    if not Assigned(Result) then
-    begin
-      Result := TBCEditorToken.Create(Token);
-      Rules.AddToken(Result);
-    end
+    LToken := ARules.FindToken(AToken.Symbol);
+    if not Assigned(LToken) then
+      ARules.AddToken(AToken)
     else
-      Result.Attribute := Token.Attribute;
+    begin
+      AToken.Free;
+      LToken.Attribute := AToken.Attribute;
+    end;
   end;
 
 var
-  Range: TBCEditorRange;
-  KeyList: TBCEditorKeyList;
-  LToken: TBCEditorToken;
+  LRange: TBCEditorRange;
+  LKeyList: TBCEditorKeyList;
+  LToken, LTempToken: TBCEditorToken;
   LAnsiChar: AnsiChar;
   LChar: Char;
 begin
@@ -643,33 +644,30 @@ begin
   if Assigned(FRanges) then
   for i := 0 to FRanges.Count - 1 do
   begin
-    Range := TBCEditorRange(FRanges[i]);
+    LRange := TBCEditorRange(FRanges[i]);
 
-    for j := 0 to Range.FOpenToken.SymbolCount - 1 do
+    for j := 0 to LRange.FOpenToken.SymbolCount - 1 do
     begin
-      Token := TBCEditorToken.Create(Range.OpenToken, j);
-      LToken := InsertTokenDefault(Token, Self, Range.Attribute);
-      LToken.OpenRule := Range;
-      Token.Free;
+      LTempToken := TBCEditorToken.Create(LRange.OpenToken, j);
+      LToken := InsertTokenDefault(LTempToken, Self, LRange.Attribute);
+      LToken.OpenRule := LRange;
 
-      Token := TBCEditorToken.Create(Range.CloseToken, j);
-      LToken.ClosingToken := InsertTokenDefault(Token, Range, Range.Attribute);
-      Token.Free;
+      LTempToken := TBCEditorToken.Create(LRange.CloseToken, j);
+      LToken.ClosingToken := InsertTokenDefault(LTempToken, LRange, LRange.Attribute);
     end;
-    Range.Prepare(Self);
+    LRange.Prepare(Self);
   end;
 
   if Assigned(FKeyList) then
   for i := 0 to FKeyList.Count - 1 do
   begin
-    KeyList := TBCEditorKeyList(FKeyList[i]);
+    LKeyList := TBCEditorKeyList(FKeyList[i]);
 
-    for j := 0 to KeyList.KeyList.Count - 1 do
+    for j := 0 to LKeyList.KeyList.Count - 1 do
     begin
-      Token := TBCEditorToken.Create(KeyList.Attribute);
-      Token.Symbol := KeyList.KeyList[j];
-      InsertToken(Token, Self);
-      Token.Free;
+      LTempToken := TBCEditorToken.Create(LKeyList.Attribute);
+      LTempToken.Symbol := LKeyList.KeyList[j];
+      InsertToken(LTempToken, Self);
     end;
   end;
 
@@ -678,35 +676,36 @@ begin
   if Assigned(FTokens) then
   for i := 0 to FTokens.Count - 1 do
   begin
-    Token := TBCEditorToken(FTokens[i]);
-    LLength := Length(Token.Symbol);
-    if LLength < 1 then
+    LTempToken := TBCEditorToken(FTokens[i]);
+    LLength := Length(LTempToken.Symbol);
+    if (LLength < 1) or (LTempToken.Symbol = ' ') then
       Continue;
 
-    Symbol := Token.Symbol;
-    FirstChar := Symbol[1];
+    LSymbol := LTempToken.Symbol;
+    LFirstChar := LSymbol[1];
 
-    if Token.BreakType <> btUnspecified then
-      BreakType := Token.BreakType
+    if CharInSet(LFirstChar, FDelimiters) then
+      LBreakType := btAny
     else
-    if CharInSet(Symbol[LLength], FDelimiters) then
-      BreakType := btAny
+    if LTempToken.BreakType <> btUnspecified then
+      LBreakType := LTempToken.BreakType
     else
-      BreakType := btTerm;
+      LBreakType := btTerm;
 
-    LChar := CaseFunct(FirstChar);
+    LChar := CaseFunct(LFirstChar);
     if Ord(LChar) < 256 then
     begin
       LAnsiChar := AnsiChar(LChar);
       if not Assigned(SymbolList[LAnsiChar]) then
       begin
         if LLength = 1 then
-          FSymbolList[LAnsiChar] := TBCEditorParser.Create(FirstChar, Token, BreakType)
+          FSymbolList[LAnsiChar] := TBCEditorParser.Create(LFirstChar, LTempToken, LBreakType)
         else
-          FSymbolList[LAnsiChar] := TBCEditorParser.Create(FirstChar, FDefaultToken, BreakType);
+          FSymbolList[LAnsiChar] := TBCEditorParser.Create(LFirstChar, FDefaultToken, LBreakType);
       end;
       if LLength <> 1 then
-        TBCEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(Symbol, 2, LLength - 1)), Token, BreakType);
+        TBCEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(LSymbol, 2, LLength - 1)), LTempToken,
+          LBreakType);
     end;
   end;
 

@@ -8231,12 +8231,12 @@ var
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
           LTokenText := FHighlighter.GetToken;
-          LTokenLength := Length(LTokenText);
+          LTokenLength := FHighlighter.GetTokenLength;
           if LTokenPosition + LTokenLength >= LFirstColumn then
           begin
             if FWordWrap.Enabled then
             begin
-              if LTokenPosition + LTokenLength > LLastColumn then
+              if LTokenPosition + LTokenLength >= LLastColumn then
               begin
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
                 LLastColumn := LFirstColumn + FVisibleChars;

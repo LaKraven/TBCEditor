@@ -17,10 +17,7 @@ type
   strict private
     FAttribute: TBCEditorHighlighterAttribute;
     FBreakType: TBCEditorBreakType;
-   // FFinishOnEol: Boolean;
     FOpenRule: TBCEditorAbstractRule;
-   // FStartLine: TBCEditorStartLine;
-    //FStartType: TBCEditorStartType;
   public
     constructor Create; reintroduce; overload;
     constructor Create(AHighlighterAttribute: TBCEditorHighlighterAttribute); reintroduce; overload;
@@ -29,10 +26,7 @@ type
     procedure Clear;
     property Attribute: TBCEditorHighlighterAttribute read FAttribute write FAttribute;
     property BreakType: TBCEditorBreakType read FBreakType write FBreakType;
-  //  property FinishOnEol: Boolean read FFinishOnEol write FFinishOnEol;
     property OpenRule: TBCEditorAbstractRule read FOpenRule write FOpenRule;
- //   property StartLine: TBCEditorStartLine read FStartLine write FStartLine;
-  //  property StartType: TBCEditorStartType read FStartType write FStartType;
   end;
 
   TBCEditorMultiToken = class(TBCEditorAbstractToken)
@@ -77,7 +71,6 @@ type
   strict private
     FChar: Char;
     FBreakType: TBCEditorBreakType;
-    //FStartType: TBCEditorStartType;
     FNextNodes: TBCEditorTokenNodeList;
     FToken: TBCEditorToken;
   public
@@ -87,7 +80,6 @@ type
 
     property Char: Char read FChar write FChar;
     property BreakType: TBCEditorBreakType read FBreakType write FBreakType;
-   // property StartType: TBCEditorStartType read FStartType write FStartType;
     property NextNodes: TBCEditorTokenNodeList read FNextNodes write FNextNodes;
     property Token: TBCEditorToken read FToken write FToken;
   end;
@@ -121,8 +113,6 @@ begin
 
   FAttribute := nil;
   FOpenRule := nil;
- // FStartLine := slNotFirst;
-  //FStartType := stUnspecified;
   FBreakType := btUnspecified;
 end;
 
@@ -136,15 +126,12 @@ constructor TBCEditorAbstractToken.Create(AToken: TBCEditorAbstractToken);
 begin
   inherited Create;
   FAttribute := AToken.Attribute;
- // FStartLine := AToken.StartLine;
- // FStartType := AToken.StartType;
   FBreakType := AToken.BreakType;
 end;
 
 procedure TBCEditorAbstractToken.Clear;
 begin
- // FStartType := stAny;
-  FBreakType := btAny;
+  FBreakType := btUnspecified;
 end;
 
 { TBCEditorMultiToken }
@@ -154,8 +141,7 @@ begin
   inherited;
 
   FSymbols := TStringList.Create;
- // FStartType := stAny;
-  BreakType := btAny;
+  BreakType := btUnspecified;
 end;
 
 constructor TBCEditorMultiToken.Create(AHighlighterAttribute: TBCEditorHighlighterAttribute);
@@ -240,9 +226,6 @@ end;
 
 function TBCEditorToken.GetSymbol: string;
 begin
-  {if FinishOnEol then
-    Result := FSymbol + BCEDITOR_NONE_CHAR
-  else   }
   Result := FSymbol;
 end;
 
@@ -265,7 +248,6 @@ constructor TBCEditorTokenNode.Create(AChar: Char; AToken: TBCEditorToken; ABrea
 begin
   Create(AChar);
   FBreakType := ABreakType;
- // FStartType := AToken.StartType;
   FToken := AToken;
 end;
 

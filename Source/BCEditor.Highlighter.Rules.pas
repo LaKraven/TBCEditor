@@ -617,8 +617,8 @@ var
       ARules.AddToken(AToken)
     else
     begin
-      AToken.Free;
       LToken.Attribute := AToken.Attribute;
+      AToken.Free;
     end;
   end;
 

@@ -7966,7 +7966,7 @@ var
         X2 := CharWidth(LLineSelectionEnd, AMinimap);
         if LTokenRect.Left < X1 then
         begin
-          SetDrawingColors(False);
+          SetDrawingColors(soFromEndOfLine in FSelection.Options);
           LTokenRect.Right := X1;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
           LTokenRect.Left := X1;

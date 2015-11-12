@@ -75,6 +75,7 @@ type
 
   TBCEditorSelectionOption = (
     soALTSetsColumnMode,
+    soFromEndOfLine,
     soHighlightSimilarTerms,
     soToEndOfLine,
     soTripleClickRowSelect

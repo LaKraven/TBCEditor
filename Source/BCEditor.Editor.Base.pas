@@ -11657,12 +11657,12 @@ end;
 
 procedure TBCBaseEditor.InitCodeFolding;
 begin
+  ClearCodeFolding;
   if Visible then
   begin
     FResetLineNumbersCache := True;
     CreateLineNumbersCache;
   end;
-  ClearCodeFolding;
   ScanCodeFoldingRanges;
   CodeFoldingResetCaches;
 end;
@@ -11879,11 +11879,16 @@ begin
   CreateLineNumbersCache;
 
   if FCodeFolding.Visible then
-    InitCodeFolding;
+  begin
+    ScanCodeFoldingRanges;
+    CodeFoldingResetCaches;
+  end;
+
   if CanFocus then
     SetFocus;
   FWordWrap.Enabled := LWordWrapEnabled;
   SizeOrFontChanged(True);
+  Invalidate;
 end;
 
 procedure TBCBaseEditor.LockUndo;

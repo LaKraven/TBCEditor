@@ -684,7 +684,7 @@ begin
     LSymbol := LTempToken.Symbol;
     LFirstChar := LSymbol[1];
 
-    if CharInSet(LFirstChar, FDelimiters) then
+    if CharInSet(LSymbol[LLength], FDelimiters) then
       LBreakType := btAny
     else
     if LTempToken.BreakType <> btUnspecified then

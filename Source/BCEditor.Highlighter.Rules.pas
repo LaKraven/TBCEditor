@@ -684,7 +684,7 @@ begin
     LSymbol := LTempToken.Symbol;
     LFirstChar := LSymbol[1];
 
-    if CharInSet(LSymbol[LLength], FDelimiters) then
+    if CharInSet(LFirstChar{LSymbol[LLength]}, FDelimiters) then
       LBreakType := btAny
     else
     if LTempToken.BreakType <> btUnspecified then
@@ -703,6 +703,8 @@ begin
         else
           FSymbolList[LAnsiChar] := TBCEditorParser.Create(LFirstChar, FDefaultToken, LBreakType);
       end;
+      if CharInSet(LSymbol[LLength], FDelimiters) then
+        LBreakType := btAny;
       if LLength <> 1 then
         TBCEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(LSymbol, 2, LLength - 1)), LTempToken,
           LBreakType);

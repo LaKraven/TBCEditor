@@ -7878,7 +7878,7 @@ var
     LIsTokenSelected: Boolean;
     LFirstColumn, LLastColumn, LSelectionStart, LSelectionEnd: Integer;
     LFirstUnselectedPartOfToken, LSelected, LSecondUnselectedPartOfToken: Boolean;
-    X: Integer;
+    X1, X2: Integer;
   begin
     { Compute some helper variables. }
     LFirstColumn := Max(LFirstChar, LTokenHelper.CharsBefore + 1);
@@ -7962,13 +7962,27 @@ var
 
       if LIsComplexLine then
       begin
-        X := CharWidth(LLineSelectionEnd, AMinimap);
-        if LTokenRect.Left < X then
+        X1 := CharWidth(LLineSelectionStart, AMinimap);
+        X2 := CharWidth(LLineSelectionEnd, AMinimap);
+        if LTokenRect.Left < X1 then
+        begin
+          SetDrawingColors(False);
+          LTokenRect.Right := X1;
+          Canvas.FillRect(LTokenRect); { fill end of line rect }
+          LTokenRect.Left := X1;
+        end;
+        if LTokenRect.Left < X2 then
         begin
           SetDrawingColors(not (soToEndOfLine in FSelection.Options));
-          LTokenRect.Right := X;
+          LTokenRect.Right := X2;
           Canvas.FillRect(LTokenRect); { fill end of line rect }
-          LTokenRect.Left := X;
+          LTokenRect.Left := X2;
+        end;
+        if LTokenRect.Left < LLineRect.Right then
+        begin
+          SetDrawingColors(False);
+          LTokenRect.Right := LLineRect.Right;
+          Canvas.FillRect(LTokenRect); { fill end of line rect }
         end;
       end
       else

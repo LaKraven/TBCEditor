@@ -6822,7 +6822,7 @@ begin
       end;
 
       { Code folding }
-      if FCodeFolding.Visible and (Lines.Count > 0) then
+      if FCodeFolding.Visible then
       begin
         DrawRect.Left := FLeftMargin.GetWidth;
         DrawRect.Right := DrawRect.Left + FCodeFolding.GetWidth;

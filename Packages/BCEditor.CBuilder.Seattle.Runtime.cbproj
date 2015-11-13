@@ -167,9 +167,6 @@
         <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas">
             <BuildOrder>12</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\BCEditor.Editor.CodeFolding.Types.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.CompletionProposal.Colors.pas">
             <BuildOrder>18</BuildOrder>
         </DelphiCompile>

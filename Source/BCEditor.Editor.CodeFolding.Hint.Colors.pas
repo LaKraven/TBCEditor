@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
-    property Border: TColor read FBorder write FBorder default clBtnFace;
     property Background: TColor read FBackground write FBackground default clWindow;
+    property Border: TColor read FBorder write FBorder default clBtnFace;
   end;
 
 implementation
@@ -26,8 +26,8 @@ constructor TBCEditorCodeFoldingHintColors.Create;
 begin
   inherited;
 
-  FBorder := clBtnFace;
   FBackground := clWindow;
+  FBorder := clBtnFace;
 end;
 
 procedure TBCEditorCodeFoldingHintColors.Assign(Source: TPersistent);
@@ -35,8 +35,8 @@ begin
   if Source is TBCEditorCodeFoldingHintColors then
   with Source as TBCEditorCodeFoldingHintColors do
   begin
-    Self.FBorder := FBorder;
     Self.FBackground := FBackground;
+    Self.FBorder := FBorder;
   end
   else
     inherited;

@@ -8,9 +8,9 @@ uses
 type
   TBCEditorCaretStyles = class(TPersistent)
   strict private
-    FOverwrite: TBCEditorCaretStyle;
     FInsert: TBCEditorCaretStyle;
     FOnChange: TNotifyEvent;
+    FOverwrite: TBCEditorCaretStyle;
     procedure DoChange;
     procedure SetInsert(const Value: TBCEditorCaretStyle);
     procedure SetOverwrite(const Value: TBCEditorCaretStyle);
@@ -19,8 +19,8 @@ type
     procedure Assign(Source: TPersistent); override;
   published
     property Insert: TBCEditorCaretStyle read FInsert write SetInsert default csThinVerticalLine;
-    property Overwrite: TBCEditorCaretStyle read FOverwrite write SetOverwrite default csThinVerticalLine;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Overwrite: TBCEditorCaretStyle read FOverwrite write SetOverwrite default csThinVerticalLine;
   end;
 
 implementation

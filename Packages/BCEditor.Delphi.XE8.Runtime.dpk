@@ -53,7 +53,6 @@ contains
   BCEditor.Editor.CodeFolding.Hint.Form in '..\Source\BCEditor.Editor.CodeFolding.Hint.Form.pas',
   BCEditor.Editor.CodeFolding.Ranges in '..\Source\BCEditor.Editor.CodeFolding.Ranges.pas',
   BCEditor.Editor.CodeFolding.Regions in '..\Source\BCEditor.Editor.CodeFolding.Regions.pas',
-  BCEditor.Editor.CodeFolding.Types in '..\Source\BCEditor.Editor.CodeFolding.Types.pas',
   BCEditor.Editor.CompletionProposal in '..\Source\BCEditor.Editor.CompletionProposal.pas',
   BCEditor.Editor.CompletionProposal.Colors in '..\Source\BCEditor.Editor.CompletionProposal.Colors.pas',
   BCEditor.Editor.CompletionProposal.Columns in '..\Source\BCEditor.Editor.CompletionProposal.Columns.pas',

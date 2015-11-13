@@ -8,9 +8,9 @@ uses
 type
   TBCEditorCaretOffsets = class(TPersistent)
   strict private
+    FOnChange: TNotifyEvent;
     FX: Integer;
     FY: Integer;
-    FOnChange: TNotifyEvent;
     procedure DoChange(Sender: TObject);
     procedure SetX(Value: Integer);
     procedure SetY(Value: Integer);
@@ -18,9 +18,9 @@ type
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property X: Integer read FX write SetX default 0;
     property Y: Integer read FY write SetY default 0;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
 implementation

@@ -11,7 +11,6 @@ type
     FBackgroundColor: TColor;
     FBufferBitmap: TBitmap;
     FBorderColor: TColor;
-    FCaseSensitive: Boolean;
     FEffectiveItemHeight: Integer;
     FFont: TFont;
     FFontHeight: Integer;
@@ -86,8 +85,6 @@ begin
 
   FBackgroundColor := clWindow;
   FBorderColor := clBtnFace;
-
-  FCaseSensitive := False;
 
   BorderStyle := bsNone;
   FormStyle := fsStayOnTop;

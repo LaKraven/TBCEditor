@@ -8,8 +8,8 @@ uses
 type
   TBCEditorCaretNonBlinking = class(TPersistent)
   strict private
-    FEnabled: Boolean;
     FColors: TBCEditorCaretNonBlinkingColors;
+    FEnabled: Boolean;
     FOnChange: TNotifyEvent;
     procedure DoChange;
     procedure SetColors(Value: TBCEditorCaretNonBlinkingColors);
@@ -19,8 +19,8 @@ type
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
   published
-    property Enabled: Boolean read FEnabled write SetEnabled;
     property Colors: TBCEditorCaretNonBlinkingColors read FColors write SetColors;
+    property Enabled: Boolean read FEnabled write SetEnabled;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 

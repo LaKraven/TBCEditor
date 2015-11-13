@@ -136,11 +136,11 @@
         <DCCReference Include="..\Source\BCEditor.Editor.Caret.Styles.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Colors.pas"/>
-        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Colors.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Form.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Ranges.pas"/>
-        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Types.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Regions.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CompletionProposal.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CompletionProposal.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.CompletionProposal.Columns.pas"/>
@@ -163,6 +163,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.MatchingPair.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Minimap.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Minimap.Colors.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.PopupWindow.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Replace.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.RightMargin.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.RightMargin.Colors.pas"/>
@@ -194,6 +195,7 @@
         <DCCReference Include="..\Source\BCEditor.Highlighter.JSONImporter.pas"/>
         <DCCReference Include="..\Source\BCEditor.Highlighter.Rules.pas"/>
         <DCCReference Include="..\Source\BCEditor.Highlighter.Token.pas"/>
+        <DCCReference Include="..\Source\BCEditor.JsonDataObjects.pas"/>
         <DCCReference Include="..\Source\BCEditor.KeyboardHandler.pas"/>
         <DCCReference Include="..\Source\BCEditor.Language.pas"/>
         <DCCReference Include="..\Source\BCEditor.Lines.pas"/>
@@ -211,9 +213,6 @@
         <DCCReference Include="..\Source\BCEditor.TextDrawer.pas"/>
         <DCCReference Include="..\Source\BCEditor.Types.pas"/>
         <DCCReference Include="..\Source\BCEditor.Utils.pas"/>
-        <DCCReference Include="..\Source\BCEditor.JsonDataObjects.pas"/>
-        <DCCReference Include="..\Source\BCEditor.Editor.CodeFolding.Hint.Form.pas"/>
-        <DCCReference Include="..\Source\BCEditor.Editor.PopupWindow.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -600,13 +599,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

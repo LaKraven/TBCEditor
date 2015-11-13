@@ -10,15 +10,15 @@ type
 
   TBCEditorCodeFoldingRegionItem = class(TCollectionItem)
   strict private
-    FOpenTokenBeginningOfLine: Boolean;
-    FCloseTokenBeginningOfLine: Boolean;
     FBreakIfNotFoundBeforeNextRegion: string;
     FCloseAtNextToken: Boolean;
     FCloseToken: string;
+    FCloseTokenBeginningOfLine: Boolean;
     FCloseTokenLength: Integer;
     FNoSubs: Boolean;
     FOpenIsClose: Boolean;
     FOpenToken: string;
+    FOpenTokenBeginningOfLine: Boolean;
     FOpenTokenCanBeFollowedBy: string;
     FOpenTokenEnd: string;
     FOpenTokenLength: Integer;
@@ -31,15 +31,15 @@ type
     procedure SetSkipIfFoundAfterOpenTokenArrayCount(const Value: Integer);
   public
     constructor Create(Collection: TCollection); override;
-    property OpenTokenBeginningOfLine: Boolean read FOpenTokenBeginningOfLine write FOpenTokenBeginningOfLine default False;
-    property CloseTokenBeginningOfLine: Boolean read FCloseTokenBeginningOfLine write FCloseTokenBeginningOfLine default False;
     property BreakIfNotFoundBeforeNextRegion: string read FBreakIfNotFoundBeforeNextRegion write FBreakIfNotFoundBeforeNextRegion;
     property CloseAtNextToken: Boolean read FCloseAtNextToken write FCloseAtNextToken;
     property CloseToken: string read FCloseToken write FCloseToken;
+    property CloseTokenBeginningOfLine: Boolean read FCloseTokenBeginningOfLine write FCloseTokenBeginningOfLine default False;
     property CloseTokenLength: Integer read FCloseTokenLength write FCloseTokenLength;
     property NoSubs: Boolean read FNoSubs write FNoSubs default False;
     property OpenIsClose: Boolean read FOpenIsClose write FOpenIsClose default False;
     property OpenToken: string read FOpenToken write FOpenToken;
+    property OpenTokenBeginningOfLine: Boolean read FOpenTokenBeginningOfLine write FOpenTokenBeginningOfLine default False;
     property OpenTokenCanBeFollowedBy: string read FOpenTokenCanBeFollowedBy write FOpenTokenCanBeFollowedBy;
     property OpenTokenEnd: string read FOpenTokenEnd write FOpenTokenEnd;
     property OpenTokenLength: Integer read FOpenTokenLength write FOpenTokenLength;
@@ -95,16 +95,16 @@ begin
   Result := TBCEditorCodeFoldingRegionItem(inherited Add);
   with Result do
   begin
-    OpenToken := AOpenToken;
-    OpenTokenLength := Length(AOpenToken);
-    CloseToken := ACloseToken;
-    CloseTokenLength := Length(ACloseToken);
-    OpenTokenBeginningOfLine := False;
-    CloseTokenBeginningOfLine := False;
-    SharedClose := False;
-    OpenIsClose := False;
-    NoSubs := False;
     BreakIfNotFoundBeforeNextRegion := '';
+    CloseToken := ACloseToken;
+    CloseTokenBeginningOfLine := False;
+    CloseTokenLength := Length(ACloseToken);
+    NoSubs := False;
+    OpenIsClose := False;
+    OpenToken := AOpenToken;
+    OpenTokenBeginningOfLine := False;
+    OpenTokenLength := Length(AOpenToken);
+    SharedClose := False;
   end;
 end;
 
@@ -118,6 +118,7 @@ end;
 destructor TBCEditorCodeFoldingRegion.Destroy;
 begin
   FSkipRegions.Free;
+
   inherited;
 end;
 

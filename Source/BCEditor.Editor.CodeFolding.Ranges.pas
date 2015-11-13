@@ -53,15 +53,15 @@ type
     FCollapsed: Boolean;
     FCollapsedBy: Integer;
     FCollapseMarkRect: TRect;
-    FRegionItem: TBCEditorCodeFoldingRegionItem;
+    FFoldRangeLevel: Integer;
     FFromLine: Integer;
     FIndentLevel: Integer;
+    FIsExtraTokenFound: Boolean;
     FParentCollapsed: Boolean;
-    FUndoListed: Boolean;
-    FFoldRangeLevel: Integer;
+    FRegionItem: TBCEditorCodeFoldingRegionItem;
     FSubCodeFoldingRanges: TBCEditorCodeFoldingRanges;
     FToLine: Integer;
-    FIsExtraTokenFound: Boolean;
+    FUndoListed: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -75,15 +75,15 @@ type
     property Collapsed: Boolean read FCollapsed write FCollapsed default False;
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
     property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
-    property RegionItem: TBCEditorCodeFoldingRegionItem read FRegionItem write FRegionItem;
-    property FromLine: Integer read FFromLine write FFromLine;
-    property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
-    property IndentLevel: Integer read FIndentLevel write FIndentLevel;
-    property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
-    property UndoListed: Boolean read FUndoListed write FUndoListed default False;
     property FoldRangeLevel: Integer read FFoldRangeLevel write FFoldRangeLevel;
+    property FromLine: Integer read FFromLine write FFromLine;
+    property IndentLevel: Integer read FIndentLevel write FIndentLevel;
+    property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
+    property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
+    property RegionItem: TBCEditorCodeFoldingRegionItem read FRegionItem write FRegionItem;
     property SubCodeFoldingRanges: TBCEditorCodeFoldingRanges read FSubCodeFoldingRanges;
     property ToLine: Integer read FToLine write FToLine;
+    property UndoListed: Boolean read FUndoListed write FUndoListed default False;
   end;
 
 implementation

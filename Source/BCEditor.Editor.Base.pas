@@ -372,7 +372,7 @@ type
     procedure DoBlockUnindent;
     procedure DoChange; virtual;
     procedure DoCopyToClipboard(const AText: string);
-    procedure DoExecuteCompletionProposal;
+    procedure DoExecuteCompletionProposal; virtual;
     procedure DoKeyPressW(var Message: TWMKey);
     procedure DoOnAfterBookmarkPlaced;
     procedure DoOnAfterClearBookmark;
@@ -798,7 +798,7 @@ begin
   FScrollTimer.Interval := 100;
   FScrollTimer.OnTimer := ScrollTimerHandler;
   { Completion proposal }
-  FCompletionProposal := TBCEditorCompletionProposal.Create;
+  FCompletionProposal := TBCEditorCompletionProposal.Create(Self);
   FCompletionProposalTimer := TTimer.Create(Self);
   FCompletionProposalTimer.Enabled := False;
   FCompletionProposalTimer.OnTimer := CompletionProposalTimerHandler;
@@ -5125,22 +5125,18 @@ begin
   FreeCompletionProposalPopupWindow;
 
   case Msg.ScrollCode of
-    { Scrolls to start / end of the text }
     SB_TOP:
       TopLine := 1;
     SB_BOTTOM:
       TopLine := FLineNumbersCount;
-    { Scrolls one line up / down }
     SB_LINEDOWN:
       TopLine := TopLine + 1;
     SB_LINEUP:
       TopLine := TopLine - 1;
-    { Scrolls one page of lines up / down }
     SB_PAGEDOWN:
       TopLine := TopLine + FVisibleLines;
     SB_PAGEUP:
       TopLine := TopLine - FVisibleLines;
-    { Scrolls to the current scroll bar position }
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         FIsScrolling := True;
@@ -5676,6 +5672,8 @@ procedure TBCBaseEditor.DoExecuteCompletionProposal;
 var
   LPoint: TPoint;
 begin
+  Assert(FCompletionProposal.CompletionColumnIndex < FCompletionProposal.Columns.Count);
+
   LPoint := ClientToScreen(RowColumnToPixels(DisplayCaretPosition));
   Inc(LPoint.Y, LineHeight);
 

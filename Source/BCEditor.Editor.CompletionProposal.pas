@@ -12,25 +12,28 @@ type
     FCloseChars: string;
     FColors: TBCEditorCompletionProposalColors;
     FColumns: TBCEditorProposalColumns;
+    FCompletionColumnIndex: Integer;
     FEnabled: Boolean;
     FFont: TFont;
-    FItemList: TStrings;
     FOptions: TBCEditorCompletionProposalOptions;
+    FOwner: TPersistent;
     FShortCut: TShortCut;
     FTrigger: TBCEditorCompletionProposalTrigger;
     FVisibleLines: Integer;
     FWidth: Integer;
+  protected
+    function GetOwner: TPersistent; override;
   public
-    constructor Create;
+    constructor Create(AOwner: TPersistent);
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
   published
     property CloseChars: string read FCloseChars write FCloseChars;
     property Colors: TBCEditorCompletionProposalColors read FColors write FColors;
     property Columns: TBCEditorProposalColumns read FColumns write FColumns;
+    property CompletionColumnIndex: Integer read FCompletionColumnIndex write FCompletionColumnIndex default 0;
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property Font: TFont read FFont write FFont;
-    property ItemList: TStrings read FItemList write FItemList;
     property Options: TBCEditorCompletionProposalOptions read FOptions write FOptions default [cpoFiltered, cpoParseItemsFromText, cpoResizeable];
     property ShortCut: TShortCut read FShortCut write FShortCut;
     property Trigger: TBCEditorCompletionProposalTrigger read FTrigger write FTrigger;
@@ -45,18 +48,20 @@ uses
 
 { TBCEditorCompletionProposal }
 
-constructor TBCEditorCompletionProposal.Create;
+constructor TBCEditorCompletionProposal.Create(AOwner: TPersistent);
 begin
-  inherited;
+  inherited Create;
 
+  FOwner := AOwner;
   FCloseChars := '()[]. ';
   FColors := TBCEditorCompletionProposalColors.Create;
   FColumns := TBCEditorProposalColumns.Create(Self, TBCEditorProposalColumn);
+  FColumns.Add; { default column }
+  FCompletionColumnIndex := 0;
   FEnabled := True;
   FFont := TFont.Create;
   FFont.Name := 'Courier New';
   FFont.Size := 8;
-  FItemList := TStringList.Create;
   FOptions := [cpoFiltered, cpoParseItemsFromText, cpoResizeable];
   FShortCut := Vcl.Menus.ShortCut(Ord(' '), [ssCtrl]);
   FTrigger := TBCEditorCompletionProposalTrigger.Create;
@@ -68,7 +73,6 @@ destructor TBCEditorCompletionProposal.Destroy;
 begin
   FColors.Free;
   FFont.Free;
-  FItemList.Free;
   FTrigger.Free;
   FColumns.Free;
 
@@ -85,7 +89,6 @@ begin
     Self.FColumns.Assign(FColumns);
     Self.FEnabled := FEnabled;
     Self.FFont.Assign(FFont);
-    Self.FItemList.Assign(FItemList);
     Self.FOptions := FOptions;
     Self.FShortCut := FShortCut;
     Self.FTrigger.Assign(FTrigger);
@@ -94,6 +97,11 @@ begin
   end
   else
     inherited;
+end;
+
+function TBCEditorCompletionProposal.GetOwner: TPersistent;
+begin
+  Result := FOwner;
 end;
 
 end.

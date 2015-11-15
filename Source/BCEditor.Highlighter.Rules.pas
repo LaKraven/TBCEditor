@@ -678,13 +678,13 @@ begin
   begin
     LTempToken := TBCEditorToken(FTokens[i]);
     LLength := Length(LTempToken.Symbol);
-    if (LLength < 1) or (LTempToken.Symbol = ' ') then
+    if LLength < 1 then
       Continue;
 
     LSymbol := LTempToken.Symbol;
     LFirstChar := LSymbol[1];
 
-    if CharInSet(LFirstChar{LSymbol[LLength]}, FDelimiters) then
+    if CharInSet(LFirstChar, FDelimiters) then
       LBreakType := btAny
     else
     if LTempToken.BreakType <> btUnspecified then

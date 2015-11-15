@@ -5235,7 +5235,7 @@ end;
 
 function TBCBaseEditor.DoSearchMatchNotFoundWraparoundDialog: Boolean;
 begin
-  Result := MessageDialog(Format(SBCEditorSearchMatchNotFound, [SLineBreak + SLineBreak]), mtConfirmation, [mbYes, mbNo]) = MrYes;
+  Result := MessageDialog(Format(SBCEditorSearchMatchNotFound, [SLineBreak + SLineBreak]), mtConfirmation, [mbYes, mbNo]) = mrYes;
 end;
 
 function TBCBaseEditor.GetReadOnly: Boolean;
@@ -10062,6 +10062,8 @@ begin
   LTextCaretPosition.Char := 1;
   LTextCaretPosition.Line := 0;
   TextCaretPosition := LTextCaretPosition;
+  SelectionBeginPosition := LTextCaretPosition;
+  SelectionEndPosition := LTextCaretPosition;
 end;
 
 procedure TBCBaseEditor.ChainEditor(AEditor: TBCBaseEditor);

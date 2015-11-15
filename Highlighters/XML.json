@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "28.10.2015",
+            "Date": "15.11.2015",
             "Sample": [
                "<!-- Hello World in XML -->\r\n",
                "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n",
@@ -39,9 +39,6 @@
                   "Type": "Tag",
                   "Attributes": {
                      "Element": "ReservedWord"
-                  },
-                  "Properties": {
-                     "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
                      "Open": "<",

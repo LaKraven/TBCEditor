@@ -1424,7 +1424,8 @@ var
       Next;
     end;
   end;
-
+var
+  LCaretX: Integer;
 begin
   Result := trNotFound;
   if FHighlighter = nil then
@@ -1437,9 +1438,9 @@ begin
       ResetCurrentRange
     else
       SetCurrentRange(FLines.Ranges[APoint.Line]);
-    SetCurrentLine(FLines[APoint.Line]);
-
-    while not GetEndOfLine and (APoint.Char >= GetTokenPosition + Length(GetToken)) do
+    SetCurrentLine(FLines.ExpandedStrings[APoint.Line]);
+    LCaretX := DisplayCaretX;
+    while not GetEndOfLine and (LCaretX > GetTokenPosition + GetTokenLength) do
       Next;
 
     if GetEndOfLine then

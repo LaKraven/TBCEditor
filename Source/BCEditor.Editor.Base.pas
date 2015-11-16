@@ -6792,7 +6792,6 @@ begin
   FTextDrawer.BeginDrawing(LHandle);
   try
     Canvas.Brush.Color := FBackgroundColor;
-    Canvas.FillRect(ClientRect); { fill background }
 
     { Text lines }
     if LClipRect.Right > LTextLinesLeft then
@@ -6850,7 +6849,8 @@ begin
         begin
           LLine1 := FTopLine;
           LLine2 := FTopLine + FVisibleLines;
-          BitBlt(Canvas.Handle, DrawRect.Left, DrawRect.Top, DrawRect.Width, DrawRect.Height, FMinimapBufferBmp.Canvas.Handle, 0, 0, SRCCOPY);
+          BitBlt(Canvas.Handle, DrawRect.Left, DrawRect.Top, DrawRect.Width, DrawRect.Height,
+            FMinimapBufferBmp.Canvas.Handle, 0, 0, SRCCOPY);
         end
         else
         begin
@@ -8392,9 +8392,9 @@ begin
   end;
 
   { If there is anything visible below the last line, then fill this as well }
-  (*LTokenRect := AClipRect;
+  LTokenRect := AClipRect;
   if AMinimap then
-    LTokenRect.Top := Max(VisibleLines, FLines.Count) * FMinimap.CharHeight
+    LTokenRect.Top := Min(FMinimap.VisibleLines, FLines.Count) * FMinimap.CharHeight
   else
     LTokenRect.Top := (ALastRow - TopLine + 1) * LineHeight;
 
@@ -8403,7 +8403,7 @@ begin
     LBackgroundColor := FBackgroundColor;
     SetDrawingColors(False);
     Canvas.FillRect(LTokenRect);
-  end; *)
+  end;
 
   if not AMinimap then
     if FRightMargin.Visible then

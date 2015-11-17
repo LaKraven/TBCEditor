@@ -7568,8 +7568,9 @@ var
   i: Integer;
   LPLine: PChar;
   LCharWidth, LTextHeight: Integer;
-  LCharPosition, X, Y: Integer;
+  LCharPosition, X, Y, LLeftTemp: Integer;
   LCharRect: TRect;
+  LPilcrow: string;
 begin
   if FSpecialChars.Visible then
   begin
@@ -7583,9 +7584,10 @@ begin
     LCharWidth := FCharWidth;
     LTextHeight := Max(FTextHeight - 8, 0) shr 4;
     with ALineRect do
-      X := Top + (Bottom - Top) shr 1;
+      X := Top + (Bottom - Top) shr 1 - 1;
 
     LCharPosition := 1;
+    LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy;
     while LPLine^ <> BCEDITOR_NONE_CHAR do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
@@ -7594,7 +7596,7 @@ begin
         begin
           Top := X - LTextHeight;
           Bottom := X + 2 + LTextHeight;
-          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
+          Left := LLeftTemp + LCharPosition * LCharWidth - LCharWidth div 2 - 1;
           Right := Left + 2;
         end;
         with Canvas, LCharRect do
@@ -7606,7 +7608,7 @@ begin
         begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom;
-          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
+          Left := LLeftTemp + LCharPosition * LCharWidth - LCharWidth div 2 - 1;
           Right := Left + FTabs.Width * LCharWidth - 6;
         end;
         with Canvas do
@@ -7653,17 +7655,36 @@ begin
         with LCharRect do
         begin
           Top := ALineRect.Top;
+          if FSpecialChars.EndOfLine.Style = eolPilcrow then
+            Bottom := ALineRect.Bottom
+          else
           Bottom := ALineRect.Bottom - 3;
-          Left := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy + LCharPosition * LCharWidth - LCharWidth div 2;
-          Right := Left + FTabs.Width * LCharWidth - 3;
+          Left := LLeftTemp + (LCharPosition - 1) * LCharWidth - LCharWidth div 2;
+          if FSpecialChars.EndOfLine.Style = eolEnter then
+            Left := Left + 4;
+          if FSpecialChars.EndOfLine.Style = eolPilcrow then
+          begin
+            Left := Left + 2;
+            Right := Left + LCharWidth
+          end
+          else
+            Right := Left + FTabs.Width * LCharWidth - 3;
         end;
         if LCharRect.Left > FLeftMargin.GetWidth - FCodeFolding.GetWidth then
         begin
           if FSpecialChars.EndOfLine.Style = eolPilcrow then
           begin
+            if IsPointInSelection(GetTextPosition(LCharPosition, ALine - 1)) then
+              FTextDrawer.BackgroundColor := FSelection.Colors.Background
+            else
+            if GetTextCaretY = ALine - 1 then
+              FTextDrawer.BackgroundColor := FActiveLine.Color
+            else
+              FTextDrawer.BackgroundColor := FBackgroundColor;
             FTextDrawer.ForegroundColor := Canvas.Pen.Color;
             FTextDrawer.Style := [];
-            FTextDrawer.TextOut(LCharRect.Left, LCharRect.Top, Char($00B6), 1);
+            LPilcrow := '@';
+            FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, [tooOpaque, tooClipped], LCharRect, PChar(LPilcrow), 1);
           end
           else
           if FSpecialChars.EndOfLine.Style = eolArrow then
@@ -7692,7 +7713,7 @@ begin
           end
           else
           begin
-            Y := LCharRect.Top + GetLineHeight div 2;
+            Y := LCharRect.Top + GetLineHeight div 2 - 1;
             MoveTo(LCharRect.Left, Y);
             LineTo(LCharRect.Left + 11, Y);
             MoveTo(LCharRect.Left + 1, Y - 1);
@@ -9517,8 +9538,8 @@ begin
         Result := False;
     end
     else
-      Result := ((ATextPosition.Line > LBeginTextPosition.Line) or (ATextPosition.Char >= LBeginTextPosition.Char)) and
-        ((ATextPosition.Line < LEndTextPosition.Line) or (ATextPosition.Char < LEndTextPosition.Char));
+      Result := ((ATextPosition.Line > LBeginTextPosition.Line) or (ATextPosition.Line = LBeginTextPosition.Line) and (ATextPosition.Char >= LBeginTextPosition.Char)) and
+        ((ATextPosition.Line < LEndTextPosition.Line) or (ATextPosition.Line = LEndTextPosition.Line) and (ATextPosition.Char < LEndTextPosition.Char));
   end
   else
     Result := False;

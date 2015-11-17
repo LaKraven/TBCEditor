@@ -8,13 +8,18 @@ uses
 type
   TBCEditorProposalColumn = class(TCollectionItem)
   strict private
+    FAutoWidth: Boolean;
     FItemList: TStrings;
+    FWidth: Integer;
+    procedure SetItemList(const Value: TStrings);
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
     procedure Assign(Source: TPersistent); override;
   published
-    property ItemList: TStrings read FItemList write FItemList;
+    property AutoWidth: Boolean read FAutoWidth write FAutoWidth default True;
+    property ItemList: TStrings read FItemList write SetItemList;
+    property Width: Integer read FWidth write FWidth default 0;
   end;
 
   TBCEditorProposalColumns = class(TCollection)
@@ -40,6 +45,8 @@ constructor TBCEditorProposalColumn.Create(Collection: TCollection);
 begin
   inherited;
   FItemList := TStringList.Create;
+  FAutoWidth := True;
+  FWidth := 0;
 end;
 
 destructor TBCEditorProposalColumn.Destroy;
@@ -56,6 +63,11 @@ begin
     Self.FItemList.Assign(FItemList)
   else
     inherited Assign(Source);
+end;
+
+procedure TBCEditorProposalColumn.SetItemList(const Value: TStrings);
+begin
+  FItemList.Assign(Value);
 end;
 
 { TBCEditorProposalColumns }

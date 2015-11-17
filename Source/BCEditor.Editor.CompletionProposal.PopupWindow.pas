@@ -322,7 +322,8 @@ end;
 
 procedure TBCEditorCompletionProposalPopupWindow.Paint;
 var
-  i: Integer;
+  i, j: Integer;
+  LColumnWidth, LItemIndex: Integer;
 begin
   FBitmapBuffer.Width := ClientWidth;
   FBitmapBuffer.Height := ClientHeight;
@@ -348,7 +349,14 @@ begin
         Canvas.Pen.Color := FCompletionProposal.Colors.Background;
         Canvas.Font.Color := FCompletionProposal.Colors.Foreground;
       end;
-      Canvas.TextOut(FMargin, FItemHeight * i, GetItemList[FItemIndexArray[TopLine + i]]);
+      LColumnWidth := 0;
+      for j := 0 to FCompletionProposal.Columns.Count - 1 do
+      begin
+        LItemIndex := FItemIndexArray[TopLine + i];
+        if LItemIndex < FCompletionProposal.Columns[j].ItemList.Count then
+          Canvas.TextOut(FMargin + LColumnWidth, FItemHeight * i, FCompletionProposal.Columns[j].ItemList[LItemIndex]);
+        LColumnWidth := LColumnWidth + FCompletionProposal.Columns[j].Width;
+      end;
     end;
   end;
   Canvas.Draw(0, 0, FBitmapBuffer);
@@ -483,7 +491,7 @@ end;
 
 procedure TBCEditorCompletionProposalPopupWindow.Execute(ACurrentString: string; X, Y: Integer);
 
-  procedure RecalcFormPlacement;
+  procedure CalculateFormPlacement;
   var
     LWidth: Integer;
     LHeight: Integer;
@@ -516,9 +524,54 @@ procedure TBCEditorCompletionProposalPopupWindow.Execute(ACurrentString: string;
     Height := LHeight;
   end;
 
+  procedure CalculateColumnWidths;
+  var
+    i, j: Integer;
+    LMaxWidth, LTempWidth, LAutoWidthCount, LWidthSum: Integer;
+    LItems: TStrings;
+    LProposalColumn: TBCEditorProposalColumn;
+  begin
+    if FCompletionProposal.Columns.Count = 1 then
+    begin
+      LProposalColumn := FCompletionProposal.Columns[0];
+      if LProposalColumn.AutoWidth then
+        LProposalColumn.Width := Width;
+      Exit;
+    end;
+
+    LAutoWidthCount := 0;
+    LWidthSum := 0;
+    for i := 0 to FCompletionProposal.Columns.Count - 1 do
+    begin
+      LProposalColumn := FCompletionProposal.Columns[i];
+      if LProposalColumn.AutoWidth then
+      begin
+        LItems := LProposalColumn.ItemList;
+        LMaxWidth := 0;
+        for j := 0 to LItems.Count - 1 do
+        begin
+          LTempWidth := TextWidth(FBitmapBuffer.Canvas, LItems[j]);
+          if LTempWidth > LMaxWidth then
+            LMaxWidth := LTempWidth;
+        end;
+        LProposalColumn.Width := LMaxWidth;
+        LWidthSum := LWidthSum + LMaxWidth;
+        Inc(LAutoWidthCount);
+      end;
+    end;
+
+    LMaxWidth := (Width - LWidthSum - GetSystemMetrics(SM_CYHSCROLL)) div LAutoWidthCount;
+    if LMaxWidth > 0 then
+    for i := 0 to FCompletionProposal.Columns.Count - 1 do
+    begin
+      LProposalColumn := FCompletionProposal.Columns[i];
+      if LProposalColumn.AutoWidth then
+        LProposalColumn.Width := LProposalColumn.Width + LMaxWidth;
+    end;
+  end;
+
 var
   i, j: Integer;
-
 begin
   j := GetItemList.Count;
   SetLength(FItemIndexArray, 0);
@@ -528,7 +581,8 @@ begin
 
   if Length(FItemIndexArray) > 0 then
   begin
-    RecalcFormPlacement;
+    CalculateFormPlacement;
+    CalculateColumnWidths;
     CurrentString := ACurrentString;
     UpdateScrollBar;
     Visible := True;

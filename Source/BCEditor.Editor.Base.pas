@@ -7683,7 +7683,7 @@ begin
               FTextDrawer.BackgroundColor := FBackgroundColor;
             FTextDrawer.ForegroundColor := Canvas.Pen.Color;
             FTextDrawer.Style := [];
-            LPilcrow := '@';
+            LPilcrow := Char($00B6);
             FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, [tooOpaque, tooClipped], LCharRect, PChar(LPilcrow), 1);
           end
           else

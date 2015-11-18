@@ -2266,7 +2266,7 @@ end;
 
 function TBCBaseEditor.PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
 begin
-  Result.Column := Max(1, FLeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2) div FCharWidth));
+  Result.Column := Max(1, FLeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth) div FCharWidth));
   Result.Row := Max(1, TopLine + Y div LineHeight);
 end;
 

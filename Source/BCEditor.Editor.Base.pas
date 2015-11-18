@@ -7100,11 +7100,6 @@ begin
     LCodeFoldingRange := nil;
     LIncY := Odd(LineHeight) and not Odd(ALine);
 
-    if ColorToRGB(FBackgroundColor) < ColorToRGB(FCodeFolding.Colors.Indent) then
-      Canvas.Pen.Mode := pmMerge
-    else
-      Canvas.Pen.Mode := pmMask;
-
     LDeepestLevel := GetDeepestLevel;
 
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
@@ -7153,7 +7148,6 @@ begin
           end;
         end;
     end;
-    Canvas.Pen.Mode := pmCopy;
   end;
   Canvas.Pen.Color := LOldColor;
 end;
@@ -8360,8 +8354,8 @@ var
           FHighlighter.Next;
         end;
 
-        PaintHighlightToken(True);
         PaintGuideForLine(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
+        PaintHighlightToken(True);
 
         if not AMinimap then
         begin

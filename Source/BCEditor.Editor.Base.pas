@@ -8107,7 +8107,7 @@ var
     LFoldRange: TBCEditorCodeFoldingRange;
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
     LScrolledXBy: Integer;
-    LTokenText, LPreviousTokenText: string;
+    LTokenText: string;
     LTokenPosition, LTokenLength: Integer;
     LStyle: TFontStyles;
     LKeyWord, LWord: string;
@@ -8278,18 +8278,11 @@ var
                   if (Pos(LTokenText, FCurrentMatchingPairMatch.OpenToken) <> 0) or
                     (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
                   begin
-                    if ((LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or
-                        (LTokenPosition - Length(LPreviousTokenText) = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1)) and
+                    if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
                        (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                        (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
                        (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
                     begin
-                      if LPreviousTokenText + LTokenText = FCurrentMatchingPairMatch.OpenToken then
-                      begin
-                        LTokenText := LPreviousTokenText + LTokenText;
-                        LTokenPosition := LTokenPosition - Length(LPreviousTokenText);
-                        LTokenLength := Length(LTokenText);
-                      end;
                       if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                       begin
                         if mpoUseMatchedColor in FMatchingPair.Options then
@@ -8355,7 +8348,6 @@ var
               PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
                 False);
           end;
-          LPreviousTokenText := LTokenText;
           FHighlighter.Next;
         end;
 

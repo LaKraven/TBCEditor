@@ -4764,6 +4764,11 @@ var
       end
       else
         EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
+
+      if Visible then
+        SendMessage(Handle, WM_SETREDRAW, -1, 0);
+      if FPaintLock = 0 then
+        Invalidate;
     end
     else
       ShowScrollBar(Handle, SB_HORZ, False);

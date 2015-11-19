@@ -8359,8 +8359,8 @@ var
           FHighlighter.Next;
         end;
 
-        PaintGuideForLine(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
         PaintHighlightToken(True);
+        PaintGuideForLine(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
 
         if not AMinimap then
         begin

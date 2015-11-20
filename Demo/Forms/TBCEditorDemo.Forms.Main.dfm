@@ -53,21 +53,26 @@ inherited MainForm: TMainForm
       AlignWithMargins = True
       Left = 0
       Top = 5
-      Width = 340
+      Width = 334
       Height = 615
       Margins.Left = 0
       Margins.Top = 5
-      Margins.Right = 0
+      Margins.Right = 6
       Margins.Bottom = 5
       Align = alClient
       Options = [goVertLineEh, goEditingEh, goAlwaysShowEditorEh]
     end
   end
   object PanelLeft: TBCPanel [3]
-    Left = 0
+    AlignWithMargins = True
+    Left = 6
     Top = 0
-    Width = 754
+    Width = 748
     Height = 625
+    Margins.Left = 6
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
     Align = alClient
     BevelOuter = bvNone
     ParentColor = True
@@ -77,7 +82,7 @@ inherited MainForm: TMainForm
       AlignWithMargins = True
       Left = 0
       Top = 5
-      Width = 754
+      Width = 748
       Height = 593
       Cursor = crIBeam
       Margins.Left = 0
@@ -96,7 +101,9 @@ inherited MainForm: TMainForm
       CodeFolding.Hint.Font.Style = []
       CodeFolding.Visible = True
       CompletionProposal.CloseChars = '()[]. '
-      CompletionProposal.Columns = <>
+      CompletionProposal.Columns = <
+        item
+        end>
       CompletionProposal.Font.Charset = DEFAULT_CHARSET
       CompletionProposal.Font.Color = clWindowText
       CompletionProposal.Font.Height = -11
@@ -172,7 +179,7 @@ inherited MainForm: TMainForm
     object PanelSearchFrame: TBCPanel
       Left = 0
       Top = 598
-      Width = 754
+      Width = 748
       Height = 27
       Align = alBottom
       AutoSize = True
@@ -184,7 +191,7 @@ inherited MainForm: TMainForm
       inline SearchFrame: TBCSearchFrame
         Left = 0
         Top = 3
-        Width = 754
+        Width = 748
         Height = 21
         Align = alBottom
         Color = clWindow
@@ -198,15 +205,15 @@ inherited MainForm: TMainForm
         ParentFont = False
         TabOrder = 0
         inherited SearchPanel: TBCPanel
-          Width = 754
+          Width = 748
           inherited SpeedButtonSearchClose: TBCSpeedButton
-            Left = 733
+            Left = 727
             Images = nil
           end
           inherited PanelRight: TBCPanel
-            Width = 400
+            Width = 394
             inherited LabelSearchResultCount: TBCLabelFX
-              Left = 388
+              Left = 382
               Height = 21
             end
           end
@@ -229,6 +236,7 @@ inherited MainForm: TMainForm
     end
   end
   inherited SkinManager: TBCSkinManager
+    ExtendedBorders = True
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
     OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
     Left = 166
@@ -245,12 +253,12 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         FontData.UseSysFontName = False
-        Height = 22
+        Height = 21
         Index = 0
         Name = 'TitleBarItemFile'
         ShowHint = True
         Style = bsMenu
-        Width = 48
+        Width = 47
       end
       item
         Align = tbaCenterInSpace
@@ -261,12 +269,12 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         FontData.UseSysFontName = False
-        Height = 21
+        Height = 20
         Index = 1
         Name = 'TitleBarItemCaption'
         ShowHint = False
         Style = bsInfo
-        Width = 168
+        Width = 174
       end
       item
         Align = tbaRight
@@ -278,12 +286,13 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         FontData.UseSysFontName = False
-        Height = 22
+        Height = 21
         Index = 2
         Name = 'TitleBarItemHighlighter'
         ShowHint = False
         Style = bsMenu
-        Width = 101
+        Width = 103
+        OnMouseDown = TitleBarItems2MouseDown
       end
       item
         Align = tbaRight
@@ -309,12 +318,12 @@ inherited MainForm: TMainForm
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
         FontData.UseSysFontName = False
-        Height = 22
+        Height = 21
         Index = 4
         Name = 'TitleBarItemColors'
         ShowHint = False
         Style = bsMenu
-        Width = 68
+        Width = 69
       end
       item
         Align = tbaRight

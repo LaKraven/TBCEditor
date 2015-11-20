@@ -50,6 +50,7 @@ type
       var Glyph: TBitmap; var LineVisible: Boolean);
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
     procedure ActionSkinsExecute(Sender: TObject);
+    procedure TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     FStopWatch: TStopWatch;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
@@ -67,7 +68,7 @@ implementation
 
 uses
   BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
-  BCCommon.Dialogs.SkinSelect;
+  BCCommon.Dialogs.SkinSelect, BCCommon.FileUtils;
 
 procedure TMainForm.ActionSelectHighlighterExecute(Sender: TObject);
 begin
@@ -256,78 +257,66 @@ end;
 
 procedure TMainForm.SetHighlighters;
 var
-  FindFileHandle: THandle;
-  Win32FindData: TWin32FindData;
-  FileName: string;
-  LMenuItem: TMenuItem;
+  LFileName, LName: string;
+  LMenuItem, LSubMenuItem: TMenuItem;
   LAction: TAction;
 begin
   PopupMenuHighlighters.Items.Clear;
-{$WARNINGS OFF}
-  FindFileHandle := FindFirstFile(PChar(IncludeTrailingBackSlash(ExtractFilePath(Application.ExeName)) +
-    'Highlighters\*.json'), Win32FindData);
-{$WARNINGS ON}
-  if FindFileHandle <> INVALID_HANDLE_VALUE then
-    try
-      // i := 1;
-      repeat
-        FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
-        FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
 
-        LAction := TAction.Create(Self);
-        LAction.Caption := FileName;
-        LAction.OnExecute := ActionSelectHighlighterExecute;
-        LMenuItem := TMenuItem.Create(PopupMenuHighlighters);
-        LMenuItem.Action := LAction;
-        LMenuItem.RadioItem := True;
-        LMenuItem.AutoCheck := True;
-        PopupMenuHighlighters.Items.Add(LMenuItem);
-        if LAction.Caption = 'Object Pascal' then
-        begin
-          LAction.Checked := True;
-          LAction.Execute;
-        end;
-      until not FindNextFile(FindFileHandle, Win32FindData);
-    finally
-      Winapi.Windows.FindClose(FindFileHandle);
+  for LFileName in BCCommon.FileUtils.GetFiles(ExtractFilePath(Application.ExeName) + '\Highlighters\', '*.json', False) do
+  begin
+    LName := ChangeFileExt(ExtractFileName(LFileName), '');
+
+    LMenuItem := PopupMenuHighlighters.Items.Find(LName[1]);
+    if not Assigned(LMenuItem) then
+    begin
+      LMenuItem := TMenuItem.Create(PopupMenuHighlighters);
+      LMenuItem.Caption := LName[1];
+      LMenuItem.RadioItem := True;
+      PopupMenuHighlighters.Items.Add(LMenuItem);
     end;
+
+    LAction := TAction.Create(Self);
+    LAction.Caption := LName;
+    LAction.OnExecute := ActionSelectHighlighterExecute;
+    LSubMenuItem := TMenuItem.Create(PopupMenuHighlighters);
+    LSubMenuItem.Action := LAction;
+    LSubMenuItem.RadioItem := True;
+    LSubMenuItem.AutoCheck := True;
+    LMenuItem.Add(LSubMenuItem);
+    if LAction.Caption = 'Object Pascal' then
+    begin
+      LAction.Checked := True;
+      LAction.Execute;
+    end;
+  end;
 end;
 
 procedure TMainForm.SetHighlighterColors;
 var
-  FindFileHandle: THandle;
-  Win32FindData: TWin32FindData;
-  FileName: string;
+  LFileName, LName: string;
   LMenuItem: TMenuItem;
   LAction: TAction;
 begin
   PopupMenuColors.Items.Clear;
-{$WARNINGS OFF}
-  FindFileHandle := FindFirstFile(PChar(IncludeTrailingBackSlash(ExtractFilePath(Application.ExeName)) +
-    'Colors\*.json'), Win32FindData);
-{$WARNINGS ON}
-  if FindFileHandle <> INVALID_HANDLE_VALUE then
-    try
-      repeat
-        FileName := ExtractFileName(StrPas(Win32FindData.cFileName));
-        FileName := Copy(FileName, 1, Pos('.', FileName) - 1);
-        LAction := TAction.Create(Self);
-        LAction.Caption := FileName;
-        LAction.OnExecute := ActionSelectHighlighterColorExecute;
-        LMenuItem := TMenuItem.Create(PopupMenuColors);
-        LMenuItem.Action := LAction;
-        LMenuItem.RadioItem := True;
-        LMenuItem.AutoCheck := True;
-        PopupMenuColors.Items.Add(LMenuItem);
-        if LAction.Caption = 'Default' then
-        begin
-          LAction.Checked := True;
-          LAction.Execute;
-        end;
-      until not FindNextFile(FindFileHandle, Win32FindData);
-    finally
-      Winapi.Windows.FindClose(FindFileHandle);
+  for LFileName in BCCommon.FileUtils.GetFiles(ExtractFilePath(Application.ExeName) + '\Colors\', '*.json', False) do
+  begin
+    LName := ChangeFileExt(ExtractFileName(LFileName), '');
+
+    LAction := TAction.Create(Self);
+    LAction.Caption := LName;
+    LAction.OnExecute := ActionSelectHighlighterColorExecute;
+    LMenuItem := TMenuItem.Create(PopupMenuColors);
+    LMenuItem.Action := LAction;
+    LMenuItem.RadioItem := True;
+    LMenuItem.AutoCheck := True;
+    PopupMenuColors.Items.Add(LMenuItem);
+    if LAction.Caption = 'Default' then
+    begin
+      LAction.Checked := True;
+      LAction.Execute;
     end;
+  end;
 end;
 
 procedure TMainForm.SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string;
@@ -347,6 +336,23 @@ begin
   end
   else
     LineVisible := False;
+end;
+
+procedure TMainForm.TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  LMenuItem: TMenuItem;
+  LTitleCaption: string;
+begin
+  LTitleCaption := TitleBar.Items[2].Caption;
+  LMenuItem := PopupMenuHighlighters.Items.Find(LTitleCaption[1]);
+  if Assigned(LMenuItem) then
+  begin
+    LMenuItem.Checked := True;
+
+    LMenuItem := LMenuItem.Find(LTitleCaption);
+    if Assigned(LMenuItem) then
+      LMenuItem.Checked := True;
+  end;
 end;
 
 procedure TMainForm.ActionSearchExecute(Sender: TObject);

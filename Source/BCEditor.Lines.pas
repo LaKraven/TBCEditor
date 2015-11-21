@@ -25,11 +25,11 @@ type
   end;
 
   TBCEditorStringRecord = record
-    FString: string;
-    FRange: TBCEditorLinesRange;
-    FExpandedLength: Integer;
-    FFlags: TBCEditorStringFlags;
-    FAttribute: TBCEditorLineAttribute;
+    Value: string;
+    Range: TBCEditorLinesRange;
+    ExpandedLength: Integer;
+    Flags: TBCEditorStringFlags;
+    Attribute: TBCEditorLineAttribute;
   end;
   PBCEditorStringRecord = ^TBCEditorStringRecord;
 
@@ -42,7 +42,7 @@ type
   PEditorStringRecordList = ^TBCEditorStringRecordList;
   TBCEditorStringRecordList = array [0 .. CMAXSTRINGS - 1] of TBCEditorStringRecord;
 
-  TStringListChangeEvent = procedure(Sender: TObject; Index: Integer; Count: Integer) of object;
+  TStringListChangeEvent = procedure(Sender: TObject; AIndex: Integer; ACount: Integer) of object;
 
   TBCEditorLines = class(TStrings)
   strict private
@@ -66,47 +66,47 @@ type
     FTabConvertProc: TBCEditorTabConvertProc;
     FTabWidth: Integer;
     FUpdateCount: Integer;
-    function ExpandString(Index: integer): string;
-    function GetAttributes(Index: Integer): PBCEditorLineAttribute;
-    function GetExpandedString(Index: Integer): string;
-    function GetExpandedStringLength(Index: Integer): Integer;
-    function GetRange(Index: Integer): TBCEditorLinesRange;
+    function ExpandString(AIndex: integer): string;
+    function GetAttributes(AIndex: Integer): PBCEditorLineAttribute;
+    function GetExpandedString(AIndex: Integer): string;
+    function GetExpandedStringLength(AIndex: Integer): Integer;
+    function GetRange(AIndex: Integer): TBCEditorLinesRange;
     procedure Grow;
-    procedure PutAttributes(Index: Integer; const Value: PBCEditorLineAttribute);
-    procedure PutRange(Index: Integer; ARange: TBCEditorLinesRange);
+    procedure PutAttributes(AIndex: Integer; const AValue: PBCEditorLineAttribute);
+    procedure PutRange(AIndex: Integer; ARange: TBCEditorLinesRange);
   protected
-    function Get(Index: Integer): string; override;
+    function Get(AIndex: Integer): string; override;
     function GetCapacity: Integer; override;
     function GetCount: Integer; override;
     function GetTextStr: string; override;
-    procedure Put(Index: Integer; const S: string); override;
-    procedure PutObject(Index: Integer; AObject: TObject); override;
-    procedure SetCapacity(NewCapacity: Integer); override;
-    procedure SetTabWidth(Value: Integer);
-    procedure SetTextStr(const Value: string); override;
-    procedure SetUpdateState(Updating: Boolean); override;
-    procedure InsertItem(Index: Integer; const S: string);
+    procedure Put(AIndex: Integer; const AValue: string); override;
+    procedure PutObject(AIndex: Integer; AObject: TObject); override;
+    procedure SetCapacity(AValue: Integer); override;
+    procedure SetTabWidth(AValue: Integer);
+    procedure SetTextStr(const AValue: string); override;
+    procedure SetUpdateState(AUpdating: Boolean); override;
+    procedure InsertItem(AIndex: Integer; const AValue: string);
   public
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
 
-    function StringLength(Index: Integer): Integer;
-    function Add(const S: string): Integer; override;
+    function StringLength(AIndex: Integer): Integer;
+    function Add(const AValue: string): Integer; override;
     function GetLengthOfLongestLine: Integer; overload;
     function GetIsLineWhitespaceOnly(AIndex: Integer): Boolean;
     procedure Clear; override;
-    procedure Delete(Index: Integer); override;
-    procedure DeleteLines(Index, NumLines: Integer);
-    procedure Insert(Index: Integer; const S: string); override;
-    procedure InsertLines(Index, NumLines: Integer; Strings: TStrings = nil);
-    procedure InsertStrings(Index: Integer; NewStrings: TStrings);
-    procedure InsertText(Index: Integer; NewText: string);
-    procedure LoadFromStream(Stream: TStream; Encoding: TEncoding = nil); override;
-    procedure SaveToStream(Stream: TStream; Encoding: TEncoding = nil); override;
-    property Attributes[Index: Integer]: PBCEditorLineAttribute read GetAttributes write PutAttributes;
+    procedure Delete(AIndex: Integer); override;
+    procedure DeleteLines(AIndex, ACount: Integer);
+    procedure Insert(AIndex: Integer; const AValue: string); override;
+    procedure InsertLines(AIndex, ACount: Integer; AStrings: TStrings = nil);
+    procedure InsertStrings(AIndex: Integer; AStrings: TStrings);
+    procedure InsertText(AIndex: Integer; AText: string);
+    procedure LoadFromStream(AStream: TStream; AEncoding: TEncoding = nil); override;
+    procedure SaveToStream(AStream: TStream; AEncoding: TEncoding = nil); override;
+    property Attributes[AIndex: Integer]: PBCEditorLineAttribute read GetAttributes write PutAttributes;
     property Count: Integer read FCount;
-    property ExpandedStrings[Index: Integer]: string read GetExpandedString;
-    property ExpandedStringLengths[Index: Integer]: Integer read GetExpandedStringLength;
+    property ExpandedStrings[AIndex: Integer]: string read GetExpandedString;
+    property ExpandedStringLengths[AIndex: Integer]: Integer read GetExpandedStringLength;
     property List: PEditorStringRecordList read FList;
     property OnAfterSetText: TNotifyEvent read FOnAfterSetText write FOnAfterSetText;
     property OnBeforePutted: TStringListChangeEvent read FOnBeforePutted write FOnBeforePutted;
@@ -118,8 +118,8 @@ type
     property OnInserted: TStringListChangeEvent read FOnInserted write FOnInserted;
     property OnPutted: TStringListChangeEvent read FOnPutted write FOnPutted;
     property Owner: TObject read FOwner write FOwner;
-    property Ranges[Index: Integer]: TBCEditorLinesRange read GetRange write PutRange;
-    property Strings[Index: Integer]: string read Get write Put; default;
+    property Ranges[AIndex: Integer]: TBCEditorLinesRange read GetRange write PutRange;
+    property Strings[AIndex: Integer]: string read Get write Put; default;
     property Streaming: Boolean read FStreaming;
     property TabWidth: Integer read FTabWidth write SetTabWidth;
     property Text: string read GetTextStr write SetTextStr;
@@ -134,9 +134,9 @@ uses
 
 { TBCEditorLines }
 
-procedure ListIndexOutOfBounds(Index: Integer);
+procedure ListIndexOutOfBounds(AIndex: Integer);
 begin
-  raise EEditorStringList.CreateFmt(SBCEditorListIndexOutOfBounds, [Index]);
+  raise EEditorStringList.CreateFmt(SBCEditorListIndexOutOfBounds, [AIndex]);
 end;
 
 constructor TBCEditorLines.Create;
@@ -165,10 +165,10 @@ begin
   inherited;
 end;
 
-function TBCEditorLines.Add(const S: string): Integer;
+function TBCEditorLines.Add(const AValue: string): Integer;
 begin
   Result := FCount;
-  InsertItem(Result, S);
+  InsertItem(Result, AValue);
   if Assigned(OnInserted) and (FUpdateCount = 0) then
     OnInserted(Self, Result, 1);
 end;
@@ -186,11 +186,11 @@ begin
       PStringRecord := @FList^[0];
       for i := 0 to FCount - 1 do
       begin
-        if sfExpandedLengthUnknown in PStringRecord^.fFlags then
+        if sfExpandedLengthUnknown in PStringRecord^.Flags then
           ExpandString(i);
-        if PStringRecord^.fExpandedLength > LMaxLength then
+        if PStringRecord^.ExpandedLength > LMaxLength then
         begin
-          LMaxLength := PStringRecord^.FExpandedLength;
+          LMaxLength := PStringRecord^.ExpandedLength;
           FIndexOfLongestLine := i;
         end;
         Inc(PStringRecord);
@@ -198,7 +198,7 @@ begin
     end;
   end;
   if (fIndexOfLongestLine >= 0) and (FIndexOfLongestLine < FCount) then
-    Result := FList^[fIndexOfLongestLine].FExpandedLength
+    Result := FList^[fIndexOfLongestLine].ExpandedLength
   else
     Result := 0;
 end;
@@ -212,13 +212,13 @@ begin
     Exit;
   with FList^[AIndex] do
   begin
-    LLength := Length(FString);
+    LLength := Length(Value);
     if LLength = 0 then
       Exit;
     i := 1;
     while i <= LLength do
     begin
-      if FString[i] >= BCEDITOR_EXCLAMATION_MARK then
+      if Value[i] >= BCEDITOR_EXCLAMATION_MARK then
       begin
         Result := False;
         Break;
@@ -228,12 +228,12 @@ begin
   end;
 end;
 
-function TBCEditorLines.StringLength(Index: Integer): Integer;
+function TBCEditorLines.StringLength(AIndex: Integer): Integer;
 begin
   Result := 0;
-  if (Index < 0) or (Index > FCount - 1) then
+  if (AIndex < 0) or (AIndex > FCount - 1) then
     Exit;
-  Result := Length(FList^[Index].FString);
+  Result := Length(FList^[AIndex].Value);
 end;
 
 procedure TBCEditorLines.Clear;
@@ -251,106 +251,106 @@ begin
   FLengthOfLongestLine := 0;
 end;
 
-procedure TBCEditorLines.Delete(Index: Integer);
+procedure TBCEditorLines.Delete(AIndex: Integer);
 begin
-  if (Index < 0) or (Index > FCount) then
-    ListIndexOutOfBounds(Index);
+  if (AIndex < 0) or (AIndex > FCount) then
+    ListIndexOutOfBounds(AIndex);
   BeginUpdate;
   try
-    Finalize(FList^[Index]);
+    Finalize(FList^[AIndex]);
     Dec(FCount);
-    if Index < FCount then
-      System.Move(FList[Index + 1], FList[Index], (FCount - Index) * CSTRINGRECORDSIZE);
+    if AIndex < FCount then
+      System.Move(FList[AIndex + 1], FList[AIndex], (FCount - AIndex) * CSTRINGRECORDSIZE);
   finally
     EndUpdate;
   end;
   FIndexOfLongestLine := -1;
   if Assigned(FOnDeleted) then
-    FOnDeleted(Self, Index, 1);
+    FOnDeleted(Self, AIndex, 1);
 end;
 
-procedure TBCEditorLines.DeleteLines(Index, NumLines: Integer);
+procedure TBCEditorLines.DeleteLines(AIndex, ACount: Integer);
 var
   LLinesAfter: Integer;
 begin
-  if NumLines > 0 then
+  if ACount > 0 then
   begin
-    if (Index < 0) or (Index > FCount) then
-      ListIndexOutOfBounds(Index);
-    LLinesAfter := FCount - (Index + NumLines);
+    if (AIndex < 0) or (AIndex > FCount) then
+      ListIndexOutOfBounds(AIndex);
+    LLinesAfter := FCount - (AIndex + ACount);
     if LLinesAfter < 0 then
-      NumLines := FCount - Index - 1;
-    Finalize(FList^[Index], NumLines);
+      ACount := FCount - AIndex - 1;
+    Finalize(FList^[AIndex], ACount);
     if LLinesAfter > 0 then
     begin
       BeginUpdate;
       try
-        System.Move(FList[Index + NumLines], FList[Index], LLinesAfter * CSTRINGRECORDSIZE);
+        System.Move(FList[AIndex + ACount], FList[AIndex], LLinesAfter * CSTRINGRECORDSIZE);
       finally
         EndUpdate;
       end;
     end;
-    Dec(FCount, NumLines);
+    Dec(FCount, ACount);
 
     FIndexOfLongestLine := -1;
     if Assigned(FOnDeleted) then
-      FOnDeleted(Self, Index, NumLines);
+      FOnDeleted(Self, AIndex, ACount);
   end;
 end;
 
-function TBCEditorLines.GetAttributes(Index: Integer): PBCEditorLineAttribute;
+function TBCEditorLines.GetAttributes(AIndex: Integer): PBCEditorLineAttribute;
 begin
-  if (Index >= 0) and (Index < FCount) then
-    Result := @(FList^[Index].FAttribute)
+  if (AIndex >= 0) and (AIndex < FCount) then
+    Result := @(FList^[AIndex].Attribute)
   else
     Result := nil;
 end;
 
-procedure TBCEditorLines.PutAttributes(Index: Integer; const Value: PBCEditorLineAttribute);
+procedure TBCEditorLines.PutAttributes(AIndex: Integer; const AValue: PBCEditorLineAttribute);
 begin
-  if (Index < 0) or (Index >= FCount) then
-    ListIndexOutOfBounds(Index);
+  if (AIndex < 0) or (AIndex >= FCount) then
+    ListIndexOutOfBounds(AIndex);
   BeginUpdate;
-  FList^[Index].FAttribute.Background := Value.Background;
-  FList^[Index].FAttribute.Foreground := Value.Foreground;
-  FList^[Index].FAttribute.Mask := Value.Mask;
-  FList^[Index].FAttribute.LineState := Value.LineState;
+  FList^[AIndex].Attribute.Background := AValue.Background;
+  FList^[AIndex].Attribute.Foreground := AValue.Foreground;
+  FList^[AIndex].Attribute.Mask := AValue.Mask;
+  FList^[AIndex].Attribute.LineState := AValue.LineState;
   EndUpdate;
 end;
 
-function TBCEditorLines.ExpandString(Index: integer): string;
+function TBCEditorLines.ExpandString(AIndex: integer): string;
 var
-  HasTabs: boolean;
+  LHasTabs: boolean;
 begin
-  with FList^[Index] do
+  with FList^[AIndex] do
   begin
-    if FString = '' then
+    if Value = '' then
     begin
       Result := '';
-      Exclude(FFlags, sfExpandedLengthUnknown);
-      Exclude(FFlags, sfHasTabs);
-      Include(FFlags, sfHasNoTabs);
-      FExpandedLength := 0;
+      Exclude(Flags, sfExpandedLengthUnknown);
+      Exclude(Flags, sfHasTabs);
+      Include(Flags, sfHasNoTabs);
+      ExpandedLength := 0;
     end
     else
     begin
-      Result := FTabConvertProc(FString, FTabWidth, HasTabs);
-      FExpandedLength := Length(Result);
-      Exclude(FFlags, sfExpandedLengthUnknown);
-      Exclude(FFlags, sfHasTabs);
-      Exclude(FFlags, sfHasNoTabs);
-      if HasTabs then
-        Include(FFlags, sfHasTabs)
+      Result := FTabConvertProc(Value, FTabWidth, LHasTabs);
+      ExpandedLength := Length(Result);
+      Exclude(Flags, sfExpandedLengthUnknown);
+      Exclude(Flags, sfHasTabs);
+      Exclude(Flags, sfHasNoTabs);
+      if LHasTabs then
+        Include(Flags, sfHasTabs)
       else
-        Include(FFlags, sfHasNoTabs);
+        Include(Flags, sfHasNoTabs);
     end;
   end;
 end;
 
-function TBCEditorLines.Get(Index: Integer): string;
+function TBCEditorLines.Get(AIndex: Integer): string;
 begin
-  if (Index >= 0) and (Index < FCount) then
-    Result := FList^[Index].FString
+  if (AIndex >= 0) and (AIndex < FCount) then
+    Result := FList^[AIndex].Value
   else
     Result := '';
 end;
@@ -365,66 +365,66 @@ begin
   Result := FCount;
 end;
 
-function TBCEditorLines.GetExpandedString(Index: integer): string;
+function TBCEditorLines.GetExpandedString(AIndex: Integer): string;
 begin
   Result := '';
-  if (Index >= 0) and (Index < FCount) then
+  if (AIndex >= 0) and (AIndex < FCount) then
   begin
-    if sfHasNoTabs in FList^[Index].FFlags then
-      Result := Get(Index)
+    if sfHasNoTabs in FList^[AIndex].Flags then
+      Result := Get(AIndex)
     else
-      Result := ExpandString(Index);
+      Result := ExpandString(AIndex);
   end
 end;
 
-function TBCEditorLines.GetExpandedStringLength(Index: Integer): Integer;
+function TBCEditorLines.GetExpandedStringLength(AIndex: Integer): Integer;
 begin
-  if (Index >= 0) and (Index < FCount) then
+  if (AIndex >= 0) and (AIndex < FCount) then
   begin
-    if sfExpandedLengthUnknown in FList^[Index].FFlags then
-      Result := Length(ExpandedStrings[Index])
+    if sfExpandedLengthUnknown in FList^[AIndex].Flags then
+      Result := Length(ExpandedStrings[AIndex])
     else
-      Result := FList^[Index].FExpandedLength;
+      Result := FList^[AIndex].ExpandedLength;
   end
   else
     Result := 0;
 end;
 
-function TBCEditorLines.GetRange(Index: Integer): TBCEditorLinesRange;
+function TBCEditorLines.GetRange(AIndex: Integer): TBCEditorLinesRange;
 begin
-  if (Index >= 0) and (Index < FCount) then
-    Result := FList^[Index].FRange
+  if (AIndex >= 0) and (AIndex < FCount) then
+    Result := FList^[AIndex].Range
   else
     Result := nil;
 end;
 
 function TBCEditorLines.GetTextStr: string;
 var
-  i, L, Size, LCount: Integer;
-  P: PChar;
-  S, LLineBreak: string;
+  i, LLength, LSize, LCount: Integer;
+  LPValue: PChar;
+  LValue, LLineBreak: string;
 begin
   LCount := GetCount;
-  Size := 0;
+  LSize := 0;
   LLineBreak := SLineBreak;
   for i := 0 to LCount - 1 do
-    Inc(Size, Length(Get(i)) + Length(LLineBreak));
-  SetString(Result, nil, Size);
-  P := Pointer(Result);
+    Inc(LSize, Length(Get(i)) + Length(LLineBreak));
+  SetString(Result, nil, LSize);
+  LPValue := Pointer(Result);
   for i := 0 to LCount - 1 do
   begin
-    S := Get(i);
-    L := Length(S);
-    if L <> 0 then
+    LValue := Get(i);
+    LLength := Length(LValue);
+    if LLength <> 0 then
     begin
-      System.Move(Pointer(S)^, P^, L * SizeOf(Char));
-      Inc(P, L);
+      System.Move(Pointer(LValue)^, LPValue^, LLength * SizeOf(Char));
+      Inc(LPValue, LLength);
     end;
-    L := Length(LLineBreak);
-    if L <> 0 then
+    LLength := Length(LLineBreak);
+    if LLength <> 0 then
     begin
-      System.Move(Pointer(LLineBreak)^, P^, L * SizeOf(Char));
-      Inc(P, L);
+      System.Move(Pointer(LLineBreak)^, LPValue^, LLength * SizeOf(Char));
+      Inc(LPValue, LLength);
     end;
   end;
 end;
@@ -440,113 +440,113 @@ begin
   SetCapacity(FCapacity + LDelta);
 end;
 
-procedure TBCEditorLines.Insert(Index: Integer; const S: string);
+procedure TBCEditorLines.Insert(AIndex: Integer; const AValue: string);
 begin
-  if (Index < 0) or (Index > FCount) then
-    ListIndexOutOfBounds(Index);
+  if (AIndex < 0) or (AIndex > FCount) then
+    ListIndexOutOfBounds(AIndex);
   BeginUpdate;
-  InsertItem(Index, S);
+  InsertItem(AIndex, AValue);
   if Assigned(FOnInserted) then
-    FOnInserted(Self, Index, 1);
+    FOnInserted(Self, AIndex, 1);
   EndUpdate;
 end;
 
-procedure TBCEditorLines.InsertItem(Index: Integer; const S: string);
+procedure TBCEditorLines.InsertItem(AIndex: Integer; const AValue: string);
 begin
   if FCount = FCapacity then
     Grow;
 
-  if Index < FCount then
-    System.Move(FList^[Index], FList^[Index + 1], (FCount - Index) * CSTRINGRECORDSIZE);
+  if AIndex < FCount then
+    System.Move(FList^[AIndex], FList^[AIndex + 1], (FCount - AIndex) * CSTRINGRECORDSIZE);
   FIndexOfLongestLine := -1;
-  with FList^[Index] do
+  with FList^[AIndex] do
   begin
-    Pointer(FString) := nil;
-    FString := S;
-    FRange := CNULLRANGE;
-    FExpandedLength := -1;
-    FFlags := [sfExpandedLengthUnknown];
-    FAttribute.Foreground := clNone;
-    FAttribute.Background := clNone;
-    FAttribute.Mask := [];
-    FAttribute.LineState := lsNone;
+    Pointer(Value) := nil;
+    Value := AValue;
+    Range := CNULLRANGE;
+    ExpandedLength := -1;
+    Flags := [sfExpandedLengthUnknown];
+    Attribute.Foreground := clNone;
+    Attribute.Background := clNone;
+    Attribute.Mask := [];
+    Attribute.LineState := lsNone;
   end;
   Inc(FCount);
 end;
 
-procedure TBCEditorLines.InsertLines(Index, NumLines: Integer; Strings: TStrings = nil);
+procedure TBCEditorLines.InsertLines(AIndex, ACount: Integer; AStrings: TStrings = nil);
 var
   i: Integer;
   LLine: Integer;
 begin
-  if (Index < 0) or (Index > FCount) then
-    ListIndexOutOfBounds(Index);
-  if NumLines > 0 then
+  if (AIndex < 0) or (AIndex > FCount) then
+    ListIndexOutOfBounds(AIndex);
+  if ACount > 0 then
   begin
     BeginUpdate;
     try
-      SetCapacity(FCount + NumLines);
-      if Index < FCount then
-        System.Move(FList^[Index], FList^[Index + NumLines], (FCount - Index) * CSTRINGRECORDSIZE);
+      SetCapacity(FCount + ACount);
+      if AIndex < FCount then
+        System.Move(FList^[AIndex], FList^[AIndex + ACount], (FCount - AIndex) * CSTRINGRECORDSIZE);
       i := 0;
-      for LLine := Index to Index + NumLines - 1 do
+      for LLine := AIndex to AIndex + ACount - 1 do
       with FList^[LLine] do
       begin
-        Pointer(FString) := nil;
-        if Assigned(Strings) then
-          FString := Strings[i];
+        Pointer(Value) := nil;
+        if Assigned(AStrings) then
+          Value := AStrings[i];
         Inc(i);
-        FRange := CNULLRANGE;
-        FExpandedLength := -1;
-        FFlags := [sfExpandedLengthUnknown];
-        FAttribute.Mask := [];
-        FAttribute.Foreground := clNone;
-        FAttribute.Background := clNone;
-        FAttribute.LineState := lsModified;
+        Range := CNULLRANGE;
+        ExpandedLength := -1;
+        Flags := [sfExpandedLengthUnknown];
+        Attribute.Mask := [];
+        Attribute.Foreground := clNone;
+        Attribute.Background := clNone;
+        Attribute.LineState := lsModified;
       end;
-      Inc(FCount, NumLines);
+      Inc(FCount, ACount);
     finally
       EndUpdate;
     end;
 
     if Assigned(OnInserted) then
-      OnInserted(Self, Index, NumLines);
+      OnInserted(Self, AIndex, ACount);
   end;
 end;
 
-procedure TBCEditorLines.InsertStrings(Index: Integer; NewStrings: TStrings);
+procedure TBCEditorLines.InsertStrings(AIndex: Integer; AStrings: TStrings);
 var
   LCount: Integer;
 begin
-  LCount := NewStrings.Count;
+  LCount := AStrings.Count;
   if LCount = 0 then
     Exit;
 
   BeginUpdate;
   try
-    InsertLines(Index, LCount, NewStrings);
+    InsertLines(AIndex, LCount, AStrings);
   finally
     EndUpdate;
   end;
 end;
 
-procedure TBCEditorLines.InsertText(Index: Integer; NewText: string);
+procedure TBCEditorLines.InsertText(AIndex: Integer; AText: string);
 var
   LStringList: TStringList;
 begin
-  if NewText = '' then
+  if AText = '' then
     Exit;
 
   LStringList := TStringList.Create;
   try
-    LStringList.Text := NewText;
-    InsertStrings(Index, LStringList);
+    LStringList.Text := AText;
+    InsertStrings(AIndex, LStringList);
   finally
     LStringList.Free;
   end;
 end;
 
-procedure TBCEditorLines.LoadFromStream(Stream: TStream; Encoding: TEncoding = nil);
+procedure TBCEditorLines.LoadFromStream(AStream: TStream; AEncoding: TEncoding = nil);
 var
   LSize: Integer;
   LBuffer: TBytes;
@@ -556,18 +556,18 @@ begin
 
   BeginUpdate;
   try
-    LSize := Stream.Size - Stream.Position;
-    if Assigned(Encoding) then
+    LSize := AStream.Size - AStream.Position;
+    if Assigned(AEncoding) then
     begin
       SetLength(LBuffer, LSize);
-      Stream.Read(LBuffer[0], LSize);
-      LSize := TEncoding.GetBufferEncoding(LBuffer, Encoding);
-      LStrBuffer := Encoding.GetString(LBuffer, LSize, Length(LBuffer) - LSize);
+      AStream.Read(LBuffer[0], LSize);
+      LSize := TEncoding.GetBufferEncoding(LBuffer, AEncoding);
+      LStrBuffer := AEncoding.GetString(LBuffer, LSize, Length(LBuffer) - LSize);
     end
     else
     begin
       SetLength(LStrBuffer, LSize shr 1);
-      Stream.ReadBuffer(LStrBuffer[1], LSize);
+      AStream.ReadBuffer(LStrBuffer[1], LSize);
     end;
     SetTextStr(LStrBuffer);
   finally
@@ -580,121 +580,122 @@ begin
   FStreaming := False;
 end;
 
-procedure TBCEditorLines.SaveToStream(Stream: TStream; Encoding: TEncoding);
+procedure TBCEditorLines.SaveToStream(AStream: TStream; AEncoding: TEncoding);
 var
   LBuffer, LPreamble: TBytes;
 begin
   FStreaming := True;
 
-  if Encoding = nil then
-    Encoding := TEncoding.Default;
-  LBuffer := Encoding.GetBytes(GetTextStr);
-  LPreamble := Encoding.GetPreamble;
+  if AEncoding = nil then
+    AEncoding := TEncoding.Default;
+  LBuffer := AEncoding.GetBytes(GetTextStr);
+  LPreamble := AEncoding.GetPreamble;
   if Length(LPreamble) > 0 then
-    Stream.WriteBuffer(LPreamble[0], Length(LPreamble));
-  Stream.WriteBuffer(LBuffer[0], Length(LBuffer));
+    AStream.WriteBuffer(LPreamble[0], Length(LPreamble));
+  AStream.WriteBuffer(LBuffer[0], Length(LBuffer));
 
   FStreaming := False;
 end;
 
-procedure TBCEditorLines.Put(Index: Integer; const S: string);
+procedure TBCEditorLines.Put(AIndex: Integer; const AValue: string);
 begin
-  if ((Index = 0) and (FCount = 0)) or (FCount = Index) then
+  if ((AIndex = 0) and (FCount = 0)) or (FCount = AIndex) then
   begin
-    Add(S);
-    FList^[Index].FAttribute.LineState := lsModified;
+    Add(AValue);
+    FList^[AIndex].Attribute.LineState := lsModified;
   end
   else
   begin
-    if (Index < 0) or (Index >= FCount) then
-      ListIndexOutOfBounds(Index);
+    if (AIndex < 0) or (AIndex >= FCount) then
+      ListIndexOutOfBounds(AIndex);
     if Assigned(OnBeforePutted) then
-      OnBeforePutted(Self, Index, 1);
-    with FList^[Index] do
+      OnBeforePutted(Self, AIndex, 1);
+    with FList^[AIndex] do
     begin
-      Include(FFlags, sfExpandedLengthUnknown);
-      Exclude(FFlags, sfHasTabs);
-      Exclude(FFlags, sfHasNoTabs);
-      FString := S;
-      FAttribute.LineState := lsModified;
+      Include(Flags, sfExpandedLengthUnknown);
+      Exclude(Flags, sfHasTabs);
+      Exclude(Flags, sfHasNoTabs);
+      Value := AValue;
+      Attribute.LineState := lsModified;
     end;
 
     if Assigned(FOnPutted) then
-      FOnPutted(Self, Index, 1);
+      FOnPutted(Self, AIndex, 1);
   end;
 end;
 
-procedure TBCEditorLines.PutObject(Index: Integer; AObject: TObject);
+procedure TBCEditorLines.PutObject(AIndex: Integer; AObject: TObject);
 begin
   { Do nothing }
 end;
 
-procedure TBCEditorLines.PutRange(Index: Integer; ARange: TBCEditorLinesRange);
+procedure TBCEditorLines.PutRange(AIndex: Integer; ARange: TBCEditorLinesRange);
 begin
-  if (Index < 0) or (Index >= FCount) then
-    ListIndexOutOfBounds(Index);
-  FList^[Index].FRange := ARange;
+  if (AIndex < 0) or (AIndex >= FCount) then
+    ListIndexOutOfBounds(AIndex);
+  FList^[AIndex].Range := ARange;
 end;
 
-procedure TBCEditorLines.SetCapacity(NewCapacity: Integer);
+procedure TBCEditorLines.SetCapacity(AValue: Integer);
 begin
-  if NewCapacity < Count then
+  if AValue < Count then
     EListError.Create(SBCEditorInvalidCapacity);
-  ReallocMem(FList, NewCapacity * CSTRINGRECORDSIZE);
-  FCapacity := NewCapacity;
+  ReallocMem(FList, AValue * CSTRINGRECORDSIZE);
+  FCapacity := AValue;
 end;
 
-procedure TBCEditorLines.SetTabWidth(Value: Integer);
+procedure TBCEditorLines.SetTabWidth(AValue: Integer);
 var
   i: Integer;
 begin
-  if Value <> FTabWidth then
+  if AValue <> FTabWidth then
   begin
-    FTabWidth := Value;
+    FTabWidth := AValue;
     FTabConvertProc := GetTabConvertProc(FTabWidth);
     FIndexOfLongestLine := -1;
     for i := 0 to FCount - 1 do
       with FList^[i] do
       begin
-        FExpandedLength := -1;
-        Exclude(FFlags, sfHasNoTabs);
-        Include(FFlags, sfExpandedLengthUnknown);
+        ExpandedLength := -1;
+        Exclude(Flags, sfHasNoTabs);
+        Include(Flags, sfExpandedLengthUnknown);
       end;
   end;
 end;
 
-procedure TBCEditorLines.SetTextStr(const Value: string);
+procedure TBCEditorLines.SetTextStr(const AValue: string);
 var
-  S: string;
+  LValue: string;
   LLength: Integer;
-  PValue, PStartValue, PLastChar: PChar;
+  LPValue, LPStartValue, LPLastChar: PChar;
 begin
   if Assigned(FOnBeforeSetText) then
     FOnBeforeSetText(Self);
   Clear;
-  PValue := Pointer(Value);
-  if Assigned(PValue) then
+  LPValue := Pointer(AValue);
+  if Assigned(LPValue) then
   begin
-    LLength := Length(Value);
-    PLastChar := @Value[LLength];
-    while PValue <= PLastChar do
+    LLength := Length(AValue);
+    LPLastChar := @AValue[LLength];
+    while LPValue <= LPLastChar do
     begin
-      PStartValue := PValue;
-      while (PValue^ <> BCEDITOR_CARRIAGE_RETURN) and (PValue^ <> BCEDITOR_LINEFEED) and (PValue^ <> WideChar($2028)) and (PValue <= PLastChar) do
-        Inc(PValue);
-      if PValue <> PStartValue then
+      LPStartValue := LPValue;
+      while (LPValue^ <> BCEDITOR_CARRIAGE_RETURN) and (LPValue^ <> BCEDITOR_LINEFEED) and (LPValue^ <> WideChar($2028))
+        and (LPValue <= LPLastChar) do
+        Inc(LPValue);
+      if LPValue <> LPStartValue then
       begin
-        SetString(S, PStartValue, PValue - PStartValue);
-        InsertItem(FCount, S);
+        SetString(LValue, LPStartValue, LPValue - LPStartValue);
+        InsertItem(FCount, LValue);
       end
       else
         InsertItem(FCount, '');
-      if PValue^ = BCEDITOR_CARRIAGE_RETURN then
-        Inc(PValue);
-      if PValue^ = BCEDITOR_LINEFEED then
-        Inc(PValue);
-      if PValue^ = WideChar($2028) then
-        Inc(PValue);
+      if LPValue^ = BCEDITOR_CARRIAGE_RETURN then
+        Inc(LPValue);
+      if LPValue^ = BCEDITOR_LINEFEED then
+        Inc(LPValue);
+      if LPValue^ = WideChar($2028) then
+        Inc(LPValue);
     end;
   end;
 
@@ -706,9 +707,9 @@ begin
     FOnAfterSetText(Self);
 end;
 
-procedure TBCEditorLines.SetUpdateState(Updating: Boolean);
+procedure TBCEditorLines.SetUpdateState(AUpdating: Boolean);
 begin
-  if Updating then
+  if AUpdating then
   begin
     if Assigned(FOnChanging) then
       FOnChanging(Self);

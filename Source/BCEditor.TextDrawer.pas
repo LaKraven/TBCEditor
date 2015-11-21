@@ -7,11 +7,11 @@ uses
   BCEditor.Utils;
 
 const
-  FontStyleCount = Ord(High(TFontStyle)) + 1;
-  FontStyleCombineCount = 1 shl FontStyleCount;
+  CFontStyleCount = Ord(High(TFontStyle)) + 1;
+  CFontStyleCombineCount = 1 shl CFontStyleCount;
 
 type
-  TBCEditorStockFontPatterns = 0 .. FontStyleCombineCount - 1;
+  TBCEditorStockFontPatterns = 0 .. CFontStyleCombineCount - 1;
 
   TBCEditorFontData = record
     Style: TFontStyles;
@@ -39,17 +39,17 @@ type
   TBCEditorFontsInfoManager = class
   strict private
     FFontsInfo: TList;
-    function FindFontsInfo(const LogFont: TLogFont): PBCEditorSharedFontsInfo;
+    function FindFontsInfo(const ALogFont: TLogFont): PBCEditorSharedFontsInfo;
     function CreateFontsInfo(ABaseFont: TFont; const LogFont: TLogFont): PBCEditorSharedFontsInfo;
-    procedure DestroyFontHandles(SharedFontsInfo: PBCEditorSharedFontsInfo);
+    procedure DestroyFontHandles(ASharedFontsInfo: PBCEditorSharedFontsInfo);
     procedure RetrieveLogFontForComparison(ABaseFont: TFont; var LogFont: TLogFont);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure LockFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
-    procedure UnLockFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
+    procedure LockFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
+    procedure UnLockFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
     function GetFontsInfo(ABaseFont: TFont): PBCEditorSharedFontsInfo;
-    procedure ReleaseFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
+    procedure ReleaseFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
   end;
 
   TBCEditorTextOutOptions = set of (tooOpaque, tooClipped);
@@ -188,9 +188,9 @@ end;
 
 { TFontsInfoManager }
 
-procedure TBCEditorFontsInfoManager.LockFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
+procedure TBCEditorFontsInfoManager.LockFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
 begin
-  Inc(SharedFontsInfo^.LockCount);
+  Inc(ASharedFontsInfo^.LockCount);
 end;
 
 constructor TBCEditorFontsInfoManager.Create;
@@ -217,13 +217,13 @@ begin
   end;
 end;
 
-procedure TBCEditorFontsInfoManager.UnLockFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
+procedure TBCEditorFontsInfoManager.UnLockFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
 begin
-  with SharedFontsInfo^ do
+  with ASharedFontsInfo^ do
   begin
     Dec(LockCount);
     if 0 = LockCount then
-      DestroyFontHandles(SharedFontsInfo);
+      DestroyFontHandles(ASharedFontsInfo);
   end;
 end;
 
@@ -244,11 +244,11 @@ begin
   inherited;
 end;
 
-procedure TBCEditorFontsInfoManager.DestroyFontHandles(SharedFontsInfo: PBCEditorSharedFontsInfo);
+procedure TBCEditorFontsInfoManager.DestroyFontHandles(ASharedFontsInfo: PBCEditorSharedFontsInfo);
 var
   i: Integer;
 begin
-  with SharedFontsInfo^ do
+  with ASharedFontsInfo^ do
   for i := Low(TBCEditorStockFontPatterns) to High(TBCEditorStockFontPatterns) do
   with FontsData[i] do
   if Handle <> 0 then
@@ -258,14 +258,14 @@ begin
   end;
 end;
 
-function TBCEditorFontsInfoManager.FindFontsInfo(const LogFont: TLogFont): PBCEditorSharedFontsInfo;
+function TBCEditorFontsInfoManager.FindFontsInfo(const ALogFont: TLogFont): PBCEditorSharedFontsInfo;
 var
   i: Integer;
 begin
   for i := 0 to FFontsInfo.Count - 1 do
   begin
     Result := PBCEditorSharedFontsInfo(FFontsInfo[i]);
-    if CompareMem(@(Result^.BaseLogFont), @LogFont, SizeOf(TLogFont)) then
+    if CompareMem(@(Result^.BaseLogFont), @ALogFont, SizeOf(TLogFont)) then
       Exit;
   end;
   Result := nil;
@@ -273,15 +273,15 @@ end;
 
 function TBCEditorFontsInfoManager.GetFontsInfo(ABaseFont: TFont): PBCEditorSharedFontsInfo;
 var
-  LogFont: TLogFont;
+  LLogFont: TLogFont;
 begin
   Assert(Assigned(ABaseFont));
 
-  RetrieveLogFontForComparison(ABaseFont, LogFont);
-  Result := FindFontsInfo(LogFont);
+  RetrieveLogFontForComparison(ABaseFont, LLogFont);
+  Result := FindFontsInfo(LLogFont);
   if not Assigned(Result) then
   begin
-    Result := CreateFontsInfo(ABaseFont, LogFont);
+    Result := CreateFontsInfo(ABaseFont, LLogFont);
     FFontsInfo.Add(Result);
   end;
 
@@ -289,27 +289,27 @@ begin
     Inc(Result^.RefCount);
 end;
 
-procedure TBCEditorFontsInfoManager.ReleaseFontsInfo(SharedFontsInfo: PBCEditorSharedFontsInfo);
+procedure TBCEditorFontsInfoManager.ReleaseFontsInfo(ASharedFontsInfo: PBCEditorSharedFontsInfo);
 begin
-  Assert(Assigned(SharedFontsInfo));
+  Assert(Assigned(ASharedFontsInfo));
 
-  with SharedFontsInfo^ do
+  with ASharedFontsInfo^ do
   begin
     Assert(LockCount < RefCount);
     if RefCount > 1 then
       Dec(RefCount)
     else
     begin
-      FFontsInfo.Remove(SharedFontsInfo);
+      FFontsInfo.Remove(ASharedFontsInfo);
       BaseFont.Free;
-      Dispose(SharedFontsInfo);
+      Dispose(ASharedFontsInfo);
     end;
   end;
 end;
 
 procedure TBCEditorFontsInfoManager.RetrieveLogFontForComparison(ABaseFont: TFont; var LogFont: TLogFont);
 var
-  pEnd: PChar;
+  LPEnd: PChar;
 begin
   GetObject(ABaseFont.Handle, SizeOf(TLogFont), @LogFont);
   with LogFont do
@@ -317,8 +317,8 @@ begin
     lfItalic := 0;
     lfUnderline := 0;
     lfStrikeOut := 0;
-    pEnd := StrEnd(lfFaceName);
-    FillChar(pEnd[1], @lfFaceName[high(lfFaceName)] - pEnd, 0);
+    LPEnd := StrEnd(lfFaceName);
+    FillChar(LPEnd[1], @lfFaceName[high(lfFaceName)] - LPEnd, 0);
   end;
 end;
 
@@ -391,11 +391,11 @@ end;
 
 function TBCEditorFontStock.InternalCreateFont(Style: TFontStyles): HFont;
 const
-  Bolds: array [Boolean] of Integer = (400, 700);
+  CBolds: array [Boolean] of Integer = (400, 700);
 begin
   with FBaseLogFont do
   begin
-    lfWeight := Bolds[fsBold in Style];
+    lfWeight := CBolds[fsBold in Style];
     lfItalic := Ord(BOOL(fsItalic in Style));
     lfUnderline := Ord(BOOL(fsUnderline in Style));
     lfStrikeOut := Ord(BOOL(fsStrikeOut in Style));
@@ -453,17 +453,17 @@ end;
 
 procedure TBCEditorFontStock.SetBaseFont(Value: TFont);
 var
-  SharedFontsInfo: PBCEditorSharedFontsInfo;
+  LSharedFontsInfo: PBCEditorSharedFontsInfo;
 begin
   if Assigned(Value) then
   begin
-    SharedFontsInfo := GetFontsInfoManager.GetFontsInfo(Value);
-    if SharedFontsInfo = FPSharedFontsInfo then
-      GetFontsInfoManager.ReleaseFontsInfo(SharedFontsInfo)
+    LSharedFontsInfo := GetFontsInfoManager.GetFontsInfo(Value);
+    if LSharedFontsInfo = FPSharedFontsInfo then
+      GetFontsInfoManager.ReleaseFontsInfo(LSharedFontsInfo)
     else
     begin
       ReleaseFontsInfo;
-      FPSharedFontsInfo := SharedFontsInfo;
+      FPSharedFontsInfo := LSharedFontsInfo;
       FBaseLogFont := FPSharedFontsInfo^.BaseLogFont;
       SetStyle(Value.Style);
     end;
@@ -474,23 +474,23 @@ end;
 
 procedure TBCEditorFontStock.SetStyle(Value: TFontStyles);
 var
-  Index: Integer;
+  LIndex: Integer;
   LHandle: HDC;
-  OldFont: HFont;
-  FontDataPointer: PBCEditorFontData;
+  LOldFont: HFont;
+  LFontDataPointer: PBCEditorFontData;
 begin
   Assert(SizeOf(TFontStyles) = 1);
 
-  Index := Byte(Value);
-  Assert(Index <= High(TBCEditorStockFontPatterns));
+  LIndex := Byte(Value);
+  Assert(LIndex <= High(TBCEditorStockFontPatterns));
 
   UseFontHandles;
-  FontDataPointer := FontData[Index];
-  if FPCurrentFontData = FontDataPointer then
+  LFontDataPointer := FontData[LIndex];
+  if FPCurrentFontData = LFontDataPointer then
     Exit;
 
-  FPCurrentFontData := FontDataPointer;
-  with FontDataPointer^ do
+  FPCurrentFontData := LFontDataPointer;
+  with LFontDataPointer^ do
   if Handle <> 0 then
   begin
     FCurrentFont := Handle;
@@ -500,7 +500,7 @@ begin
 
   FCurrentFont := InternalCreateFont(Value);
   LHandle := InternalGetHandle;
-  OldFont := SelectObject(LHandle, FCurrentFont);
+  LOldFont := SelectObject(LHandle, FCurrentFont);
 
   with FPCurrentFontData^ do
   begin
@@ -508,7 +508,7 @@ begin
     CharAdvance := CalculateFontAdvance(LHandle, @CharHeight);
   end;
 
-  SelectObject(LHandle, OldFont);
+  SelectObject(LHandle, LOldFont);
   InternalReleaseDC(LHandle);
 end;
 
@@ -703,10 +703,10 @@ end;
 
 procedure TBCEditorTextDrawer.TextOut(X, Y: Integer; Text: PChar; Length: Integer);
 var
-  TempRect: TRect;
+  LTempRect: TRect;
 begin
-  TempRect := Rect(X, Y, X, Y);
-  UniversalExtTextOut(FHandle, X, Y, [], TempRect, Text, Length, nil);
+  LTempRect := Rect(X, Y, X, Y);
+  UniversalExtTextOut(FHandle, X, Y, [], LTempRect, Text, Length, nil);
 end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: PChar): Integer;

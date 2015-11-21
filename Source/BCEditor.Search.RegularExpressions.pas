@@ -3,8 +3,7 @@ unit BCEditor.Search.RegularExpressions;
 interface
 
 uses
-  System.Classes, System.RegularExpressions,
-  BCEditor.Search;
+  System.Classes, System.RegularExpressions, BCEditor.Search;
 
 type
   TBCEditorRegexSearch = class(TBCEditorSearchCustom)
@@ -14,9 +13,9 @@ type
     FPattern: string;
     FPositions: TList;
   protected
-    function GetLength(Index: Integer): Integer; override;
+    function GetLength(AIndex: Integer): Integer; override;
     function GetPattern: string; override;
-    function GetResult(Index: Integer): Integer; override;
+    function GetResult(AIndex: Integer): Integer; override;
     function GetResultCount: Integer; override;
     procedure SetPattern(const Value: string); override;
   public
@@ -37,7 +36,7 @@ begin
   inherited Create;
   {$if CompilerVersion > 26}
   FOptions := [roNotEmpty];
-  {$ifend}
+  {$endif}
   FPositions := TList.Create;
   FLengths := TList.Create;
 end;
@@ -87,9 +86,9 @@ begin
   FLengths.Clear;
 end;
 
-function TBCEditorRegexSearch.GetLength(Index: Integer): Integer;
+function TBCEditorRegexSearch.GetLength(AIndex: Integer): Integer;
 begin
-  Result := Integer(FLengths[index]);
+  Result := Integer(FLengths[AIndex]);
 end;
 
 function TBCEditorRegexSearch.GetPattern: string;
@@ -97,9 +96,9 @@ begin
   Result := FPattern;
 end;
 
-function TBCEditorRegexSearch.GetResult(Index: Integer): Integer;
+function TBCEditorRegexSearch.GetResult(AIndex: Integer): Integer;
 begin
-  Result := Integer(FPositions[index]);
+  Result := Integer(FPositions[AIndex]);
 end;
 
 function TBCEditorRegexSearch.GetResultCount: Integer;

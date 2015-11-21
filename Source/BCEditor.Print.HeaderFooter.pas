@@ -35,7 +35,7 @@ type
   TBCEditorLineInfo = class
   public
     LineHeight: Integer;
-    MaxBaseDist: Integer;
+    MaxBaseDistance: Integer;
   end;
 
   TBCEditorSection = class(TPersistent)
@@ -454,7 +454,7 @@ begin
     with TBCEditorLineInfo(FLineInfo[CurrentLine - 1]), TextMetric do
     begin
       LineHeight := Max(LineHeight, TextHeight(ACanvas, 'W'));
-      MaxBaseDist := Max(MaxBaseDist, tmHeight - tmDescent);
+      MaxBaseDistance := Max(MaxBaseDistance, tmHeight - tmDescent);
     end;
     FFrameHeight := Max(FFrameHeight, OrginalHeight + TextHeight(ACanvas, 'W'));
   end;
@@ -601,7 +601,7 @@ begin
       end;
     end;
     OldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
-    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).MaxBaseDist, 0, nil, PChar(S),
+    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).MaxBaseDistance, 0, nil, PChar(S),
       Length(S), nil);
     SetTextAlign(ACanvas.Handle, OldAlign);
   end;

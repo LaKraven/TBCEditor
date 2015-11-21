@@ -10,15 +10,15 @@ type
   strict private
     FData: TList;
     function GetCount: Integer;
-    function GetItem(Index: Integer): TMethod;
+    function GetItem(AIndex: Integer): TMethod;
   public
     constructor Create;
     destructor Destroy; override;
 
-    procedure Add(aHandler: TMethod);
-    procedure Remove(aHandler: TMethod);
+    procedure Add(AHandler: TMethod);
+    procedure Remove(AHandler: TMethod);
     property Count: Integer read GetCount;
-    property Items[index: Integer]: TMethod read GetItem; default;
+    property Items[Aindex: Integer]: TMethod read GetItem; default;
   end;
 
   TBCEditorKeyboardHandler = class(TObject)
@@ -85,11 +85,11 @@ begin
   Result := FData.Count div 2;
 end;
 
-function TBCEditorMethodList.GetItem(Index: Integer): TMethod;
+function TBCEditorMethodList.GetItem(AIndex: Integer): TMethod;
 begin
-  Index := Index * 2;
-  Result.Data := FData[Index];
-  Result.Code := FData[Index + 1];
+  AIndex := AIndex * 2;
+  Result.Data := FData[AIndex];
+  Result.Code := FData[AIndex + 1];
 end;
 
 procedure TBCEditorMethodList.Add(AHandler: TMethod);

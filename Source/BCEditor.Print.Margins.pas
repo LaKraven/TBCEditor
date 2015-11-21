@@ -20,8 +20,8 @@ type
     FRightTextIndent: Double;
     FTop: Double;
     FUnitSystem: TBCEditorUnitSystem;
-    function ConvertFrom(Value: Double): Double;
-    function ConvertTo(Value: Double): Double;
+    function ConvertFrom(AValue: Double): Double;
+    function ConvertTo(AValue: Double): Double;
     function GetBottom: Double;
     function GetFooter: Double;
     function GetHeader: Double;
@@ -32,16 +32,16 @@ type
     function GetRight: Double;
     function GetRightTextIndent: Double;
     function GetTop: Double;
-    procedure SetBottom(const Value: Double);
-    procedure SetFooter(const Value: Double);
-    procedure SetHeader(const Value: Double);
-    procedure SetInternalMargin(const Value: Double);
-    procedure SetLeft(const Value: Double);
-    procedure SetLeftTextIndent(const Value: Double);
-    procedure SetMargin(const Value: Double);
-    procedure SetRight(const Value: Double);
-    procedure SetRightTextIndent(const Value: Double);
-    procedure SetTop(const Value: Double);
+    procedure SetBottom(const AValue: Double);
+    procedure SetFooter(const AValue: Double);
+    procedure SetHeader(const AValue: Double);
+    procedure SetInternalMargin(const AValue: Double);
+    procedure SetLeft(const AValue: Double);
+    procedure SetLeftTextIndent(const AValue: Double);
+    procedure SetMargin(const AValue: Double);
+    procedure SetRight(const AValue: Double);
+    procedure SetRightTextIndent(const AValue: Double);
+    procedure SetTop(const AValue: Double);
   public
     PixelBottom: Integer;
     PixelFooter: Integer;
@@ -56,8 +56,8 @@ type
     constructor Create;
 
     procedure Assign(Source: TPersistent); override;
-    procedure InitPage(ACanvas: TCanvas; PageNum: Integer; PrinterInfo: TBCEditorPrinterInfo;
-      LineNumbers, LineNumbersInMargin: Boolean; MaxLineNum: Integer);
+    procedure InitPage(ACanvas: TCanvas; APageNumber: Integer; APrinterInfo: TBCEditorPrinterInfo;
+      ALineNumbers, ALineNumbersInMargin: Boolean; AMaxLineNumber: Integer);
     procedure LoadFromStream(AStream: TStream);
     procedure SaveToStream(AStream: TStream);
   published
@@ -80,8 +80,8 @@ implementation
 { TBCEditorPrintMargins }
 
 const
-  mmPrInch = 25.4;
-  mmPrCm = 10;
+  mmPerInch = 25.4;
+  mmPerCm = 10;
 
 constructor TBCEditorPrintMargins.Create;
 begin
@@ -100,31 +100,31 @@ begin
   FMirrorMargins := False;
 end;
 
-function TBCEditorPrintMargins.ConvertTo(Value: Double): Double;
+function TBCEditorPrintMargins.ConvertTo(AValue: Double): Double;
 begin
   case FUnitSystem of
-    usCM:
-      Result := Value * mmPrCm;
+    usCm:
+      Result := AValue * mmPerCm;
     usInch:
-      Result := Value * mmPrInch;
+      Result := AValue * mmPerInch;
     muThousandthsOfInches:
-      Result := mmPrInch * Value / 1000;
+      Result := mmPerInch * AValue / 1000;
   else
-    Result := Value;
+    Result := AValue;
   end;
 end;
 
-function TBCEditorPrintMargins.ConvertFrom(Value: Double): Double;
+function TBCEditorPrintMargins.ConvertFrom(AValue: Double): Double;
 begin
   case FUnitSystem of
-    usCM:
-      Result := Value / mmPrCm;
+    usCm:
+      Result := AValue / mmPerCm;
     usInch:
-      Result := Value / mmPrInch;
+      Result := AValue / mmPerInch;
     muThousandthsOfInches:
-      Result := 1000 * Value / mmPrInch;
+      Result := 1000 * AValue / mmPerInch;
   else
-    Result := Value;
+    Result := AValue;
   end;
 end;
 
@@ -178,79 +178,79 @@ begin
   Result := ConvertFrom(FInternalMargin);
 end;
 
-procedure TBCEditorPrintMargins.SetBottom(const Value: Double);
+procedure TBCEditorPrintMargins.SetBottom(const AValue: Double);
 begin
-  FBottom := ConvertTo(Value);
+  FBottom := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetFooter(const Value: Double);
+procedure TBCEditorPrintMargins.SetFooter(const AValue: Double);
 begin
-  FFooter := ConvertTo(Value);
+  FFooter := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetMargin(const Value: Double);
+procedure TBCEditorPrintMargins.SetMargin(const AValue: Double);
 begin
-  FMargin := ConvertTo(Value);
+  FMargin := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetHeader(const Value: Double);
+procedure TBCEditorPrintMargins.SetHeader(const AValue: Double);
 begin
-  FHeader := ConvertTo(Value);
+  FHeader := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetLeft(const Value: Double);
+procedure TBCEditorPrintMargins.SetLeft(const AValue: Double);
 begin
-  FLeft := ConvertTo(Value);
+  FLeft := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetRight(const Value: Double);
+procedure TBCEditorPrintMargins.SetRight(const AValue: Double);
 begin
-  FRight := ConvertTo(Value);
+  FRight := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetTop(const Value: Double);
+procedure TBCEditorPrintMargins.SetTop(const AValue: Double);
 begin
-  FTop := ConvertTo(Value);
+  FTop := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetLeftTextIndent(const Value: Double);
+procedure TBCEditorPrintMargins.SetLeftTextIndent(const AValue: Double);
 begin
-  FLeftTextIndent := ConvertTo(Value);
+  FLeftTextIndent := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetRightTextIndent(const Value: Double);
+procedure TBCEditorPrintMargins.SetRightTextIndent(const AValue: Double);
 begin
-  FRightTextIndent := ConvertTo(Value);
+  FRightTextIndent := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.SetInternalMargin(const Value: Double);
+procedure TBCEditorPrintMargins.SetInternalMargin(const AValue: Double);
 begin
-  FInternalMargin := ConvertTo(Value);
+  FInternalMargin := ConvertTo(AValue);
 end;
 
-procedure TBCEditorPrintMargins.InitPage(ACanvas: TCanvas; PageNum: Integer; PrinterInfo: TBCEditorPrinterInfo;
-  LineNumbers, LineNumbersInMargin: Boolean; MaxLineNum: Integer);
+procedure TBCEditorPrintMargins.InitPage(ACanvas: TCanvas; APageNumber: Integer; APrinterInfo: TBCEditorPrinterInfo;
+  ALineNumbers, ALineNumbersInMargin: Boolean; AMaxLineNumber: Integer);
 begin
-  if FMirrorMargins and ((PageNum mod 2) = 0) then
+  if FMirrorMargins and ((APageNumber mod 2) = 0) then
   begin
-    PixelLeft := PrinterInfo.PixFromLeft(FRight);
-    PixelRight := PrinterInfo.PrintableWidth - PrinterInfo.PixFromRight(FLeft + FMargin);
+    PixelLeft := APrinterInfo.PixFromLeft(FRight);
+    PixelRight := APrinterInfo.PrintableWidth - APrinterInfo.PixFromRight(FLeft + FMargin);
   end
   else
   begin
-    PixelLeft := PrinterInfo.PixFromLeft(FLeft + FMargin);
-    PixelRight := PrinterInfo.PrintableWidth - PrinterInfo.PixFromRight(FRight);
+    PixelLeft := APrinterInfo.PixFromLeft(FLeft + FMargin);
+    PixelRight := APrinterInfo.PrintableWidth - APrinterInfo.PixFromRight(FRight);
   end;
-  if LineNumbers and (not LineNumbersInMargin) then
-    PixelLeft := PixelLeft + TextWidth(ACanvas, IntToStr(MaxLineNum) + ': ');
-  PixelTop := PrinterInfo.PixFromTop(FTop);
-  PixelBottom := PrinterInfo.PrintableHeight - PrinterInfo.PixFromBottom(FBottom);
-  PixelHeader := PrinterInfo.PixFromTop(FHeader);
-  PixelFooter := PrinterInfo.PrintableHeight - PrinterInfo.PixFromBottom(FFooter);
-  PixelInternalMargin := Round(PrinterInfo.YPixPermm * FInternalMargin);
-  PixelMargin := Round(PrinterInfo.XPixPermm * FMargin);
-  PixelRightTextIndent := PixelRight - Round(PrinterInfo.XPixPermm * FRightTextIndent);
-  PixelLeftTextIndent := PixelLeft + Round(PrinterInfo.XPixPermm * FLeftTextIndent);
+  if ALineNumbers and (not ALineNumbersInMargin) then
+    PixelLeft := PixelLeft + TextWidth(ACanvas, IntToStr(AMaxLineNumber) + ': ');
+  PixelTop := APrinterInfo.PixFromTop(FTop);
+  PixelBottom := APrinterInfo.PrintableHeight - APrinterInfo.PixFromBottom(FBottom);
+  PixelHeader := APrinterInfo.PixFromTop(FHeader);
+  PixelFooter := APrinterInfo.PrintableHeight - APrinterInfo.PixFromBottom(FFooter);
+  PixelInternalMargin := Round(APrinterInfo.YPixPermm * FInternalMargin);
+  PixelMargin := Round(APrinterInfo.XPixPermm * FMargin);
+  PixelRightTextIndent := PixelRight - Round(APrinterInfo.XPixPermm * FRightTextIndent);
+  PixelLeftTextIndent := PixelLeft + Round(APrinterInfo.XPixPermm * FLeftTextIndent);
 end;
 
 procedure TBCEditorPrintMargins.Assign(Source: TPersistent);

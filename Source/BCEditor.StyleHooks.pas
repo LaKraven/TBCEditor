@@ -397,7 +397,6 @@ var
   BorderWidth: Integer;
 begin
   BorderWidth := 0;
-  // VertScrollBarWindow
   if FVertScrollBarWindow.Visible then
   begin
     R := FVertScrollBarRect;
@@ -730,7 +729,6 @@ begin
         SF.fMask := SIF_ALL;
         SF.cbSize := SizeOf(SF);
         GetScrollInfo(Handle, SB_HORZ, SF);
-        // FListPos := SF.nPos;
         FScrollPos := SF.nPos;
         FPrevScrollPos := Mouse.CursorPos.X;
         FHorzScrollBarSliderState := tsThumbBtnHorzPressed;
@@ -938,8 +936,6 @@ procedure TBCEditorStyleHook.WMNCPaint(var Msg: TMessage);
 begin
   CalcScrollBarsRect;
   UpdateScrollBarWindow;
-  // PaintScrollBars;
-  // Handled := True;
 end;
 
 procedure TBCEditorStyleHook.WMSize(var Msg: TMessage);

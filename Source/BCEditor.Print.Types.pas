@@ -20,7 +20,7 @@ const
 type
   TBCEditorFrameType = (ftLine, ftBox, ftShaded);
   TBCEditorFrameTypes = set of TBCEditorFrameType;
-  TBCEditorUnitSystem = (usMM, usCM, usInch, muThousandthsOfInches);
+  TBCEditorUnitSystem = (usMM, usCm, usInch, muThousandthsOfInches);
   TBCEditorPrintStatus = (psBegin, psNewPage, psEnd);
   TBCEditorPrintStatusEvent = procedure(Sender: TObject; Status: TBCEditorPrintStatus; PageNumber: Integer;
     var Abort: Boolean) of object;

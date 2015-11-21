@@ -8,19 +8,19 @@ uses
 type
   TBCEditorSearchCustom = class
   protected
-    function GetLength(aIndex: Integer): Integer; virtual; abstract;
+    function GetLength(AIndex: Integer): Integer; virtual; abstract;
     function GetPattern: string; virtual; abstract;
-    function GetResult(aIndex: Integer): Integer; virtual; abstract;
+    function GetResult(AIndex: Integer): Integer; virtual; abstract;
     function GetResultCount: Integer; virtual; abstract;
-    procedure SetPattern(const Value: string); virtual; abstract;
+    procedure SetPattern(const AValue: string); virtual; abstract;
   public
-    function FindAll(const NewText: string): Integer; virtual; abstract;
-    function Replace(const aOccurrence, aReplacement: string): string; virtual; abstract;
+    function FindAll(const AText: string): Integer; virtual; abstract;
+    function Replace(const AOccurrence, aReplacement: string): string; virtual; abstract;
     procedure Clear; virtual; abstract;
-    property Lengths[aIndex: Integer]: Integer read GetLength;
+    property Lengths[AIndex: Integer]: Integer read GetLength;
     property Pattern: string read GetPattern write SetPattern;
     property ResultCount: Integer read GetResultCount;
-    property Results[aIndex: Integer]: Integer read GetResult;
+    property Results[AIndex: Integer]: Integer read GetResult;
   end;
 
   { TBCEditorNormalSearch }
@@ -43,24 +43,24 @@ type
     FWholeWordsOnly: Boolean;
     function GetFinished: Boolean;
     procedure InitShiftTable;
-    procedure SetCaseSensitive(const Value: Boolean);
+    procedure SetCaseSensitive(const AValue: Boolean);
   protected
-    function GetLength(Index: Integer): Integer; override;
+    function GetLength(AIndex: Integer): Integer; override;
     function GetPattern: string; override;
-    function GetResult(Index: Integer): Integer; override;
+    function GetResult(AIndex: Integer): Integer; override;
     function GetResultCount: Integer; override;
     function TestWholeWord: Boolean;
-    procedure SetPattern(const Value: string); override;
+    procedure SetPattern(const AValue: string); override;
   public
     constructor Create;
     destructor Destroy; override;
 
-    function FindAll(const NewText: string): Integer; override;
-    function FindFirst(const NewText: string): Integer;
+    function FindAll(const AText: string): Integer; override;
+    function FindFirst(const AText: string): Integer;
     function Next: Integer;
     function Replace(const AOccurrence, AReplacement: string): string; override;
     procedure Clear; override;
-    procedure FixResults(First, Delta: Integer);
+    procedure FixResults(AFirst, ADelta: Integer);
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
     property Count: Integer read FCount write FCount;
     property Finished: Boolean read GetFinished;
@@ -84,11 +84,11 @@ begin
   Result := (FRun >= FTheEnd) or (FPatternLength >= FTextLength);
 end;
 
-function TBCEditorNormalSearch.GetResult(Index: Integer): Integer;
+function TBCEditorNormalSearch.GetResult(AIndex: Integer): Integer;
 begin
   Result := 0;
-  if (Index >= 0) and (Index < FResults.Count) then
-    Result := Integer(FResults[Index]);
+  if (AIndex >= 0) and (AIndex < FResults.Count) then
+    Result := Integer(FResults[AIndex]);
 end;
 
 function TBCEditorNormalSearch.GetResultCount: Integer;
@@ -96,18 +96,18 @@ begin
   Result := FResults.Count;
 end;
 
-procedure TBCEditorNormalSearch.FixResults(First, Delta: Integer);
+procedure TBCEditorNormalSearch.FixResults(AFirst, ADelta: Integer);
 var
   i: Integer;
 begin
-  if (Delta <> 0) and (FResults.Count > 0) then
+  if (ADelta <> 0) and (FResults.Count > 0) then
   begin
     i := FResults.Count - 1;
     while i >= 0 do
     begin
-      if Integer(FResults[i]) <= First then
+      if Integer(FResults[i]) <= AFirst then
         Break;
-      FResults[i] := pointer(Integer(FResults[i]) - Delta);
+      FResults[i] := pointer(Integer(FResults[i]) - ADelta);
       Dec(i);
     end;
   end;
@@ -138,7 +138,7 @@ end;
 
 function TBCEditorNormalSearch.TestWholeWord: Boolean;
 var
-  Test: PChar;
+  LPTest: PChar;
 
   function IsWordBreakChar(AChar: Char): Boolean;
   begin
@@ -152,15 +152,15 @@ var
   end;
 
 begin
-  Test := FRun - FPatternLength;
+  LPTest := FRun - FPatternLength;
 
-  Result := ((Test < FOrigin) or IsWordBreakChar(Test[0])) and ((FRun >= FTheEnd) or IsWordBreakChar(FRun[1]));
+  Result := ((LPTest < FOrigin) or IsWordBreakChar(LPTest[0])) and ((FRun >= FTheEnd) or IsWordBreakChar(FRun[1]));
 end;
 
 function TBCEditorNormalSearch.Next: Integer;
 var
   i: Integer;
-  J: PChar;
+  LPValue: PChar;
 begin
   Result := 0;
   Inc(FRun, FPatternLength);
@@ -170,9 +170,9 @@ begin
       Inc(FRun, FShift[AnsiChar((FRun + 1)^)])
     else
     begin
-      J := FRun - FPatternLength + 1;
+      LPValue := FRun - FPatternLength + 1;
       i := 1;
-      while FPattern[i] = J^ do
+      while FPattern[i] = LPValue^ do
       begin
         if i = FPatternLength then
         begin
@@ -184,7 +184,7 @@ begin
           Exit;
         end;
         Inc(i);
-        Inc(J);
+        Inc(LPValue);
       end;
       Inc(FRun, FLookAt);
       if FRun >= FTheEnd then
@@ -200,11 +200,11 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorNormalSearch.SetPattern(const Value: string);
+procedure TBCEditorNormalSearch.SetPattern(const AValue: string);
 begin
-  if FPattern <> Value then
+  if FPattern <> AValue then
   begin
-    FCasedPattern := Value;
+    FCasedPattern := AValue;
     if CaseSensitive then
       FPattern := FCasedPattern
     else
@@ -214,11 +214,11 @@ begin
   FCount := 0;
 end;
 
-procedure TBCEditorNormalSearch.SetCaseSensitive(const Value: Boolean);
+procedure TBCEditorNormalSearch.SetCaseSensitive(const AValue: Boolean);
 begin
-  if FCaseSensitive <> Value then
+  if FCaseSensitive <> AValue then
   begin
-    FCaseSensitive := Value;
+    FCaseSensitive := AValue;
     if FCaseSensitive then
       FPattern := FCasedPattern
     else
@@ -232,12 +232,12 @@ begin
   FResults.Count := 0;
 end;
 
-function TBCEditorNormalSearch.FindAll(const NewText: string): Integer;
+function TBCEditorNormalSearch.FindAll(const AText: string): Integer;
 var
   Found: Integer;
 begin
   Clear;
-  Found := FindFirst(NewText);
+  Found := FindFirst(AText);
   while Found > 0 do
   begin
     FResults.Add(Pointer(Found));
@@ -251,18 +251,18 @@ begin
   Result := AReplacement;
 end;
 
-function TBCEditorNormalSearch.FindFirst(const NewText: string): Integer;
+function TBCEditorNormalSearch.FindFirst(const AText: string): Integer;
 begin
   if not FShiftInitialized then
     InitShiftTable;
   Result := 0;
-  FTextLength := Length(NewText);
+  FTextLength := Length(AText);
   if FTextLength >= FPatternLength then
   begin
     if CaseSensitive then
-      FTextToSearch := NewText
+      FTextToSearch := AText
     else
-      FTextToSearch := LowerCase(NewText);
+      FTextToSearch := AnsiLowerCase(AText);
     FOrigin := PChar(FTextToSearch);
     FTheEnd := FOrigin + FTextLength;
     FRun := FOrigin - 1;
@@ -270,7 +270,7 @@ begin
   end;
 end;
 
-function TBCEditorNormalSearch.GetLength(Index: Integer): Integer;
+function TBCEditorNormalSearch.GetLength(AIndex: Integer): Integer;
 begin
   Result := FPatternLength;
 end;

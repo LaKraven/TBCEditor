@@ -12,7 +12,7 @@ type
   protected
     function GetPattern: string; override;
     function WildCardToRegExpr(AWildCard: string): string;
-    procedure SetPattern(const Value: string); override;
+    procedure SetPattern(const AValue: string); override;
   public
     constructor Create;
   end;
@@ -32,11 +32,11 @@ begin
   Result := FPattern;
 end;
 
-procedure TBCEditorWildcardSearch.SetPattern(const Value: string);
+procedure TBCEditorWildcardSearch.SetPattern(const AValue: string);
 begin
-  FPattern := Value;
+  FPattern := AValue;
 
-  inherited SetPattern(WildCardToRegExpr(Value));
+  inherited SetPattern(WildCardToRegExpr(AValue));
 end;
 
 function TBCEditorWildcardSearch.WildCardToRegExpr(AWildCard: string): string;

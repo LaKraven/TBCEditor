@@ -8871,7 +8871,7 @@ var
               LCurrentLine := Line;
             end;
             LDeletePositionEnd := DisplayToTextPosition(GetDisplayPosition(LDisplayDeletePositionEnd, i)).Char;
-            LTempString := FLines.List[LCurrentLine].fString;
+            LTempString := FLines.List[LCurrentLine].Value;
             Delete(LTempString, LDeletePosition, LDeletePositionEnd - LDeletePosition);
             FLines[LCurrentLine] := LTempString;
           end;

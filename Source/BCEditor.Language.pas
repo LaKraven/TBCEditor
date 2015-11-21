@@ -7,7 +7,7 @@ resourcestring
   SBCEditorCannotInsertItemAtPosition = 'Cannot insert item at position %d.';
 
   { BCEditor.Editor.Base }
-  SBCEditorScrollInfoTopLine = 'Top Line: %d';
+  SBCEditorScrollInfoTopLine = 'Top line: %d';
   SBCEditorScrollInfo = '%d - %d';
   SBCEditorSearchStringNotFound = 'Search string ''%s'' not found';
   SBCEditorSearchMatchNotFound = 'Search match not found.%sRestart search from the beginning of the file?';

@@ -21,7 +21,6 @@ type
     procedure InvalidateEditor;
   public
     constructor Create(AOwner: TComponent); override;
-    function GetPopupText: string; virtual;
     procedure Hide;
     procedure Show(Origin: TPoint); virtual;
     property ActiveControl: TWinControl read FActiveControl;
@@ -54,11 +53,6 @@ begin
   inherited CreateParams(Params);
 
   Params.Style := WS_POPUP or WS_BORDER;
-end;
-
-function TBCEditorPopupWindow.GetPopupText: string;
-begin
-  Result := '';
 end;
 
 procedure TBCEditorPopupWindow.Hide;

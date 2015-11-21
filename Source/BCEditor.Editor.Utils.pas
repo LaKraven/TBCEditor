@@ -5,22 +5,13 @@ interface
 uses
   System.Classes, BCEditor.Types;
 
-function AreCaretsEqual(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
 function GetTextPosition(AChar, ALine: Integer): TBCEditorTextPosition;
-function IsCaretInRange(const TextPosition, BeginTextPosition, EndTextPosition: TBCEditorTextPosition; Inclusive: Boolean): Boolean;
-function IsCaretBefore(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
-function IsDigitChar(AChar: Char): Boolean;
 function IsUTF8(Stream: TStream; out WithBOM: Boolean): Boolean;
 
 implementation
 
 uses
   System.Character, System.Math, System.SysUtils, BCEditor.Consts;
-
-function AreCaretsEqual(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
-begin
-  Result := (TextPosition1.Line = TextPosition2.Line) and (TextPosition1.Char = TextPosition2.Char);
-end;
 
 function GetTextPosition(AChar, ALine: Integer): TBCEditorTextPosition;
 begin
@@ -29,25 +20,6 @@ begin
     Char := AChar;
     Line := ALine;
   end;
-end;
-
-function IsCaretInRange(const TextPosition, BeginTextPosition, EndTextPosition: TBCEditorTextPosition;
-  Inclusive: Boolean): Boolean;
-begin
-  Result := ((TextPosition.Line > BeginTextPosition.Line) or ((TextPosition.Line = BeginTextPosition.Line) and
-    (TextPosition.Char > BeginTextPosition.Char - Ord(Inclusive)))) and ((TextPosition.Line < EndTextPosition.Line) or
-    ((TextPosition.Line = EndTextPosition.Line) and (TextPosition.Char < EndTextPosition.Char + Ord(Inclusive))));
-end;
-
-function IsCaretBefore(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
-begin
-  Result := (TextPosition1.Line < TextPosition2.Line) or ((TextPosition1.Line = TextPosition2.Line) and
-    (TextPosition1.Char < TextPosition2.Char));
-end;
-
-function IsDigitChar(AChar: Char): Boolean;
-begin
-  Result := AChar.IsDigit or AChar.IsNumber
 end;
 
 // checks for a BOM in UTF-8 format or searches the first 4096 bytes for typical UTF-8 octet sequences

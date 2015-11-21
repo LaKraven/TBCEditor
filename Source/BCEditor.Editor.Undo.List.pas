@@ -114,19 +114,6 @@ begin
       ChangeEndPosition := ASelectionEndPosition;
       ChangeString := ChangeText;
       ChangeData := Data;
-
-      {if FBlockChangeNumber <> 0 then
-        ChangeNumber := FBlockChangeNumber
-      else
-      begin
-        ChangeNumber := FNextChangeNumber;
-        if FBlockCount = 0 then
-        begin
-          Inc(FNextChangeNumber);
-          if FNextChangeNumber = 0 then
-            Inc(FNextChangeNumber);
-        end;
-      end;  }
     end;
     PushItem(LNewItem);
   end;

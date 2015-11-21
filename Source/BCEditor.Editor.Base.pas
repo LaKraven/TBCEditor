@@ -10586,6 +10586,11 @@ var
     Result := True;
   end;
 
+  function AreCaretsEqual(const TextPosition1, TextPosition2: TBCEditorTextPosition): Boolean;
+  begin
+    Result := (TextPosition1.Line = TextPosition2.Line) and (TextPosition1.Char = TextPosition2.Char);
+  end;
+
 begin
   LHelper := '';
   IncPaintLock;

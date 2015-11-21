@@ -8,7 +8,6 @@ uses
 
 type
   TBCEditorRange = class;
-
   TBCEditorSet = class;
 
   TBCEditorAbstractParser = class abstract
@@ -97,12 +96,10 @@ type
   strict private
     FAlternativeCloseArray: TBCEditorArrayOfString;
     FAlternativeCloseArrayCount: Integer;
-    FOpenBeginningOfLine: Boolean;
     FCaseFunct: TBCEditorCaseFunction;
     FCaseSensitive: Boolean;
     FCloseOnEndOfLine: Boolean;
     FCloseOnTerm: Boolean;
-    FSkipWhitespace: Boolean;
     FCloseParent: Boolean;
     FCloseToken: TBCEditorMultiToken;
     FClosingToken: TBCEditorToken;
@@ -111,20 +108,22 @@ type
     FDefaultToken: TBCEditorToken;
     FDelimiters: TBCEditorCharSet;
     FKeyList: TList;
+    FOpenBeginningOfLine: Boolean;
     FOpenToken: TBCEditorMultiToken;
     FPrepared: Boolean;
     FRanges: TList;
     FSets: TList;
+    FSkipWhitespace: Boolean;
     FStringCaseFunct: TBCEditorStringCaseFunction;
     FSymbolList: TBCEditorAbstractParserArray;
     FTokens: TList;
-    function GetKeyList(Index: Integer): TBCEditorKeyList;
+    function GetKeyList(AIndex: Integer): TBCEditorKeyList;
     function GetKeyListCount: Integer;
-    function GetRange(Index: Integer): TBCEditorRange;
+    function GetRange(AIndex: Integer): TBCEditorRange;
     function GetRangeCount: Integer;
-    function GetSet(Index: Integer): TBCEditorSet;
+    function GetSet(AIndex: Integer): TBCEditorSet;
     function GetSetCount: Integer;
-    function GetToken(Index: Integer): TBCEditorToken;
+    function GetToken(AIndex: Integer): TBCEditorToken;
     procedure SetAlternativeCloseArrayCount(const Value: Integer);
     procedure SetCaseSensitive(const Value: Boolean);
   public
@@ -156,16 +155,16 @@ type
     property DefaultToken: TBCEditorToken read FDefaultToken;
     property Delimiters: TBCEditorCharSet read FDelimiters write FDelimiters;
     property KeyListCount: Integer read GetKeyListCount;
-    property KeyList[Index: Integer]: TBCEditorKeyList read GetKeyList;
+    property KeyList[AIndex: Integer]: TBCEditorKeyList read GetKeyList;
     property OpenToken: TBCEditorMultiToken read FOpenToken write FOpenToken;
     property Prepared: Boolean read FPrepared;
     property RangeCount: Integer read GetRangeCount;
-    property Ranges[Index: Integer]: TBCEditorRange read GetRange;
+    property Ranges[AIndex: Integer]: TBCEditorRange read GetRange;
     property SetCount: Integer read GetSetCount;
-    property Sets[Index: Integer]: TBCEditorSet read GetSet;
+    property Sets[AIndex: Integer]: TBCEditorSet read GetSet;
     property StringCaseFunct: TBCEditorStringCaseFunction read FStringCaseFunct;
     property SymbolList: TBCEditorAbstractParserArray read FSymbolList;
-    property Tokens[Index: Integer]: TBCEditorToken read GetToken;
+    property Tokens[AIndex: Integer]: TBCEditorToken read GetToken;
   end;
 
 implementation
@@ -505,24 +504,24 @@ begin
   Result := FSets.Count;
 end;
 
-function TBCEditorRange.GetToken(Index: Integer): TBCEditorToken;
+function TBCEditorRange.GetToken(AIndex: Integer): TBCEditorToken;
 begin
-  Result := TBCEditorToken(FTokens[Index]);
+  Result := TBCEditorToken(FTokens[AIndex]);
 end;
 
-function TBCEditorRange.GetRange(Index: Integer): TBCEditorRange;
+function TBCEditorRange.GetRange(AIndex: Integer): TBCEditorRange;
 begin
-  Result := TBCEditorRange(FRanges[Index]);
+  Result := TBCEditorRange(FRanges[AIndex]);
 end;
 
-function TBCEditorRange.GetKeyList(Index: Integer): TBCEditorKeyList;
+function TBCEditorRange.GetKeyList(AIndex: Integer): TBCEditorKeyList;
 begin
-  Result := TBCEditorKeyList(FKeyList[Index]);
+  Result := TBCEditorKeyList(FKeyList[AIndex]);
 end;
 
-function TBCEditorRange.GetSet(Index: Integer): TBCEditorSet;
+function TBCEditorRange.GetSet(AIndex: Integer): TBCEditorSet;
 begin
-  Result := TBCEditorSet(FSets[Index]);
+  Result := TBCEditorSet(FSets[AIndex]);
 end;
 
 procedure TBCEditorRange.AddTokenRange(AOpenToken: string; AOpenTokenBreakType: TBCEditorBreakType; ACloseToken: string;

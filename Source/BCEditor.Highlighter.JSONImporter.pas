@@ -82,7 +82,7 @@ end;
 
 function StrToBreakType(const AString: string): TBCEditorBreakType;
 begin
-  if (AString = 'Any') {or (AString = '') } then
+  if AString = 'Any' then
     Result := btAny
   else
   if (AString = 'Term') or (AString = '') then
@@ -361,9 +361,9 @@ begin
         end;
 
         ARange.OpenToken.Clear;
-        ARange.OpenToken.BreakType := btUnspecified{btAny};
+        ARange.OpenToken.BreakType := btUnspecified;
         ARange.CloseToken.Clear;
-        ARange.CloseToken.BreakType := btUnspecified{btAny};
+        ARange.CloseToken.BreakType := btUnspecified;
 
         TokenRangeObject := RangeObject['TokenRange'].ObjectValue;
         if Assigned(TokenRangeObject) then

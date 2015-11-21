@@ -3,19 +3,17 @@ unit BCEditor.Editor.Scroll.Hint;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, Vcl.Graphics, BCEditor.Types;
 
 type
-  TScrollHintFormat = (shfTopLineOnly, shfTopToBottom);
-
   TBCEditorScrollHint = class(TPersistent)
   strict private
-    FFormat: TScrollHintFormat;
+    FFormat: TBCEditorScrollHintFormat;
   public
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
-    property Format: TScrollHintFormat read FFormat write FFormat default shfTopLineOnly;
+    property Format: TBCEditorScrollHintFormat read FFormat write FFormat default shfTopLineOnly;
   end;
 
 implementation

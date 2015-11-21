@@ -308,6 +308,8 @@ type
 
   TBCEditorLeftMarginBorderStyle = (mbsNone, mbsMiddle, mbsRight);
 
+  TBCEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);
+
 implementation
 
 end.

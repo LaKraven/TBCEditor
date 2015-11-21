@@ -12,8 +12,8 @@ type
   strict private
     FAttributes: TStringList;
     FBeginningOfLine: Boolean;
-    FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FCodeFoldingRangeCount: Integer;
+    FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FColors: TBCEditorHighlighterColors;
     FCompletionProposalSkipRegions: TBCEditorSkipRegions;
     FCurrentLine: PChar;
@@ -22,29 +22,32 @@ type
     FEditor: TWinControl;
     FEndOfLine: Boolean;
     FFileName: string;
+    FFoldCloseKeyChars: TBCEditorCharSet;
+    FFoldOpenKeyChars: TBCEditorCharSet;
     FInfo: TBCEditorHighlighterInfo;
     FLoading: Boolean;
+    FMainRules: TBCEditorRange;
     FMatchingPairHighlight: Boolean;
     FMatchingPairs: TList;
-    FMainRules: TBCEditorRange;
     FMultiHighlighter: Boolean;
     FName: string;
     FPrepared: Boolean;
     FPreviousEndOfLine: Boolean;
     FRunPosition: LongInt;
+    FSkipCloseKeyChars: TBCEditorCharSet;
+    FSkipOpenKeyChars: TBCEditorCharSet;
     FTemporaryCurrentTokens: TList;
     FTokenPosition: Integer;
     FWordBreakChars: TBCEditorCharSet;
-    FFoldOpenKeyChars, FFoldCloseKeyChars, FSkipOpenKeyChars, FSkipCloseKeyChars: TBCEditorCharSet;
     procedure AddAllAttributes(ARange: TBCEditorRange);
     procedure UpdateAttributes(ARange: TBCEditorRange; AParentRange: TBCEditorRange);
   protected
-    function GetAttribute(Index: Integer): TBCEditorHighlighterAttribute;
+    function GetAttribute(AIndex: Integer): TBCEditorHighlighterAttribute;
     procedure AddAttribute(AHighlighterAttribute: TBCEditorHighlighterAttribute);
     procedure Prepare;
     procedure Reset;
     procedure SetAttributesOnChange(AEvent: TNotifyEvent);
-    procedure SetCodeFoldingRangeCount(Value: Integer);
+    procedure SetCodeFoldingRangeCount(AValue: Integer);
     procedure SetWordBreakChars(AChars: TBCEditorCharSet);
   public
     constructor Create(AOwner: TWinControl);
@@ -58,6 +61,7 @@ type
     function GetTokenKind: Integer;
     function GetTokenLength: Integer;
     function GetTokenPosition: Integer;
+    procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
     procedure AddKeywords(var AStringList: TStringList);
     procedure Clear;
     procedure LoadFromFile(AFileName: string);
@@ -65,18 +69,19 @@ type
     procedure Next;
     procedure NextToEndOfLine;
     procedure ResetCurrentRange;
-    procedure SetCurrentLine(NewValue: string);
-    procedure SetCurrentRange(Value: Pointer);
+    procedure SetCurrentLine(ANewValue: string);
+    procedure SetCurrentRange(AValue: Pointer);
     procedure UpdateColors;
-    procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
-
     property Attribute[Index: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
-    property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
+    property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
+    property Colors: TBCEditorHighlighterColors read FColors write FColors;
     property CompletionProposalSkipRegions: TBCEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
     property FileName: string read FFileName write FFileName;
+    property FoldCloseKeyChars: TBCEditorCharSet read FFoldCloseKeyChars write FFoldCloseKeyChars;
+    property FoldOpenKeyChars: TBCEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
     property Info: TBCEditorHighlighterInfo read FInfo write FInfo;
     property Loading: Boolean read FLoading write FLoading;
     property MainRules: TBCEditorRange read FMainRules;
@@ -84,13 +89,9 @@ type
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
     property MultiHighlighter: Boolean read FMultiHighlighter write FMultiHighlighter;
     property Name: string read FName write FName;
-    property Colors: TBCEditorHighlighterColors read FColors write FColors;
-    property WordBreakChars: TBCEditorCharSet read FWordBreakChars write SetWordBreakChars;
-
-    property FoldOpenKeyChars: TBCEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
-    property FoldCloseKeyChars: TBCEditorCharSet read FFoldCloseKeyChars write FFoldCloseKeyChars;
-    property SkipOpenKeyChars: TBCEditorCharSet read FSkipOpenKeyChars write FSkipOpenKeyChars;
     property SkipCloseKeyChars: TBCEditorCharSet read FSkipCloseKeyChars write FSkipCloseKeyChars;
+    property SkipOpenKeyChars: TBCEditorCharSet read FSkipOpenKeyChars write FSkipOpenKeyChars;
+    property WordBreakChars: TBCEditorCharSet read FWordBreakChars write SetWordBreakChars;
   end;
 
 implementation
@@ -179,13 +180,13 @@ begin
     AddAllAttributes(ARange.Ranges[i]);
 end;
 
-procedure TBCEditorHighlighter.SetCurrentLine(NewValue: string);
+procedure TBCEditorHighlighter.SetCurrentLine(ANewValue: string);
 begin
   if Assigned(FCurrentRange) then
     if not FCurrentRange.Prepared then
       Prepare;
 
-  FCurrentLine := PChar(NewValue);
+  FCurrentLine := PChar(ANewValue);
   FRunPosition := 0;
   FTokenPosition := 0;
   FEndOfLine := False;
@@ -340,18 +341,18 @@ begin
   FCurrentRange := MainRules;
 end;
 
-procedure TBCEditorHighlighter.SetCodeFoldingRangeCount(Value: Integer);
+procedure TBCEditorHighlighter.SetCodeFoldingRangeCount(AValue: Integer);
 begin
-  if Value <> FCodeFoldingRangeCount then
+  if AValue <> FCodeFoldingRangeCount then
   begin
-    SetLength(FCodeFoldingRegions, Value);
-    FCodeFoldingRangeCount := Value;
+    SetLength(FCodeFoldingRegions, AValue);
+    FCodeFoldingRangeCount := AValue;
   end;
 end;
 
-procedure TBCEditorHighlighter.SetCurrentRange(Value: Pointer);
+procedure TBCEditorHighlighter.SetCurrentRange(AValue: Pointer);
 begin
-  FCurrentRange := TBCEditorRange(Value);
+  FCurrentRange := TBCEditorRange(AValue);
 end;
 
 procedure TBCEditorHighlighter.AddKeywords(var AStringList: TStringList);
@@ -529,11 +530,11 @@ begin
   FLoading := False;
 end;
 
-function TBCEditorHighlighter.GetAttribute(Index: Integer): TBCEditorHighlighterAttribute;
+function TBCEditorHighlighter.GetAttribute(AIndex: Integer): TBCEditorHighlighterAttribute;
 begin
   Result := nil;
-  if (Index >= 0) and (Index < FAttributes.Count) then
-    Result := TBCEditorHighlighterAttribute(FAttributes.Objects[Index]);
+  if (AIndex >= 0) and (AIndex < FAttributes.Count) then
+    Result := TBCEditorHighlighterAttribute(FAttributes.Objects[AIndex]);
 end;
 
 procedure TBCEditorHighlighter.AddAttribute(AHighlighterAttribute: TBCEditorHighlighterAttribute);

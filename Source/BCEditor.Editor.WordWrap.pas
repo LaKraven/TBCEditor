@@ -11,9 +11,9 @@ type
     FBitmap: Vcl.Graphics.TBitmap;
     FColors: TBCEditorWordWrapColors;
     FEnabled: Boolean;
-    FPosition: Integer;
-    FOnChange: TNotifyEvent;
     FIndicator: TBCEditorGlyph;
+    FOnChange: TNotifyEvent;
+    FPosition: Integer;
     FStyle: TBCEditorWordWrapStyle;
     procedure CreateInternalBitmap;
     procedure DoChange;
@@ -21,9 +21,9 @@ type
     procedure SetColors(const Value: TBCEditorWordWrapColors);
     procedure SetEnabled(const Value: Boolean);
     procedure SetIndicator(const Value: TBCEditorGlyph);
+    procedure SetOnChange(Value: TNotifyEvent);
     procedure SetPosition(const Value: Integer);
     procedure SetStyle(const Value: TBCEditorWordWrapStyle);
-    procedure SetOnChange(Value: TNotifyEvent);
   public
     constructor Create;
     destructor Destroy; override;
@@ -31,10 +31,10 @@ type
   published
     property Colors: TBCEditorWordWrapColors read FColors write SetColors;
     property Enabled: Boolean read FEnabled write SetEnabled;
-    property Position: Integer read FPosition write SetPosition;
-    property Style: TBCEditorWordWrapStyle read FStyle write SetStyle;
     property Indicator: TBCEditorGlyph read FIndicator write SetIndicator;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
+    property Position: Integer read FPosition write SetPosition;
+    property Style: TBCEditorWordWrapStyle read FStyle write SetStyle;
   end;
 
 implementation

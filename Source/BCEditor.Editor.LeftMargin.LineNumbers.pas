@@ -36,10 +36,6 @@ implementation
 uses
   BCEditor.Utils, System.Math;
 
-const
-  MIN_DIGIT_COUNT = 2;
-  MAX_DIGIT_COUNT = 12;
-
 { TBCEditorLeftMarginLineNumbers }
 
 constructor TBCEditorLeftMarginLineNumbers.Create;
@@ -78,7 +74,7 @@ end;
 
 procedure TBCEditorLeftMarginLineNumbers.SetDigitCount(Value: Integer);
 begin
-  Value := MinMax(Value, MIN_DIGIT_COUNT, MAX_DIGIT_COUNT);
+  Value := MinMax(Value, 2, 12);
   if FDigitCount <> Value then
   begin
     FDigitCount := Value;

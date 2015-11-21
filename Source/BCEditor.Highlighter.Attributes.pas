@@ -15,8 +15,8 @@ type
     FForegroundDefault: TColor;
     FName: string;
     FOnChange: TNotifyEvent;
-    FParentForeground: Boolean;
     FParentBackground: Boolean;
+    FParentForeground: Boolean;
     FStyle: TFontStyles;
     FStyleDefault: TFontStyles;
     function GetBackgroundColorStored: Boolean;

@@ -130,7 +130,7 @@ type
 implementation
 
 uses
-  BCEditor.Consts, BCEditor.Language, System.Math;
+  BCEditor.Consts, BCEditor.Language;
 
 { TBCEditorLines }
 

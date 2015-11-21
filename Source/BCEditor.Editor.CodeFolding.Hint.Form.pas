@@ -56,7 +56,7 @@ implementation
 
 uses
   System.SysUtils, System.UITypes, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Utils,
-  BCEditor.Consts, System.Math{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
+  BCEditor.Consts{$IFDEF USE_ALPHASKINS}, sSkinProvider, sMessages{$ENDIF};
 
 { TBCEditorCodeFoldingHintForm }
 

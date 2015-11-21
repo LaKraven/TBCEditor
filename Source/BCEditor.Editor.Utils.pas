@@ -11,7 +11,7 @@ function IsUTF8(Stream: TStream; out WithBOM: Boolean): Boolean;
 implementation
 
 uses
-  System.Character, System.Math, System.SysUtils, BCEditor.Consts;
+  System.Math, System.SysUtils, BCEditor.Consts;
 
 function GetTextPosition(AChar, ALine: Integer): TBCEditorTextPosition;
 begin

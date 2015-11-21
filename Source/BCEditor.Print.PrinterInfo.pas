@@ -56,8 +56,7 @@ type
 
 implementation
 
-uses
-  BCEditor.Utils;
+
 
 { TBCEditorPrinterInfo }
 

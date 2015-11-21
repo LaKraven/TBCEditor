@@ -727,7 +727,7 @@ uses
     {$ELSE}
   System.DateUtils,
     {$ENDIF MSWINDOWS}
-  System.Variants, System.RTLConsts, System.TypInfo, System.Math, System.SysConst;
+  System.Variants, System.RTLConsts, System.TypInfo, System.SysConst;
 
   {$ELSE}
 

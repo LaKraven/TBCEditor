@@ -90,7 +90,7 @@ type
 implementation
 
 uses
-  Vcl.Graphics, System.SysUtils, System.Math, BCEditor.Utils;
+  Vcl.Graphics, System.SysUtils, System.Math;
 
 type
   TWinControlClass = class(TWinControl);

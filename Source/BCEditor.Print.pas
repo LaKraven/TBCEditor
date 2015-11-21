@@ -126,7 +126,7 @@ type
 implementation
 
 uses
-  System.Math, System.UITypes, BCEditor.Highlighter.Attributes, BCEditor.Consts;
+  System.UITypes, BCEditor.Highlighter.Attributes, BCEditor.Consts;
 
 { TBCEditorPrint }
 

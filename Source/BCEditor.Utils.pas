@@ -20,7 +20,7 @@ procedure FreeList(var List: TList);
 implementation
 
 uses
-  Vcl.Forms, Vcl.Dialogs, System.SysUtils, Vcl.Clipbrd, System.Character;
+  Vcl.Forms, Vcl.Dialogs, System.SysUtils, System.Character;
 
 procedure FreeList(var List: TList);
 begin

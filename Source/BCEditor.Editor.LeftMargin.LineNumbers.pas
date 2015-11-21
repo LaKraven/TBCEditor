@@ -34,7 +34,7 @@ type
 implementation
 
 uses
-  BCEditor.Utils, System.Math;
+  BCEditor.Utils;
 
 { TBCEditorLeftMarginLineNumbers }
 

@@ -27,7 +27,6 @@ const
   ecEditorTop = 15;
   ecEditorBottom = 16;
   ecGotoXY = 17;
-  //ecOffsetCaret = 18;
   { Selection }
   ecSelection = 100;
   ecSelectionLeft = ecLeft + ecSelection;
@@ -132,7 +131,7 @@ const
   ecSearchPrevious = 801;
 
   ecUserFirst = 1001;
-
+  { code folding }
   ecCollapse = ecUserFirst + 100;
   ecUncollapse = ecUserFirst + 101;
   ecCollapseLevel = ecUserFirst + 102;
@@ -338,7 +337,7 @@ const
     (Value: ecUncollapseAll; Name: 'ecUncollapseAll'),
     (Value: ecCollapseCurrent; Name: 'ecCollapseCurrent'),
     (Value: ecSearchNext; Name: 'ecSearchNext'),
-    (Value: ecSearchPrevious; Name: 'ecSearchPrevious')//,
+    (Value: ecSearchPrevious; Name: 'ecSearchPrevious')
   );
 
 function IdentToEditorCommand(const AIdent: string; var ACommand: LongInt): Boolean;
@@ -408,7 +407,7 @@ end;
 
 function TBCEditorKeyCommand.GetDisplayName: string;
 begin
-  Result := Format('%s - %s', [EditorCommandToCodeString(Command), ShortCutToText(ShortCut)]);
+  Result := EditorCommandToCodeString(Command) + ' - ' + ShortCutToText(ShortCut);
   if SecondaryShortCut <> 0 then
     Result := Result + ' ' + ShortCutToText(SecondaryShortCut);
   if Result = '' then
@@ -474,22 +473,22 @@ end;
 
 procedure TBCEditorKeyCommand.SetSecondaryShortCut(const Value: TShortCut);
 var
-  NewKey: Word;
-  NewShiftState: TShiftState;
-  Dup: Integer;
+  LNewKey: Word;
+  LNewShiftState: TShiftState;
+  LDuplicate: Integer;
 begin
   if Value <> 0 then
   begin
-    Dup := TBCEditorKeyCommands(Collection).FindShortcuts(ShortCut, Value);
-    if (Dup <> -1) and (Dup <> Self.Index) then
+    LDuplicate := TBCEditorKeyCommands(Collection).FindShortcuts(ShortCut, Value);
+    if (LDuplicate <> -1) and (LDuplicate <> Self.Index) then
       raise Exception.Create(SBCEditOrduplicateShortcut);
   end;
 
-  Vcl.Menus.ShortCutToKey(Value, NewKey, NewShiftState);
-  if (NewKey <> SecondaryKey) or (NewShiftState <> SecondaryShiftState) then
+  Vcl.Menus.ShortCutToKey(Value, LNewKey, LNewShiftState);
+  if (LNewKey <> SecondaryKey) or (LNewShiftState <> SecondaryShiftState) then
   begin
-    SecondaryKey := NewKey;
-    SecondaryShiftState := NewShiftState;
+    SecondaryKey := LNewKey;
+    SecondaryShiftState := LNewShiftState;
   end;
 end;
 
@@ -507,12 +506,12 @@ end;
 
 procedure TBCEditorKeyCommands.Add(const ACommand: TBCEditorCommand; const AShift: TShiftState; const AKey: Word);
 var
-  NewKeystroke: TBCEditorKeyCommand;
+  LNewKeystroke: TBCEditorKeyCommand;
 begin
-  NewKeystroke := NewItem;
-  NewKeystroke.Key := AKey;
-  NewKeystroke.ShiftState := AShift;
-  NewKeystroke.Command := ACommand;
+  LNewKeystroke := NewItem;
+  LNewKeystroke.Key := AKey;
+  LNewKeystroke.ShiftState := AShift;
+  LNewKeystroke.Command := ACommand;
 end;
 
 procedure TBCEditorKeyCommands.Assign(ASource: TPersistent);
@@ -534,6 +533,7 @@ end;
 constructor TBCEditorKeyCommands.Create(AOwner: TPersistent);
 begin
   inherited Create(TBCEditorKeyCommand);
+
   FOwner := AOwner;
 end;
 

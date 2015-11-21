@@ -14,11 +14,11 @@ type
     FOtherMarkXOffset: Integer;
     FVisible: Boolean;
     FWidth: Integer;
+    procedure DoChange;
     procedure SetLeftMargin(Value: Integer);
     procedure SetOtherMarkXOffset(Value: Integer);
-    procedure SetVisible(const Value: Boolean);
     procedure SetWidth(Value: Integer);
-    procedure DoChange;
+    procedure SetVisible(const Value: Boolean);
   public
     constructor Create;
     procedure Assign(Source: TPersistent); override;

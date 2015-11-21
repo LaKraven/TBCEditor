@@ -12,15 +12,14 @@ type
     FHeight: Integer;
     FImages: Vcl.Graphics.TBitmap;
     FWidth: Integer;
-    function CreateBitmapFromInternalList(AModule: THandle; const Name: string): Vcl.Graphics.TBitmap;
+    function CreateBitmapFromInternalList(AModule: THandle; const AName: string): Vcl.Graphics.TBitmap;
     procedure FreeBitmapFromInternalList;
   public
-    constructor Create(AModule: THandle; const Name: string; const Count: Integer);
+    constructor Create(AModule: THandle; const AName: string; const ACount: Integer);
     destructor Destroy; override;
 
-    procedure Draw(ACanvas: TCanvas; const Number: Integer; const X: Integer; const Y: Integer; const LineHeight: Integer);
-    procedure DrawTransparent(ACanvas: TCanvas; const Number: Integer; const X: Integer; const Y: Integer;
-      const LineHeight: Integer; const TransparentColor: TColor);
+    procedure Draw(ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
+      const ALineHeight: Integer; const ATransparentColor: TColor = clNone);
   end;
 
 implementation
@@ -37,17 +36,17 @@ type
   end;
 
 var
-  InternalResources: TList;
+  GInternalResources: TList;
 
 { TBCEditorInternalImage }
 
-constructor TBCEditorInternalImage.Create(AModule: THandle; const Name: string; const Count: Integer);
+constructor TBCEditorInternalImage.Create(AModule: THandle; const AName: string; const ACount: Integer);
 begin
   inherited Create;
-  FImages := CreateBitmapFromInternalList(AModule, name);
-  FWidth := (FImages.Width + Count shr 1) div Count;
+  FImages := CreateBitmapFromInternalList(AModule, AName);
+  FWidth := (FImages.Width + ACount shr 1) div ACount;
   FHeight := FImages.Height;
-  FCount := Count;
+  FCount := ACount;
 end;
 
 destructor TBCEditorInternalImage.Destroy;
@@ -57,14 +56,14 @@ begin
   inherited Destroy;
 end;
 
-function TBCEditorInternalImage.CreateBitmapFromInternalList(AModule: THandle; const Name: string): Vcl.Graphics.TBitmap;
+function TBCEditorInternalImage.CreateBitmapFromInternalList(AModule: THandle; const AName: string): Vcl.Graphics.TBitmap;
 var
   i: Integer;
-  InternalResource: TInternalResource;
+  LInternalResource: TInternalResource;
 begin
-  for i := 0 to InternalResources.Count - 1 do
-    if TInternalResource(InternalResources[i]).Name = UpperCase(Name) then
-      with TInternalResource(InternalResources[i]) do
+  for i := 0 to GInternalResources.Count - 1 do
+    if TInternalResource(GInternalResources[i]).Name = UpperCase(AName) then
+      with TInternalResource(GInternalResources[i]) do
       begin
         UsageCount := UsageCount + 1;
         Result := Bitmap;
@@ -72,27 +71,27 @@ begin
       end;
 
   Result := Vcl.Graphics.TBitmap.Create;
-  Result.Handle := LoadBitmap(AModule, PChar(name));
+  Result.Handle := LoadBitmap(AModule, PChar(AName));
 
-  InternalResource := TInternalResource.Create;
-  with InternalResource do
+  LInternalResource := TInternalResource.Create;
+  with LInternalResource do
   begin
     UsageCount := 1;
-    Name := UpperCase(Name);
+    Name := UpperCase(AName);
     Bitmap := Result;
   end;
-  InternalResources.Add(InternalResource);
+  GInternalResources.Add(LInternalResource);
 end;
 
 procedure TBCEditorInternalImage.FreeBitmapFromInternalList;
 var
   i: Integer;
-  InternalResource: TInternalResource;
+  LInternalResource: TInternalResource;
 
   function FindImageIndex: Integer;
   begin
-    for Result := 0 to InternalResources.Count - 1 do
-      if TInternalResource(InternalResources[Result]).Bitmap = FImages then
+    for Result := 0 to GInternalResources.Count - 1 do
+      if TInternalResource(GInternalResources[Result]).Bitmap = FImages then
         Exit;
     Result := -1;
   end;
@@ -102,77 +101,55 @@ begin
   if i = -1 then
     Exit;
 
-  InternalResource := TInternalResource(InternalResources[i]);
-  with InternalResource do
+  LInternalResource := TInternalResource(GInternalResources[i]);
+  with LInternalResource do
   begin
     UsageCount := UsageCount - 1;
     if UsageCount = 0 then
     begin
       Bitmap.Free;
       Bitmap := nil;
-      InternalResources.Delete(i);
-      InternalResource.Free;
+      GInternalResources.Delete(i);
+      LInternalResource.Free;
     end;
   end;
 end;
 
-procedure TBCEditorInternalImage.Draw(ACanvas: TCanvas; const Number: Integer; const X: Integer; const Y: Integer;
-  const LineHeight: Integer);
+procedure TBCEditorInternalImage.Draw(ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
+  const ALineHeight: Integer; const ATransparentColor: TColor = clNone);
 var
-  SourceRect, DestinationRect: TRect;
+  LSourceRect, LDestinationRect: TRect;
   LY: Integer;
 begin
-  if (Number >= 0) and (Number < FCount) then
+  if (ANumber >= 0) and (ANumber < FCount) then
   begin
     LY := Y;
-    if LineHeight >= FHeight then
+    if ALineHeight >= FHeight then
     begin
-      SourceRect := Rect(Number * FWidth, 0, (Number + 1) * FWidth, FHeight);
-      Inc(LY, (LineHeight - FHeight) div 2);
-      DestinationRect := Rect(X, LY, X + FWidth, LY + FHeight);
+      LSourceRect := Rect(ANumber * FWidth, 0, (ANumber + 1) * FWidth, FHeight);
+      Inc(LY, (ALineHeight - FHeight) div 2);
+      LDestinationRect := Rect(X, LY, X + FWidth, LY + FHeight);
     end
     else
     begin
-      DestinationRect := Rect(X, LY, X + FWidth, LY + LineHeight);
-      LY := (FHeight - LineHeight) div 2;
-      SourceRect := Rect(Number * FWidth, LY, (Number + 1) * FWidth, LY + LineHeight);
+      LDestinationRect := Rect(X, LY, X + FWidth, LY + ALineHeight);
+      LY := (FHeight - ALineHeight) div 2;
+      LSourceRect := Rect(ANumber * FWidth, LY, (ANumber + 1) * FWidth, LY + ALineHeight);
     end;
-    ACanvas.CopyRect(DestinationRect, FImages.Canvas, SourceRect);
-  end;
-end;
-
-procedure TBCEditorInternalImage.DrawTransparent(ACanvas: TCanvas; const Number: Integer; const X: Integer;
-  const Y: Integer; const LineHeight: Integer; const TransparentColor: TColor);
-var
-  SourceRect, DestinationRect: TRect;
-  LY: Integer;
-begin
-  LY := Y;
-  if (Number >= 0) and (Number < FCount) then
-  begin
-    if LineHeight >= FHeight then
-    begin
-      SourceRect := Rect(Number * FWidth, 0, (Number + 1) * FWidth, FHeight);
-      Inc(LY, (LineHeight - FHeight) div 2);
-      DestinationRect := Rect(X, LY, X + FWidth, LY + FHeight);
-    end
+    if ATransparentColor = clNone then
+      ACanvas.CopyRect(LDestinationRect, FImages.Canvas, LSourceRect)
     else
-    begin
-      DestinationRect := Rect(X, LY, X + FWidth, LY + LineHeight);
-      LY := (FHeight - LineHeight) div 2;
-      SourceRect := Rect(Number * FWidth, LY, (Number + 1) * FWidth, LY + LineHeight);
-    end;
-    ACanvas.BrushCopy(DestinationRect, FImages, SourceRect, TransparentColor);
+      ACanvas.BrushCopy(LDestinationRect, FImages, LSourceRect, ATransparentColor);
   end;
 end;
 
 initialization
 
-  InternalResources := TList.Create;
+  GInternalResources := TList.Create;
 
 finalization
 
-  InternalResources.Free;
-  InternalResources := nil;
+  GInternalResources.Free;
+  GInternalResources := nil;
 
 end.

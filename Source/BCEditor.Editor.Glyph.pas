@@ -8,8 +8,8 @@ uses
 type
   TBCEditorGlyph = class(TPersistent)
   strict private
-    FInternalGlyph: TBitmap;
     FGlyph: TBitmap;
+    FInternalGlyph: TBitmap;
     FInternalMaskColor: TColor;
     FLeft: Integer;
     FMaskColor: TColor;
@@ -72,7 +72,6 @@ begin
     FInternalGlyph.Free;
     FInternalGlyph := nil;
   end;
-
   FGlyph.Free;
 
   inherited Destroy;
@@ -99,38 +98,38 @@ end;
 
 procedure TBCEditorGlyph.Draw(ACanvas: TCanvas; X, Y: Integer; ALineHeight: Integer);
 var
-  SourceRect, DestinationRect: TRect;
-  GlyphBitmap: Vcl.Graphics.TBitmap;
-  MaskColor: TColor;
+  LSourceRect, LDestinationRect: TRect;
+  LGlyphBitmap: Vcl.Graphics.TBitmap;
+  LMaskColor: TColor;
 begin
   if not FGlyph.Empty then
   begin
-    GlyphBitmap := FGlyph;
-    MaskColor := FMaskColor;
+    LGlyphBitmap := FGlyph;
+    LMaskColor := FMaskColor;
   end
   else
   if Assigned(FInternalGlyph) then
   begin
-    GlyphBitmap := FInternalGlyph;
-    MaskColor := FInternalMaskColor;
+    LGlyphBitmap := FInternalGlyph;
+    LMaskColor := FInternalMaskColor;
   end
   else
     Exit;
 
-  if ALineHeight >= GlyphBitmap.Height then
+  if ALineHeight >= LGlyphBitmap.Height then
   begin
-    SourceRect := Rect(0, 0, GlyphBitmap.Width, GlyphBitmap.Height);
-    Inc(Y, (aLineHeight - GlyphBitmap.Height) div 2);
-    DestinationRect := Rect(X, Y, X + GlyphBitmap.Width, Y + GlyphBitmap.Height);
+    LSourceRect := Rect(0, 0, LGlyphBitmap.Width, LGlyphBitmap.Height);
+    Inc(Y, (ALineHeight - LGlyphBitmap.Height) div 2);
+    LDestinationRect := Rect(X, Y, X + LGlyphBitmap.Width, Y + LGlyphBitmap.Height);
   end
   else
   begin
-    DestinationRect := Rect(X, Y, X + GlyphBitmap.Width, Y + aLineHeight);
-    Y := (GlyphBitmap.Height - aLineHeight) div 2;
-    SourceRect := Rect(0, Y, GlyphBitmap.Width, Y + aLineHeight);
+    LDestinationRect := Rect(X, Y, X + LGlyphBitmap.Width, Y + ALineHeight);
+    Y := (LGlyphBitmap.Height - ALineHeight) div 2;
+    LSourceRect := Rect(0, Y, LGlyphBitmap.Width, Y + ALineHeight);
   end;
 
-  ACanvas.BrushCopy(DestinationRect, GlyphBitmap, SourceRect, MaskColor);
+  ACanvas.BrushCopy(LDestinationRect, LGlyphBitmap, LSourceRect, LMaskColor);
 end;
 
 procedure TBCEditorGlyph.SetGlyph(Value: Vcl.Graphics.TBitmap);

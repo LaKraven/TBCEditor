@@ -190,7 +190,6 @@ type
     function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
-    function GetExpandedLineText(ALine: Integer): string; // TODO: Obsolete?
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
       var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
@@ -1203,14 +1202,6 @@ begin
       Inc(Result);
 end;
 
-function TBCBaseEditor.GetExpandedLineText(ALine: Integer): string;
-begin
-  if (ALine >= 0) and (ALine < FLines.Count) then
-    Result := FLines.ExpandedStrings[ALine]
-  else
-    Result := '';
-end;
-
 function TBCBaseEditor.GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
   var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
 var
@@ -1993,7 +1984,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
   begin
     Result := False;
 
-    LLine := AnsiUpperCase(GetExpandedLineText(GetTextCaretY));
+    LLine := AnsiUpperCase(FLines.ExpandedStrings[GetTextCaretY]);
 
     for i := 0 to Length(FHighlighter.CodeFoldingRegions) - 1 do
     begin
@@ -3241,7 +3232,7 @@ begin
 
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationPosition, SelectionCommand);
 
-  if FWordWrap.Enabled and (X > 0) and (DisplayCaretX < Length(GetExpandedLineText(LTextCaretPosition.Line))) then
+  if FWordWrap.Enabled and (X > 0) and (DisplayCaretX < FLines.ExpandedStringLengths[LTextCaretPosition.Line]) then
   begin
     LCaretRowColumn := DisplayCaretPosition;
 
@@ -7189,7 +7180,7 @@ var
         if not Assigned(FInternalBookmarkImage) then
           FInternalBookmarkImage := TBCEditorInternalImage.Create(HINSTANCE, 'BCEDITORBOOKMARKIMAGES', 9);
         if ALeftMarginOffset = 0 then
-          FInternalBookmarkImage.DrawTransparent(Canvas, ABookMark.ImageIndex, FLeftMargin.Bookmarks.Panel.LeftMargin +
+          FInternalBookmarkImage.Draw(Canvas, ABookMark.ImageIndex, FLeftMargin.Bookmarks.Panel.LeftMargin +
             ALeftMarginOffset, (aMarkRow - TopLine) * LineHeight, LineHeight, clFuchsia);
         Inc(ALeftMarginOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
       end;
@@ -8858,7 +8849,6 @@ var
         end;
       smColumn:
         begin
-          // TODO: Refactor
           if LBeginTextPosition.Char > LEndTextPosition.Char then
             SwapInt(LBeginTextPosition.Char, LEndTextPosition.Char);
 

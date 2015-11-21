@@ -32,8 +32,6 @@ type
 
 implementation
 
-
-
 { TBCEditorBookMarkOptions }
 
 constructor TBCEditorLeftMarginBookMarks.Create(AOwner: TComponent);
@@ -49,6 +47,7 @@ end;
 destructor TBCEditorLeftMarginBookMarks.Destroy;
 begin
   FPanel.Free;
+
   inherited;
 end;
 

@@ -3,33 +3,33 @@ unit BCEditor.Editor.DB;
 interface
 
 uses
-  Winapi.Messages, System.SysUtils, System.Classes, Vcl.Controls, Vcl.DbCtrls, BCEditor.Editor,
-  BCEditor.Editor.KeyCommands, Data.DB;
+  Winapi.Messages, System.SysUtils, System.Classes, Vcl.Controls, Vcl.DbCtrls, Data.DB, BCEditor.Editor,
+  BCEditor.Editor.KeyCommands;
 
 type
   TBCCustomDBEditor = class(TBCCustomEditor)
   strict private
+    FBeginEdit: Boolean;
     FDataLink: TFieldDataLink;
-    FEditing: boolean;
-    FBeginEdit: boolean;
+    FEditing: Boolean;
     FLoadData: TNotifyEvent;
-    procedure DataChange(Sender: TObject);
-    procedure EditingChange(Sender: TObject);
     function GetDataField: string;
     function GetDataSource: TDataSource;
     function GetField: TField;
-    procedure SetDataField(const Value: string);
-    procedure SetDataSource(Value: TDataSource);
-    procedure SetEditing(Value: boolean);
-    procedure UpdateData(Sender: TObject);
     procedure CMEnter(var Msg: TCMEnter); message CM_ENTER;
     procedure CMExit(var Msg: TCMExit); message CM_EXIT;
     procedure CMGetDataLink(var Msg: TMessage); message CM_GETDATALINK;
+    procedure DataChange(Sender: TObject);
+    procedure EditingChange(Sender: TObject);
+    procedure SetDataField(const Value: string);
+    procedure SetDataSource(Value: TDataSource);
+    procedure SetEditing(Value: Boolean);
+    procedure UpdateData(Sender: TObject);
   protected
-    function GetReadOnly: boolean; override;
-    procedure Loaded; override;
+    function GetReadOnly: Boolean; override;
     procedure DoChange; override;
-    procedure SetReadOnly(Value: boolean); override;
+    procedure Loaded; override;
+    procedure SetReadOnly(Value: Boolean); override;
     property DataField: string read GetDataField write SetDataField;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
     property Field: TField read GetField;
@@ -38,7 +38,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
-    procedure ExecuteCommand(Command: TBCEditorCommand; AChar: Char; Data: pointer); override;
+    procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; Data: pointer); override;
     procedure LoadMemo;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   end;
@@ -149,6 +149,7 @@ uses
 constructor TBCCustomDBEditor.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
   FDataLink := TFieldDataLink.Create;
   FDataLink.Control := Self;
   FDataLink.OnDataChange := DataChange;
@@ -160,12 +161,14 @@ destructor TBCCustomDBEditor.Destroy;
 begin
   FDataLink.Free;
   FDataLink := nil;
+
   inherited Destroy;
 end;
 
 procedure TBCCustomDBEditor.CMEnter(var Msg: TCMEnter);
 begin
   SetEditing(True);
+
   inherited;
 end;
 
@@ -178,6 +181,7 @@ begin
     raise;
   end;
   SetEditing(False);
+
   inherited;
 end;
 
@@ -220,18 +224,16 @@ end;
 procedure TBCCustomDBEditor.EditingChange(Sender: TObject);
 begin
   if FDataLink.Editing then
-  begin
     if Assigned(FDataLink.DataSource) and (FDataLink.DataSource.State <> dsInsert) then
       FBeginEdit := True;
-  end;
 end;
 
-procedure TBCCustomDBEditor.ExecuteCommand(Command: TBCEditorCommand; AChar: Char; Data: pointer);
+procedure TBCCustomDBEditor.ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; Data: pointer);
 begin
-  if (Command = ecChar) and (AChar = BCEDITOR_ESCAPE) then
+  if (ACommand = ecChar) and (AChar = BCEDITOR_ESCAPE) then
     FDataLink.Reset
   else
-  if (Command >= ecEditCommandFirst) and (Command <= ecEditCommandLast) then
+  if (ACommand >= ecEditCommandFirst) and (ACommand <= ecEditCommandLast) then
     if not FDataLink.Edit then
       Exit;
 
@@ -253,7 +255,7 @@ begin
   Result := FDataLink.Field;
 end;
 
-function TBCCustomDBEditor.GetReadOnly: boolean;
+function TBCCustomDBEditor.GetReadOnly: Boolean;
 begin
   Result := FDataLink.ReadOnly;
 end;
@@ -261,24 +263,24 @@ end;
 procedure TBCCustomDBEditor.Loaded;
 begin
   inherited Loaded;
+
   if csDesigning in ComponentState then
     DataChange(Self);
 end;
 
 procedure TBCCustomDBEditor.LoadMemo;
 var
-  BlobStream: TStream;
+  LBlobStream: TStream;
 begin
   try
-    BlobStream := FDataLink.DataSet.CreateBlobStream(FDataLink.Field, bmRead);
+    LBlobStream := FDataLink.DataSet.CreateBlobStream(FDataLink.Field, bmRead);
     Lines.BeginUpdate;
-    Lines.LoadFromStream(BlobStream, TEncoding.Default);
+    Lines.LoadFromStream(LBlobStream, TEncoding.Default);
     Lines.EndUpdate;
-    BlobStream.Free;
+    LBlobStream.Free;
     Modified := False;
     ClearUndo;
   except
-    // Memo too large
     on E: EInvalidOperation do
       Lines.Text := Format('(%s)', [E.Message]);
   end;
@@ -288,12 +290,14 @@ end;
 procedure TBCCustomDBEditor.DoChange;
 begin
   FDataLink.Modified;
+
   inherited;
 end;
 
 procedure TBCCustomDBEditor.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
+
   if (Operation = opRemove) and Assigned(FDataLink) and (AComponent = DataSource) then
     DataSource := nil;
 end;
@@ -311,7 +315,7 @@ begin
     Value.FreeNotification(Self);
 end;
 
-procedure TBCCustomDBEditor.SetEditing(Value: boolean);
+procedure TBCCustomDBEditor.SetEditing(Value: Boolean);
 begin
   if FEditing <> Value then
   begin
@@ -321,20 +325,20 @@ begin
   end;
 end;
 
-procedure TBCCustomDBEditor.SetReadOnly(Value: boolean);
+procedure TBCCustomDBEditor.SetReadOnly(Value: Boolean);
 begin
   FDataLink.ReadOnly := Value;
 end;
 
 procedure TBCCustomDBEditor.UpdateData(Sender: TObject);
 var
-  BlobStream: TStream;
+  LBlobStream: TStream;
 begin
   if FDataLink.Field.IsBlob then
   begin
-    BlobStream := FDataLink.DataSet.CreateBlobStream(FDataLink.Field, bmWrite);
-    Lines.SaveToStream(BlobStream);
-    BlobStream.Free;
+    LBlobStream := FDataLink.DataSet.CreateBlobStream(FDataLink.Field, bmWrite);
+    Lines.SaveToStream(LBlobStream);
+    LBlobStream.Free;
   end
   else
     FDataLink.Field.AsString := Text;

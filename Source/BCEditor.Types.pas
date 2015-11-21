@@ -306,6 +306,8 @@ type
   );
   TBCEditorCodeFoldingOptions = set of TBCEditorCodeFoldingOption;
 
+  TBCEditorLeftMarginBorderStyle = (mbsNone, mbsMiddle, mbsRight);
+
 implementation
 
 end.

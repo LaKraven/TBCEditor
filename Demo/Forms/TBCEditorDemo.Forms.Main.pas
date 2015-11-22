@@ -202,7 +202,7 @@ end;
 procedure TMainForm.ActionFileOpenExecute(Sender: TObject);
 var
   i: Integer;
-  FileName, Ext, ItemString, Token: string;
+  FileName, Ext, ItemString, Token, LFileType: string;
 begin
   OpenDialog.Title := 'Open';
   if OpenDialog.Execute(Handle) then
@@ -221,7 +221,8 @@ begin
         ItemString := RemoveTokenFromStart(';', ItemString);
         if Ext = Token then
         begin
-          PopupMenuHighlighters.Items.Find(MultiStringHolderFileTypes.MultipleStrings.Items[i].Name).Action.Execute;
+          LFileType := MultiStringHolderFileTypes.MultipleStrings.Items[i].Name;
+          PopupMenuHighlighters.Items.Find(LFileType[1]).Find(LFileType).Action.Execute;
           Break;
         end;
       end;

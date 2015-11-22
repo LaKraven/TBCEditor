@@ -142,8 +142,6 @@ inherited MainForm: TMainForm
       SpecialChars.Style = scsDot
       TabOrder = 0
       WordWrap.Enabled = False
-      WordWrap.Position = 80
-      WordWrap.Style = wwsClientWidth
       WordWrap.Indicator.Glyph.Data = {
         7E030000424D7E0300000000000036000000280000000F0000000E0000000100
         2000000000004803000000000000000000000000000000000000FF00FF00FF00
@@ -175,6 +173,8 @@ inherited MainForm: TMainForm
         FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
         FF00}
       WordWrap.Indicator.MaskColor = clFuchsia
+      WordWrap.Position = 80
+      WordWrap.Style = wwsClientWidth
     end
     object PanelSearchFrame: TBCPanel
       Left = 0
@@ -214,7 +214,6 @@ inherited MainForm: TMainForm
             Width = 394
             inherited LabelSearchResultCount: TBCLabelFX
               Left = 382
-              Height = 21
             end
           end
           inherited PanelToolbar: TBCPanel
@@ -237,6 +236,7 @@ inherited MainForm: TMainForm
   end
   inherited SkinManager: TBCSkinManager
     ExtendedBorders = True
+    IsDefault = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
     OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
     Left = 166

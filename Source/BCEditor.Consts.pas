@@ -20,16 +20,12 @@ const
   BCEDITOR_MAX_UNDO_ACTIONS = 1024;
   { Characters }
   BCEDITOR_SPECIAL_CHARACTERS = ['À' .. 'Ö', 'Ø' .. 'ö', 'ø' .. 'ÿ'];
-  BCEDITOR_NUMBERS = ['0' .. '9'];
-  BCEDITOR_UNDERSCORE = ['_'];
-  BCEDITOR_STRING_UPPER_CHARACTERS = ['A' .. 'Z'];
-  BCEDITOR_STRING_LOWER_CHARACTERS = ['a' .. 'z'];
-  BCEDITOR_VALID_STRING_CHARACTERS = BCEDITOR_UNDERSCORE + BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_STRING_LOWER_CHARACTERS;
+  BCEDITOR_UNDERSCORE = '_';
   BCEDITOR_WORD_BREAK_CHARACTERS = ['.', ',', ';', ':', '"', '''', '!', '?', '[', ']', '(', ')', '{', '}', '^', '-',
     '=', '+', '-', '*', '/', '\', '|', ' '];
   BCEDITOR_DEFAULT_DELIMITERS: TBCEditorCharSet = ['*', '/', '+', '-', '=', '\', '|', '&', '(', ')', '[', ']', '{', '}',
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
-  BCEDITOR_CODE_FOLDING_VALID_CHARACTERS = ['\', '@'] + BCEDITOR_UNDERSCORE + BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_NUMBERS;
+  BCEDITOR_CODE_FOLDING_VALID_CHARACTERS = ['\', '@', '_'];
   BCEDITOR_NONE_CHAR = #0;
   BCEDITOR_BACKSPACE_CHAR = #8;
   BCEDITOR_TAB_CHAR = #9;

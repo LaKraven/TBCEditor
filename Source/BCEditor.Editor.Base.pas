@@ -2077,13 +2077,13 @@ var
 
   procedure SkipEmptySpace;
   begin
-    while (LTextPtr^ = BCEDITOR_SPACE_CHAR) or (LTextPtr^ = BCEDITOR_TAB_CHAR) do
+    while (LTextPtr^ < BCEDITOR_EXCLAMATION_MARK) and (LTextPtr^ <> BCEDITOR_NONE_CHAR) do
       Inc(LTextPtr);
   end;
 
   function IsValidChar(ACharacter: PChar): Boolean;
   begin
-    Result := CharInSet(ACharacter^, BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_NUMBERS);
+    Result := ACharacter^.IsUpper or ACharacter^.IsNumber;
   end;
 
   function IsWholeWord(AFirstChar, ALastChar: PChar): Boolean;
@@ -3314,7 +3314,8 @@ var
 
   function IsValidChar(Character: PChar): Boolean;
   begin
-    Result := CharInSet(UpCase(Character^), BCEDITOR_CODE_FOLDING_VALID_CHARACTERS);
+    Result := Character^.IsLower or Character^.IsUpper or Character^.IsNumber or
+      CharInSet(Character^, BCEDITOR_CODE_FOLDING_VALID_CHARACTERS);
   end;
 
   function IsWholeWord(FirstChar, LastChar: PChar): Boolean;
@@ -3324,7 +3325,7 @@ var
 
   procedure SkipEmptySpace;
   begin
-    while LTextPtr^ < BCEDITOR_EXCLAMATION_MARK do
+    while (LTextPtr^ < BCEDITOR_EXCLAMATION_MARK) and (LTextPtr^ <> BCEDITOR_NONE_CHAR) do
       Inc(LTextPtr);
   end;
 
@@ -6234,9 +6235,6 @@ begin
   if FCodeFolding.Visible then
     CodeFoldingLinesDeleted(AIndex + 1, ACount);
 
-  CreateLineNumbersCache(True);
-  CodeFoldingResetCaches;
-
   if Assigned(FOnLinesDeleted) then
     FOnLinesDeleted(Self, AIndex, ACount);
 
@@ -6251,6 +6249,9 @@ begin
         RescanHighlighterRangesFrom(AIndex - 1);
     end;
   end;
+
+  CreateLineNumbersCache(True);
+  CodeFoldingResetCaches;
 
   InvalidateLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
   InvalidateLeftMarginLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
@@ -9798,8 +9799,8 @@ begin
 
         if LOpenTokenSkipFoldRangeList.Count = 0 then
         begin
-          if (LWord = '') and CharInSet(LTextPtr^, BCEDITOR_VALID_STRING_CHARACTERS) or
-            (LWord <> '') and CharInSet(LTextPtr^, BCEDITOR_VALID_STRING_CHARACTERS + BCEDITOR_NUMBERS) then
+          if (LWord = '') and (LTextPtr^.IsLower or LTextPtr^.IsUpper or (LTextPtr^ = BCEDITOR_UNDERSCORE)) or
+            (LWord <> '') and (LTextPtr^.IsLower or LTextPtr^.IsUpper or LTextPtr^.IsNumber or (LTextPtr^ = BCEDITOR_UNDERSCORE)) then
             LWord := LWord + LTextPtr^
           else
           begin
@@ -9821,7 +9822,7 @@ begin
     for i := 0 to LKeywordStringList.Count - 1 do
     begin
       LWord := LKeywordStringList.Strings[i];
-      if (Length(LWord) > 1) and CharInSet(LWord[1], BCEDITOR_VALID_STRING_CHARACTERS) then
+      if (Length(LWord) > 1) and (LWord[1].IsLower or LWord[1].IsUpper or (LWord[1] = BCEDITOR_UNDERSCORE)) then
         if Pos(LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED, LWordList) = 0 then { no duplicates }
           LWordList := LWordList + LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
     end;
@@ -10208,7 +10209,7 @@ begin
 
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
 
-      ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars));;
+      ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars));
 
     if FCodeFolding.Visible then
     begin

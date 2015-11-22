@@ -464,8 +464,23 @@ begin
 end;
 
 procedure TBCEditorHighlighter.UpdateColors;
+var
+  LEditor: TBCBaseEditor;
+  LFontDummy: TFont;
 begin
   UpdateAttributes(MainRules, nil);
+  LEditor := FEditor as TBCBaseEditor;
+  if Assigned(LEditor) then
+  begin
+    LFontDummy := TFont.Create;
+    try
+      LFontDummy.Name := LEditor.Font.Name;
+      LFontDummy.Size := LEditor.Font.Size;
+      LEditor.Font.Assign(LFontDummy);
+    finally
+      LFontDummy.Free;
+    end;
+  end;
 end;
 
 procedure TBCEditorHighlighter.LoadFromFile(AFileName: string);

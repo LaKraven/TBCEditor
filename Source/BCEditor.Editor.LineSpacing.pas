@@ -14,14 +14,14 @@ type
     FRule: TLineSpacingRule;
     FSpacing: Integer;
     procedure DoChange;
-    procedure SetRule(const Value: TLineSpacingRule);
-    procedure SetSpacing(const Value: Integer);
+    procedure SetRule(const AValue: TLineSpacingRule);
+    procedure SetSpacing(const AValue: Integer);
   public
     constructor Create;
     procedure Assign(Source: TPersistent); override;
   published
     property Rule: TLineSpacingRule read FRule write SetRule default lsSpecified;
-    property Spacing: Integer read FSpacing write SetSpacing;
+    property Spacing: Integer read FSpacing write SetSpacing default 1;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
@@ -56,20 +56,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLineSpacing.SetSpacing(const Value: Integer);
+procedure TBCEditorLineSpacing.SetSpacing(const AValue: Integer);
 begin
-  if Value <> FSpacing then
+  if AValue <> FSpacing then
   begin
-    FSpacing := Value;
+    FSpacing := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLineSpacing.SetRule(const Value: TLineSpacingRule);
+procedure TBCEditorLineSpacing.SetRule(const AValue: TLineSpacingRule);
 begin
-  if Value <> FRule then
+  if AValue <> FRule then
   begin
-    FRule := Value;
+    FRule := AValue;
     DoChange;
   end;
 end;

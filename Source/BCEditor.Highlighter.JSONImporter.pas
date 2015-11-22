@@ -171,6 +171,7 @@ procedure TBCEditorHighlighterJSONImporter.ImportColorsEditorProperties(AEditorO
 var
   LColorsObject, LFontsObject, LFontSizesObject: TJsonObject;
   LEditor: TBCBaseEditor;
+  LFontDummy: TFont;
 begin
   if Assigned(AEditorObject) then
   begin
@@ -219,11 +220,12 @@ begin
       LEditor.WordWrap.Colors.Arrow := StringToColorDef(LColorsObject['WordWrapIndicatorArrow'].Value, LEditor.WordWrap.Colors.Arrow);
       LEditor.WordWrap.Colors.Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, LEditor.WordWrap.Colors.Lines);
     end;
+    LFontDummy := TFont.Create;
     LFontsObject := AEditorObject['Fonts'].ObjectValue;
     if Assigned(LFontsObject) then
     begin
       LEditor.LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Name);
-      LEditor.Font.Name := StrToStrDef(LFontsObject['Text'].Value, LEditor.Font.Name);
+      LFontDummy.Name := StrToStrDef(LFontsObject['Text'].Value, LEditor.Font.Name);
       LEditor.Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, LEditor.Minimap.Font.Name);
       LEditor.CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Name);
       LEditor.CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Name);
@@ -232,11 +234,13 @@ begin
     if Assigned(LFontSizesObject) then
     begin
       LEditor.LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Size);
-      LEditor.Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, LEditor.Font.Size);
+      LFontDummy.Size := StrToIntDef(LFontSizesObject['Text'].Value, LEditor.Font.Size);
       LEditor.Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, LEditor.Minimap.Font.Size);
       LEditor.CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Size);
       LEditor.CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Size);
     end;
+    LEditor.Font.Assign(LFontDummy);
+    LFontDummy.Free;
   end;
 end;
 

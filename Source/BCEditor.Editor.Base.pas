@@ -83,6 +83,7 @@ type
     FLeftChar: Integer;
     FLeftMargin: TBCEditorLeftMargin;
     FLeftMarginCharWidth: Integer;
+    FLineHeight: Integer;
     FLineNumbersCache: array of Integer;
     FLineNumbersCount: Integer;
     FLines: TBCEditorLines;
@@ -194,7 +195,7 @@ type
     function GetTextCaretPosition: TBCEditorTextPosition;
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
-    function GetLineHeight: Integer;
+    //function GetLineHeight: Integer;
     function GetLineIndentChars(ALine: Integer): Integer;
     function GetLineText: string;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
@@ -566,7 +567,7 @@ type
     property KeyCommands: TBCEditorKeyCommands read FKeyCommands write SetKeyCommands stored False;
     property LeftChar: Integer read FLeftChar write SetLeftChar;
     property LeftMargin: TBCEditorLeftMargin read FLeftMargin write SetLeftMargin;
-    property LineHeight: Integer read GetLineHeight;
+    property LineHeight: Integer read FLineHeight;
     property LineNumbersCount: Integer read FLineNumbersCount;
     property Lines: TBCEditorLines read FLines write SetLines;
     property LineSpacing: TBCEditorLineSpacing read FLinespacing write FLinespacing;
@@ -1269,10 +1270,10 @@ begin
     Result := StringOfChar(BCEDITOR_SPACE_CHAR, ACharCount);
 end;
 
-function TBCBaseEditor.GetLineHeight: Integer;
+{function TBCBaseEditor.GetLineHeight: Integer;
 begin
   Result := FTextHeight + ExtraLineSpacing;
-end;
+end; }
 
 function TBCBaseEditor.GetLineIndentChars(ALine: Integer): Integer;
 var
@@ -3034,6 +3035,7 @@ begin
           LCaretHeight := 2;
         Y := LineHeight;
         LPoint.Y := LPoint.Y + Y;
+        LPoint.X := LPoint.X + 1;
       end;
     csHalfBlock:
       begin
@@ -3041,11 +3043,13 @@ begin
         LCaretHeight := LineHeight div 2;
         Y := LineHeight div 2;
         LPoint.Y := LPoint.Y + Y;
+        LPoint.X := LPoint.X + 1;
       end;
     csBlock:
       begin
         LCaretWidth := FCharWidth;
         LCaretHeight := LineHeight;
+        LPoint.X := LPoint.X + 1;
       end;
     csVerticalLine, csThinVerticalLine:
     begin
@@ -7677,7 +7681,7 @@ begin
           end
           else
           begin
-            Y := LCharRect.Top + GetLineHeight div 2 - 1;
+            Y := LCharRect.Top + LineHeight div 2 - 1;
             MoveTo(LCharRect.Left, Y);
             LineTo(LCharRect.Left + 11, Y);
             MoveTo(LCharRect.Left + 1, Y - 1);
@@ -7842,7 +7846,7 @@ var
         Inc(AFirst);
       end;
 
-      FTextDrawer.ExtTextOut(X, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), ATokenLength);
+      FTextDrawer.ExtTextOut(X + 1, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), ATokenLength);
 
       if LTokenHelper.MatchingPairUnderline then
       begin
@@ -7903,7 +7907,7 @@ var
         if LFirstUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := CharWidth(LLineSelectionStart, AMinimap);
+          LTokenRect.Right := CharWidth(LLineSelectionStart, AMinimap) + 1;
           with LTokenHelper do
             PaintToken(Text, LLineSelectionStart, CharsBefore, LFirstColumn, LLineSelectionStart);
         end;
@@ -7911,14 +7915,14 @@ var
         SetDrawingColors(True);
         LSelectionStart := Max(LLineSelectionStart, LFirstColumn);
         LSelectionEnd := Min(LLineSelectionEnd, LLastColumn);
-        LTokenRect.Right := CharWidth(LSelectionEnd, AMinimap);
+        LTokenRect.Right := CharWidth(LSelectionEnd, AMinimap) + 1;
         with LTokenHelper do
           PaintToken(Text, LSelectionEnd - LSelectionStart, CharsBefore, LSelectionStart, LSelectionEnd);
         { second unselected part of the token }
         if LSecondUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := CharWidth(LLastColumn, AMinimap);
+          LTokenRect.Right := CharWidth(LLastColumn, AMinimap) + 1;
           with LTokenHelper do
             PaintToken(Text, LLastColumn - LSelectionEnd, CharsBefore, LLineSelectionEnd, LLastColumn);
         end;
@@ -7926,7 +7930,7 @@ var
       else
       begin
         SetDrawingColors(LSelected);
-        LTokenRect.Right := CharWidth(LLastColumn, AMinimap);
+        LTokenRect.Right := CharWidth(LLastColumn, AMinimap) + 1;
         with LTokenHelper do
           PaintToken(Text, Length, CharsBefore, LFirstColumn, LLastColumn);
       end;
@@ -8439,6 +8443,7 @@ begin
       FCharWidth := Max(FCharWidth, FTextDrawer.CharWidth);
     end;
   Inc(FTextHeight, ExtraLineSpacing);
+  FLineHeight := FTextHeight;
 end;
 
 procedure TBCBaseEditor.RedoItem;
@@ -12439,6 +12444,7 @@ var
   LCaretTextPosition: TBCEditorTextPosition;
   LCaretPoint: TPoint;
   LCompositionForm: TCompositionForm;
+  LCaretStyle: TBCEditorCaretStyle;
 begin
   if (PaintLock <> 0) or not (Focused or FAlwaysShowCaret) then
     Include(FStateFlags, sfCaretChanged)
@@ -12459,6 +12465,12 @@ begin
     end;
     LCaretPoint := RowColumnToPixels(LCaretDisplayPosition);
     X := LCaretPoint.X + FCaretOffset.X;
+    if InsertMode then
+      LCaretStyle := FCaret.Styles.Insert
+    else
+      LCaretStyle := FCaret.Styles.Overwrite;
+    if LCaretStyle in [csHorizontalLine, csThinHorizontalLine, csHalfBlock, csBlock] then
+      X := X + 1;
     Y := LCaretPoint.Y + FCaretOffset.Y;
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);

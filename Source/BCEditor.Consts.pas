@@ -19,7 +19,6 @@ const
   BCEDITOR_MAX_SCROLL_RANGE = 32767;
   BCEDITOR_MAX_UNDO_ACTIONS = 1024;
   { Characters }
-  BCEDITOR_SPECIAL_CHARACTERS = ['À' .. 'Ö', 'Ø' .. 'ö', 'ø' .. 'ÿ'];
   BCEDITOR_UNDERSCORE = '_';
   BCEDITOR_WORD_BREAK_CHARACTERS = ['.', ',', ';', ':', '"', '''', '!', '?', '[', ']', '(', ')', '{', '}', '^', '-',
     '=', '+', '-', '*', '/', '\', '|', ' '];

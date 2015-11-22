@@ -29,6 +29,7 @@ const
     '=', '+', '-', '*', '/', '\', '|', ' '];
   BCEDITOR_DEFAULT_DELIMITERS: TBCEditorCharSet = ['*', '/', '+', '-', '=', '\', '|', '&', '(', ')', '[', ']', '{', '}',
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
+  BCEDITOR_CODE_FOLDING_VALID_CHARACTERS = ['\', '@'] + BCEDITOR_UNDERSCORE + BCEDITOR_STRING_UPPER_CHARACTERS + BCEDITOR_NUMBERS;
   BCEDITOR_NONE_CHAR = #0;
   BCEDITOR_BACKSPACE_CHAR = #8;
   BCEDITOR_TAB_CHAR = #9;

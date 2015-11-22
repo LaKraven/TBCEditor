@@ -93,7 +93,6 @@ type
     function StringLength(AIndex: Integer): Integer;
     function Add(const AValue: string): Integer; override;
     function GetLengthOfLongestLine: Integer; overload;
-    function GetIsLineWhitespaceOnly(AIndex: Integer): Boolean;
     procedure Clear; override;
     procedure Delete(AIndex: Integer); override;
     procedure DeleteLines(AIndex, ACount: Integer);
@@ -201,31 +200,6 @@ begin
     Result := FList^[fIndexOfLongestLine].ExpandedLength
   else
     Result := 0;
-end;
-
-function TBCEditorLines.GetIsLineWhitespaceOnly(AIndex: Integer): Boolean;
-var
-  i, LLength: Integer;
-begin
-  Result := True;
-  if (AIndex < 0) or (AIndex > FCount - 1) then
-    Exit;
-  with FList^[AIndex] do
-  begin
-    LLength := Length(Value);
-    if LLength = 0 then
-      Exit;
-    i := 1;
-    while i <= LLength do
-    begin
-      if Value[i] >= BCEDITOR_EXCLAMATION_MARK then
-      begin
-        Result := False;
-        Break;
-      end;
-      Inc(i);
-    end;
-  end;
 end;
 
 function TBCEditorLines.StringLength(AIndex: Integer): Integer;

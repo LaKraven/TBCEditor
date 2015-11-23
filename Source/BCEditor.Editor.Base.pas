@@ -9922,7 +9922,7 @@ begin
   Y := ATextPosition.Line;
   if (X >= 1) and (Y < FLines.Count) then
   begin
-    LLine := FLines.ExpandedStrings[Y];
+    LLine := FLines[Y];
     if X < Length(LLine) then
     begin
       X := StringWordEnd(LLine, X + 1);
@@ -9949,7 +9949,7 @@ begin
 
   if (Y >= 0) and (Y < FLines.Count) then
   begin
-    LLine := FLines.ExpandedStrings[Y];
+    LLine := FLines[Y];
     X := Min(X, Length(LLine) + 1);
     X := StringWordStart(LLine, X - 1);
     if X = 0 then

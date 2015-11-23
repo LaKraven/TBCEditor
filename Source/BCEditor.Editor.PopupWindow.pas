@@ -30,7 +30,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils;
+  Winapi.Windows, System.SysUtils{$IFDEF USE_VCL_STYLES}, Vcl.Themes{$ENDIF};
 
 constructor TBCEditorPopupWindow.Create(AOwner: TComponent);
 begin

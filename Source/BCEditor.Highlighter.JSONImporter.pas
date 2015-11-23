@@ -434,7 +434,7 @@ begin
         LJSONObject := TJsonObject.ParseFromStream(LFileStream) as TJsonObject;
         if Assigned(LJSONObject) then
         try
-          if LJSONObject.Contains('CodeFolding') then
+          if LJSONObject.Contains('CompletionProposal') then
             ImportCompletionProposal(LJSONObject['CompletionProposal'].ObjectValue);
         finally
           LJSONObject.Free;

@@ -17,17 +17,17 @@ type
     FStyle: TBCEditorSpecialCharsStyle;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetColor(const Value: TColor);
-    procedure SetEndOfLine(const Value: TBCEditorSpecialCharsEndOfLine);
-    procedure SetOnChange(const Value: TNotifyEvent);
-    procedure SetOptions(const Value: TBCEditorSpecialCharsOptions);
-    procedure SetSelection(const Value: TBCEditorSpecialCharsSelection);
-    procedure SetStyle(const Value: TBCEditorSpecialCharsStyle);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColor(const AValue: TColor);
+    procedure SetEndOfLine(const AValue: TBCEditorSpecialCharsEndOfLine);
+    procedure SetOnChange(const AValue: TNotifyEvent);
+    procedure SetOptions(const AValue: TBCEditorSpecialCharsOptions);
+    procedure SetSelection(const AValue: TBCEditorSpecialCharsSelection);
+    procedure SetStyle(const AValue: TBCEditorSpecialCharsStyle);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Color: TColor read FColor write SetColor default clBlack;
     property EndOfLine: TBCEditorSpecialCharsEndOfLine read FEndOfLine write SetEndOfLine;
@@ -60,17 +60,17 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorSpecialChars.SetOnChange(const Value: TNotifyEvent);
+procedure TBCEditorSpecialChars.SetOnChange(const AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
+  FOnChange := AValue;
   FEndOfLine.OnChange := FOnChange;
   FSelection.OnChange := FOnChange;
 end;
 
-procedure TBCEditorSpecialChars.Assign(Source: TPersistent);
+procedure TBCEditorSpecialChars.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSpecialChars) then
-  with Source as TBCEditorSpecialChars do
+  if Assigned(ASource) and (ASource is TBCEditorSpecialChars) then
+  with ASource as TBCEditorSpecialChars do
   begin
     Self.FColor := FColor;
     Self.FEndOfLine.Assign(FEndOfLine);
@@ -80,7 +80,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorSpecialChars.DoChange;
@@ -89,48 +89,48 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorSpecialChars.SetColor(const Value: TColor);
+procedure TBCEditorSpecialChars.SetColor(const AValue: TColor);
 begin
-  if Value <> FColor then
+  if FColor <> AValue then
   begin
-    FColor := Value;
+    FColor := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialChars.SetEndOfLine(const Value: TBCEditorSpecialCharsEndOfLine);
+procedure TBCEditorSpecialChars.SetEndOfLine(const AValue: TBCEditorSpecialCharsEndOfLine);
 begin
-  FEndOfLine.Assign(Value);
+  FEndOfLine.Assign(AValue);
 end;
 
-procedure TBCEditorSpecialChars.SetSelection(const Value: TBCEditorSpecialCharsSelection);
+procedure TBCEditorSpecialChars.SetSelection(const AValue: TBCEditorSpecialCharsSelection);
 begin
-  FSelection.Assign(Value);
+  FSelection.Assign(AValue);
 end;
 
-procedure TBCEditorSpecialChars.SetVisible(const Value: Boolean);
+procedure TBCEditorSpecialChars.SetVisible(const AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialChars.SetStyle(const Value: TBCEditorSpecialCharsStyle);
+procedure TBCEditorSpecialChars.SetStyle(const AValue: TBCEditorSpecialCharsStyle);
 begin
-  if Value <> FStyle then
+  if FStyle <> AValue then
   begin
-    FStyle := Value;
+    FStyle := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialChars.SetOptions(const Value: TBCEditorSpecialCharsOptions);
+procedure TBCEditorSpecialChars.SetOptions(const AValue: TBCEditorSpecialCharsOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange;
   end;
 end;

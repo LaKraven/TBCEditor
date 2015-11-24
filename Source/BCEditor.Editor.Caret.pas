@@ -16,16 +16,16 @@ type
     FStyles: TBCEditorCaretStyles;
     FVisible: Boolean;
     procedure DoChange(Sender: TObject);
-    procedure SetNonBlinking(Value: TBCEditorCaretNonBlinking);
-    procedure SetOffsets(Value: TBCEditorCaretOffsets);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetOptions(const Value: TBCEditorCaretOptions);
-    procedure SetStyles(const Value: TBCEditorCaretStyles);
-    procedure SetVisible(Value: Boolean);
+    procedure SetNonBlinking(AValue: TBCEditorCaretNonBlinking);
+    procedure SetOffsets(AValue: TBCEditorCaretOffsets);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetOptions(const AValue: TBCEditorCaretOptions);
+    procedure SetStyles(const AValue: TBCEditorCaretStyles);
+    procedure SetVisible(AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property NonBlinking: TBCEditorCaretNonBlinking read FNonBlinking write SetNonBlinking;
     property Offsets: TBCEditorCaretOffsets read FOffsets write SetOffsets;
@@ -58,10 +58,10 @@ begin
   inherited;
 end;
 
-procedure TBCEditorCaret.Assign(Source: TPersistent);
+procedure TBCEditorCaret.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorCaret) then
-  with Source as TBCEditorCaret do
+  if Assigned(ASource) and (ASource is TBCEditorCaret) then
+  with ASource as TBCEditorCaret do
   begin
     Self.FStyles.Assign(FStyles);
     Self.FNonBlinking.Assign(FNonBlinking);
@@ -71,15 +71,15 @@ begin
     Self.DoChange(Self);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorCaret.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorCaret.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FOffsets.OnChange := Value;
-  FStyles.OnChange := Value;
-  FNonBlinking.OnChange := Value;
+  FOnChange := AValue;
+  FOffsets.OnChange := AValue;
+  FStyles.OnChange := AValue;
+  FNonBlinking.OnChange := AValue;
 end;
 
 procedure TBCEditorCaret.DoChange(Sender: TObject);
@@ -88,35 +88,35 @@ begin
     FOnChange(Sender);
 end;
 
-procedure TBCEditorCaret.SetStyles(const Value: TBCEditorCaretStyles);
+procedure TBCEditorCaret.SetStyles(const AValue: TBCEditorCaretStyles);
 begin
-  FStyles.Assign(Value);
+  FStyles.Assign(AValue);
 end;
 
-procedure TBCEditorCaret.SetNonBlinking(Value: TBCEditorCaretNonBlinking);
+procedure TBCEditorCaret.SetNonBlinking(AValue: TBCEditorCaretNonBlinking);
 begin
-  FNonBlinking.Assign(Value);
+  FNonBlinking.Assign(AValue);
 end;
 
-procedure TBCEditorCaret.SetVisible(Value: Boolean);
+procedure TBCEditorCaret.SetVisible(AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange(Self);
   end;
 end;
 
-procedure TBCEditorCaret.SetOffsets(Value: TBCEditorCaretOffsets);
+procedure TBCEditorCaret.SetOffsets(AValue: TBCEditorCaretOffsets);
 begin
-  FOffsets.Assign(Value);
+  FOffsets.Assign(AValue);
 end;
 
-procedure TBCEditorCaret.SetOptions(const Value: TBCEditorCaretOptions);
+procedure TBCEditorCaret.SetOptions(const AValue: TBCEditorCaretOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange(Self);
   end;
 end;

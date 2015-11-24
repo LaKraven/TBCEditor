@@ -15,13 +15,13 @@ type
     FShortCuts: Boolean;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetImages(const Value: TImageList);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetVisible(Value: Boolean);
+    procedure SetImages(const AValue: TImageList);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetVisible(AValue: Boolean);
   public
     constructor Create(AOwner: TComponent);
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Images: TImageList read FImages write SetImages;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
@@ -51,16 +51,16 @@ begin
   inherited;
 end;
 
-procedure TBCEditorLeftMarginBookMarks.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorLeftMarginBookMarks.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FPanel.OnChange := Value;
+  FOnChange := AValue;
+  FPanel.OnChange := AValue;
 end;
 
-procedure TBCEditorLeftMarginBookMarks.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginBookMarks.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLeftMarginBookMarks) then
-  with Source as TBCEditorLeftMarginBookMarks do
+  if Assigned(ASource) and (ASource is TBCEditorLeftMarginBookMarks) then
+  with ASource as TBCEditorLeftMarginBookMarks do
   begin
     Self.FImages := FImages;
     Self.FShortCuts := FShortCuts;
@@ -69,7 +69,7 @@ begin
       Self.FOnChange(Self);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorLeftMarginBookMarks.DoChange;
@@ -78,22 +78,22 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginBookMarks.SetImages(const Value: TImageList);
+procedure TBCEditorLeftMarginBookMarks.SetImages(const AValue: TImageList);
 begin
-  if FImages <> Value then
+  if FImages <> AValue then
   begin
-    FImages := Value;
+    FImages := AValue;
     if Assigned(FImages) then
       FImages.FreeNotification(FOwner);
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginBookMarks.SetVisible(Value: Boolean);
+procedure TBCEditorLeftMarginBookMarks.SetVisible(AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;

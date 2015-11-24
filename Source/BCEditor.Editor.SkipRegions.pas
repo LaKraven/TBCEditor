@@ -25,11 +25,11 @@ type
 
   TBCEditorSkipRegions = class(TCollection)
   strict private
-    function GetSkipRegionItem(Index: Integer): TBCEditorSkipRegionItem;
+    function GetSkipRegionItem(AIndex: Integer): TBCEditorSkipRegionItem;
   public
     function Add(const AOpenToken, ACloseToken: string): TBCEditorSkipRegionItem;
     function Contains(const AOpenToken, ACloseToken: string): Boolean;
-    property SkipRegions[index: Integer]: TBCEditorSkipRegionItem read GetSkipRegionItem; default;
+    property SkipRegions[AIndex: Integer]: TBCEditorSkipRegionItem read GetSkipRegionItem; default;
   end;
 
 implementation
@@ -59,9 +59,9 @@ begin
       Exit(True);
 end;
 
-function TBCEditorSkipRegions.GetSkipRegionItem(Index: Integer): TBCEditorSkipRegionItem;
+function TBCEditorSkipRegions.GetSkipRegionItem(AIndex: Integer): TBCEditorSkipRegionItem;
 begin
-  Result := TBCEditorSkipRegionItem(inherited Items[index]);
+  Result := TBCEditorSkipRegionItem(inherited Items[AIndex]);
 end;
 
 end.

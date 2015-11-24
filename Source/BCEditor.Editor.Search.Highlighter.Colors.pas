@@ -11,12 +11,12 @@ type
     FBackground: TColor;
     FForeground: TColor;
     FOnChange: TBCEditorSearchChangeEvent;
-    procedure SetBackground(const Value: TColor);
-    procedure SetForeground(const Value: TColor);
+    procedure SetBackground(const AValue: TColor);
+    procedure SetForeground(const AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Background: TColor read FBackground write SetBackground default clSearchHighlighter;
     property Foreground: TColor read FForeground write SetForeground default clWindowText;
@@ -35,17 +35,17 @@ begin
   FForeground := clWindowText;
 end;
 
-procedure TBCEditorSearchColors.Assign(Source: TPersistent);
+procedure TBCEditorSearchColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorSearchColors then
-  with Source as TBCEditorSearchColors do
+  if ASource is TBCEditorSearchColors then
+  with ASource as TBCEditorSearchColors do
   begin
     Self.FBackground := FBackground;
     Self.FForeground := FForeground;
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorSearchColors.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(scRefresh);
 end;
 
-procedure TBCEditorSearchColors.SetBackground(const Value: TColor);
+procedure TBCEditorSearchColors.SetBackground(const AValue: TColor);
 begin
-  if FBackground <> Value then
+  if FBackground <> AValue then
   begin
-    FBackground := Value;
+    FBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSearchColors.SetForeground(const Value: TColor);
+procedure TBCEditorSearchColors.SetForeground(const AValue: TColor);
 begin
-  if FForeground <> Value then
+  if FForeground <> AValue then
   begin
-    FForeground := Value;
+    FForeground := AValue;
     DoChange;
   end;
 end;

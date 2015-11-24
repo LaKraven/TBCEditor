@@ -26,22 +26,22 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetAutosize(const Value: Boolean);
-    procedure SetBookMarks(const Value: TBCEditorLeftMarginBookMarks);
-    procedure SetColors(const Value: TBCEditorLeftMarginColors);
-    procedure SetFont(Value: TFont);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetVisible(const Value: Boolean);
-    procedure SetWidth(Value: Integer);
+    procedure SetAutosize(const AValue: Boolean);
+    procedure SetBookMarks(const AValue: TBCEditorLeftMarginBookMarks);
+    procedure SetColors(const AValue: TBCEditorLeftMarginColors);
+    procedure SetFont(AValue: TFont);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetVisible(const AValue: Boolean);
+    procedure SetWidth(AValue: Integer);
   public
     constructor Create(AOwner: TComponent);
     destructor Destroy; override;
 
     function GetWidth: Integer;
-    function FormatLineNumber(Line: Integer): string;
-    function RealLeftMarginWidth(CharWidth: Integer): Integer;
-    procedure Assign(Source: TPersistent); override;
-    procedure AutosizeDigitCount(LinesCount: Integer);
+    function FormatLineNumber(ALine: Integer): string;
+    function RealLeftMarginWidth(ACharWidth: Integer): Integer;
+    procedure Assign(ASource: TPersistent); override;
+    procedure AutosizeDigitCount(ALinesCount: Integer);
   published
     property Autosize: Boolean read FAutosize write SetAutosize default True;
     property Bookmarks: TBCEditorLeftMarginBookMarks read FBookMarks write SetBookMarks;
@@ -84,16 +84,16 @@ begin
   FLineNumbers := TBCEditorLeftMarginLineNumbers.Create;
 end;
 
-procedure TBCEditorLeftMargin.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorLeftMargin.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
+  FOnChange := AValue;
 
-  FBookmarks.OnChange := Value;
-  FBorder.OnChange := Value;
-  FColors.OnChange := Value;
-  FFont.OnChange := Value;
-  FLineState.OnChange := Value;
-  FLineNumbers.OnChange := Value;
+  FBookmarks.OnChange := AValue;
+  FBorder.OnChange := AValue;
+  FColors.OnChange := AValue;
+  FFont.OnChange := AValue;
+  FLineState.OnChange := AValue;
+  FLineNumbers.OnChange := AValue;
 end;
 
 destructor TBCEditorLeftMargin.Destroy;
@@ -113,7 +113,7 @@ begin
     FOnChange(Self);
 end;
 
-function TBCEditorLeftMargin.RealLeftMarginWidth(CharWidth: Integer): Integer;
+function TBCEditorLeftMargin.RealLeftMarginWidth(ACharWidth: Integer): Integer;
 var
   PanelWidth: Integer;
 begin
@@ -125,15 +125,15 @@ begin
     Result := 0
   else
   if FLineNumbers.Visible then
-    Result := PanelWidth + FLineState.Width + FLineNumbers.AutosizeDigitCount * CharWidth + 5
+    Result := PanelWidth + FLineState.Width + FLineNumbers.AutosizeDigitCount * ACharWidth + 5
   else
     Result := FWidth;
 end;
 
-procedure TBCEditorLeftMargin.Assign(Source: TPersistent);
+procedure TBCEditorLeftMargin.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorLeftMargin then
-  with Source as TBCEditorLeftMargin do
+  if ASource is TBCEditorLeftMargin then
+  with ASource as TBCEditorLeftMargin do
   begin
     Self.FAutosize := FAutosize;
     Self.FBookmarks.Assign(FBookmarks);
@@ -147,7 +147,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 function TBCEditorLeftMargin.GetWidth: Integer;
@@ -158,62 +158,62 @@ begin
     Result := 0;
 end;
 
-procedure TBCEditorLeftMargin.SetAutosize(const Value: Boolean);
+procedure TBCEditorLeftMargin.SetAutosize(const AValue: Boolean);
 begin
-  if FAutosize <> Value then
+  if FAutosize <> AValue then
   begin
-    FAutosize := Value;
+    FAutosize := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMargin.SetColors(const Value: TBCEditorLeftMarginColors);
+procedure TBCEditorLeftMargin.SetColors(const AValue: TBCEditorLeftMarginColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
-procedure TBCEditorLeftMargin.SetFont(Value: TFont);
+procedure TBCEditorLeftMargin.SetFont(AValue: TFont);
 begin
-  FFont.Assign(Value);
+  FFont.Assign(AValue);
 end;
 
-procedure TBCEditorLeftMargin.SetWidth(Value: Integer);
+procedure TBCEditorLeftMargin.SetWidth(AValue: Integer);
 begin
-  Value := Max(0, Value);
-  if FWidth <> Value then
+  AValue := Max(0, AValue);
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMargin.SetVisible(const Value: Boolean);
+procedure TBCEditorLeftMargin.SetVisible(const AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMargin.SetBookMarks(const Value: TBCEditorLeftMarginBookmarks);
+procedure TBCEditorLeftMargin.SetBookMarks(const AValue: TBCEditorLeftMarginBookmarks);
 begin
-  FBookmarks.Assign(Value);
+  FBookmarks.Assign(AValue);
 end;
 
-procedure TBCEditorLeftMargin.AutosizeDigitCount(LinesCount: Integer);
+procedure TBCEditorLeftMargin.AutosizeDigitCount(ALinesCount: Integer);
 var
   NumberOfDigits: Integer;
 begin
   if FLineNumbers.Visible and FAutosize then
   begin
     if FLineNumbers.StartFrom = 0 then
-      Dec(LinesCount)
+      Dec(ALinesCount)
     else
       if FLineNumbers.StartFrom > 1 then
-        Inc(LinesCount, FLineNumbers.StartFrom - 1);
+        Inc(ALinesCount, FLineNumbers.StartFrom - 1);
 
-    NumberOfDigits := Max(Length(LinesCount.ToString), FLineNumbers.DigitCount);
+    NumberOfDigits := Max(Length(ALinesCount.ToString), FLineNumbers.DigitCount);
     if FLineNumbers.AutosizeDigitCount <> NumberOfDigits then
     begin
       FLineNumbers.AutosizeDigitCount := NumberOfDigits;
@@ -225,16 +225,16 @@ begin
     FLineNumbers.AutosizeDigitCount := FLineNumbers.DigitCount;
 end;
 
-function TBCEditorLeftMargin.FormatLineNumber(Line: Integer): string;
+function TBCEditorLeftMargin.FormatLineNumber(ALine: Integer): string;
 var
   i: Integer;
 begin
   if FLineNumbers.StartFrom = 0 then
-    Dec(Line)
+    Dec(ALine)
   else
   if FLineNumbers.StartFrom > 1 then
-    Inc(Line, FLineNumbers.StartFrom - 1);
-  Result := Format('%*d', [FLineNumbers.AutosizeDigitCount, Line]);
+    Inc(ALine, FLineNumbers.StartFrom - 1);
+  Result := Format('%*d', [FLineNumbers.AutosizeDigitCount, ALine]);
   if lnoLeadingZeros in FLineNumbers.Options then
     for i := 1 to FLineNumbers.AutosizeDigitCount - 1 do
     begin

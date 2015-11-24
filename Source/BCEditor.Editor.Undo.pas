@@ -12,11 +12,11 @@ type
     FOnChange: TNotifyEvent;
     FOptions: TBCEditorUndoOptions;
     procedure DoChange;
-    procedure SetMaxActions(Value: Integer);
-    procedure SetOptions(const Value: TBCEditorUndoOptions);
+    procedure SetMaxActions(AValue: Integer);
+    procedure SetOptions(const AValue: TBCEditorUndoOptions);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property MaxActions: Integer read FMaxActions write SetMaxActions default BCEDITOR_MAX_UNDO_ACTIONS;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -39,33 +39,33 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorUndo.Assign(Source: TPersistent);
+procedure TBCEditorUndo.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorUndo then
-  with Source as TBCEditorUndo do
+  if ASource is TBCEditorUndo then
+  with ASource as TBCEditorUndo do
   begin
     Self.FMaxActions := FMaxActions;
     Self.FOptions := FOptions;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorUndo.SetMaxActions(Value: Integer);
+procedure TBCEditorUndo.SetMaxActions(AValue: Integer);
 begin
-  if Value <> FMaxActions then
+  if FMaxActions <> AValue then
   begin
-    FMaxActions := Value;
+    FMaxActions := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorUndo.SetOptions(const Value: TBCEditorUndoOptions);
+procedure TBCEditorUndo.SetOptions(const AValue: TBCEditorUndoOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange;
   end;
 end;

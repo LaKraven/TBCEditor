@@ -12,11 +12,11 @@ type
     FX: Integer;
     FY: Integer;
     procedure DoChange(Sender: TObject);
-    procedure SetX(Value: Integer);
-    procedure SetY(Value: Integer);
+    procedure SetX(AValue: Integer);
+    procedure SetY(AValue: Integer);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property X: Integer read FX write SetX default 0;
@@ -35,17 +35,17 @@ begin
   FY := 0;
 end;
 
-procedure TBCEditorCaretOffsets.Assign(Source: TPersistent);
+procedure TBCEditorCaretOffsets.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorCaretOffsets) then
-  with Source as TBCEditorCaretOffsets do
+  if Assigned(ASource) and (ASource is TBCEditorCaretOffsets) then
+  with ASource as TBCEditorCaretOffsets do
   begin
     Self.FX := FX;
     Self.FY := FY;
     Self.DoChange(Self);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorCaretOffsets.DoChange(Sender: TObject);
@@ -54,20 +54,20 @@ begin
     FOnChange(Sender);
 end;
 
-procedure TBCEditorCaretOffsets.SetX(Value: Integer);
+procedure TBCEditorCaretOffsets.SetX(AValue: Integer);
 begin
-  if Value <> FX then
+  if FX <> AValue then
   begin
-    FX := Value;
+    FX := AValue;
     DoChange(Self);
   end;
 end;
 
-procedure TBCEditorCaretOffsets.SetY(Value: Integer);
+procedure TBCEditorCaretOffsets.SetY(AValue: Integer);
 begin
-  if Value <> FY then
+  if FY <> AValue then
   begin
-    FY := Value;
+    FY := AValue;
     DoChange(Self);
   end;
 end;

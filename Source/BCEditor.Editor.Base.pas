@@ -215,7 +215,7 @@ type
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function PreviousWordPosition: TBCEditorTextPosition; overload;
     function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
-    function RescanHighlighterRangesFrom(Index: Integer): Integer;
+    function RescanHighlighterRangesFrom(AIndex: Integer): Integer;
     function RowColumnToCharIndex(ATextPosition: TBCEditorTextPosition): Integer;
     function SearchText(const ASearchText: string; AChanged: Boolean = False): Integer;
     function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
@@ -381,7 +381,7 @@ type
     procedure DoSearchStringNotFoundDialog; virtual;
     procedure DoTripleClick;
     procedure DragCanceled; override;
-    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
+    procedure DragOver(ASource: TObject; X, Y: Integer; AState: TDragState; var AAccept: Boolean); override;
     procedure FreeHintForm(var AForm: TBCEditorCodeFoldingHintForm);
     procedure FreeCompletionProposalPopupWindow;
     procedure HideCaret;
@@ -1556,21 +1556,21 @@ function TBCBaseEditor.GetSelectedText: string;
     end;
   end;
 
-  procedure CopyAndForward(const AValue: string; Index, Count: Integer; var PResult: PChar);
+  procedure CopyAndForward(const AValue: string; AIndex, ACount: Integer; var APResult: PChar);
   var
     LPSource: PChar;
     LSourceLength: Integer;
     LDestinationLength: Integer;
   begin
     LSourceLength := Length(AValue);
-    if (Index <= LSourceLength) and (Count > 0) then
+    if (AIndex <= LSourceLength) and (ACount > 0) then
     begin
-      Dec(Index);
-      LPSource := PChar(AValue) + Index;
-      LDestinationLength := Min(LSourceLength - Index, Count);
-      Move(LPSource^, PResult^, LDestinationLength * SizeOf(Char));
-      Inc(PResult, LDestinationLength);
-      PResult^ := BCEDITOR_NONE_CHAR;
+      Dec(AIndex);
+      LPSource := PChar(AValue) + AIndex;
+      LDestinationLength := Min(LSourceLength - AIndex, ACount);
+      Move(LPSource^, APResult^, LDestinationLength * SizeOf(Char));
+      Inc(APResult, LDestinationLength);
+      APResult^ := BCEDITOR_NONE_CHAR;
     end;
   end;
 
@@ -2296,11 +2296,11 @@ begin
   Result.Line := Y;
 end;
 
-function TBCBaseEditor.RescanHighlighterRangesFrom(Index: Integer): Integer;
+function TBCBaseEditor.RescanHighlighterRangesFrom(AIndex: Integer): Integer;
 var
   LCurrentRange: TBCEditorRange;
 begin
-  Result := Index;
+  Result := AIndex;
   if Result > FLines.Count then
     Exit;
 
@@ -4125,7 +4125,7 @@ begin
       LMaxLineWidth := 1;
   end;
   AValue := MinMax(AValue, 1, LMaxLineWidth);
-  if AValue <> FLeftChar then
+  if FLeftChar <> AValue then
   begin
     LDelta := FLeftChar - AValue;
     FLeftChar := AValue;
@@ -4187,7 +4187,7 @@ procedure TBCBaseEditor.SetModified(AValue: Boolean);
 var
   i: Integer;
 begin
-  if AValue <> FModified then
+  if FModified <> AValue then
   begin
     FModified := AValue;
     if (uoGroupUndo in FUndo.Options) and (not AValue) and UndoList.CanUndo then
@@ -4205,7 +4205,7 @@ end;
 
 procedure TBCBaseEditor.SetOptions(AValue: TBCEditorOptions);
 begin
-  if AValue <> FOptions then
+  if FOptions <> AValue then
   begin
     FOptions := AValue;
 
@@ -4384,7 +4384,7 @@ begin
     AValue := Min(AValue, LDisplayLineCount - FVisibleLines + 1);
 
   AValue := Max(AValue, 1);
-  if AValue <> TopLine then
+  if TopLine <> AValue then
   begin
     LDelta := TopLine - AValue;
     FTopLine := AValue;
@@ -5959,20 +5959,20 @@ begin
   inherited;
 end;
 
-procedure TBCBaseEditor.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+procedure TBCBaseEditor.DragOver(ASource: TObject; X, Y: Integer; AState: TDragState; var AAccept: Boolean);
 var
   LDisplayPosition: TBCEditorDisplayPosition;
   LOldTextCaretPosition: TBCEditorTextPosition;
 begin
   inherited;
 
-  if (Source is TBCBaseEditor) and not ReadOnly then
+  if (ASource is TBCBaseEditor) and not ReadOnly then
   begin
-    Accept := True;
+    AAccept := True;
 
     if Dragging then
     begin
-      if State = dsDragLeave then
+      if AState = dsDragLeave then
         ComputeCaret(FMouseDownX, FMouseDownY)
       else
       begin
@@ -12465,9 +12465,9 @@ begin
   end;
 end;
 
-function IsTextMessage(Msg: Cardinal): Boolean;
+function IsTextMessage(AMessage: Cardinal): Boolean;
 begin
-  Result := (Msg = WM_SETTEXT) or (Msg = WM_GETTEXT) or (Msg = WM_GETTEXTLENGTH);
+  Result := (AMessage = WM_SETTEXT) or (AMessage = WM_GETTEXT) or (AMessage = WM_GETTEXTLENGTH);
 end;
 
 procedure TBCBaseEditor.WndProc(var AMessage: TMessage);

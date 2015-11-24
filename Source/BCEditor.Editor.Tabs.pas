@@ -15,13 +15,13 @@ type
     FOptions: TBCEditorTabOptions;
     FWantTabs: Boolean;
     FWidth: Integer;
-    procedure SetWidth(Value: Integer);
-    procedure SetWantTabs(const Value: Boolean);
-    procedure SetOptions(const Value: TBCEditorTabOptions);
+    procedure SetWidth(AValue: Integer);
+    procedure SetWantTabs(const AValue: Boolean);
+    procedure SetOptions(const AValue: TBCEditorTabOptions);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Options: TBCEditorTabOptions read FOptions write SetOptions default BCEDITOR_DEFAULT_TAB_OPTIONS;
@@ -51,10 +51,10 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorTabs.Assign(Source: TPersistent);
+procedure TBCEditorTabs.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorTabs then
-  with Source as TBCEditorTabs do
+  if ASource is TBCEditorTabs then
+  with ASource as TBCEditorTabs do
   begin
     Self.FOptions := FOptions;
     Self.FWantTabs := FWantTabs;
@@ -62,33 +62,33 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorTabs.SetOptions(const Value: TBCEditorTabOptions);
+procedure TBCEditorTabs.SetOptions(const AValue: TBCEditorTabOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorTabs.SetWidth(Value: Integer);
+procedure TBCEditorTabs.SetWidth(AValue: Integer);
 begin
-  Value := MinMax(Value, 1, 256);
-  if FWidth <> Value then
+  AValue := MinMax(AValue, 1, 256);
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorTabs.SetWantTabs(const Value: Boolean);
+procedure TBCEditorTabs.SetWantTabs(const AValue: Boolean);
 begin
-  if FWantTabs <> Value then
+  if FWantTabs <> AValue then
   begin
-    FWantTabs := Value;
+    FWantTabs := AValue;
     DoChange;
   end;
 end;

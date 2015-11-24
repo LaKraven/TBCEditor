@@ -26,7 +26,7 @@ type
   public
     constructor Create(AOwner: TPersistent);
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property CloseChars: string read FCloseChars write FCloseChars;
     property Colors: TBCEditorCompletionProposalColors read FColors write FColors;
@@ -79,10 +79,10 @@ begin
   inherited;
 end;
 
-procedure TBCEditorCompletionProposal.Assign(Source: TPersistent);
+procedure TBCEditorCompletionProposal.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCompletionProposal then
-  with Source as TBCEditorCompletionProposal do
+  if ASource is TBCEditorCompletionProposal then
+  with ASource as TBCEditorCompletionProposal do
   begin
     Self.FCloseChars := FCloseChars;
     Self.FColors.Assign(FColors);
@@ -96,7 +96,7 @@ begin
     Self.FWidth := FWidth;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 function TBCEditorCompletionProposal.GetOwner: TPersistent;

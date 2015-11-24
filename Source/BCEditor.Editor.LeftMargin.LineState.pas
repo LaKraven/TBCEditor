@@ -12,12 +12,12 @@ type
     FOnChange: TNotifyEvent;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetEnabled(const Value: Boolean);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetWidth(const Value: Integer);
+    procedure SetEnabled(const AValue: Boolean);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetWidth(const AValue: Integer);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Enabled: Boolean read FEnabled write SetEnabled default True;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
@@ -36,22 +36,22 @@ begin
   FWidth := 2;
 end;
 
-procedure TBCEditorLeftMarginLineState.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginLineState.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLeftMarginLineState) then
-  with Source as TBCEditorLeftMarginLineState do
+  if Assigned(ASource) and (ASource is TBCEditorLeftMarginLineState) then
+  with ASource as TBCEditorLeftMarginLineState do
   begin
     Self.FEnabled := FEnabled;
     Self.FWidth := FWidth;
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorLeftMarginLineState.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorLeftMarginLineState.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
+  FOnChange := AValue;
 end;
 
 procedure TBCEditorLeftMarginLineState.DoChange;
@@ -60,20 +60,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginLineState.SetEnabled(const Value: Boolean);
+procedure TBCEditorLeftMarginLineState.SetEnabled(const AValue: Boolean);
 begin
-  if FEnabled <> Value then
+  if FEnabled <> AValue then
   begin
-    FEnabled := Value;
+    FEnabled := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginLineState.SetWidth(const Value: Integer);
+procedure TBCEditorLeftMarginLineState.SetWidth(const AValue: Integer);
 begin
-  if FWidth <> Value then
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange
   end;
 end;

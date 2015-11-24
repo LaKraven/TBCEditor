@@ -20,7 +20,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Color: TColor read FColor write SetColor default clActiveLineBackground;
     property Indicator: TBCEditorGlyph read FIndicator write SetIndicator;
@@ -49,10 +49,10 @@ begin
   inherited;
 end;
 
-procedure TBCEditorActiveLine.Assign(Source: TPersistent);
+procedure TBCEditorActiveLine.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorActiveLine) then
-  with Source as TBCEditorActiveLine do
+  if Assigned(ASource) and (ASource is TBCEditorActiveLine) then
+  with ASource as TBCEditorActiveLine do
   begin
     Self.FColor := FColor;
     Self.FVisible := FVisible;
@@ -60,7 +60,7 @@ begin
     Self.DoChange(Self);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorActiveLine.SetOnChange(AValue: TNotifyEvent);

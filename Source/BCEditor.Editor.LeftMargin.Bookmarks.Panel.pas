@@ -15,13 +15,13 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetLeftMargin(Value: Integer);
-    procedure SetOtherMarkXOffset(Value: Integer);
-    procedure SetWidth(Value: Integer);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetLeftMargin(AValue: Integer);
+    procedure SetOtherMarkXOffset(AValue: Integer);
+    procedure SetWidth(AValue: Integer);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property LeftMargin: Integer read FLeftMargin write SetLeftMargin default 2;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -47,10 +47,10 @@ begin
   FOtherMarkXOffset := 12;
 end;
 
-procedure TBCEditorLeftMarginBookMarkPanel.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginBookMarkPanel.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLeftMarginBookMarkPanel) then
-  with Source as TBCEditorLeftMarginBookMarkPanel do
+  if Assigned(ASource) and (ASource is TBCEditorLeftMarginBookMarkPanel) then
+  with ASource as TBCEditorLeftMarginBookMarkPanel do
   begin
     Self.FLeftMargin := FLeftMargin;
     Self.FOtherMarkXOffset := FOtherMarkXOffset;
@@ -61,7 +61,7 @@ begin
       Self.FOnChange(Self);
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorLeftMarginBookMarkPanel.DoChange;
@@ -70,39 +70,39 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginBookMarkPanel.SetWidth(Value: Integer);
+procedure TBCEditorLeftMarginBookMarkPanel.SetWidth(AValue: Integer);
 begin
-  Value := Max(0, Value);
-  if FWidth <> Value then
+  AValue := Max(0, AValue);
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginBookMarkPanel.SetVisible(const Value: Boolean);
+procedure TBCEditorLeftMarginBookMarkPanel.SetVisible(const AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginBookMarkPanel.SetLeftMargin(Value: Integer);
+procedure TBCEditorLeftMarginBookMarkPanel.SetLeftMargin(AValue: Integer);
 begin
-  if FLeftMargin <> Value then
+  if FLeftMargin <> AValue then
   begin
-    FLeftMargin := Value;
+    FLeftMargin := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginBookMarkPanel.SetOtherMarkXOffset(Value: Integer);
+procedure TBCEditorLeftMarginBookMarkPanel.SetOtherMarkXOffset(AValue: Integer);
 begin
-  if FOtherMarkXOffset <> Value then
+  if FOtherMarkXOffset <> AValue then
   begin
-    FOtherMarkXOffset := Value;
+    FOtherMarkXOffset := AValue;
     DoChange;
   end;
 end;

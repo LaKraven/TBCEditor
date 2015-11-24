@@ -17,14 +17,14 @@ type
     FOnChange: TNotifyEvent;
     FOptions: TBCEditorScrollOptions;
     procedure DoChange;
-    procedure SetBars(const Value: System.UITypes.TScrollStyle);
-    procedure SetHint(const Value: TBCEditorScrollHint);
-    procedure SetOptions(const Value: TBCEditorScrollOptions);
-    procedure SetMaxWidth(Value: Integer);
+    procedure SetBars(const AValue: System.UITypes.TScrollStyle);
+    procedure SetHint(const AValue: TBCEditorScrollHint);
+    procedure SetOptions(const AValue: TBCEditorScrollOptions);
+    procedure SetMaxWidth(AValue: Integer);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Bars: System.UITypes.TScrollStyle read FBars write SetBars default System.UITypes.TScrollStyle.ssBoth;
     property Hint: TBCEditorScrollHint read FHint write SetHint;
@@ -57,11 +57,11 @@ begin
   inherited;
 end;
 
-procedure TBCEditorScroll.SetBars(const Value: System.UITypes.TScrollStyle);
+procedure TBCEditorScroll.SetBars(const AValue: System.UITypes.TScrollStyle);
 begin
-  if FBars <> Value then
+  if FBars <> AValue then
   begin
-    FBars := Value;
+    FBars := AValue;
     DoChange;
   end;
 end;
@@ -72,10 +72,10 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorScroll.Assign(Source: TPersistent);
+procedure TBCEditorScroll.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorScroll then
-  with Source as TBCEditorScroll do
+  if ASource is TBCEditorScroll then
+  with ASource as TBCEditorScroll do
   begin
     Self.FBars := FBars;
     Self.FHint.Assign(FHint);
@@ -84,31 +84,31 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorScroll.SetOptions(const Value: TBCEditorScrollOptions);
+procedure TBCEditorScroll.SetOptions(const AValue: TBCEditorScrollOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorScroll.SetMaxWidth(Value: Integer);
+procedure TBCEditorScroll.SetMaxWidth(AValue: Integer);
 begin
-  Value := MinMax(Value, 1, MaxInt - 1);
-  if FMaxWidth <> Value then
+  AValue := MinMax(AValue, 1, MaxInt - 1);
+  if FMaxWidth <> AValue then
   begin
-    FMaxWidth := Value;
+    FMaxWidth := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorScroll.SetHint(const Value: TBCEditorScrollHint);
+procedure TBCEditorScroll.SetHint(const AValue: TBCEditorScrollHint);
 begin
-  FHint.Assign(Value);
+  FHint.Assign(AValue);
 end;
 
 end.

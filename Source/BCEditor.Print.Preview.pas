@@ -35,23 +35,23 @@ type
     function GetPageWidth100Percent: Integer;
     function GetPageWidthFromHeight(AHeight: Integer): Integer;
     procedure PaintPaper;
-    procedure SetBorderStyle(Value: TBorderStyle);
-    procedure SetEditorPrint(Value: TBCEditorPrint);
-    procedure SetPageBackground(Value: TColor);
-    procedure SetScaleMode(Value: TBCEditorPreviewScale);
-    procedure SetScalePercent(Value: Integer);
-    procedure WMEraseBkgnd(var Msg: TWMEraseBkgnd); message WM_ERASEBKGND;
-    procedure WMHScroll(var Msg: TWMHScroll); message WM_HSCROLL;
+    procedure SetBorderStyle(AValue: TBorderStyle);
+    procedure SetEditorPrint(AValue: TBCEditorPrint);
+    procedure SetPageBackground(AValue: TColor);
+    procedure SetScaleMode(AValue: TBCEditorPreviewScale);
+    procedure SetScalePercent(AValue: Integer);
+    procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
+    procedure WMHScroll(var AMessage: TWMHScroll); message WM_HSCROLL;
     procedure WMMouseWheel(var Message: TWMMouseWheel); message WM_MOUSEWHEEL;
-    procedure WMSize(var Msg: TWMSize); message WM_SIZE;
-    procedure WMVScroll(var Msg: TWMVScroll); message WM_VSCROLL;
+    procedure WMSize(var AMessage: TWMSize); message WM_SIZE;
+    procedure WMVScroll(var AMessage: TWMVScroll); message WM_VSCROLL;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure ScrollHorzFor(Value: Integer);
-    procedure ScrollHorzTo(Value: Integer); virtual;
-    procedure ScrollVertFor(Value: Integer);
-    procedure ScrollVertTo(Value: Integer); virtual;
+    procedure ScrollHorzFor(AValue: Integer);
+    procedure ScrollHorzTo(AValue: Integer); virtual;
+    procedure ScrollVertFor(AValue: Integer);
+    procedure ScrollVertTo(AValue: Integer); virtual;
     procedure SizeChanged; virtual;
     procedure UpdateScrollbars; virtual;
   public
@@ -255,25 +255,25 @@ begin
   end;
 end;
 
-procedure TBCEditorPrintPreview.ScrollHorzFor(Value: Integer);
+procedure TBCEditorPrintPreview.ScrollHorzFor(AValue: Integer);
 begin
-  ScrollHorzTo(FScrollPosition.X + Value);
+  ScrollHorzTo(FScrollPosition.X + AValue);
 end;
 
-procedure TBCEditorPrintPreview.ScrollHorzTo(Value: Integer);
+procedure TBCEditorPrintPreview.ScrollHorzTo(AValue: Integer);
 var
   LWidth, Position: Integer;
 begin
   LWidth := ClientWidth;
   Position := LWidth - FVirtualSize.X;
-  if Value < Position then
-    Value := Position;
-  if Value > 0 then
-    Value := 0;
-  if Value <> FScrollPosition.X then
+  if AValue < Position then
+    AValue := Position;
+  if AValue > 0 then
+    AValue := 0;
+  if FScrollPosition.X <> AValue then
   begin
-    Position := Value - FScrollPosition.X;
-    FScrollPosition.X := Value;
+    Position := AValue - FScrollPosition.X;
+    FScrollPosition.X := AValue;
     UpdateScrollbars;
     if Abs(Position) > LWidth div 2 then
       Invalidate
@@ -285,25 +285,25 @@ begin
   end;
 end;
 
-procedure TBCEditorPrintPreview.ScrollVertFor(Value: Integer);
+procedure TBCEditorPrintPreview.ScrollVertFor(AValue: Integer);
 begin
-  ScrollVertTo(FScrollPosition.Y + Value);
+  ScrollVertTo(FScrollPosition.Y + AValue);
 end;
 
-procedure TBCEditorPrintPreview.ScrollVertTo(Value: Integer);
+procedure TBCEditorPrintPreview.ScrollVertTo(AValue: Integer);
 var
   LHeight, Position: Integer;
 begin
   LHeight := ClientHeight;
   Position := LHeight - FVirtualSize.Y;
-  if Value < Position then
-    Value := Position;
-  if Value > 0 then
-    Value := 0;
-  if (Value <> FScrollPosition.Y) then
+  if AValue < Position then
+    AValue := Position;
+  if AValue > 0 then
+    AValue := 0;
+  if FScrollPosition.Y <> AValue then
   begin
-    Position := Value - FScrollPosition.Y;
-    FScrollPosition.Y := Value;
+    Position := AValue - FScrollPosition.Y;
+    FScrollPosition.Y := AValue;
     UpdateScrollbars;
     if Abs(Position) > LHeight div 2 then
       Invalidate
@@ -410,20 +410,20 @@ begin
   end;
 end;
 
-procedure TBCEditorPrintPreview.SetBorderStyle(Value: TBorderStyle);
+procedure TBCEditorPrintPreview.SetBorderStyle(AValue: TBorderStyle);
 begin
-  if Value <> FBorderStyle then
+  if FBorderStyle <> AValue then
   begin
-    FBorderStyle := Value;
+    FBorderStyle := AValue;
     RecreateWnd;
   end;
 end;
 
-procedure TBCEditorPrintPreview.SetPageBackground(Value: TColor);
+procedure TBCEditorPrintPreview.SetPageBackground(AValue: TColor);
 begin
-  if Value <> FPageBackground then
+  if FPageBackground <> AValue then
   begin
-    FPageBackground := Value;
+    FPageBackground := AValue;
     Invalidate;
   end;
 end;
@@ -435,21 +435,21 @@ begin
   Result := FEditorPrint
 end;
 
-procedure TBCEditorPrintPreview.SetEditorPrint(Value: TBCEditorPrint);
+procedure TBCEditorPrintPreview.SetEditorPrint(AValue: TBCEditorPrint);
 begin
-  if FEditorPrint <> Value then
+  if FEditorPrint <> AValue then
   begin
-    FEditorPrint := Value;
+    FEditorPrint := AValue;
     if Assigned(FEditorPrint) then
       FEditorPrint.FreeNotification(Self);
   end;
 end;
 
-procedure TBCEditorPrintPreview.SetScaleMode(Value: TBCEditorPreviewScale);
+procedure TBCEditorPrintPreview.SetScaleMode(AValue: TBCEditorPreviewScale);
 begin
-  if FScaleMode <> Value then
+  if FScaleMode <> AValue then
   begin
-    FScaleMode := Value;
+    FScaleMode := AValue;
     FScrollPosition := Point(0, 0);
     SizeChanged;
     if Assigned(FOnScaleChange) then
@@ -458,13 +458,13 @@ begin
   end;
 end;
 
-procedure TBCEditorPrintPreview.SetScalePercent(Value: Integer);
+procedure TBCEditorPrintPreview.SetScalePercent(AValue: Integer);
 begin
-  if FScalePercent <> Value then
+  if FScalePercent <> AValue then
   begin
     FScaleMode := pscUserScaled;
     FScrollPosition := Point(0, 0);
-    FScalePercent := Value;
+    FScalePercent := AValue;
     SizeChanged;
     Invalidate;
   end
@@ -474,19 +474,19 @@ begin
     FOnScaleChange(Self);
 end;
 
-procedure TBCEditorPrintPreview.WMEraseBkgnd(var Msg: TWMEraseBkgnd);
+procedure TBCEditorPrintPreview.WMEraseBkgnd(var AMessage: TWMEraseBkgnd);
 begin
-  Msg.Result := 1;
+  AMessage.Result := 1;
 end;
 
-procedure TBCEditorPrintPreview.WMHScroll(var Msg: TWMHScroll);
+procedure TBCEditorPrintPreview.WMHScroll(var AMessage: TWMHScroll);
 var
   LWidth: Integer;
 begin
-  if (FScaleMode <> pscWholePage) then
+  if FScaleMode <> pscWholePage then
   begin
     LWidth := ClientWidth;
-    case Msg.ScrollCode of
+    case AMessage.ScrollCode of
       SB_TOP:
         ScrollHorzTo(0);
       SB_BOTTOM:
@@ -500,12 +500,12 @@ begin
       SB_PAGEUP:
         ScrollHorzFor(LWidth div 2);
       SB_THUMBPOSITION, SB_THUMBTRACK:
-        ScrollHorzTo(-Msg.Pos);
+        ScrollHorzTo(-AMessage.Pos);
     end;
   end;
 end;
 
-procedure TBCEditorPrintPreview.WMSize(var Msg: TWMSize);
+procedure TBCEditorPrintPreview.WMSize(var AMessage: TWMSize);
 begin
   inherited;
   if not (csDesigning in ComponentState) then
@@ -525,7 +525,7 @@ begin
   Result := ScrollHintWnd;
 end;
 
-procedure TBCEditorPrintPreview.WMVScroll(var Msg: TWMVScroll);
+procedure TBCEditorPrintPreview.WMVScroll(var AMessage: TWMVScroll);
 var
   LHeight: Integer;
   S: string;
@@ -536,7 +536,7 @@ begin
   if (FScaleMode = pscWholePage) then
   begin
     if Assigned(FEditorPrint) then
-      case Msg.ScrollCode of
+      case AMessage.ScrollCode of
         SB_TOP:
           FPageNumber := 1;
         SB_BOTTOM:
@@ -555,7 +555,7 @@ begin
           end;
         SB_THUMBPOSITION, SB_THUMBTRACK:
           begin
-            FPageNumber := Msg.Pos;
+            FPageNumber := AMessage.Pos;
             if FShowScrollHint then
             begin
               ScrollHint := GetScrollHint;
@@ -593,7 +593,7 @@ begin
   else
   begin
     LHeight := ClientHeight;
-    case Msg.ScrollCode of
+    case AMessage.ScrollCode of
       SB_TOP:
         ScrollVertTo(0);
       SB_BOTTOM:
@@ -607,7 +607,7 @@ begin
       SB_PAGEUP:
         ScrollVertFor(LHeight div 2);
       SB_THUMBPOSITION, SB_THUMBTRACK:
-        ScrollVertTo(-Msg.Pos);
+        ScrollVertTo(-AMessage.Pos);
     end;
   end;
 end;

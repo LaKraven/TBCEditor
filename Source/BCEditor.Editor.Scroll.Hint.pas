@@ -11,7 +11,7 @@ type
     FFormat: TBCEditorScrollHintFormat;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Format: TBCEditorScrollHintFormat read FFormat write FFormat default shfTopLineOnly;
   end;
@@ -25,13 +25,13 @@ begin
   FFormat := shfTopLineOnly;
 end;
 
-procedure TBCEditorScrollHint.Assign(Source: TPersistent);
+procedure TBCEditorScrollHint.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorScrollHint then
-  with Source as TBCEditorScrollHint do
+  if ASource is TBCEditorScrollHint then
+  with ASource as TBCEditorScrollHint do
     Self.FFormat := FFormat
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 end.

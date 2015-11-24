@@ -124,8 +124,8 @@ type
     function GetSet(AIndex: Integer): TBCEditorSet;
     function GetSetCount: Integer;
     function GetToken(AIndex: Integer): TBCEditorToken;
-    procedure SetAlternativeCloseArrayCount(const Value: Integer);
-    procedure SetCaseSensitive(const Value: Boolean);
+    procedure SetAlternativeCloseArrayCount(const AValue: Integer);
+    procedure SetCaseSensitive(const AValue: Boolean);
   public
     constructor Create(AOpenToken: string = ''; ACloseToken: string = ''); virtual;
     destructor Destroy; override;
@@ -542,16 +542,16 @@ begin
     Ranges[i].SetDelimiters(ADelimiters);
 end;
 
-procedure TBCEditorRange.SetAlternativeCloseArrayCount(const Value: Integer);
+procedure TBCEditorRange.SetAlternativeCloseArrayCount(const AValue: Integer);
 begin
-  FAlternativeCloseArrayCount := Value;
-  SetLength(FAlternativeCloseArray, Value);
+  FAlternativeCloseArrayCount := AValue;
+  SetLength(FAlternativeCloseArray, AValue);
 end;
 
-procedure TBCEditorRange.SetCaseSensitive(const Value: Boolean);
+procedure TBCEditorRange.SetCaseSensitive(const AValue: Boolean);
 begin
-  FCaseSensitive := Value;
-  if not Value then
+  FCaseSensitive := AValue;
+  if not AValue then
   begin
     FCaseFunct := UpCase;
     FStringCaseFunct := AnsiUpperCase;
@@ -563,28 +563,28 @@ begin
   end;
 end;
 
-procedure QuickSortTokenList(List: TList; const LowerPosition, UpperPosition: Integer);
+procedure QuickSortTokenList(AList: TList; const ALowerPosition, AUpperPosition: Integer);
 var
-  i, MiddlePosition: Integer;
-  PivotValue: string;
+  i, LMiddlePosition: Integer;
+  LPivotValue: string;
 begin
-  if LowerPosition < UpperPosition then
+  if ALowerPosition < AUpperPosition then
   begin
-    PivotValue := TBCEditorToken(List[LowerPosition]).Symbol;
-    MiddlePosition := LowerPosition;
+    LPivotValue := TBCEditorToken(AList[ALowerPosition]).Symbol;
+    LMiddlePosition := ALowerPosition;
 
-    for i := LowerPosition + 1 to UpperPosition do
+    for i := ALowerPosition + 1 to AUpperPosition do
     begin
-      if TBCEditorToken(List[i]).Symbol < PivotValue then
+      if TBCEditorToken(AList[i]).Symbol < LPivotValue then
       begin
-        Inc(MiddlePosition);
-        List.Exchange(i, MiddlePosition);
+        Inc(LMiddlePosition);
+        AList.Exchange(i, LMiddlePosition);
       end;
     end;
-    List.Exchange(LowerPosition, MiddlePosition);
+    AList.Exchange(ALowerPosition, LMiddlePosition);
 
-    QuickSortTokenList(List, LowerPosition, MiddlePosition - 1);
-    QuickSortTokenList(List, MiddlePosition + 1, UpperPosition);
+    QuickSortTokenList(AList, ALowerPosition, LMiddlePosition - 1);
+    QuickSortTokenList(AList, LMiddlePosition + 1, AUpperPosition);
   end;
 end;
 

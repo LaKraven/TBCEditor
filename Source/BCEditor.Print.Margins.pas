@@ -55,7 +55,7 @@ type
     PixelTop: Integer;
     constructor Create;
 
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     procedure InitPage(ACanvas: TCanvas; APageNumber: Integer; APrinterInfo: TBCEditorPrinterInfo;
       ALineNumbers, ALineNumbersInMargin: Boolean; AMaxLineNumber: Integer);
     procedure LoadFromStream(AStream: TStream);
@@ -253,10 +253,10 @@ begin
   PixelLeftTextIndent := PixelLeft + Round(APrinterInfo.XPixPermm * FLeftTextIndent);
 end;
 
-procedure TBCEditorPrintMargins.Assign(Source: TPersistent);
+procedure TBCEditorPrintMargins.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorPrintMargins) then
-  with Source as TBCEditorPrintMargins do
+  if Assigned(ASource) and (ASource is TBCEditorPrintMargins) then
+  with ASource as TBCEditorPrintMargins do
   begin
     Self.FLeft := FLeft;
     Self.FRight := FRight;
@@ -272,7 +272,7 @@ begin
     Self.FUnitSystem := FUnitSystem;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorPrintMargins.LoadFromStream(AStream: TStream);

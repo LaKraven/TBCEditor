@@ -16,17 +16,17 @@ type
     FIndent: TColor;
     FIndentHighlight: TColor;
     FOnChange: TBCEditorCodeFoldingChangeEvent;
-    procedure SetActiveLineBackground(const Value: TColor);
-    procedure SetBackground(const Value: TColor);
-    procedure SetCollapsedLine(const Value: TColor);
-    procedure SetFoldingLine(const Value: TColor);
-    procedure SetFoldingLineHighlight(const Value: TColor);
-    procedure SetIndent(const Value: TColor);
-    procedure SetIndentHighlight(const Value: TColor);
+    procedure SetActiveLineBackground(const AValue: TColor);
+    procedure SetBackground(const AValue: TColor);
+    procedure SetCollapsedLine(const AValue: TColor);
+    procedure SetFoldingLine(const AValue: TColor);
+    procedure SetFoldingLineHighlight(const AValue: TColor);
+    procedure SetIndent(const AValue: TColor);
+    procedure SetIndentHighlight(const AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property ActiveLineBackground: TColor read FActiveLineBackground write SetActiveLineBackground default clActiveLineBackground;
     property CollapsedLine: TColor read FCollapsedLine write SetCollapsedLine default clLeftMarginFontForeground;
@@ -54,10 +54,10 @@ begin
   FIndentHighlight := clIndentHighlight;
 end;
 
-procedure TBCEditorCodeFoldingColors.Assign(Source: TPersistent);
+procedure TBCEditorCodeFoldingColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCodeFoldingColors then
-  with Source as TBCEditorCodeFoldingColors do
+  if ASource is TBCEditorCodeFoldingColors then
+  with ASource as TBCEditorCodeFoldingColors do
   begin
     Self.FActiveLineBackground := FActiveLineBackground;
     Self.FCollapsedLine := FCollapsedLine;
@@ -68,7 +68,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorCodeFoldingColors.DoChange;
@@ -77,65 +77,65 @@ begin
     FOnChange(fcRefresh);
 end;
 
-procedure TBCEditorCodeFoldingColors.SetActiveLineBackground(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetActiveLineBackground(const AValue: TColor);
 begin
-  if Value <> FActiveLineBackground then
+  if FActiveLineBackground <> AValue then
   begin
-    FActiveLineBackground := Value;
+    FActiveLineBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetBackground(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetBackground(const AValue: TColor);
 begin
-  if Value <> FBackground then
+  if FBackground <> AValue then
   begin
-    FBackground := Value;
+    FBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetFoldingLine(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetFoldingLine(const AValue: TColor);
 begin
-  if Value <> FFoldingLine then
+  if FFoldingLine <> AValue then
   begin
-    FFoldingLine := Value;
+    FFoldingLine := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetFoldingLineHighlight(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetFoldingLineHighlight(const AValue: TColor);
 begin
-  if Value <> FFoldingLineHighlight then
+  if FFoldingLineHighlight <> AValue then
   begin
-    FFoldingLineHighlight := Value;
+    FFoldingLineHighlight := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetCollapsedLine(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetCollapsedLine(const AValue: TColor);
 begin
-  if Value <> FCollapsedLine then
+  if FCollapsedLine <> AValue then
   begin
-    FCollapsedLine := Value;
+    FCollapsedLine := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetIndent(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetIndent(const AValue: TColor);
 begin
-  if Value <> FIndent then
+  if FIndent <> AValue then
   begin
-    FIndent := Value;
+    FIndent := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFoldingColors.SetIndentHighlight(const Value: TColor);
+procedure TBCEditorCodeFoldingColors.SetIndentHighlight(const AValue: TColor);
 begin
-  if Value <> FIndentHighlight then
+  if FIndentHighlight <> AValue then
   begin
-    FIndentHighlight := Value;
+    FIndentHighlight := AValue;
     DoChange;
   end;
 end;

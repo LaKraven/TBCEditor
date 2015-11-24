@@ -13,7 +13,7 @@ type
     FInterval: Integer;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Chars: string read FChars write FChars;
     property Enabled: Boolean read FEnabled write FEnabled;
@@ -31,17 +31,17 @@ begin
   FInterval := 1000;
 end;
 
-procedure TBCEditorCompletionProposalTrigger.Assign(Source: TPersistent);
+procedure TBCEditorCompletionProposalTrigger.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCompletionProposalTrigger then
-  with Source as TBCEditorCompletionProposalTrigger do
+  if ASource is TBCEditorCompletionProposalTrigger then
+  with ASource as TBCEditorCompletionProposalTrigger do
   begin
     Self.FChars := FChars;
     Self.FEnabled := FEnabled;
     Self.FInterval := FInterval;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 end.

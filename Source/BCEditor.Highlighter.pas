@@ -72,7 +72,7 @@ type
     procedure SetCurrentLine(ANewValue: string);
     procedure SetCurrentRange(AValue: Pointer);
     procedure UpdateColors;
-    property Attribute[Index: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
+    property Attribute[AIndex: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
     property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
@@ -343,7 +343,7 @@ end;
 
 procedure TBCEditorHighlighter.SetCodeFoldingRangeCount(AValue: Integer);
 begin
-  if AValue <> FCodeFoldingRangeCount then
+  if FCodeFoldingRangeCount <> AValue then
   begin
     SetLength(FCodeFoldingRegions, AValue);
     FCodeFoldingRangeCount := AValue;

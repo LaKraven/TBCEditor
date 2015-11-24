@@ -11,11 +11,11 @@ type
     FColors: TBCEditorMatchingPairColors;
     FEnabled: Boolean;
     FOptions: TBCEditorMatchingPairOptions;
-    procedure SetColors(const Value: TBCEditorMatchingPairColors);
+    procedure SetColors(const AValue: TBCEditorMatchingPairColors);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Colors: TBCEditorMatchingPairColors read FColors write SetColors;
     property Enabled: Boolean read FEnabled write FEnabled;
@@ -42,21 +42,21 @@ begin
   inherited;
 end;
 
-procedure TBCEditorMatchingPair.Assign(Source: TPersistent);
+procedure TBCEditorMatchingPair.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorMatchingPair) then
-  with Source as TBCEditorMatchingPair do
+  if Assigned(ASource) and (ASource is TBCEditorMatchingPair) then
+  with ASource as TBCEditorMatchingPair do
   begin
     Self.FEnabled := FEnabled;
     Self.FColors.Assign(FColors);
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorMatchingPair.SetColors(const Value: TBCEditorMatchingPairColors);
+procedure TBCEditorMatchingPair.SetColors(const AValue: TBCEditorMatchingPairColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
 end.

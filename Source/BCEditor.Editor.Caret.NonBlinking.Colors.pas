@@ -12,7 +12,7 @@ type
     FForeground: TColor;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Background: TColor read FBackground write FBackground default clBlack;
     property Foreground: TColor read FForeground write FForeground default clWhite;
@@ -28,16 +28,16 @@ begin
   FForeground := clWhite;
 end;
 
-procedure TBCEditorCaretNonBlinkingColors.Assign(Source: TPersistent);
+procedure TBCEditorCaretNonBlinkingColors.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorCaretNonBlinkingColors) then
-  with Source as TBCEditorCaretNonBlinkingColors do
+  if Assigned(ASource) and (ASource is TBCEditorCaretNonBlinkingColors) then
+  with ASource as TBCEditorCaretNonBlinkingColors do
   begin
     Self.FBackground := FBackground;
     Self.FForeground := FForeground;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 end.

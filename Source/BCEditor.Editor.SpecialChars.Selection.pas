@@ -12,11 +12,11 @@ type
     FOnChange: TNotifyEvent;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetColor(const Value: TColor);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColor(const AValue: TColor);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Color: TColor read FColor write SetColor default clBlack;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -35,17 +35,17 @@ begin
   FVisible := False;
 end;
 
-procedure TBCEditorSpecialCharsSelection.Assign(Source: TPersistent);
+procedure TBCEditorSpecialCharsSelection.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSpecialCharsSelection) then
-  with Source as TBCEditorSpecialCharsSelection do
+  if Assigned(ASource) and (ASource is TBCEditorSpecialCharsSelection) then
+  with ASource as TBCEditorSpecialCharsSelection do
   begin
     Self.FColor := FColor;
     Self.FVisible := FVisible;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorSpecialCharsSelection.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorSpecialCharsSelection.SetColor(const Value: TColor);
+procedure TBCEditorSpecialCharsSelection.SetColor(const AValue: TColor);
 begin
-  if Value <> FColor then
+  if FColor <> AValue then
   begin
-    FColor := Value;
+    FColor := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialCharsSelection.SetVisible(const Value: Boolean);
+procedure TBCEditorSpecialCharsSelection.SetVisible(const AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;

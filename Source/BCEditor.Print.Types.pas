@@ -32,18 +32,18 @@ type
     Index: Integer;
   end;
 
-function IntToRoman(Value: Integer): string;
-function WrapTextEx(const Line: string; BreakChars: TSysCharSet; MaxCol: Integer; AList: TList): Boolean;
+function IntToRoman(AValue: Integer): string;
+function WrapTextEx(const ALine: string; ABreakChars: TSysCharSet; AMaxColumn: Integer; AList: TList): Boolean;
 
 implementation
 
-function WrapTextEx(const Line: string; BreakChars: TSysCharSet; MaxCol: Integer; AList: TList): Boolean;
+function WrapTextEx(const ALine: string; ABreakChars: TSysCharSet; AMaxColumn: Integer; AList: TList): Boolean;
 var
   WrapPosition: TBCEditorWrapPosition;
   Position, PreviousPosition: Integer;
   Found: Boolean;
 begin
-  if Length(Line) <= MaxCol then
+  if Length(ALine) <= AMaxColumn then
   begin
     Result := True;
     Exit;
@@ -53,10 +53,10 @@ begin
   Position := 1;
   PreviousPosition := 0;
   WrapPosition := TBCEditorWrapPosition.Create;
-  while Position <= Length(Line) do
+  while Position <= Length(ALine) do
   begin
-    Found := (Position - PreviousPosition > MaxCol) and (WrapPosition.Index <> 0);
-    if not Found and (Line[Position] <= High(Char)) and CharInSet(Char(Line[Position]), BreakChars) then
+    Found := (Position - PreviousPosition > AMaxColumn) and (WrapPosition.Index <> 0);
+    if not Found and (ALine[Position] <= High(Char)) and CharInSet(Char(ALine[Position]), ABreakChars) then
       WrapPosition.Index := Position;
 
     if Found then
@@ -65,7 +65,7 @@ begin
       AList.Add(WrapPosition);
       PreviousPosition := WrapPosition.Index;
 
-      if ((Length(Line) - PreviousPosition) > MaxCol) and (Position < Length(Line)) then
+      if ((Length(ALine) - PreviousPosition) > AMaxColumn) and (Position < Length(ALine)) then
         WrapPosition := TBCEditorWrapPosition.Create
       else
         Break;
@@ -77,85 +77,85 @@ begin
     WrapPosition.Free;
 end;
 
-function IntToRoman(Value: Integer): string;
+function IntToRoman(AValue: Integer): string;
 begin
   Result := '';
-  while Value >= 1000 do
+  while AValue >= 1000 do
   begin
     Result := Result + 'M';
-    Value := Value - 1000;
+    AValue := AValue - 1000;
   end;
 
-  if Value >= 900 then
+  if AValue >= 900 then
   begin
     Result := Result + 'CM';
-    Value := Value - 900;
+    AValue := AValue - 900;
   end;
 
-  while Value >= 500 do
+  while AValue >= 500 do
   begin
     Result := Result + 'D';
-    Value := Value - 500;
+    AValue := AValue - 500;
   end;
 
-  if Value >= 400 then
+  if AValue >= 400 then
   begin
     Result := Result + 'CD';
-    Value := Value - 400;
+    AValue := AValue - 400;
   end;
 
-  while Value >= 100 do
+  while AValue >= 100 do
   begin
     Result := Result + 'C';
-    Value := Value - 100;
+    AValue := AValue - 100;
   end;
 
-  if Value >= 90 then
+  if AValue >= 90 then
   begin
     Result := Result + 'XC';
-    Value := Value - 90;
+    AValue := AValue - 90;
   end;
 
-  while Value >= 50 do
+  while AValue >= 50 do
   begin
     Result := Result + 'L';
-    Value := Value - 50;
+    AValue := AValue - 50;
   end;
 
-  if Value >= 40 then
+  if AValue >= 40 then
   begin
     Result := Result + 'XL';
-    Value := Value - 40;
+    AValue := AValue - 40;
   end;
 
-  while Value >= 10 do
+  while AValue >= 10 do
   begin
     Result := Result + 'X';
-    Value := Value - 10;
+    AValue := AValue - 10;
   end;
 
-  if Value >= 9 then
+  if AValue >= 9 then
   begin
     Result := Result + 'IX';
-    Value := Value - 9;
+    AValue := AValue - 9;
   end;
 
-  while Value >= 5 do
+  while AValue >= 5 do
   begin
     Result := Result + 'V';
-    Value := Value - 5;
+    AValue := AValue - 5;
   end;
 
-  if Value >= 4 then
+  if AValue >= 4 then
   begin
     Result := Result + 'IV';
-    Value := Value - 4;
+    AValue := AValue - 4;
   end;
 
-  while Value > 0 do
+  while AValue > 0 do
   begin
     Result := Result + 'I';
-    Dec(Value);
+    Dec(AValue);
   end;
 end;
 

@@ -15,13 +15,13 @@ type
     FStartFrom: Integer;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetDigitCount(Value: Integer);
-    procedure SetOptions(const Value: TBCEditorLeftMarginLineNumberOptions);
-    procedure SetStartFrom(const Value: Integer);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetDigitCount(AValue: Integer);
+    procedure SetOptions(const AValue: TBCEditorLeftMarginLineNumberOptions);
+    procedure SetStartFrom(const AValue: Integer);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     property AutosizeDigitCount: Integer read FAutosizeDigitCount write FAutosizeDigitCount;
   published
     property DigitCount: Integer read FDigitCount write SetDigitCount default 4;
@@ -49,10 +49,10 @@ begin
   FVisible := True;
 end;
 
-procedure TBCEditorLeftMarginLineNumbers.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginLineNumbers.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLeftMarginLineNumbers) then
-  with Source as TBCEditorLeftMarginLineNumbers do
+  if Assigned(ASource) and (ASource is TBCEditorLeftMarginLineNumbers) then
+  with ASource as TBCEditorLeftMarginLineNumbers do
   begin
     Self.FAutosizeDigitCount := FAutosizeDigitCount;
     Self.FDigitCount := FDigitCount;
@@ -63,7 +63,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorLeftMarginLineNumbers.DoChange;
@@ -72,42 +72,42 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginLineNumbers.SetDigitCount(Value: Integer);
+procedure TBCEditorLeftMarginLineNumbers.SetDigitCount(AValue: Integer);
 begin
-  Value := MinMax(Value, 2, 12);
-  if FDigitCount <> Value then
+  AValue := MinMax(AValue, 2, 12);
+  if FDigitCount <> AValue then
   begin
-    FDigitCount := Value;
+    FDigitCount := AValue;
     FAutosizeDigitCount := FDigitCount;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginLineNumbers.SetOptions(const Value: TBCEditorLeftMarginLineNumberOptions);
+procedure TBCEditorLeftMarginLineNumbers.SetOptions(const AValue: TBCEditorLeftMarginLineNumberOptions);
 begin
-  if Value <> FOptions then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginLineNumbers.SetStartFrom(const Value: Integer);
+procedure TBCEditorLeftMarginLineNumbers.SetStartFrom(const AValue: Integer);
 begin
-  if Value <> FStartFrom then
+  if FStartFrom <> AValue then
   begin
-    FStartFrom := Value;
+    FStartFrom := AValue;
     if FStartFrom < 0 then
       FStartFrom := 0;
     DoChange
   end;
 end;
 
-procedure TBCEditorLeftMarginLineNumbers.SetVisible(const Value: Boolean);
+procedure TBCEditorLeftMarginLineNumbers.SetVisible(const AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange
   end;
 end;

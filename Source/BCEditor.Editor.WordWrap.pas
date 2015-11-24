@@ -18,16 +18,16 @@ type
     procedure CreateInternalBitmap;
     procedure DoChange;
     procedure OnColorsChange(Sender: TObject);
-    procedure SetColors(const Value: TBCEditorWordWrapColors);
-    procedure SetEnabled(const Value: Boolean);
-    procedure SetIndicator(const Value: TBCEditorGlyph);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetPosition(const Value: Integer);
-    procedure SetStyle(const Value: TBCEditorWordWrapStyle);
+    procedure SetColors(const AValue: TBCEditorWordWrapColors);
+    procedure SetEnabled(const AValue: Boolean);
+    procedure SetIndicator(const AValue: TBCEditorGlyph);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetPosition(const AValue: Integer);
+    procedure SetStyle(const AValue: TBCEditorWordWrapStyle);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Colors: TBCEditorWordWrapColors read FColors write SetColors;
     property Enabled: Boolean read FEnabled write SetEnabled;
@@ -63,10 +63,10 @@ begin
   inherited;
 end;
 
-procedure TBCEditorWordWrap.Assign(Source: TPersistent);
+procedure TBCEditorWordWrap.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorWordWrap) then
-  with Source as TBCEditorWordWrap do
+  if Assigned(ASource) and (ASource is TBCEditorWordWrap) then
+  with ASource as TBCEditorWordWrap do
   begin
     Self.FColors.Assign(FColors);
     Self.FEnabled := FEnabled;
@@ -76,7 +76,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorWordWrap.CreateInternalBitmap;
@@ -117,10 +117,10 @@ begin
   FIndicator.Glyph.Handle := FBitmap.Handle;
 end;
 
-procedure TBCEditorWordWrap.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorWordWrap.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FIndicator.OnChange := Value;
+  FOnChange := AValue;
+  FIndicator.OnChange := AValue;
   FColors.OnChange := OnColorsChange;
 end;
 
@@ -130,41 +130,41 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorWordWrap.SetEnabled(const Value: Boolean);
+procedure TBCEditorWordWrap.SetEnabled(const AValue: Boolean);
 begin
-  if FEnabled <> Value then
+  if FEnabled <> AValue then
   begin
-    FEnabled := Value;
+    FEnabled := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorWordWrap.SetIndicator(const Value: TBCEditorGlyph);
+procedure TBCEditorWordWrap.SetIndicator(const AValue: TBCEditorGlyph);
 begin
-  FIndicator.Assign(Value);
+  FIndicator.Assign(AValue);
 end;
 
-procedure TBCEditorWordWrap.SetPosition(const Value: Integer);
+procedure TBCEditorWordWrap.SetPosition(const AValue: Integer);
 begin
-  if FPosition <> Value then
+  if FPosition <> AValue then
   begin
-    FPosition := Value;
+    FPosition := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorWordWrap.SetStyle(const Value: TBCEditorWordWrapStyle);
+procedure TBCEditorWordWrap.SetStyle(const AValue: TBCEditorWordWrapStyle);
 begin
-  if FStyle <> Value then
+  if FStyle <> AValue then
   begin
-    FStyle := Value;
+    FStyle := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorWordWrap.SetColors(const Value: TBCEditorWordWrapColors);
+procedure TBCEditorWordWrap.SetColors(const AValue: TBCEditorWordWrapColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
 procedure TBCEditorWordWrap.OnColorsChange(Sender: TObject);

@@ -19,9 +19,9 @@ type
       FScrollBarVertical: Boolean;
       FScrollBarVisible: Boolean;
       FScrollBarEnabled: Boolean;
-      procedure WMNCHitTest(var Msg: TWMNCHitTest); message WM_NCHITTEST;
-      procedure WMEraseBkgnd(var Msg: TMessage); message WM_ERASEBKGND;
-      procedure WMPaint(var Msg: TWMPaint); message WM_PAINT;
+      procedure WMNCHitTest(var AMessage: TWMNCHitTest); message WM_NCHITTEST;
+      procedure WMEraseBkgnd(var AMessage: TMessage); message WM_ERASEBKGND;
+      procedure WMPaint(var AMessage: TWMPaint); message WM_PAINT;
     strict protected
       procedure CreateParams(var Params: TCreateParams);
       override;
@@ -55,24 +55,24 @@ type
     FVertScrollBarUpButtonState: TThemedScrollBar;
     FVertScrollBarWindow: TVclStyleScrollBarWindow;
 
-    procedure CMUpdateVclStyleScrollbars(var Message: TMessage); message CM_UPDATE_VCLSTYLE_SCROLLBARS;
-    procedure WMKeyDown(var Msg: TMessage); message WM_KEYDOWN;
-    procedure WMKeyUp(var Msg: TMessage); message WM_KEYUP;
-    procedure WMLButtonDown(var Msg: TWMMouse); message WM_LBUTTONDOWN;
-    procedure WMLButtonUp(var Msg: TWMMouse); message WM_LBUTTONUP;
-    procedure WMNCLButtonDown(var Msg: TWMMouse); message WM_NCLBUTTONDOWN;
-    procedure WMNCMouseMove(var Msg: TWMMouse); message WM_NCMOUSEMOVE;
-    procedure WMNCLButtonUp(var Msg: TWMMouse); message WM_NCLBUTTONUP;
-    procedure WMNCPaint(var Msg: TMessage); message WM_NCPAINT;
-    procedure WMMouseMove(var Msg: TWMMouse); message WM_MOUSEMOVE;
-    procedure WMMouseWheel(var Msg: TMessage); message WM_MOUSEWHEEL;
-    procedure WMVScroll(var Msg: TMessage); message WM_VSCROLL;
-    procedure WMHScroll(var Msg: TMessage); message WM_HSCROLL;
-    procedure WMCaptureChanged(var Msg: TMessage); message WM_CAPTURECHANGED;
-    procedure WMNCLButtonDblClk(var Msg: TWMMouse); message WM_NCLBUTTONDBLCLK;
-    procedure WMSize(var Msg: TMessage); message WM_SIZE;
-    procedure WMMove(var Msg: TMessage); message WM_MOVE;
-    procedure WMPosChanged(var Msg: TMessage); message WM_WINDOWPOSCHANGED;
+    procedure CMUpdateVclStyleScrollbars(var AMessage: TMessage); message CM_UPDATE_VCLSTYLE_SCROLLBARS;
+    procedure WMKeyDown(var AMessage: TMessage); message WM_KEYDOWN;
+    procedure WMKeyUp(var AMessage: TMessage); message WM_KEYUP;
+    procedure WMLButtonDown(var AMessage: TWMMouse); message WM_LBUTTONDOWN;
+    procedure WMLButtonUp(var AMessage: TWMMouse); message WM_LBUTTONUP;
+    procedure WMNCLButtonDown(var AMessage: TWMMouse); message WM_NCLBUTTONDOWN;
+    procedure WMNCMouseMove(var AMessage: TWMMouse); message WM_NCMOUSEMOVE;
+    procedure WMNCLButtonUp(var AMessage: TWMMouse); message WM_NCLBUTTONUP;
+    procedure WMNCPaint(var AMessage: TMessage); message WM_NCPAINT;
+    procedure WMMouseMove(var AMessage: TWMMouse); message WM_MOUSEMOVE;
+    procedure WMMouseWheel(var AMessage: TMessage); message WM_MOUSEWHEEL;
+    procedure WMVScroll(var AMessage: TMessage); message WM_VSCROLL;
+    procedure WMHScroll(var AMessage: TMessage); message WM_HSCROLL;
+    procedure WMCaptureChanged(var AMessage: TMessage); message WM_CAPTURECHANGED;
+    procedure WMNCLButtonDblClk(var AMessage: TWMMouse); message WM_NCLBUTTONDBLCLK;
+    procedure WMSize(var AMessage: TMessage); message WM_SIZE;
+    procedure WMMove(var AMessage: TMessage); message WM_MOVE;
+    procedure WMPosChanged(var AMessage: TMessage); message WM_WINDOWPOSCHANGED;
   protected
     procedure CalcScrollBarsRect; virtual;
     procedure DrawHorzScrollBar(AHandle: HDC); virtual;
@@ -429,7 +429,7 @@ begin
     ShowWindow(FHorzScrollBarWindow.Handle, SW_HIDE);
 end;
 
-procedure TBCEditorStyleHook.WMCaptureChanged(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMCaptureChanged(var AMessage: TMessage);
 begin
   if FVertScrollBarWindow.Visible and FVertScrollBarWindow.Enabled then
   begin
@@ -461,49 +461,49 @@ begin
     end;
   end;
 
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMHScroll(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMHScroll(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.CMUpdateVclStyleScrollbars(var Message: TMessage);
+procedure TBCEditorStyleHook.CMUpdateVclStyleScrollbars(var AMessage: TMessage);
 begin
   CalcScrollBarsRect;
   PaintScrollBars;
 end;
 
-procedure TBCEditorStyleHook.WMKeyDown(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMKeyDown(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMKeyUp(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMKeyUp(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMLButtonDown(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMLButtonDown(var AMessage: TWMMouse);
 begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(TMessage(AMessage));
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMLButtonUp(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMLButtonUp(var AMessage: TWMMouse);
 var
   P: TPoint;
 begin
-  P := Point(Msg.XPos, Msg.YPos);
+  P := Point(AMessage.XPos, AMessage.YPos);
   ScreenToClient(Handle, P);
   if FVertScrollBarWindow.Visible then
   begin
@@ -548,7 +548,7 @@ begin
   FLeftMouseButtonDown := False;
 end;
 
-procedure TBCEditorStyleHook.WMMouseMove(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMMouseMove(var AMessage: TWMMouse);
 var
   SF: TScrollInfo;
 begin
@@ -657,30 +657,30 @@ begin
     PaintScrollBars;
   end;
 
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(TMessage(AMessage));
   if FLeftMouseButtonDown then
     PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMMouseWheel(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMMouseWheel(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMNCLButtonDblClk(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMNCLButtonDblClk(var AMessage: TWMMouse);
 begin
-  WMNCLButtonDown(Msg);
+  WMNCLButtonDown(AMessage);
 end;
 
-procedure TBCEditorStyleHook.WMNCLButtonDown(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMNCLButtonDown(var AMessage: TWMMouse);
 var
   P: TPoint;
   SF: TScrollInfo;
 begin
-  P := Point(Msg.XPos, Msg.YPos);
+  P := Point(AMessage.XPos, AMessage.YPos);
   ScreenToClient(Handle, P);
 
   if HasBorder then
@@ -751,11 +751,11 @@ begin
   end;
 end;
 
-procedure TBCEditorStyleHook.WMNCLButtonUp(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMNCLButtonUp(var AMessage: TWMMouse);
 var
   P: TPoint;
 begin
-  P := Point(Msg.XPos, Msg.YPos);
+  P := Point(AMessage.XPos, AMessage.YPos);
   ScreenToClient(Handle, P);
 
   if HasBorder then
@@ -816,20 +816,20 @@ begin
         FHorzScrollBarUpButtonState := tsArrowBtnLeftNormal;
     end;
 
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(TMessage(AMessage));
   if FHorzScrollBarWindow.Visible or FVertScrollBarWindow.Visible then
     PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMNCMouseMove(var Msg: TWMMouse);
+procedure TBCEditorStyleHook.WMNCMouseMove(var AMessage: TWMMouse);
 var
   P: TPoint;
   MustUpdateScroll: Boolean;
   B: Boolean;
 begin
   inherited;
-  P := Point(Msg.XPos, Msg.YPos);
+  P := Point(AMessage.XPos, AMessage.YPos);
   ScreenToClient(Handle, P);
 
   if HasBorder then
@@ -932,38 +932,38 @@ begin
     PaintScrollBars;
 end;
 
-procedure TBCEditorStyleHook.WMNCPaint(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMNCPaint(var AMessage: TMessage);
 begin
   CalcScrollBarsRect;
   UpdateScrollBarWindow;
 end;
 
-procedure TBCEditorStyleHook.WMSize(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMSize(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
-  CalcScrollBarsRect;
-  UpdateScrollBarWindow;
-  PaintScrollBars;
-  Handled := True;
-end;
-
-procedure TBCEditorStyleHook.WMMove(var Msg: TMessage);
-begin
-  CallDefaultProc(TMessage(Msg));
+  CallDefaultProc(AMessage);
   CalcScrollBarsRect;
   UpdateScrollBarWindow;
   PaintScrollBars;
   Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMPosChanged(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMMove(var AMessage: TMessage);
 begin
-  WMMove(Msg);
+  CallDefaultProc(AMessage);
+  CalcScrollBarsRect;
+  UpdateScrollBarWindow;
+  PaintScrollBars;
+  Handled := True;
 end;
 
-procedure TBCEditorStyleHook.WMVScroll(var Msg: TMessage);
+procedure TBCEditorStyleHook.WMPosChanged(var AMessage: TMessage);
 begin
-  CallDefaultProc(TMessage(Msg));
+  WMMove(AMessage);
+end;
+
+procedure TBCEditorStyleHook.WMVScroll(var AMessage: TMessage);
+begin
+  CallDefaultProc(AMessage);
   PaintScrollBars;
   Handled := True;
 end;
@@ -987,17 +987,17 @@ begin
   Params.ExStyle := Params.ExStyle or WS_EX_NOPARENTNOTIFY;
 end;
 
-procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMEraseBkgnd(var Msg: TMessage);
+procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMEraseBkgnd(var AMessage: TMessage);
 begin
-  Msg.Result := 1;
+  AMessage.Result := 1;
 end;
 
-procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMNCHitTest(var Msg: TWMNCHitTest);
+procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMNCHitTest(var AMessage: TWMNCHitTest);
 begin
-  Msg.Result := HTTRANSPARENT;
+  AMessage.Result := HTTRANSPARENT;
 end;
 
-procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMPaint(var Msg: TWMPaint);
+procedure TBCEditorStyleHook.TVclStyleScrollBarWindow.WMPaint(var AMessage: TWMPaint);
 var
   LPaintStruct: TPaintStruct;
   LHandle: HDC;

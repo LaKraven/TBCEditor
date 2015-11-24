@@ -17,7 +17,7 @@ type
     function GetPattern: string; override;
     function GetResult(AIndex: Integer): Integer; override;
     function GetResultCount: Integer; override;
-    procedure SetPattern(const Value: string); override;
+    procedure SetPattern(const AValue: string); override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -106,9 +106,9 @@ begin
   Result := FPositions.Count;
 end;
 
-procedure TBCEditorRegexSearch.SetPattern(const Value: string);
+procedure TBCEditorRegexSearch.SetPattern(const AValue: string);
 begin
-  FPattern := Value;
+  FPattern := AValue;
 end;
 
 end.

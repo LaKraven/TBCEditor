@@ -12,7 +12,7 @@ type
     FHighlighters: string;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Colors: string read FColors write FColors;
     property Highlighters: string read FHighlighters write FHighlighters;
@@ -28,16 +28,16 @@ begin
   FHighlighters := 'Highlighters'
 end;
 
-procedure TBCEditorDirectories.Assign(Source: TPersistent);
+procedure TBCEditorDirectories.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorDirectories) then
-  with Source as TBCEditorDirectories do
+  if Assigned(ASource) and (ASource is TBCEditorDirectories) then
+  with ASource as TBCEditorDirectories do
   begin
     Self.FColors := FColors;
     Self.FHighlighters := FHighlighters;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 end.

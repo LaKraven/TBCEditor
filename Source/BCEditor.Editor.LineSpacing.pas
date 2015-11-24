@@ -18,7 +18,7 @@ type
     procedure SetSpacing(const AValue: Integer);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Rule: TLineSpacingRule read FRule write SetRule default lsSpecified;
     property Spacing: Integer read FSpacing write SetSpacing default 1;
@@ -29,17 +29,17 @@ implementation
 
 { TBCEditorLineSpacing }
 
-procedure TBCEditorLineSpacing.Assign(Source: TPersistent);
+procedure TBCEditorLineSpacing.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLineSpacing) then
-  with Source as TBCEditorLineSpacing do
+  if Assigned(ASource) and (ASource is TBCEditorLineSpacing) then
+  with ASource as TBCEditorLineSpacing do
   begin
     Self.FSpacing := Spacing;
     Self.FRule := Rule;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 constructor TBCEditorLineSpacing.Create;
@@ -58,7 +58,7 @@ end;
 
 procedure TBCEditorLineSpacing.SetSpacing(const AValue: Integer);
 begin
-  if AValue <> FSpacing then
+  if FSpacing <> AValue then
   begin
     FSpacing := AValue;
     DoChange;
@@ -67,7 +67,7 @@ end;
 
 procedure TBCEditorLineSpacing.SetRule(const AValue: TLineSpacingRule);
 begin
-  if AValue <> FRule then
+  if FRule <> AValue then
   begin
     FRule := AValue;
     DoChange;

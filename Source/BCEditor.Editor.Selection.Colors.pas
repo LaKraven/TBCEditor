@@ -11,11 +11,11 @@ type
     FBackground: TColor;
     FForeground: TColor;
     FOnChange: TNotifyEvent;
-    procedure SetBackground(Value: TColor);
-    procedure SetForeground(Value: TColor);
+    procedure SetBackground(AValue: TColor);
+    procedure SetForeground(AValue: TColor);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Background: TColor read FBackground write SetBackground default clSelectionColor;
     property Foreground: TColor read FForeground write SetForeground default clHighLightText;
@@ -34,10 +34,10 @@ begin
   FForeground := clHighLightText;
 end;
 
-procedure TBCEditorSelectedColor.Assign(Source: TPersistent);
+procedure TBCEditorSelectedColor.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSelectedColor) then
-  with Source as TBCEditorSelectedColor do
+  if Assigned(ASource) and (ASource is TBCEditorSelectedColor) then
+  with ASource as TBCEditorSelectedColor do
   begin
     Self.FBackground := FBackground;
     Self.FForeground := FForeground;
@@ -45,24 +45,24 @@ begin
       Self.FOnChange(Self);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorSelectedColor.SetBackground(Value: TColor);
+procedure TBCEditorSelectedColor.SetBackground(AValue: TColor);
 begin
-  if FBackground <> Value then
+  if FBackground <> AValue then
   begin
-    FBackground := Value;
+    FBackground := AValue;
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;
 end;
 
-procedure TBCEditorSelectedColor.SetForeground(Value: TColor);
+procedure TBCEditorSelectedColor.SetForeground(AValue: TColor);
 begin
-  if FForeground <> Value then
+  if FForeground <> AValue then
   begin
-    FForeground := Value;
+    FForeground := AValue;
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;

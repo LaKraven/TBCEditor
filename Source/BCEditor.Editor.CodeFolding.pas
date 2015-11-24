@@ -19,19 +19,19 @@ type
     FWidth: Integer;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetColors(const Value: TBCEditorCodeFoldingColors);
-    procedure SetHint(Value: TBCEditorCodeFoldingHint);
-    procedure SetMarkStyle(const Value: TBCEditorCodeFoldingMarkStyle);
-    procedure SetOnChange(Value: TBCEditorCodeFoldingChangeEvent);
-    procedure SetOptions(Value: TBCEditorCodeFoldingOptions);
-    procedure SetPadding(const Value: Integer);
-    procedure SetWidth(Value: Integer);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColors(const AValue: TBCEditorCodeFoldingColors);
+    procedure SetHint(AValue: TBCEditorCodeFoldingHint);
+    procedure SetMarkStyle(const AValue: TBCEditorCodeFoldingMarkStyle);
+    procedure SetOnChange(AValue: TBCEditorCodeFoldingChangeEvent);
+    procedure SetOptions(AValue: TBCEditorCodeFoldingOptions);
+    procedure SetPadding(const AValue: Integer);
+    procedure SetWidth(AValue: Integer);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
     function GetWidth: Integer;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     property MouseOverHint: Boolean read FMouseOverHint write FMouseOverHint;
   published
     property Colors: TBCEditorCodeFoldingColors read FColors write SetColors;
@@ -74,16 +74,16 @@ begin
   inherited;
 end;
 
-procedure TBCEditorCodeFolding.SetOnChange(Value: TBCEditorCodeFoldingChangeEvent);
+procedure TBCEditorCodeFolding.SetOnChange(AValue: TBCEditorCodeFoldingChangeEvent);
 begin
-  FOnChange := Value;
-  FColors.OnChange := Value;
+  FOnChange := AValue;
+  FColors.OnChange := AValue;
 end;
 
-procedure TBCEditorCodeFolding.Assign(Source: TPersistent);
+procedure TBCEditorCodeFolding.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCodeFolding then
-  with Source as TBCEditorCodeFolding do
+  if ASource is TBCEditorCodeFolding then
+  with ASource as TBCEditorCodeFolding do
   begin
     Self.FVisible := FVisible;
     Self.FOptions := FOptions;
@@ -94,7 +94,7 @@ begin
       Self.OnChange(fcRescan);
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorCodeFolding.DoChange;
@@ -103,46 +103,46 @@ begin
     FOnChange(fcRefresh);
 end;
 
-procedure TBCEditorCodeFolding.SetMarkStyle(const Value: TBCEditorCodeFoldingMarkStyle);
+procedure TBCEditorCodeFolding.SetMarkStyle(const AValue: TBCEditorCodeFoldingMarkStyle);
 begin
-  if Value <> FMarkStyle then
+  if FMarkStyle <> AValue then
   begin
-    FMarkStyle := Value;
+    FMarkStyle := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCodeFolding.SetVisible(const Value: Boolean);
+procedure TBCEditorCodeFolding.SetVisible(const AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     if Assigned(FOnChange) then
       FOnChange(fcEnabled);
   end;
 end;
 
-procedure TBCEditorCodeFolding.SetOptions(Value: TBCEditorCodeFoldingOptions);
+procedure TBCEditorCodeFolding.SetOptions(AValue: TBCEditorCodeFoldingOptions);
 begin
-  FOptions := Value;
+  FOptions := AValue;
   DoChange;
 end;
 
-procedure TBCEditorCodeFolding.SetColors(const Value: TBCEditorCodeFoldingColors);
+procedure TBCEditorCodeFolding.SetColors(const AValue: TBCEditorCodeFoldingColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
-procedure TBCEditorCodeFolding.SetHint(Value: TBCEditorCodeFoldingHint);
+procedure TBCEditorCodeFolding.SetHint(AValue: TBCEditorCodeFoldingHint);
 begin
-  FHint.Assign(Value);
+  FHint.Assign(AValue);
 end;
 
-procedure TBCEditorCodeFolding.SetPadding(const Value: Integer);
+procedure TBCEditorCodeFolding.SetPadding(const AValue: Integer);
 begin
-  if Value <> FPadding then
+  if FPadding <> AValue then
   begin
-    FPadding := Value;
+    FPadding := AValue;
     DoChange;
   end;
 end;
@@ -155,12 +155,12 @@ begin
     Result := 0;
 end;
 
-procedure TBCEditorCodeFolding.SetWidth(Value: Integer);
+procedure TBCEditorCodeFolding.SetWidth(AValue: Integer);
 begin
-  Value := Max(0, Value);
-  if FWidth <> Value then
+  AValue := Max(0, AValue);
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange;
   end;
 end;

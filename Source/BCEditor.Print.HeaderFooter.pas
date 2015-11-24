@@ -14,7 +14,7 @@ type
     FIndex: Integer;
     FLineNumber: Integer;
     FText: string;
-    procedure SetFont(const Value: TFont);
+    procedure SetFont(const AValue: TFont);
   public
     constructor Create;
     destructor Destroy; override;
@@ -63,23 +63,23 @@ type
     procedure DrawFrame(ACanvas: TCanvas);
     procedure RestoreFontPenBrush(ACanvas: TCanvas);
     procedure SaveFontPenBrush(ACanvas: TCanvas);
-    procedure SetDefaultFont(const Value: TFont);
+    procedure SetDefaultFont(const AValue: TFont);
   public
     constructor Create;
     destructor Destroy; override;
 
     function Add(Text: string; Font: TFont; Alignment: TAlignment; LineNumber: Integer): Integer;
     function Count: Integer;
-    function Get(Index: Integer): TBCEditorSectionItem;
-    procedure Assign(Source: TPersistent); override;
+    function Get(AIndex: Integer): TBCEditorSectionItem;
+    procedure Assign(ASource: TPersistent); override;
     procedure Clear;
-    procedure Delete(Index: Integer);
+    procedure Delete(AIndex: Integer);
     procedure FixLines;
     procedure InitPrint(ACanvas: TCanvas; NumberOfPages: Integer; Title: string; Margins: TBCEditorPrintMargins);
     procedure LoadFromStream(AStream: TStream);
     procedure Print(ACanvas: TCanvas; PageNum: Integer);
     procedure SaveToStream(AStream: TStream);
-    procedure SetPixelsPerInch(Value: Integer);
+    procedure SetPixelsPerInch(AValue: Integer);
     property SectionType: TBCEditorSectionType read FSectionType write FSectionType;
   published
     property DefaultFont: TFont read FDefaultFont write SetDefaultFont;
@@ -317,9 +317,9 @@ begin
   end;
 end;
 
-procedure TBCEditorSectionItem.SetFont(const Value: TFont);
+procedure TBCEditorSectionItem.SetFont(const AValue: TFont);
 begin
-  FFont.Assign(Value);
+  FFont.Assign(AValue);
 end;
 
 { TBCEditorSection }
@@ -378,12 +378,12 @@ begin
   Result := SectionItem.Index;
 end;
 
-procedure TBCEditorSection.Delete(Index: Integer);
+procedure TBCEditorSection.Delete(AIndex: Integer);
 var
   i: Integer;
 begin
   for i := 0 to FItems.Count - 1 do
-  if TBCEditorSectionItem(FItems[i]).Index = index then
+  if TBCEditorSectionItem(FItems[i]).Index = AIndex then
   begin
     FItems.Delete(i);
     break;
@@ -399,9 +399,9 @@ begin
   FItems.Clear;
 end;
 
-procedure TBCEditorSection.SetDefaultFont(const Value: TFont);
+procedure TBCEditorSection.SetDefaultFont(const AValue: TFont);
 begin
-  FDefaultFont.Assign(Value);
+  FDefaultFont.Assign(AValue);
 end;
 
 procedure TBCEditorSection.FixLines;
@@ -468,7 +468,7 @@ begin
     Result := Integer(Item1) - Integer(Item2);
 end;
 
-procedure TBCEditorSection.SetPixelsPerInch(Value: Integer);
+procedure TBCEditorSection.SetPixelsPerInch(AValue: Integer);
 var
   i, TmpSize: Integer;
   LFont: TFont;
@@ -477,7 +477,7 @@ begin
   begin
     LFont := TBCEditorSectionItem(FItems[i]).Font;
     TmpSize := LFont.Size;
-    LFont.PixelsPerInch := Value;
+    LFont.PixelsPerInch := AValue;
     LFont.Size := TmpSize;
   end;
 end;
@@ -608,12 +608,12 @@ begin
   RestoreFontPenBrush(ACanvas);
 end;
 
-procedure TBCEditorSection.Assign(Source: TPersistent);
+procedure TBCEditorSection.Assign(ASource: TPersistent);
 var
   i: Integer;
 begin
-  if Assigned(Source) and (Source is TBCEditorSection) then
-  with Source as TBCEditorSection do
+  if Assigned(ASource) and (ASource is TBCEditorSection) then
+  with ASource as TBCEditorSection do
   begin
     Clear;
     Self.FSectionType := FSectionType;
@@ -628,7 +628,7 @@ begin
     Self.FMirrorPosition := FMirrorPosition;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 function TBCEditorSection.Count: Integer;
@@ -636,9 +636,9 @@ begin
   Result := FItems.Count;
 end;
 
-function TBCEditorSection.Get(Index: Integer): TBCEditorSectionItem;
+function TBCEditorSection.Get(AIndex: Integer): TBCEditorSectionItem;
 begin
-  Result := TBCEditorSectionItem(FItems[index]);
+  Result := TBCEditorSectionItem(FItems[AIndex]);
 end;
 
 procedure TBCEditorSection.LoadFromStream(AStream: TStream);

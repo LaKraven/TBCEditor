@@ -14,15 +14,15 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetOnChange(Value: TBCEditorSearchChangeEvent);
-    procedure SetColors(const Value: TBCEditorSearchMapColors);
-    procedure SetOptions(const Value: TBCEditorSearchMapOptions);
-    procedure SetVisible(Value: Boolean);
-    procedure SetWidth(Value: Integer);
+    procedure SetOnChange(AValue: TBCEditorSearchChangeEvent);
+    procedure SetColors(const AValue: TBCEditorSearchMapColors);
+    procedure SetOptions(const AValue: TBCEditorSearchMapOptions);
+    procedure SetVisible(AValue: Boolean);
+    procedure SetWidth(AValue: Integer);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     function GetWidth: Integer;
   published
     property Colors: TBCEditorSearchMapColors read FColors write SetColors;
@@ -55,10 +55,10 @@ begin
   inherited;
 end;
 
-procedure TBCEditorSearchMap.Assign(Source: TPersistent);
+procedure TBCEditorSearchMap.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorSearchMap then
-  with Source as TBCEditorSearchMap do
+  if ASource is TBCEditorSearchMap then
+  with ASource as TBCEditorSearchMap do
   begin
     Self.FVisible := FVisible;
     Self.FOptions := Options;
@@ -67,20 +67,20 @@ begin
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorSearchMap.SetOnChange(Value: TBCEditorSearchChangeEvent);
+procedure TBCEditorSearchMap.SetOnChange(AValue: TBCEditorSearchChangeEvent);
 begin
-  FOnChange := Value;
+  FOnChange := AValue;
   FColors.OnChange := FOnChange;
 end;
 
-procedure TBCEditorSearchMap.SetWidth(Value: Integer);
+procedure TBCEditorSearchMap.SetWidth(AValue: Integer);
 begin
-  Value := Max(0, Value);
-  if FWidth <> Value then
-    FWidth := Value;
+  AValue := Max(0, AValue);
+  if FWidth <> AValue then
+    FWidth := AValue;
   DoChange;
 end;
 
@@ -90,20 +90,20 @@ begin
     FOnChange(scSearch);
 end;
 
-procedure TBCEditorSearchMap.SetVisible(Value: Boolean);
+procedure TBCEditorSearchMap.SetVisible(AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSearchMap.SetOptions(const Value: TBCEditorSearchMapOptions);
+procedure TBCEditorSearchMap.SetOptions(const AValue: TBCEditorSearchMapOptions);
 begin
-  if FOptions <> Value then
+  if FOptions <> AValue then
   begin
-    FOptions := Value;
+    FOptions := AValue;
     DoChange;
   end;
 end;
@@ -116,9 +116,9 @@ begin
     Result := 0;
 end;
 
-procedure TBCEditorSearchMap.SetColors(const Value: TBCEditorSearchMapColors);
+procedure TBCEditorSearchMap.SetColors(const AValue: TBCEditorSearchMapColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
 end.

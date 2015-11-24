@@ -12,12 +12,12 @@ type
     FBackground: TColor;
     FForeground: TColor;
     FOnChange: TBCEditorSearchChangeEvent;
-    procedure SetActiveLine(Value: TColor);
-    procedure SetBackground(Value: TColor);
-    procedure SetForeground(Value: TColor);
+    procedure SetActiveLine(AValue: TColor);
+    procedure SetBackground(AValue: TColor);
+    procedure SetForeground(AValue: TColor);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property ActiveLine: TColor read FActiveLine write SetActiveLine default clLeftMarginBookmarkBackground;
     property Background: TColor read FBackground write SetBackground default clLeftMarginBackground;
@@ -38,10 +38,10 @@ begin
   FForeground := clSearchHighlighter;
 end;
 
-procedure TBCEditorSearchMapColors.Assign(Source: TPersistent);
+procedure TBCEditorSearchMapColors.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSearchMapColors) then
-  with Source as TBCEditorSearchMapColors do
+  if Assigned(ASource) and (ASource is TBCEditorSearchMapColors) then
+  with ASource as TBCEditorSearchMapColors do
   begin
     Self.FBackground := FBackground;
     Self.FForeground := FForeground;
@@ -50,34 +50,34 @@ begin
       Self.FOnChange(scRefresh);
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorSearchMapColors.SetActiveLine(Value: TColor);
+procedure TBCEditorSearchMapColors.SetActiveLine(AValue: TColor);
 begin
-  if FActiveLine <> Value then
+  if FActiveLine <> AValue then
   begin
-    FActiveLine := Value;
+    FActiveLine := AValue;
     if Assigned(FOnChange) then
       FOnChange(scRefresh);
   end;
 end;
 
-procedure TBCEditorSearchMapColors.SetBackground(Value: TColor);
+procedure TBCEditorSearchMapColors.SetBackground(AValue: TColor);
 begin
-  if FBackground <> Value then
+  if FBackground <> AValue then
   begin
-    FBackground := Value;
+    FBackground := AValue;
     if Assigned(FOnChange) then
       FOnChange(scRefresh);
   end;
 end;
 
-procedure TBCEditorSearchMapColors.SetForeground(Value: TColor);
+procedure TBCEditorSearchMapColors.SetForeground(AValue: TColor);
 begin
-  if FForeground <> Value then
+  if FForeground <> AValue then
   begin
-    FForeground := Value;
+    FForeground := AValue;
     if Assigned(FOnChange) then
       FOnChange(scRefresh);
   end;

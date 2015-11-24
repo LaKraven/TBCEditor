@@ -16,7 +16,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Colors: TBCEditorCodeFoldingHintColors read FColors write FColors;
     property Cursor: TCursor read FCursor write FCursor default crHelp;
@@ -48,17 +48,17 @@ begin
   inherited;
 end;
 
-procedure TBCEditorCodeFoldingHint.Assign(Source: TPersistent);
+procedure TBCEditorCodeFoldingHint.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCodeFoldingHint then
-  with Source as TBCEditorCodeFoldingHint do
+  if ASource is TBCEditorCodeFoldingHint then
+  with ASource as TBCEditorCodeFoldingHint do
   begin
     Self.FColors.Assign(FColors);
     Self.FCursor := FCursor;
     Self.FFont.Assign(FFont);
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 end.

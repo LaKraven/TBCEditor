@@ -11,14 +11,14 @@ type
     FAlphaBlending: Byte;
     FColors: TBCEditorSearchColors;
     FOnChange: TBCEditorSearchChangeEvent;
-    procedure SetAlphaBlending(const Value: Byte);
-    procedure SetColors(const Value: TBCEditorSearchColors);
+    procedure SetAlphaBlending(const AValue: Byte);
+    procedure SetColors(const AValue: TBCEditorSearchColors);
     procedure DoChange;
-    procedure SetOnChange(Value: TBCEditorSearchChangeEvent);
+    procedure SetOnChange(AValue: TBCEditorSearchChangeEvent);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property AlphaBlending: Byte read FAlphaBlending write SetAlphaBlending default 255;
     property Colors: TBCEditorSearchColors read FColors write SetColors;
@@ -43,17 +43,17 @@ begin
   inherited;
 end;
 
-procedure TBCEditorSearchHighlighter.Assign(Source: TPersistent);
+procedure TBCEditorSearchHighlighter.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSearchHighlighter) then
-  with Source as TBCEditorSearchHighlighter do
+  if Assigned(ASource) and (ASource is TBCEditorSearchHighlighter) then
+  with ASource as TBCEditorSearchHighlighter do
   begin
     Self.FAlphaBlending := FAlphaBlending;
     Self.FColors.Assign(Colors);
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorSearchHighlighter.DoChange;
@@ -62,22 +62,22 @@ begin
     FOnChange(scRefresh);
 end;
 
-procedure TBCEditorSearchHighlighter.SetOnChange(Value: TBCEditorSearchChangeEvent);
+procedure TBCEditorSearchHighlighter.SetOnChange(AValue: TBCEditorSearchChangeEvent);
 begin
-  FOnChange := Value;
+  FOnChange := AValue;
   FColors.OnChange := FOnChange;
 end;
 
-procedure TBCEditorSearchHighlighter.SetColors(const Value: TBCEditorSearchColors);
+procedure TBCEditorSearchHighlighter.SetColors(const AValue: TBCEditorSearchColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
-procedure TBCEditorSearchHighlighter.SetAlphaBlending(const Value: Byte);
+procedure TBCEditorSearchHighlighter.SetAlphaBlending(const AValue: Byte);
 begin
-  if Value <> FAlphaBlending then
+  if FAlphaBlending <> AValue then
   begin
-    FAlphaBlending := Value;
+    FAlphaBlending := AValue;
     DoChange;
   end;
 end;

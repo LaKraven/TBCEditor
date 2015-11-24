@@ -10,11 +10,11 @@ type
   strict private
     FOnChange: TNotifyEvent;
     FStyle: TBCEditorLeftMarginBorderStyle;
-    procedure SetStyle(const Value: TBCEditorLeftMarginBorderStyle);
+    procedure SetStyle(const AValue: TBCEditorLeftMarginBorderStyle);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Style: TBCEditorLeftMarginBorderStyle read FStyle write SetStyle default mbsNone;
@@ -35,21 +35,21 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginBorder.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginBorder.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorLeftMarginBorder) then
-  with Source as TBCEditorLeftMarginBorder do
+  if Assigned(ASource) and (ASource is TBCEditorLeftMarginBorder) then
+  with ASource as TBCEditorLeftMarginBorder do
   begin
     Self.FStyle := FStyle;
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorLeftMarginBorder.SetStyle(const Value: TBCEditorLeftMarginBorderStyle);
+procedure TBCEditorLeftMarginBorder.SetStyle(const AValue: TBCEditorLeftMarginBorderStyle);
 begin
-  FStyle := Value;
+  FStyle := AValue;
   DoChange
 end;
 

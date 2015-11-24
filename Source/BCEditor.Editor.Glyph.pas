@@ -18,15 +18,15 @@ type
     function GetHeight: Integer;
     function GetWidth: Integer;
     procedure GlyphChange(Sender: TObject);
-    procedure SetGlyph(Value: TBitmap);
-    procedure SetLeft(Value: Integer);
-    procedure SetMaskColor(Value: TColor);
-    procedure SetVisible(Value: Boolean);
+    procedure SetGlyph(AValue: TBitmap);
+    procedure SetLeft(AValue: Integer);
+    procedure SetMaskColor(AValue: TColor);
+    procedure SetVisible(AValue: Boolean);
   public
     constructor Create(AModule: THandle; const AName: string; AMaskColor: TColor);
     destructor Destroy; override;
 
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     procedure Draw(ACanvas: TCanvas; X, Y: Integer; ALineHeight: Integer);
     property Height: Integer read GetHeight;
     property Width: Integer read GetWidth;
@@ -77,10 +77,10 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorGlyph.Assign(Source: TPersistent);
+procedure TBCEditorGlyph.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorGlyph) then
-  with Source as TBCEditorGlyph do
+  if Assigned(ASource) and (ASource is TBCEditorGlyph) then
+  with ASource as TBCEditorGlyph do
   begin
     if Assigned(FInternalGlyph) then
       Self.FInternalGlyph.Assign(FInternalGlyph);
@@ -93,7 +93,7 @@ begin
       Self.FOnChange(Self);
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorGlyph.Draw(ACanvas: TCanvas; X, Y: Integer; ALineHeight: Integer);
@@ -132,9 +132,9 @@ begin
   ACanvas.BrushCopy(LDestinationRect, LGlyphBitmap, LSourceRect, LMaskColor);
 end;
 
-procedure TBCEditorGlyph.SetGlyph(Value: Vcl.Graphics.TBitmap);
+procedure TBCEditorGlyph.SetGlyph(AValue: Vcl.Graphics.TBitmap);
 begin
-  FGlyph.Assign(Value);
+  FGlyph.Assign(AValue);
 end;
 
 procedure TBCEditorGlyph.GlyphChange(Sender: TObject);
@@ -143,31 +143,31 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorGlyph.SetMaskColor(Value: TColor);
+procedure TBCEditorGlyph.SetMaskColor(AValue: TColor);
 begin
-  if FMaskColor <> Value then
+  if FMaskColor <> AValue then
   begin
-    FMaskColor := Value;
+    FMaskColor := AValue;
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;
 end;
 
-procedure TBCEditorGlyph.SetVisible(Value: Boolean);
+procedure TBCEditorGlyph.SetVisible(AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;
 end;
 
-procedure TBCEditorGlyph.SetLeft(Value: Integer);
+procedure TBCEditorGlyph.SetLeft(AValue: Integer);
 begin
-  if FLeft <> Value then
+  if FLeft <> AValue then
   begin
-    FLeft := Value;
+    FLeft := AValue;
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;

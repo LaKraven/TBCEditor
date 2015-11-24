@@ -21,17 +21,17 @@ type
     FVisibleLines: Integer;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetColors(const Value: TBCEditorMinimapColors);
-    procedure SetFont(Value: TFont);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetVisible(Value: Boolean);
-    procedure SetWidth(Value: Integer);
+    procedure SetColors(const AValue: TBCEditorMinimapColors);
+    procedure SetFont(AValue: TFont);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetVisible(AValue: Boolean);
+    procedure SetWidth(AValue: Integer);
   public
     constructor Create;
     destructor Destroy; override;
 
     function GetWidth: Integer;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     property CharHeight: Integer read FCharHeight write FCharHeight;
     property Clicked: Boolean read FClicked write FClicked;
     property Dragging: Boolean read FDragging write FDragging;
@@ -83,10 +83,10 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorMinimap.Assign(Source: TPersistent);
+procedure TBCEditorMinimap.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorMinimap then
-  with Source as TBCEditorMinimap do
+  if ASource is TBCEditorMinimap then
+  with ASource as TBCEditorMinimap do
   begin
     Self.FColors.Assign(FColors);
     Self.FFont.Assign(FFont);
@@ -96,14 +96,14 @@ begin
     Self.FCursor := FCursor;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorMinimap.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorMinimap.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FFont.OnChange := Value;
-  FColors.OnChange := Value;
+  FOnChange := AValue;
+  FFont.OnChange := AValue;
+  FColors.OnChange := AValue;
 end;
 
 procedure TBCEditorMinimap.DoChange;
@@ -112,22 +112,22 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorMinimap.SetColors(const Value: TBCEditorMinimapColors);
+procedure TBCEditorMinimap.SetColors(const AValue: TBCEditorMinimapColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
-procedure TBCEditorMinimap.SetFont(Value: TFont);
+procedure TBCEditorMinimap.SetFont(AValue: TFont);
 begin
-  FFont.Assign(Value);
+  FFont.Assign(AValue);
 end;
 
-procedure TBCEditorMinimap.SetWidth(Value: Integer);
+procedure TBCEditorMinimap.SetWidth(AValue: Integer);
 begin
-  Value := Max(0, Value);
-  if FWidth <> Value then
+  AValue := Max(0, AValue);
+  if FWidth <> AValue then
   begin
-    FWidth := Value;
+    FWidth := AValue;
     DoChange;
   end;
 end;
@@ -140,11 +140,11 @@ begin
     Result := 0;
 end;
 
-procedure TBCEditorMinimap.SetVisible(Value: Boolean);
+procedure TBCEditorMinimap.SetVisible(AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;

@@ -16,7 +16,7 @@ type
     FChangeBeginPosition: TBCEditorTextPosition;
     FChangeString: string;
   public
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
 
     property ChangeCaretPosition: TBCEditorTextPosition read FChangeCaretPosition write FChangeCaretPosition;
     property ChangeData: Pointer read FChangeData write FChangeData;
@@ -31,10 +31,10 @@ implementation
 
 { TBCEditorUndoItem }
 
-procedure TBCEditorUndoItem.Assign(Source: TPersistent);
+procedure TBCEditorUndoItem.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorUndoItem) then
-  with Source as TBCEditorUndoItem do
+  if Assigned(ASource) and (ASource is TBCEditorUndoItem) then
+  with ASource as TBCEditorUndoItem do
   begin
     Self.FChangeReason := FChangeReason;
     Self.FChangeSelectionMode := FChangeSelectionMode;
@@ -43,7 +43,7 @@ begin
     Self.FChangeString := FChangeString;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 end.

@@ -16,17 +16,17 @@ type
     FLineStateModified: TColor;
     FLineStateNormal: TColor;
     FOnChange: TNotifyEvent;
-    procedure SetActiveLineBackground(const Value: TColor);
-    procedure SetBackground(const Value: TColor);
-    procedure SetBookmarkPanelBackground(const Value: TColor);
-    procedure SetBorder(const Value: TColor);
-    procedure SetLineNumberLine(const Value: TColor);
-    procedure SetLineStateModified(const Value: TColor);
-    procedure SetLineStateNormal(const Value: TColor);
+    procedure SetActiveLineBackground(const AValue: TColor);
+    procedure SetBackground(const AValue: TColor);
+    procedure SetBookmarkPanelBackground(const AValue: TColor);
+    procedure SetBorder(const AValue: TColor);
+    procedure SetLineNumberLine(const AValue: TColor);
+    procedure SetLineStateModified(const AValue: TColor);
+    procedure SetLineStateNormal(const AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property ActiveLineBackground: TColor read FActiveLineBackground write SetActiveLineBackground default clActiveLineBackground;
     property Background: TColor read FBackground write SetBackground default clLeftMarginBackground;
@@ -55,10 +55,10 @@ begin
   FLineStateNormal := clLime;
 end;
 
-procedure TBCEditorLeftMarginColors.Assign(Source: TPersistent);
+procedure TBCEditorLeftMarginColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorLeftMarginColors then
-  with Source as TBCEditorLeftMarginColors do
+  if ASource is TBCEditorLeftMarginColors then
+  with ASource as TBCEditorLeftMarginColors do
   begin
     Self.FActiveLineBackground := FActiveLineBackground;
     Self.FBackground := FBackground;
@@ -70,7 +70,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorLeftMarginColors.DoChange;
@@ -79,65 +79,65 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorLeftMarginColors.SetActiveLineBackground(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetActiveLineBackground(const AValue: TColor);
 begin
-  if Value <> FActiveLineBackground then
+  if FActiveLineBackground <> AValue then
   begin
-    FActiveLineBackground := Value;
+    FActiveLineBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetBackground(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetBackground(const AValue: TColor);
 begin
-  if Value <> FBackground then
+  if FBackground <> AValue then
   begin
-    FBackground := Value;
+    FBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetBookmarkPanelBackground(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetBookmarkPanelBackground(const AValue: TColor);
 begin
-  if Value <> FBookmarkPanelBackground then
+  if FBookmarkPanelBackground <> AValue then
   begin
-    FBookmarkPanelBackground := Value;
+    FBookmarkPanelBackground := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetBorder(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetBorder(const AValue: TColor);
 begin
-  if Value <> FBorder then
+  if FBorder <> AValue then
   begin
-    FBorder := Value;
+    FBorder := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetLineNumberLine(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetLineNumberLine(const AValue: TColor);
 begin
-  if Value <> FLineNumberLine then
+  if FLineNumberLine <> AValue then
   begin
-    FLineNumberLine := Value;
+    FLineNumberLine := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetLineStateModified(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetLineStateModified(const AValue: TColor);
 begin
-  if Value <> FLineStateModified then
+  if FLineStateModified <> AValue then
   begin
-    FLineStateModified := Value;
+    FLineStateModified := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorLeftMarginColors.SetLineStateNormal(const Value: TColor);
+procedure TBCEditorLeftMarginColors.SetLineStateNormal(const AValue: TColor);
 begin
-  if Value <> FLineStateNormal then
+  if FLineStateNormal <> AValue then
   begin
-    FLineStateNormal := Value;
+    FLineStateNormal := AValue;
     DoChange;
   end;
 end;

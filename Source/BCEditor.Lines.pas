@@ -622,7 +622,7 @@ procedure TBCEditorLines.SetTabWidth(AValue: Integer);
 var
   i: Integer;
 begin
-  if AValue <> FTabWidth then
+  if FTabWidth <> AValue then
   begin
     FTabWidth := AValue;
     FTabConvertProc := GetTabConvertProc(FTabWidth);

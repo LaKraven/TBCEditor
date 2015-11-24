@@ -16,20 +16,20 @@ type
     function GetDataField: string;
     function GetDataSource: TDataSource;
     function GetField: TField;
-    procedure CMEnter(var Msg: TCMEnter); message CM_ENTER;
-    procedure CMExit(var Msg: TCMExit); message CM_EXIT;
-    procedure CMGetDataLink(var Msg: TMessage); message CM_GETDATALINK;
+    procedure CMEnter(var AMessage: TCMEnter); message CM_ENTER;
+    procedure CMExit(var AMessage: TCMExit); message CM_EXIT;
+    procedure CMGetDataLink(var AMessage: TMessage); message CM_GETDATALINK;
     procedure DataChange(Sender: TObject);
     procedure EditingChange(Sender: TObject);
-    procedure SetDataField(const Value: string);
-    procedure SetDataSource(Value: TDataSource);
-    procedure SetEditing(Value: Boolean);
+    procedure SetDataField(const AValue: string);
+    procedure SetDataSource(AValue: TDataSource);
+    procedure SetEditing(AValue: Boolean);
     procedure UpdateData(Sender: TObject);
   protected
     function GetReadOnly: Boolean; override;
     procedure DoChange; override;
     procedure Loaded; override;
-    procedure SetReadOnly(Value: Boolean); override;
+    procedure SetReadOnly(AValue: Boolean); override;
     property DataField: string read GetDataField write SetDataField;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
     property Field: TField read GetField;
@@ -37,10 +37,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure DragDrop(Source: TObject; X, Y: Integer); override;
-    procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; Data: pointer); override;
+    procedure DragDrop(ASource: TObject; X, Y: Integer); override;
+    procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer); override;
     procedure LoadMemo;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
   end;
 
   TBCDBEditor = class(TBCCustomDBEditor)
@@ -165,14 +165,14 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCCustomDBEditor.CMEnter(var Msg: TCMEnter);
+procedure TBCCustomDBEditor.CMEnter(var AMessage: TCMEnter);
 begin
   SetEditing(True);
 
   inherited;
 end;
 
-procedure TBCCustomDBEditor.CMExit(var Msg: TCMExit);
+procedure TBCCustomDBEditor.CMExit(var AMessage: TCMExit);
 begin
   try
     FDataLink.UpdateRecord;
@@ -185,9 +185,9 @@ begin
   inherited;
 end;
 
-procedure TBCCustomDBEditor.CMGetDataLink(var Msg: TMessage);
+procedure TBCCustomDBEditor.CMGetDataLink(var AMessage: TMessage);
 begin
-  Msg.Result := Integer(FDataLink);
+  AMessage.Result := Integer(FDataLink);
 end;
 
 procedure TBCCustomDBEditor.DataChange(Sender: TObject);
@@ -215,7 +215,7 @@ begin
   end;
 end;
 
-procedure TBCCustomDBEditor.DragDrop(Source: TObject; X, Y: Integer);
+procedure TBCCustomDBEditor.DragDrop(ASource: TObject; X, Y: Integer);
 begin
   FDataLink.Edit;
   inherited;
@@ -228,7 +228,7 @@ begin
       FBeginEdit := True;
 end;
 
-procedure TBCCustomDBEditor.ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; Data: pointer);
+procedure TBCCustomDBEditor.ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
 begin
   if (ACommand = ecChar) and (AChar = BCEDITOR_ESCAPE) then
     FDataLink.Reset
@@ -294,40 +294,40 @@ begin
   inherited;
 end;
 
-procedure TBCCustomDBEditor.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TBCCustomDBEditor.Notification(AComponent: TComponent; AOperation: TOperation);
 begin
-  inherited Notification(AComponent, Operation);
+  inherited Notification(AComponent, AOperation);
 
-  if (Operation = opRemove) and Assigned(FDataLink) and (AComponent = DataSource) then
+  if (AOperation = opRemove) and Assigned(FDataLink) and (AComponent = DataSource) then
     DataSource := nil;
 end;
 
-procedure TBCCustomDBEditor.SetDataField(const Value: string);
+procedure TBCCustomDBEditor.SetDataField(const AValue: string);
 begin
-  FDataLink.FieldName := Value;
+  FDataLink.FieldName := AValue;
 end;
 
-procedure TBCCustomDBEditor.SetDataSource(Value: TDataSource);
+procedure TBCCustomDBEditor.SetDataSource(AValue: TDataSource);
 begin
   if not (FDataLink.DataSourceFixed and (csLoading in ComponentState)) then
-    FDataLink.DataSource := Value;
-  if Assigned(Value) then
-    Value.FreeNotification(Self);
+    FDataLink.DataSource := AValue;
+  if Assigned(AValue) then
+    AValue.FreeNotification(Self);
 end;
 
-procedure TBCCustomDBEditor.SetEditing(Value: Boolean);
+procedure TBCCustomDBEditor.SetEditing(AValue: Boolean);
 begin
-  if FEditing <> Value then
+  if FEditing <> AValue then
   begin
-    FEditing := Value;
+    FEditing := AValue;
     if not Assigned(FDataLink.Field) or not FDataLink.Field.IsBlob then
       FDataLink.Reset;
   end;
 end;
 
-procedure TBCCustomDBEditor.SetReadOnly(Value: Boolean);
+procedure TBCCustomDBEditor.SetReadOnly(AValue: Boolean);
 begin
-  FDataLink.ReadOnly := Value;
+  FDataLink.ReadOnly := AValue;
 end;
 
 procedure TBCCustomDBEditor.UpdateData(Sender: TObject);

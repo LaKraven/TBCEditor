@@ -14,7 +14,7 @@ type
     FSelectedText: TColor;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Background: TColor read FBackground write FBackground default clWindow;
     property Foreground: TColor read FForeground write FForeground default clWindowText;
@@ -36,10 +36,10 @@ begin
   FSelectedText := clHighlightText;
 end;
 
-procedure TBCEditorCompletionProposalColors.Assign(Source: TPersistent);
+procedure TBCEditorCompletionProposalColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorCompletionProposalColors then
-  with Source as TBCEditorCompletionProposalColors do
+  if ASource is TBCEditorCompletionProposalColors then
+  with ASource as TBCEditorCompletionProposalColors do
   begin
     Self.FBackground := FBackground;
     Self.FForeground := FForeground;
@@ -47,7 +47,7 @@ begin
     Self.FSelectedText := FSelectedText;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 end.

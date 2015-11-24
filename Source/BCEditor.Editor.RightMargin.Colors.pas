@@ -11,12 +11,12 @@ type
     FEdge: TColor;
     FMovingEdge: TColor;
     FOnChange: TNotifyEvent;
-    procedure SetEdge(Value: TColor);
-    procedure SetMovingEdge(Value: TColor);
+    procedure SetEdge(AValue: TColor);
+    procedure SetMovingEdge(AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Edge: TColor read FEdge write SetEdge default clSilver;
     property MovingEdge: TColor read FMovingEdge write SetMovingEdge default clSilver;
@@ -35,17 +35,17 @@ begin
   FMovingEdge := clSilver;
 end;
 
-procedure TBCEditorRightMarginColors.Assign(Source: TPersistent);
+procedure TBCEditorRightMarginColors.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorRightMarginColors) then
-  with Source as TBCEditorRightMarginColors do
+  if Assigned(ASource) and (ASource is TBCEditorRightMarginColors) then
+  with ASource as TBCEditorRightMarginColors do
   begin
     Self.FEdge := FEdge;
     Self.FMovingEdge := FMovingEdge;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorRightMarginColors.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorRightMarginColors.SetEdge(Value: TColor);
+procedure TBCEditorRightMarginColors.SetEdge(AValue: TColor);
 begin
-  if FEdge <> Value then
+  if FEdge <> AValue then
   begin
-    FEdge := Value;
+    FEdge := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorRightMarginColors.SetMovingEdge(Value: TColor);
+procedure TBCEditorRightMarginColors.SetMovingEdge(AValue: TColor);
 begin
-  if FMovingEdge <> Value then
+  if FMovingEdge <> AValue then
   begin
-    FMovingEdge := Value;
+    FMovingEdge := AValue;
     DoChange;
   end;
 end;

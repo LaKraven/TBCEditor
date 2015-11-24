@@ -11,12 +11,12 @@ type
     FBookmark: TColor;
     FVisibleLines: TColor;
     FOnChange: TNotifyEvent;
-    procedure SetBookmark(const Value: TColor);
-    procedure SetVisibleLines(const Value: TColor);
+    procedure SetBookmark(const AValue: TColor);
+    procedure SetVisibleLines(const AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property VisibleLines: TColor read FVisibleLines write SetVisibleLines default clMinimapVisibleLines;
     property Bookmark: TColor read FBookmark write SetBookmark default clMinimapBookmark;
@@ -35,17 +35,17 @@ begin
   FVisibleLines := clMinimapVisibleLines;
 end;
 
-procedure TBCEditorMinimapColors.Assign(Source: TPersistent);
+procedure TBCEditorMinimapColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorMinimapColors then
-  with Source as TBCEditorMinimapColors do
+  if ASource is TBCEditorMinimapColors then
+  with ASource as TBCEditorMinimapColors do
   begin
     Self.FBookmark := FBookmark;
     Self.FVisibleLines := FVisibleLines;
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorMinimapColors.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorMinimapColors.SetBookmark(const Value: TColor);
+procedure TBCEditorMinimapColors.SetBookmark(const AValue: TColor);
 begin
-  if Value <> FBookmark then
+  if FBookmark <> AValue then
   begin
-    FBookmark := Value;
+    FBookmark := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorMinimapColors.SetVisibleLines(const Value: TColor);
+procedure TBCEditorMinimapColors.SetVisibleLines(const AValue: TColor);
 begin
-  if Value <> FVisibleLines then
+  if FVisibleLines <> AValue then
   begin
-    FVisibleLines := Value;
+    FVisibleLines := AValue;
     DoChange;
   end;
 end;

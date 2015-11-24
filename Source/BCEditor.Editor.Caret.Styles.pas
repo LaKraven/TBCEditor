@@ -12,11 +12,11 @@ type
     FOnChange: TNotifyEvent;
     FOverwrite: TBCEditorCaretStyle;
     procedure DoChange;
-    procedure SetInsert(const Value: TBCEditorCaretStyle);
-    procedure SetOverwrite(const Value: TBCEditorCaretStyle);
+    procedure SetInsert(const AValue: TBCEditorCaretStyle);
+    procedure SetOverwrite(const AValue: TBCEditorCaretStyle);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Insert: TBCEditorCaretStyle read FInsert write SetInsert default csThinVerticalLine;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -35,17 +35,17 @@ begin
   FOverwrite := csThinVerticalLine;
 end;
 
-procedure TBCEditorCaretStyles.Assign(Source: TPersistent);
+procedure TBCEditorCaretStyles.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorCaretStyles) then
-  with Source as TBCEditorCaretStyles do
+  if Assigned(ASource) and (ASource is TBCEditorCaretStyles) then
+  with ASource as TBCEditorCaretStyles do
   begin
     Self.FOverwrite := FOverwrite;
     Self.FInsert := FInsert;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorCaretStyles.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorCaretStyles.SetInsert(const Value: TBCEditorCaretStyle);
+procedure TBCEditorCaretStyles.SetInsert(const AValue: TBCEditorCaretStyle);
 begin
-  if FInsert <> Value then
+  if FInsert <> AValue then
   begin
-    FInsert := Value;
+    FInsert := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCaretStyles.SetOverwrite(const Value: TBCEditorCaretStyle);
+procedure TBCEditorCaretStyles.SetOverwrite(const AValue: TBCEditorCaretStyle);
 begin
-  if FOverwrite <> Value then
+  if FOverwrite <> AValue then
   begin
-    FOverwrite := Value;
+    FOverwrite := AValue;
     DoChange;
   end;
 end;

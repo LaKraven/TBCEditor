@@ -13,7 +13,7 @@ type
     FUnmatched: TColor;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Matched: TColor read FMatched write FMatched default clAqua;
     property Underline: TColor read FUnderline write FUnderline default clMatchingPairUnderline;
@@ -33,16 +33,16 @@ begin
   FUnmatched := clYellow;
 end;
 
-procedure TBCEditorMatchingPairColors.Assign(Source: TPersistent);
+procedure TBCEditorMatchingPairColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorMatchingPairColors then
-  with Source as TBCEditorMatchingPairColors do
+  if ASource is TBCEditorMatchingPairColors then
+  with ASource as TBCEditorMatchingPairColors do
   begin
     Self.FMatched := FMatched;
     Self.FUnmatched := FUnmatched;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 end.

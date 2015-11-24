@@ -13,12 +13,12 @@ type
     FStyle: TBCEditorSpecialCharsEndOfLineStyle;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetColor(const Value: TColor);
-    procedure SetStyle(const Value: TBCEditorSpecialCharsEndOfLineStyle);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColor(const AValue: TColor);
+    procedure SetStyle(const AValue: TBCEditorSpecialCharsEndOfLineStyle);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Color: TColor read FColor write SetColor default clBlack;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -39,10 +39,10 @@ begin
   FVisible := False;
 end;
 
-procedure TBCEditorSpecialCharsEndOfLine.Assign(Source: TPersistent);
+procedure TBCEditorSpecialCharsEndOfLine.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorSpecialCharsEndOfLine) then
-  with Source as TBCEditorSpecialCharsEndOfLine do
+  if Assigned(ASource) and (ASource is TBCEditorSpecialCharsEndOfLine) then
+  with ASource as TBCEditorSpecialCharsEndOfLine do
   begin
     Self.FColor := FColor;
     Self.FStyle := FStyle;
@@ -50,7 +50,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorSpecialCharsEndOfLine.DoChange;
@@ -59,29 +59,29 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorSpecialCharsEndOfLine.SetColor(const Value: TColor);
+procedure TBCEditorSpecialCharsEndOfLine.SetColor(const AValue: TColor);
 begin
-  if Value <> FColor then
+  if FColor <> AValue then
   begin
-    FColor := Value;
+    FColor := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialCharsEndOfLine.SetStyle(const Value: TBCEditorSpecialCharsEndOfLineStyle);
+procedure TBCEditorSpecialCharsEndOfLine.SetStyle(const AValue: TBCEditorSpecialCharsEndOfLineStyle);
 begin
-  if Value <> FStyle then
+  if FStyle <> AValue then
   begin
-    FStyle := Value;
+    FStyle := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorSpecialCharsEndOfLine.SetVisible(const Value: Boolean);
+procedure TBCEditorSpecialCharsEndOfLine.SetVisible(const AValue: Boolean);
 begin
-  if Value <> FVisible then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange;
   end;
 end;

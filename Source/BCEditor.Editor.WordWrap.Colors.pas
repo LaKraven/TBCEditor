@@ -11,12 +11,12 @@ type
     FArrow: TColor;
     FLines: TColor;
     FOnChange: TNotifyEvent;
-    procedure SetArrow(const Value: TColor);
-    procedure SetLines(const Value: TColor);
+    procedure SetArrow(const AValue: TColor);
+    procedure SetLines(const AValue: TColor);
     procedure DoChange;
   public
     constructor Create;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Arrow: TColor read FArrow write SetArrow default clWordWrapIndicatorArrow;
     property Lines: TColor read FLines write SetLines default clWordWrapIndicatorLines;
@@ -35,17 +35,17 @@ begin
   FLines := clWordWrapIndicatorLines;
 end;
 
-procedure TBCEditorWordWrapColors.Assign(Source: TPersistent);
+procedure TBCEditorWordWrapColors.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorWordWrapColors then
-  with Source as TBCEditorWordWrapColors do
+  if ASource is TBCEditorWordWrapColors then
+  with ASource as TBCEditorWordWrapColors do
   begin
     Self.FArrow := FArrow;
     Self.FLines := FLines;
     Self.DoChange;
   end
   else
-    inherited;
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorWordWrapColors.DoChange;
@@ -54,20 +54,20 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorWordWrapColors.SetArrow(const Value: TColor);
+procedure TBCEditorWordWrapColors.SetArrow(const AValue: TColor);
 begin
-  if Value <> FArrow then
+  if FArrow <> AValue then
   begin
-    FArrow := Value;
+    FArrow := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorWordWrapColors.SetLines(const Value: TColor);
+procedure TBCEditorWordWrapColors.SetLines(const AValue: TColor);
 begin
-  if Value <> FLines then
+  if FLines <> AValue then
   begin
-    FLines := Value;
+    FLines := AValue;
     DoChange;
   end;
 end;

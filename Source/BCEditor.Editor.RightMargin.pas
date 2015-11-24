@@ -17,14 +17,14 @@ type
     FPosition: Integer;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetColors(const Value: TBCEditorRightMarginColors);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetPosition(const Value: Integer);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColors(const AValue: TBCEditorRightMarginColors);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetPosition(const AValue: Integer);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
     property Moving: Boolean read FMoving write FMoving;
     property MouseOver: Boolean read FMouseOver write FMouseOver;
   published
@@ -59,16 +59,16 @@ begin
   inherited;
 end;
 
-procedure TBCEditorRightMargin.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorRightMargin.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FColors.OnChange := Value;
+  FOnChange := AValue;
+  FColors.OnChange := AValue;
 end;
 
-procedure TBCEditorRightMargin.Assign(Source: TPersistent);
+procedure TBCEditorRightMargin.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorRightMargin) then
-  with Source as TBCEditorRightMargin do
+  if Assigned(ASource) and (ASource is TBCEditorRightMargin) then
+  with ASource as TBCEditorRightMargin do
   begin
     Self.FVisible := FVisible;
     Self.FPosition := FPosition;
@@ -78,7 +78,7 @@ begin
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorRightMargin.DoChange;
@@ -87,25 +87,25 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorRightMargin.SetColors(const Value: TBCEditorRightMarginColors);
+procedure TBCEditorRightMargin.SetColors(const AValue: TBCEditorRightMarginColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
-procedure TBCEditorRightMargin.SetPosition(const Value: Integer);
+procedure TBCEditorRightMargin.SetPosition(const AValue: Integer);
 begin
-  if FPosition <> Value then
+  if FPosition <> AValue then
   begin
-    FPosition := Value;
+    FPosition := AValue;
     DoChange
   end;
 end;
 
-procedure TBCEditorRightMargin.SetVisible(const Value: Boolean);
+procedure TBCEditorRightMargin.SetVisible(const AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange
   end;
 end;

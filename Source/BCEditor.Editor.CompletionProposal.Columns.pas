@@ -11,11 +11,11 @@ type
     FAutoWidth: Boolean;
     FItemList: TStrings;
     FWidth: Integer;
-    procedure SetItemList(const Value: TStrings);
+    procedure SetItemList(const AValue: TStrings);
   public
-    constructor Create(Collection: TCollection); override;
+    constructor Create(ACollection: TCollection); override;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property AutoWidth: Boolean read FAutoWidth write FAutoWidth default True;
     property ItemList: TStrings read FItemList write SetItemList;
@@ -25,23 +25,23 @@ type
   TBCEditorProposalColumns = class(TCollection)
   strict private
     FOwner: TPersistent;
-    function GetItem(Index: Integer): TBCEditorProposalColumn;
-    procedure SetItem(Index: Integer; Value: TBCEditorProposalColumn);
+    function GetItem(AIndex: Integer): TBCEditorProposalColumn;
+    procedure SetItem(AIndex: Integer; AValue: TBCEditorProposalColumn);
   protected
     function GetOwner: TPersistent; override;
   public
-    constructor Create(AOwner: TPersistent; ItemClass: TCollectionItemClass);
+    constructor Create(AOwner: TPersistent; AItemClass: TCollectionItemClass);
     function Add: TBCEditorProposalColumn;
-    function FindItemID(ID: Integer): TBCEditorProposalColumn;
-    function Insert(Index: Integer): TBCEditorProposalColumn;
-    property Items[index: Integer]: TBCEditorProposalColumn read GetItem write SetItem; default;
+    function FindItemID(AID: Integer): TBCEditorProposalColumn;
+    function Insert(AIndex: Integer): TBCEditorProposalColumn;
+    property Items[AIndex: Integer]: TBCEditorProposalColumn read GetItem write SetItem; default;
   end;
 
 implementation
 
 { TBCEditorProposalColumn }
 
-constructor TBCEditorProposalColumn.Create(Collection: TCollection);
+constructor TBCEditorProposalColumn.Create(ACollection: TCollection);
 begin
   inherited;
   FItemList := TStringList.Create;
@@ -56,25 +56,26 @@ begin
   inherited;
 end;
 
-procedure TBCEditorProposalColumn.Assign(Source: TPersistent);
+procedure TBCEditorProposalColumn.Assign(ASource: TPersistent);
 begin
-  if Source is TBCEditorProposalColumn then
-  with Source as TBCEditorProposalColumn do
+  if ASource is TBCEditorProposalColumn then
+  with ASource as TBCEditorProposalColumn do
     Self.FItemList.Assign(FItemList)
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
-procedure TBCEditorProposalColumn.SetItemList(const Value: TStrings);
+procedure TBCEditorProposalColumn.SetItemList(const AValue: TStrings);
 begin
-  FItemList.Assign(Value);
+  FItemList.Assign(AValue);
 end;
 
 { TBCEditorProposalColumns }
 
-constructor TBCEditorProposalColumns.Create(AOwner: TPersistent; ItemClass: TCollectionItemClass);
+constructor TBCEditorProposalColumns.Create(AOwner: TPersistent; AItemClass: TCollectionItemClass);
 begin
-  inherited Create(ItemClass);
+  inherited Create(AItemClass);
+
   FOwner := AOwner;
 end;
 
@@ -83,14 +84,14 @@ begin
   Result := FOwner;
 end;
 
-function TBCEditorProposalColumns.GetItem(Index: Integer): TBCEditorProposalColumn;
+function TBCEditorProposalColumns.GetItem(AIndex: Integer): TBCEditorProposalColumn;
 begin
-  Result := inherited GetItem(Index) as TBCEditorProposalColumn;
+  Result := inherited GetItem(AIndex) as TBCEditorProposalColumn;
 end;
 
-procedure TBCEditorProposalColumns.SetItem(Index: Integer; Value: TBCEditorProposalColumn);
+procedure TBCEditorProposalColumns.SetItem(AIndex: Integer; AValue: TBCEditorProposalColumn);
 begin
-  inherited SetItem(Index, Value);
+  inherited SetItem(AIndex, AValue);
 end;
 
 function TBCEditorProposalColumns.Add: TBCEditorProposalColumn;
@@ -98,14 +99,14 @@ begin
   Result := inherited Add as TBCEditorProposalColumn;
 end;
 
-function TBCEditorProposalColumns.FindItemID(ID: Integer): TBCEditorProposalColumn;
+function TBCEditorProposalColumns.FindItemID(AID: Integer): TBCEditorProposalColumn;
 begin
-  Result := inherited FindItemID(ID) as TBCEditorProposalColumn;
+  Result := inherited FindItemID(AID) as TBCEditorProposalColumn;
 end;
 
-function TBCEditorProposalColumns.Insert(Index: Integer): TBCEditorProposalColumn;
+function TBCEditorProposalColumns.Insert(AIndex: Integer): TBCEditorProposalColumn;
 begin
-  Result := inherited Insert(Index) as TBCEditorProposalColumn;
+  Result := inherited Insert(AIndex) as TBCEditorProposalColumn;
 end;
 
 end.

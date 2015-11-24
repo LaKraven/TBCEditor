@@ -12,12 +12,12 @@ type
     FEnabled: Boolean;
     FOnChange: TNotifyEvent;
     procedure DoChange;
-    procedure SetColors(Value: TBCEditorCaretNonBlinkingColors);
-    procedure SetEnabled(Value: Boolean);
+    procedure SetColors(AValue: TBCEditorCaretNonBlinkingColors);
+    procedure SetEnabled(AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Assign(Source: TPersistent); override;
+    procedure Assign(ASource: TPersistent); override;
   published
     property Colors: TBCEditorCaretNonBlinkingColors read FColors write SetColors;
     property Enabled: Boolean read FEnabled write SetEnabled;
@@ -41,17 +41,17 @@ begin
   inherited;
 end;
 
-procedure TBCEditorCaretNonBlinking.Assign(Source: TPersistent);
+procedure TBCEditorCaretNonBlinking.Assign(ASource: TPersistent);
 begin
-  if Assigned(Source) and (Source is TBCEditorCaretNonBlinking) then
-  with Source as TBCEditorCaretNonBlinking do
+  if Assigned(ASource) and (ASource is TBCEditorCaretNonBlinking) then
+  with ASource as TBCEditorCaretNonBlinking do
   begin
     Self.FColors.Assign(FColors);
     Self.FEnabled := FEnabled;
     Self.DoChange;
   end
   else
-    inherited Assign(Source);
+    inherited Assign(ASource);
 end;
 
 procedure TBCEditorCaretNonBlinking.DoChange;
@@ -60,18 +60,18 @@ begin
     FOnChange(Self);
 end;
 
-procedure TBCEditorCaretNonBlinking.SetEnabled(Value: Boolean);
+procedure TBCEditorCaretNonBlinking.SetEnabled(AValue: Boolean);
 begin
-  if Value <> FEnabled then
+  if FEnabled <> AValue then
   begin
-    FEnabled := Value;
+    FEnabled := AValue;
     DoChange;
   end;
 end;
 
-procedure TBCEditorCaretNonBlinking.SetColors(Value: TBCEditorCaretNonBlinkingColors);
+procedure TBCEditorCaretNonBlinking.SetColors(AValue: TBCEditorCaretNonBlinkingColors);
 begin
-  FColors.Assign(Value);
+  FColors.Assign(AValue);
 end;
 
 end.

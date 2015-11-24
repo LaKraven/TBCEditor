@@ -611,11 +611,20 @@ begin
       LTextPosition := Editor.TextCaretPosition;
       if FAdjustCompletionStart then
         FCompletionStart := GetTextPosition(FCompletionStart, LTextPosition.Line).Char;
-      SelectionBeginPosition := GetTextPosition(FCompletionStart, LTextPosition.Line);
-      if AEndToken = BCEDITOR_NONE_CHAR then
-        SelectionEndPosition := GetTextPosition(WordEnd.Char, LTextPosition.Line)
-      else
-        SelectionEndPosition := LTextPosition;
+
+      if not SelectionAvailable then
+      begin
+        SelectionBeginPosition := GetTextPosition(FCompletionStart, LTextPosition.Line);
+        if AEndToken = BCEDITOR_NONE_CHAR then
+        begin
+          if IsWordBreakChar(Lines[LTextPosition.Line][LTextPosition.Char]) then
+            SelectionEndPosition := LTextPosition
+          else
+            SelectionEndPosition := GetTextPosition(WordEnd.Char, LTextPosition.Line)
+        end
+        else
+          SelectionEndPosition := LTextPosition;
+      end;
 
       if FSelectedLine < Length(FItemIndexArray) then
         Value := GetItemList[FItemIndexArray[FSelectedLine]]
@@ -625,14 +634,11 @@ begin
       if SelectedText <> Value then
         SelectedText := Value;
 
-      with Editor do
-      begin
-        if CanFocus then
-          SetFocus;
-        EnsureCursorPositionVisible;
-        TextCaretPosition := SelectionEndPosition;
-        SelectionBeginPosition := TextCaretPosition;
-      end;
+      if CanFocus then
+        SetFocus;
+      EnsureCursorPositionVisible;
+      TextCaretPosition := SelectionEndPosition;
+      SelectionBeginPosition := TextCaretPosition;
     finally
       EndUndoBlock;
       EndUpdate;

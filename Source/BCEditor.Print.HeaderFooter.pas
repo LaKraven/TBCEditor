@@ -364,18 +364,18 @@ end;
 
 function TBCEditorSection.Add(Text: string; Font: TFont; Alignment: TAlignment; LineNumber: Integer): Integer;
 var
-  SectionItem: TBCEditorSectionItem;
+  LSectionItem: TBCEditorSectionItem;
 begin
-  SectionItem := TBCEditorSectionItem.Create;
+  LSectionItem := TBCEditorSectionItem.Create;
   if not Assigned(Font) then
-    SectionItem.Font := FDefaultFont
+    LSectionItem.Font := FDefaultFont
   else
-    SectionItem.Font := Font;
-  SectionItem.Alignment := Alignment;
-  SectionItem.LineNumber := LineNumber;
-  SectionItem.Index := FItems.Add(SectionItem);
-  SectionItem.Text := Text;
-  Result := SectionItem.Index;
+    LSectionItem.Font := Font;
+  LSectionItem.Alignment := Alignment;
+  LSectionItem.LineNumber := LineNumber;
+  LSectionItem.Index := FItems.Add(LSectionItem);
+  LSectionItem.Text := Text;
+  Result := LSectionItem.Index;
 end;
 
 procedure TBCEditorSection.Delete(AIndex: Integer);
@@ -406,22 +406,22 @@ end;
 
 procedure TBCEditorSection.FixLines;
 var
-  i, CurrentLine: Integer;
-  LineInfo: TBCEditorLineInfo;
+  i, LCurrentLine: Integer;
+  LLineInfo: TBCEditorLineInfo;
 begin
   for i := 0 to FLineInfo.Count - 1 do
     TBCEditorLineInfo(FLineInfo[i]).Free;
   FLineInfo.Clear;
-  CurrentLine := 0;
+  LCurrentLine := 0;
   FLineCount := 0;
   for i := 0 to FItems.Count - 1 do
   begin
-    if TBCEditorSectionItem(FItems[i]).LineNumber <> CurrentLine then
+    if TBCEditorSectionItem(FItems[i]).LineNumber <> LCurrentLine then
     begin
-      CurrentLine := TBCEditorSectionItem(FItems[i]).LineNumber;
+      LCurrentLine := TBCEditorSectionItem(FItems[i]).LineNumber;
       FLineCount := FLineCount + 1;
-      LineInfo := TBCEditorLineInfo.Create;
-      FLineInfo.Add(LineInfo);
+      LLineInfo := TBCEditorLineInfo.Create;
+      FLineInfo.Add(LLineInfo);
     end;
     TBCEditorSectionItem(FItems[i]).LineNumber := FLineCount;
   end;
@@ -429,34 +429,34 @@ end;
 
 procedure TBCEditorSection.CalculateHeight(ACanvas: TCanvas);
 var
-  i, CurrentLine: Integer;
-  SectionItem: TBCEditorSectionItem;
-  OrginalHeight: Integer;
-  TextMetric: TTextMetric;
+  i, LCurrentLine: Integer;
+  LSectionItem: TBCEditorSectionItem;
+  LOrginalHeight: Integer;
+  LTextMetric: TTextMetric;
 begin
   FFrameHeight := -1;
   if FItems.Count <= 0 then
     Exit;
 
-  CurrentLine := 1;
+  LCurrentLine := 1;
   FFrameHeight := 0;
-  OrginalHeight := FFrameHeight;
+  LOrginalHeight := FFrameHeight;
   for i := 0 to FItems.Count - 1 do
   begin
-    SectionItem := TBCEditorSectionItem(FItems[i]);
-    if SectionItem.LineNumber <> CurrentLine then
+    LSectionItem := TBCEditorSectionItem(FItems[i]);
+    if LSectionItem.LineNumber <> LCurrentLine then
     begin
-      CurrentLine := SectionItem.LineNumber;
-      OrginalHeight := FFrameHeight;
+      LCurrentLine := LSectionItem.LineNumber;
+      LOrginalHeight := FFrameHeight;
     end;
-    ACanvas.Font.Assign(SectionItem.Font);
-    GetTextMetrics(ACanvas.Handle, TextMetric);
-    with TBCEditorLineInfo(FLineInfo[CurrentLine - 1]), TextMetric do
+    ACanvas.Font.Assign(LSectionItem.Font);
+    GetTextMetrics(ACanvas.Handle, LTextMetric);
+    with TBCEditorLineInfo(FLineInfo[LCurrentLine - 1]), LTextMetric do
     begin
       LineHeight := Max(LineHeight, TextHeight(ACanvas, 'W'));
       MaxBaseDistance := Max(MaxBaseDistance, tmHeight - tmDescent);
     end;
-    FFrameHeight := Max(FFrameHeight, OrginalHeight + TextHeight(ACanvas, 'W'));
+    FFrameHeight := Max(FFrameHeight, LOrginalHeight + TextHeight(ACanvas, 'W'));
   end;
   FFrameHeight := FFrameHeight + 2 * FMargins.PixelInternalMargin;
 end;
@@ -470,15 +470,15 @@ end;
 
 procedure TBCEditorSection.SetPixelsPerInch(AValue: Integer);
 var
-  i, TmpSize: Integer;
+  i, LTmpSize: Integer;
   LFont: TFont;
 begin
   for i := 0 to FItems.Count - 1 do
   begin
     LFont := TBCEditorSectionItem(FItems[i]).Font;
-    TmpSize := LFont.Size;
+    LTmpSize := LFont.Size;
     LFont.PixelsPerInch := AValue;
-    LFont.Size := TmpSize;
+    LFont.Size := LTmpSize;
   end;
 end;
 
@@ -552,10 +552,10 @@ end;
 
 procedure TBCEditorSection.Print(ACanvas: TCanvas; PageNum: Integer);
 var
-  i, X, Y, CurrentLine: Integer;
+  i, X, Y, LCurrentLine: Integer;
   S: string;
-  SectionItem: TBCEditorSectionItem;
-  OldAlign: UINT;
+  LSectionItem: TBCEditorSectionItem;
+  LOldAlign: UINT;
   LAlignment: TAlignment;
 begin
   if FFrameHeight <= 0 then
@@ -569,21 +569,21 @@ begin
     Y := FMargins.PixelFooter;
   Y := Y + FMargins.PixelInternalMargin;
 
-  CurrentLine := 1;
+  LCurrentLine := 1;
   for i := 0 to FItems.Count - 1 do
   begin
-    SectionItem := TBCEditorSectionItem(FItems[i]);
-    ACanvas.Font := SectionItem.Font;
-    if SectionItem.LineNumber <> CurrentLine then
+    LSectionItem := TBCEditorSectionItem(FItems[i]);
+    ACanvas.Font := LSectionItem.Font;
+    if LSectionItem.LineNumber <> LCurrentLine then
     begin
-      Y := Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).LineHeight;
-      CurrentLine := SectionItem.LineNumber;
+      Y := Y + TBCEditorLineInfo(FLineInfo[LCurrentLine - 1]).LineHeight;
+      LCurrentLine := LSectionItem.LineNumber;
     end;
-    S := SectionItem.GetText(FNumberOfPages, PageNum, FRomanNumbers, FTitle, FTime, FDate);
-    LAlignment := SectionItem.Alignment;
+    S := LSectionItem.GetText(FNumberOfPages, PageNum, FRomanNumbers, FTitle, FTime, FDate);
+    LAlignment := LSectionItem.Alignment;
     if MirrorPosition and ((PageNum mod 2) = 0) then
     begin
-      case SectionItem.Alignment of
+      case LSectionItem.Alignment of
         taRightJustify:
           LAlignment := taLeftJustify;
         taLeftJustify:
@@ -600,10 +600,10 @@ begin
           X := (PixelLeftTextIndent + PixelRightTextIndent - TextWidth(ACanvas, S)) div 2;
       end;
     end;
-    OldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
-    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[CurrentLine - 1]).MaxBaseDistance, 0, nil, PChar(S),
+    LOldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
+    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[LCurrentLine - 1]).MaxBaseDistance, 0, nil, PChar(S),
       Length(S), nil);
-    SetTextAlign(ACanvas.Handle, OldAlign);
+    SetTextAlign(ACanvas.Handle, LOldAlign);
   end;
   RestoreFontPenBrush(ACanvas);
 end;

@@ -9902,7 +9902,7 @@ begin
     LLine := FLines[Y];
     if X < Length(LLine) then
     begin
-      X := StringWordEnd(LLine, X + 1);
+      X := StringWordEnd(LLine, X);
       if X = 0 then
         X := Length(LLine) + 1;
     end;

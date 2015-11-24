@@ -195,7 +195,6 @@ type
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineIndentChars(ALine: Integer): Integer;
-    function GetLineText: string;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
     function GetSelectionAvailable: Boolean;
     function GetSelectedText: string;
@@ -247,7 +246,7 @@ type
     procedure DoInternalUndo;
     procedure DoInternalRedo;
     procedure DoPasteFromClipboard;
-    procedure DoSelectedText(const Value: string); overload;
+    procedure DoSelectedText(const AValue: string); overload;
     procedure DoSelectedText(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean); overload;
     procedure DoSelectedText(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean;
       ATextCaretPosition: TBCEditorTextPosition); overload;
@@ -287,7 +286,6 @@ type
     procedure SetLeftMargin(const AValue: TBCEditorLeftMargin);
     procedure SetLeftMarginWidth(AValue: Integer);
     procedure SetLines(AValue: TBCEditorLines);
-    procedure SetLineText(AValue: string);
     procedure SetLineWithRightTrim(ALine: Integer; const ALineText: string);
     procedure SetModified(AValue: Boolean);
     procedure SetOptions(AValue: TBCEditorOptions);
@@ -569,7 +567,6 @@ type
     property LineNumbersCount: Integer read FLineNumbersCount;
     property Lines: TBCEditorLines read FLines write SetLines;
     property LineSpacing: TBCEditorLineSpacing read FLinespacing write FLinespacing;
-    property LineText: string read GetLineText write SetLineText;
     property Marks: TBCEditorBookmarkList read FMarkList;
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
@@ -1291,17 +1288,6 @@ begin
         Inc(Result);
       end
   until (LPLine^ <> BCEDITOR_TAB_CHAR) and (LPLine^ <> BCEDITOR_SPACE_CHAR);
-end;
-
-function TBCBaseEditor.GetLineText: string;
-var
-  LLine: Integer;
-begin
-  LLine := GetTextCaretY;
-  if (LLine >= 0) and (LLine < FLines.Count) then
-    Result := FLines[LLine]
-  else
-    Result := '';
 end;
 
 function TBCBaseEditor.GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
@@ -4195,15 +4181,6 @@ begin
   CreateLineNumbersCache;
   SizeOrFontChanged(True);
   InitCodeFolding;
-end;
-
-procedure TBCBaseEditor.SetLineText(AValue: string);
-var
-  LLine: Integer;
-begin
-  LLine := GetTextCaretY;
-  if (LLine >= 0) and (LLine < Max(1, FLines.Count)) then
-    FLines[LLine] := AValue;
 end;
 
 procedure TBCBaseEditor.SetModified(AValue: Boolean);
@@ -8368,7 +8345,7 @@ begin
   { If there is anything visible below the last line, then fill this as well }
   LTokenRect := AClipRect;
   if AMinimap then
-    LTokenRect.Top := Min(FMinimap.VisibleLines, FLines.Count) * FMinimap.CharHeight
+    LTokenRect.Top := Min(FMinimap.VisibleLines, FLineNumbersCount) * FMinimap.CharHeight
   else
     LTokenRect.Top := (ALastRow - TopLine + 1) * FLineHeight;
 
@@ -8770,9 +8747,9 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.DoSelectedText(const Value: string);
+procedure TBCBaseEditor.DoSelectedText(const AValue: string);
 begin
-  DoSelectedText(FSelection.ActiveMode, PChar(Value), True);
+  DoSelectedText(FSelection.ActiveMode, PChar(AValue), True);
 end;
 
 procedure TBCBaseEditor.DoSelectedText(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean);

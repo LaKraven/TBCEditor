@@ -18,11 +18,11 @@ type
     FVisible: Boolean;
     function GetIsBookmark: Boolean;
     procedure Invalidate;
-    procedure SetChar(const Value: Integer); virtual;
-    procedure SetImage(const Value: Integer); virtual;
-    procedure SetInternalImage(const Value: Boolean);
-    procedure SetLine(const Value: Integer); virtual;
-    procedure SetVisible(const Value: Boolean);
+    procedure SetChar(const AValue: Integer); virtual;
+    procedure SetImage(const AValue: Integer); virtual;
+    procedure SetInternalImage(const AValue: Boolean);
+    procedure SetLine(const AValue: Integer); virtual;
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create(AOwner: TCustomControl);
 
@@ -81,9 +81,9 @@ begin
   Result := FIndex >= 0;
 end;
 
-procedure TBCEditorBookmark.SetChar(const Value: Integer);
+procedure TBCEditorBookmark.SetChar(const AValue: Integer);
 begin
-  FChar := Value;
+  FChar := AValue;
 end;
 
 procedure TBCEditorBookmark.Invalidate;
@@ -93,36 +93,36 @@ begin
      (FEditor as TBCBaseEditor).InvalidateLeftMarginLines(FLine, FLine);
 end;
 
-procedure TBCEditorBookmark.SetImage(const Value: Integer);
+procedure TBCEditorBookmark.SetImage(const AValue: Integer);
 begin
-  FImage := Value;
+  FImage := AValue;
   Invalidate;
 end;
 
-procedure TBCEditorBookmark.SetInternalImage(const Value: Boolean);
+procedure TBCEditorBookmark.SetInternalImage(const AValue: Boolean);
 begin
-  FInternalImage := Value;
+  FInternalImage := AValue;
   Invalidate;
 end;
 
-procedure TBCEditorBookmark.SetLine(const Value: Integer);
+procedure TBCEditorBookmark.SetLine(const AValue: Integer);
 begin
   if FVisible and Assigned(FEditor) then
   begin
     if FLine > 0 then
       Invalidate;
-    FLine := Value;
+    FLine := AValue;
     Invalidate;
   end
   else
-    FLine := Value;
+    FLine := AValue;
 end;
 
-procedure TBCEditorBookmark.SetVisible(const Value: Boolean);
+procedure TBCEditorBookmark.SetVisible(const AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     Invalidate;
   end;
 end;

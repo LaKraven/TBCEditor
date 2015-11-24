@@ -214,8 +214,8 @@ begin
           with LEditor do
           begin
             LTextCaretPosition := TextCaretPosition;
-            if LTextCaretPosition.Char <= Length(LineText) then
-              LChar := LineText[LTextCaretPosition.Char]
+            if LTextCaretPosition.Char <= Length(LEditor.Lines[LTextCaretPosition.Line]) then
+              LChar := LEditor.Lines[LTextCaretPosition.Line][LTextCaretPosition.Char]
             else
               LChar := BCEDITOR_SPACE_CHAR;
 
@@ -649,29 +649,32 @@ end;
 
 function TBCEditorCompletionProposalPopupWindow.GetCurrentInput: string;
 var
-  S: string;
   i: Integer;
+  LLineText: string;
   LEditor: TBCBaseEditor;
   LTextCaretPosition: TBCEditorTextPosition;
 begin
   Result := '';
   LEditor := Owner as TBCBaseEditor;
-  S := LEditor.LineText;
+
   LTextCaretPosition := LEditor.TextCaretPosition;
-  i := LTextCaretPosition.Char;
-  if i <= Length(S) then
+
+  LLineText := LEditor.Lines[LTextCaretPosition.Line];
+  i := LTextCaretPosition.Char - 1;
+  if i <= Length(LLineText) then
   begin
     FAdjustCompletionStart := False;
-    while (i > 0) and (S[i] > BCEDITOR_SPACE_CHAR) and not Self.IsWordBreakChar(S[i]) do
+    while (i > 0) and (LLineText[i] > BCEDITOR_SPACE_CHAR) and not Self.IsWordBreakChar(LLineText[i]) do
       Dec(i);
 
     FCompletionStart := i + 1;
-    Result := Copy(S, i + 1, LTextCaretPosition.Char - i - 1);
+    Result := Copy(LLineText, FCompletionStart, LTextCaretPosition.Char - FCompletionStart);
   end
   else
+  begin
     FAdjustCompletionStart := True;
-
-  FCompletionStart := i;
+    FCompletionStart := LTextCaretPosition.Char;
+  end;
 end;
 
 function TBCEditorCompletionProposalPopupWindow.GetItemList: TStrings;

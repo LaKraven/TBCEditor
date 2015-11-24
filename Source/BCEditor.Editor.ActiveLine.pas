@@ -13,10 +13,10 @@ type
     FOnChange: TNotifyEvent;
     FVisible: Boolean;
     procedure DoChange(Sender: TObject);
-    procedure SetColor(const Value: TColor);
-    procedure SetIndicator(const Value: TBCEditorGlyph);
-    procedure SetOnChange(Value: TNotifyEvent);
-    procedure SetVisible(const Value: Boolean);
+    procedure SetColor(const AValue: TColor);
+    procedure SetIndicator(const AValue: TBCEditorGlyph);
+    procedure SetOnChange(AValue: TNotifyEvent);
+    procedure SetVisible(const AValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -63,10 +63,10 @@ begin
     inherited Assign(Source);
 end;
 
-procedure TBCEditorActiveLine.SetOnChange(Value: TNotifyEvent);
+procedure TBCEditorActiveLine.SetOnChange(AValue: TNotifyEvent);
 begin
-  FOnChange := Value;
-  FIndicator.OnChange := Value;
+  FOnChange := AValue;
+  FIndicator.OnChange := AValue;
 end;
 
 procedure TBCEditorActiveLine.DoChange(Sender: TObject);
@@ -75,25 +75,25 @@ begin
     FOnChange(Sender);
 end;
 
-procedure TBCEditorActiveLine.SetColor(const Value: TColor);
+procedure TBCEditorActiveLine.SetColor(const AValue: TColor);
 begin
-  if FColor <> Value then
+  if FColor <> AValue then
   begin
-    FColor := Value;
+    FColor := AValue;
     DoChange(Self);
   end;
 end;
 
-procedure TBCEditorActiveLine.SetIndicator(const Value: TBCEditorGlyph);
+procedure TBCEditorActiveLine.SetIndicator(const AValue: TBCEditorGlyph);
 begin
-  FIndicator.Assign(Value);
+  FIndicator.Assign(AValue);
 end;
 
-procedure TBCEditorActiveLine.SetVisible(const Value: Boolean);
+procedure TBCEditorActiveLine.SetVisible(const AValue: Boolean);
 begin
-  if FVisible <> Value then
+  if FVisible <> AValue then
   begin
-    FVisible := Value;
+    FVisible := AValue;
     DoChange(Self);
   end;
 end;

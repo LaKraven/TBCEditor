@@ -23,14 +23,10 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
 ```
   with Editor do 
   begin
-    { Load highlighter from file }
     Highlighter.LoadFromFile('JSON.json');
-    { Load color from file }
     Highlighter.Colors.LoadFromFile('Default.json'); 
-    { Load a file into editor }  
     LoadFromFile(GetHighlighterFileName('JSON.json')); 
     ...
-    { Set editor lines }
     Lines.Text := Highlighter.Info.General.Sample; 
   end;
 ```

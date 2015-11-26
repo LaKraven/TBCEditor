@@ -21,14 +21,10 @@ type
   TBCBaseEditor = class(TCustomControl)
   strict private
     FActiveLine: TBCEditorActiveLine;
-    FAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
-    FOnAfterLinePaint: TBCEditorLinePaintEvent;
     FAllCodeFoldingRanges: TBCEditorAllCodeFoldingRanges;
     FAltEnabled: Boolean;
     FAlwaysShowCaret: Boolean;
     FBackgroundColor: TColor;
-    FBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
-    FBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent;
     FBookMarks: array [0 .. 8] of TBCEditorBookmark;
     FBorderStyle: TBorderStyle;
     FBufferBmp: Vcl.Graphics.TBitmap;
@@ -37,14 +33,6 @@ type
     FDisplayCaretX: Integer;
     FDisplayCaretY: Integer;
     FChainedEditor: TBCBaseEditor;
-    FChainLinesChanged: TNotifyEvent;
-    FChainLinesChanging: TNotifyEvent;
-    FChainListCleared: TNotifyEvent;
-    FChainListDeleted: TStringListChangeEvent;
-    FChainListInserted: TStringListChangeEvent;
-    FChainListPutted: TStringListChangeEvent;
-    FChainRedoAdded: TNotifyEvent;
-    FChainUndoAdded: TNotifyEvent;
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
     FCodeFoldingHintForm: TBCEditorCodeFoldingHintForm;
@@ -101,12 +89,24 @@ type
     FMouseOverURI: Boolean;
     FMouseWheelAccumulator: Integer;
     FOldMouseMovePoint: TPoint;
+    FOnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FOnAfterBookmarkPlaced: TNotifyEvent;
     FOnAfterClearBookmark: TNotifyEvent;
+    FOnAfterLinePaint: TBCEditorLinePaintEvent;
+    FOnBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FOnBeforeBookmarkPlaced: TBCEditorBookmarkEvent;
     FOnBeforeClearBookmark: TBCEditorBookmarkEvent;
+    FOnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent;
     FOnCaretChanged: TBCEditorCaretChangedEvent;
     FOnChange: TNotifyEvent;
+    FOnChainLinesChanged: TNotifyEvent;
+    FOnChainLinesChanging: TNotifyEvent;
+    FOnChainListCleared: TNotifyEvent;
+    FOnChainListDeleted: TStringListChangeEvent;
+    FOnChainListInserted: TStringListChangeEvent;
+    FOnChainListPutted: TStringListChangeEvent;
+    FOnChainRedoAdded: TNotifyEvent;
+    FOnChainUndoAdded: TNotifyEvent;
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
     FOnContextHelp: TBCEditorContextHelpEvent;
     FOnCustomLineColors: TBCEditorCustomLineColorsEvent;
@@ -218,8 +218,6 @@ type
     function RescanHighlighterRangesFrom(AIndex: Integer): Integer;
     function RowColumnToCharIndex(ATextPosition: TBCEditorTextPosition): Integer;
     function SearchText(const ASearchText: string; AChanged: Boolean = False): Integer;
-    function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
-    function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
     function StringWordEnd(const ALine: string; AStart: Integer): Integer;
     function StringWordStart(const ALine: string; AStart: Integer): Integer;
     procedure ActiveLineChanged(Sender: TObject);
@@ -570,14 +568,14 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
-    property OnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FAfterBookmarkPanelPaint write FAfterBookmarkPanelPaint;
+    property OnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FOnAfterBookmarkPanelPaint write FOnAfterBookmarkPanelPaint;
     property OnAfterBookmarkPlaced: TNotifyEvent read FOnAfterBookmarkPlaced write FOnAfterBookmarkPlaced;
     property OnAfterClearBookmark: TNotifyEvent read FOnAfterClearBookmark write FOnAfterClearBookmark;
     property OnAfterLinePaint: TBCEditorLinePaintEvent read FOnAfterLinePaint write FOnAfterLinePaint;
     property OnBeforeBookmarkPlaced: TBCEditorBookmarkEvent read FOnBeforeBookmarkPlaced write FOnBeforeBookmarkPlaced;
     property OnBeforeClearBookmark: TBCEditorBookmarkEvent read FOnBeforeClearBookmark write FOnBeforeClearBookmark;
-    property OnBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FBeforeBookmarkPanelPaint write FBeforeBookmarkPanelPaint;
-    property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FBookmarkPanelLinePaint write FBookmarkPanelLinePaint;
+    property OnBeforeBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FOnBeforeBookmarkPanelPaint write FOnBeforeBookmarkPanelPaint;
+    property OnBookmarkPanelLinePaint: TBCEditorBookmarkPanelLinePaintEvent read FOnBookmarkPanelLinePaint write FOnBookmarkPanelLinePaint;
     property OnCaretChanged: TBCEditorCaretChangedEvent read FOnCaretChanged write FOnCaretChanged;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
@@ -2175,6 +2173,24 @@ function TBCBaseEditor.NextWordPosition(const ATextPosition: TBCEditorTextPositi
 var
   X, Y, LLength: Integer;
   LLine: string;
+
+  function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
+  var
+    LCharPointer: PChar;
+  begin
+    if (AStart > 0) and (AStart <= Length(ALine)) then
+    begin
+      LCharPointer := PChar(@ALine[AStart]);
+      repeat
+        if ACharMethod(LCharPointer^) then
+          Exit(AStart);
+        Inc(LCharPointer);
+        Inc(AStart);
+      until LCharPointer^ = BCEDITOR_NONE_CHAR;
+    end;
+    Result := 0;
+  end;
+
 begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
@@ -2235,6 +2251,18 @@ function TBCBaseEditor.PreviousWordPosition(const ATextPosition: TBCEditorTextPo
 var
   X, Y: Integer;
   LLine: string;
+
+  function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
+  var
+    i: Integer;
+  begin
+    Result := 0;
+    if (AStart > 0) and (AStart <= Length(ALine)) then
+      for i := AStart downto 1 do
+        if ACharMethod(ALine[i]) then
+          Exit(i);
+  end;
+
 begin
   X := ATextPosition.Char;
   Y := ATextPosition.Line;
@@ -2464,34 +2492,6 @@ begin
     if LIsEndUndoBlock then
       EndUndoBlock;
   end;
-end;
-
-function TBCBaseEditor.StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
-var
-  i: Integer;
-begin
-  Result := 0;
-  if (AStart > 0) and (AStart <= Length(ALine)) then
-    for i := AStart downto 1 do
-      if ACharMethod(ALine[i]) then
-        Exit(i);
-end;
-
-function TBCBaseEditor.StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
-var
-  LCharPointer: PChar;
-begin
-  if (AStart > 0) and (AStart <= Length(ALine)) then
-  begin
-    LCharPointer := PChar(@ALine[AStart]);
-    repeat
-      if ACharMethod(LCharPointer^) then
-        Exit(AStart);
-      Inc(LCharPointer);
-      Inc(AStart);
-    until LCharPointer^ = BCEDITOR_NONE_CHAR;
-  end;
-  Result := 0;
 end;
 
 procedure TBCBaseEditor.ActiveLineChanged(Sender: TObject);
@@ -5233,43 +5233,43 @@ end;
 
 procedure TBCBaseEditor.ChainLinesChanged(Sender: TObject);
 begin
-  if Assigned(FChainLinesChanged) then
-    FChainLinesChanged(Sender);
+  if Assigned(FOnChainLinesChanged) then
+    FOnChainLinesChanged(Sender);
   FOriginalLines.OnChange(Sender);
 end;
 
 procedure TBCBaseEditor.ChainLinesChanging(Sender: TObject);
 begin
-  if Assigned(FChainLinesChanging) then
-    FChainLinesChanging(Sender);
+  if Assigned(FOnChainLinesChanging) then
+    FOnChainLinesChanging(Sender);
   FOriginalLines.OnChanging(Sender);
 end;
 
 procedure TBCBaseEditor.ChainListCleared(Sender: TObject);
 begin
-  if Assigned(FChainListCleared) then
-    FChainListCleared(Sender);
+  if Assigned(FOnChainListCleared) then
+    FOnChainListCleared(Sender);
   FOriginalLines.OnCleared(Sender);
 end;
 
 procedure TBCBaseEditor.ChainListDeleted(Sender: TObject; AIndex: Integer; ACount: Integer);
 begin
-  if Assigned(FChainListDeleted) then
-    FChainListDeleted(Sender, AIndex, ACount);
+  if Assigned(FOnChainListDeleted) then
+    FOnChainListDeleted(Sender, AIndex, ACount);
   FOriginalLines.OnDeleted(Sender, AIndex, ACount);
 end;
 
 procedure TBCBaseEditor.ChainListInserted(Sender: TObject; AIndex: Integer; ACount: Integer);
 begin
-  if Assigned(FChainListInserted) then
-    FChainListInserted(Sender, AIndex, ACount);
+  if Assigned(FOnChainListInserted) then
+    FOnChainListInserted(Sender, AIndex, ACount);
   FOriginalLines.OnInserted(Sender, AIndex, ACount);
 end;
 
 procedure TBCBaseEditor.ChainListPutted(Sender: TObject; AIndex: Integer; ACount: Integer);
 begin
-  if Assigned(FChainListPutted) then
-    FChainListPutted(Sender, AIndex, ACount);
+  if Assigned(FOnChainListPutted) then
+    FOnChainListPutted(Sender, AIndex, ACount);
   FOriginalLines.OnPutted(Sender, AIndex, ACount);
 end;
 
@@ -5281,12 +5281,12 @@ begin
   if Sender = FUndoList then
   begin
     LUndoList := FOriginalUndoList;
-    LNotifyEvent := FChainUndoAdded;
+    LNotifyEvent := FOnChainUndoAdded;
   end
   else
   begin
     LUndoList := FOriginalRedoList;
-    LNotifyEvent := FChainRedoAdded;
+    LNotifyEvent := FOnChainRedoAdded;
   end;
   if Assigned(LNotifyEvent) then
     LNotifyEvent(Sender);
@@ -7240,8 +7240,8 @@ var
           end;
         end;
       end;
-      if Assigned(FBeforeBookmarkPanelPaint) then
-        FBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
+      if Assigned(FOnBeforeBookmarkPanelPaint) then
+        FOnBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
     end;
     Canvas.Brush.Style := bsClear;
   end;
@@ -7374,7 +7374,7 @@ var
   begin
     if FLeftMargin.Bookmarks.Panel.Visible then
     begin
-      if Assigned(FBookmarkPanelLinePaint) then
+      if Assigned(FOnBookmarkPanelLinePaint) then
       begin
         for i := AFirstLine to ALastLine do
         begin
@@ -7385,11 +7385,11 @@ var
           LLineRect.Right := LPanelRect.Right;
           LLineRect.Top := (LLine - TopLine) * FLineHeight;
           LLineRect.Bottom := LLineRect.Top + FLineHeight;
-          FBookmarkPanelLinePaint(Self, Canvas, LLineRect, LLine);
+          FOnBookmarkPanelLinePaint(Self, Canvas, LLineRect, LLine);
         end;
       end;
-      if Assigned(FAfterBookmarkPanelPaint) then
-        FAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
+      if Assigned(FOnAfterBookmarkPanelPaint) then
+        FOnAfterBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
     end;
   end;
 
@@ -11558,22 +11558,22 @@ begin
   if FLines <> FOriginalLines then
     UnhookEditorLines;
 
-  FChainListCleared := ALines.OnCleared;
+  FOnChainListCleared := ALines.OnCleared;
   ALines.OnCleared := ChainListCleared;
-  FChainListDeleted := ALines.OnDeleted;
+  FOnChainListDeleted := ALines.OnDeleted;
   ALines.OnDeleted := ChainListDeleted;
-  FChainListInserted := ALines.OnInserted;
+  FOnChainListInserted := ALines.OnInserted;
   ALines.OnInserted := ChainListInserted;
-  FChainListPutted := ALines.OnPutted;
+  FOnChainListPutted := ALines.OnPutted;
   ALines.OnPutted := ChainListPutted;
-  FChainLinesChanging := ALines.OnChanging;
+  FOnChainLinesChanging := ALines.OnChanging;
   ALines.OnChanging := ChainLinesChanging;
-  FChainLinesChanged := ALines.OnChange;
+  FOnChainLinesChanged := ALines.OnChange;
   ALines.OnChange := ChainLinesChanged;
 
-  FChainUndoAdded := AUndo.OnAddedUndo;
+  FOnChainUndoAdded := AUndo.OnAddedUndo;
   AUndo.OnAddedUndo := ChainUndoRedoAdded;
-  FChainRedoAdded := ARedo.OnAddedUndo;
+  FOnChainRedoAdded := ARedo.OnAddedUndo;
   ARedo.OnAddedUndo := ChainUndoRedoAdded;
 
   FLines := ALines;
@@ -12306,23 +12306,23 @@ begin
 
   with FLines do
   begin
-    OnCleared := FChainListCleared;
-    OnDeleted := FChainListDeleted;
-    OnInserted := FChainListInserted;
-    OnPutted := FChainListPutted;
-    OnChanging := FChainLinesChanging;
-    OnChange := FChainLinesChanged;
+    OnCleared := FOnChainListCleared;
+    OnDeleted := FOnChainListDeleted;
+    OnInserted := FOnChainListInserted;
+    OnPutted := FOnChainListPutted;
+    OnChanging := FOnChainLinesChanging;
+    OnChange := FOnChainLinesChanged;
   end;
-  FUndoList.OnAddedUndo := FChainUndoAdded;
-  FRedoList.OnAddedUndo := FChainRedoAdded;
+  FUndoList.OnAddedUndo := FOnChainUndoAdded;
+  FRedoList.OnAddedUndo := FOnChainRedoAdded;
 
-  FChainListCleared := nil;
-  FChainListDeleted := nil;
-  FChainListInserted := nil;
-  FChainListPutted := nil;
-  FChainLinesChanging := nil;
-  FChainLinesChanged := nil;
-  FChainUndoAdded := nil;
+  FOnChainListCleared := nil;
+  FOnChainListDeleted := nil;
+  FOnChainListInserted := nil;
+  FOnChainListPutted := nil;
+  FOnChainLinesChanging := nil;
+  FOnChainLinesChanged := nil;
+  FOnChainUndoAdded := nil;
 
   FLines := FOriginalLines;
   FUndoList := FOriginalUndoList;

@@ -185,7 +185,7 @@ type
     function GetClipboardText: string;
     function GetDisplayCaretPosition: TBCEditorDisplayPosition;
     function GetDisplayLineNumber(const ADisplayLineNumber: Integer): Integer;
-    function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition; overload;
+    function GetDisplayPosition(AColumn, ARow: Integer): TBCEditorDisplayPosition;
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
@@ -491,8 +491,7 @@ type
     procedure DragDrop(ASource: TObject; X, Y: Integer); override;
     procedure EndUndoBlock;
     procedure EndUpdate;
-    procedure EnsureCursorPositionVisible; overload;
-    procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean; AEvenIfVisible: Boolean = False); overload;
+    procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
@@ -1583,7 +1582,6 @@ function TBCBaseEditor.GetSelectedText: string;
     LPOld := PResult;
     CopyAndForward(AValue, Index, Count, PResult);
     LLength := Count - (PResult - LPOld);
-    { Was anything copied at all or Index was behind line length? }
     if not (eoTrimTrailingSpaces in Options) and (PResult - LPOld > 0) then
     begin
       for i := 0 to LLength - 1 do
@@ -1627,7 +1625,7 @@ function TBCBaseEditor.GetSelectedText: string;
               Inc(LTotalLength, Length(SLineBreak));
             end;
             Inc(LTotalLength, LColumnTo - 1);
-            { Build up result string }
+
             SetLength(Result, LTotalLength);
             P := PChar(Result);
             CopyAndForward(Lines[LFirst], LColumnFrom, MaxInt, P);
@@ -1655,12 +1653,10 @@ function TBCBaseEditor.GetSelectedText: string;
           if LColumnFrom > LColumnTo then
             SwapInt(LColumnFrom, LColumnTo);
 
-          { pre-allocate string large enough for worst case }
           LTotalLength := ((LColumnTo - LColumnFrom) + Length(sLineBreak)) * (LLast - LFirst + 1);
           SetLength(Result, LTotalLength);
           P := PChar(Result);
 
-          { copy chunks to the pre-allocated string }
           LTotalLength := 0;
           for LRow := LFirst to LLast do
           begin
@@ -10398,12 +10394,7 @@ begin
   DecPaintLock;
 end;
 
-procedure TBCBaseEditor.EnsureCursorPositionVisible;
-begin
-  EnsureCursorPositionVisible(False);
-end;
-
-procedure TBCBaseEditor.EnsureCursorPositionVisible(AForceToMiddle: Boolean; AEvenIfVisible: Boolean = False);
+procedure TBCBaseEditor.EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
 var
   LMiddle: Integer;
   LVisibleX: Integer;

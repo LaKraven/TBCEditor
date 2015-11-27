@@ -1003,7 +1003,7 @@ end;
 procedure TBCBaseEditor.DoTrimTrailingSpaces(ATextLine: Integer);
 begin
   if eoTrimTrailingSpaces in FOptions then
-    FLines[ATextLine] := TrimRight(FLines[ATextLine]);
+    FLines.TrimTrailingSpaces(ATextLine);
 end;
 
 function TBCBaseEditor.ExtraLineSpacing: Integer;

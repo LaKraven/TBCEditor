@@ -102,6 +102,7 @@ type
     procedure InsertText(AIndex: Integer; AText: string);
     procedure LoadFromStream(AStream: TStream; AEncoding: TEncoding = nil); override;
     procedure SaveToStream(AStream: TStream; AEncoding: TEncoding = nil); override;
+    procedure TrimTrailingSpaces(AIndex: Integer);
     property Attributes[AIndex: Integer]: PBCEditorLineAttribute read GetAttributes write PutAttributes;
     property Count: Integer read FCount;
     property ExpandedStrings[AIndex: Integer]: string read GetExpandedString;
@@ -596,6 +597,13 @@ begin
     if Assigned(FOnPutted) then
       FOnPutted(Self, AIndex, 1);
   end;
+end;
+
+procedure TBCEditorLines.TrimTrailingSpaces(AIndex: Integer);
+begin
+  if (AIndex < 0) or (AIndex >= FCount) then
+    ListIndexOutOfBounds(AIndex);
+  FList^[AIndex].Value := TrimRight(FList^[AIndex].Value);
 end;
 
 procedure TBCEditorLines.PutObject(AIndex: Integer; AObject: TObject);

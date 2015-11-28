@@ -449,7 +449,7 @@ type
     function GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
     function GetWordAtPixels(X, Y: Integer): string;
     function IsBookmark(ABookmark: Integer): Boolean;
-    function IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
+    function IsTextPositionInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
     function IsWordBreakChar(AChar: Char): Boolean;
     function IsWordChar(AChar: Char): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string): Integer;
@@ -6405,7 +6405,7 @@ begin
     if AButton = mbRight then
     begin
       if (coRightMouseClickMovesCaret in FCaret.Options) and
-        (SelectionAvailable and not IsPointInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) or not SelectionAvailable) then
+        (SelectionAvailable and not IsTextPositionInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) or not SelectionAvailable) then
       begin
         InvalidateSelection;
         FSelectionEndPosition := FSelectionBeginPosition;
@@ -6424,7 +6424,7 @@ begin
 
     Exclude(FStateFlags, sfWaitForDragging);
     if LWasSelected and (eoDragDropEditing in FOptions) and (X > LLeftMarginWidth) and
-      (FSelection.Mode = smNormal) and IsPointInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
+      (FSelection.Mode = smNormal) and IsTextPositionInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
       Include(FStateFlags, sfWaitForDragging);
   end;
 
@@ -7532,6 +7532,9 @@ begin
   for i := 0 to FSearchLines.Count - 1 do
   begin
     LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
+    if IsTextPositionInSelection(LTextPosition) then
+      Continue
+    else
     if LTextPosition.Line + 1 >= TopLine then
     begin
       LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
@@ -7539,12 +7542,12 @@ begin
       LRect.Bottom := LRect.Top + LineHeight;
       LRect.Left := LLeftMargin + (LTextPosition.Char - FLeftChar) * FTextDrawer.CharWidth;
       LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
-      LRect.Left := Max(LLeftMargin, LRect.Left);
+      LRect.Left := Max(LLeftMargin, LRect.Left) + 1;
       if LLength - LCharsOutside > 0 then
       begin
         if LCharsOutside > 0 then
           Delete(LText, 1, LCharsOutside);
-        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 1;
+        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth;
         FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, [tooOpaque, tooClipped], LRect, PChar(LText), (LLength - LCharsOutside));
       end;
     end
@@ -7665,7 +7668,7 @@ begin
         begin
           if FSpecialChars.EndOfLine.Style = eolPilcrow then
           begin
-            if IsPointInSelection(GetTextPosition(LCharPosition, ALine - 1)) then
+            if IsTextPositionInSelection(GetTextPosition(LCharPosition, ALine - 1)) then
               FTextDrawer.BackgroundColor := FSelection.Colors.Background
             else
             if GetTextCaretY = ALine - 1 then
@@ -9277,7 +9280,7 @@ begin
   else
   begin
     LTextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));
-    if (eoDragDropEditing in FOptions) and not MouseCapture and IsPointInSelection(LTextPosition) then
+    if (eoDragDropEditing in FOptions) and not MouseCapture and IsTextPositionInSelection(LTextPosition) then
       LNewCursor := crArrow
     else
     if FRightMargin.Moving or FRightMargin.MouseOver then
@@ -9472,7 +9475,7 @@ begin
   Result := GetBookmark(ABookmark, LTextPosition);
 end;
 
-function TBCBaseEditor.IsPointInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
+function TBCBaseEditor.IsTextPositionInSelection(const ATextPosition: TBCEditorTextPosition): Boolean;
 var
   LBeginTextPosition, LEndTextPosition: TBCEditorTextPosition;
 begin

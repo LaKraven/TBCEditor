@@ -7656,7 +7656,7 @@ begin
             Bottom := ALineRect.Bottom
           else
           Bottom := ALineRect.Bottom - 3;
-          Left := LLeftTemp + (LCharPosition - 1) * LCharWidth - LCharWidth div 2;
+          Left := LLeftTemp + (LCharPosition - 1) * LCharWidth;
           if FSpecialChars.EndOfLine.Style = eolEnter then
             Left := Left + 4;
           if FSpecialChars.EndOfLine.Style = eolPilcrow then

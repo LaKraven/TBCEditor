@@ -414,6 +414,7 @@ type
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
+    procedure PaintSearchResults;
     procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure RecalculateCharExtent;
@@ -503,7 +504,7 @@ type
     procedure InvalidateMinimap;
     procedure InvalidateSelection;
     procedure LeftMarginChanged(Sender: TObject);
-    procedure LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+    procedure LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding = nil);
     procedure LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
     procedure LockUndo;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
@@ -518,7 +519,7 @@ type
     procedure RemoveMouseDownHandler(AHandler: TMouseEvent);
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
     procedure RescanCodeFoldingRanges;
-    procedure SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+    procedure SaveToFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(AIndex: Integer; ATextPosition: TBCEditorTextPosition);
@@ -1941,7 +1942,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
   var
     LPosition, i, j: Integer;
     LKeyword: PChar;
-    LLine, LTempLine: String;
+    LLine, LTempLine: string;
     LFoldRegion: TBCEditorCodeFoldingRegion;
     LOffset: Byte;
   begin
@@ -3074,6 +3075,16 @@ var
   LLine, LKeyword: string;
   LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
   LPTextPosition: PBCEditorTextPosition;
+  LCaseSensitive: Boolean;
+
+  function AreCharsSame(APChar1, APChar2: PChar): Boolean;
+  begin
+    if LCaseSensitive then
+      Result := APChar1^ = APChar2^
+    else
+      Result := UpCase(APChar1^) = UpCase(APChar2^)
+  end;
+
 begin
   ClearSearchLines;
   if ASearchText = '' then
@@ -3082,22 +3093,20 @@ begin
     LKeyword := ASearchText;
   if LKeyword = '' then
     Exit;
-  if not (soCaseSensitive in FSearch.Options) then
-    LKeyword := AnsiUpperCase(LKeyword);
+  LCaseSensitive := soCaseSensitive in FSearch.Options;
+
   for i := 0 to FLines.Count - 1 do
   begin
     LLine := FLines[i];
-    if not (soCaseSensitive in FSearch.Options) then
-      LLine := AnsiUpperCase(LLine);
     LTextPtr := PChar(LLine);
     while LTextPtr^ <> BCEDITOR_NONE_CHAR do
     begin
-      if LTextPtr^ = PChar(LKeyword)^ then { if the first character is a match }
+      if AreCharsSame(LTextPtr, PChar(LKeyword)) then { if the first character is a match }
       begin
         LKeyWordPtr := PChar(LKeyword);
         LBookmarkTextPtr := LTextPtr;
         { check if the keyword found }
-        while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (LTextPtr^ = LKeyWordPtr^) do
+        while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and AreCharsSame(LTextPtr, LKeyWordPtr) do
         begin
           Inc(LTextPtr);
           Inc(LKeyWordPtr);
@@ -3105,7 +3114,7 @@ begin
         if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
         begin
           New(LPTextPosition);
-          LPTextPosition^.Char := Integer(LBookmarkTextPtr);
+          LPTextPosition^.Char := LBookmarkTextPtr - PChar(LLine) + 1;
           LPTextPosition^.Line := i;
           FSearchLines.Add(LPTextPosition)
         end
@@ -6817,6 +6826,8 @@ begin
 
     if FRightMargin.Moving then
       PaintRightMarginMove;
+    if soHighlightResults in FSearch.Options then
+      PaintSearchResults;
   finally
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
@@ -7435,6 +7446,13 @@ var
   LStyles: TCustomStyleServices;
   {$ENDIF}
 begin
+  if not Assigned(FSearchLines) then
+    Exit;
+  if not Assigned(FSearchEngine) then
+    Exit;
+  if (FSearchEngine.ResultCount = 0) and not (soHighlightSimilarTerms in FSelection.Options) then
+    Exit;
+
   {$IFDEF USE_VCL_STYLES}
   LStyles := StyleServices;
   {$ENDIF}
@@ -7456,12 +7474,6 @@ begin
   Canvas.Brush.Color := FBackgroundColor;
   Canvas.FillRect(AClipRect); { fill lines in window rect }
 
-  if not Assigned(FSearchLines) then
-    Exit;
-  if not Assigned(FSearchEngine) then
-    Exit;
-  if (FSearchEngine.ResultCount = 0) and not (soHighlightSimilarTerms in FSelection.Options) then
-    Exit;
   { draw lines }
   if FSearch.Map.Colors.Foreground <> clNone then
     Canvas.Pen.Color := FSearch.Map.Colors.Foreground
@@ -7494,6 +7506,51 @@ begin
     Canvas.LineTo(AClipRect.Right, j);
     Canvas.MoveTo(AClipRect.Left, j + 1);
     Canvas.LineTo(AClipRect.Right, j + 1);
+  end;
+end;
+
+procedure TBCBaseEditor.PaintSearchResults;
+var
+  i: Integer;
+  LTextPosition: TBCEditorTextPosition;
+  LRect: TRect;
+  LText: string;
+  LLength, LLeftMargin, LCharsOutside: Integer;
+begin
+  if not Assigned(FSearchLines) then
+    Exit;
+  if not Assigned(FSearchEngine) then
+    Exit;
+  if FSearchEngine.ResultCount = 0 then
+    Exit;
+
+  if FSearch.Highlighter.Colors.Foreground <> clNone then
+    FTextDrawer.ForegroundColor := FSearch.Highlighter.Colors.Foreground;
+  FTextDrawer.BackgroundColor := FSearch.Highlighter.Colors.Background;
+  LLength := Length(FSearch.SearchText);
+  LLeftMargin := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  for i := 0 to FSearchLines.Count - 1 do
+  begin
+    LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
+    if LTextPosition.Line + 1 >= TopLine then
+    begin
+      LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
+      LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
+      LRect.Bottom := LRect.Top + LineHeight;
+      LRect.Left := LLeftMargin + (LTextPosition.Char - FLeftChar) * FTextDrawer.CharWidth;
+      LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
+      LRect.Left := Max(LLeftMargin, LRect.Left);
+      if LLength - LCharsOutside > 0 then
+      begin
+        if LCharsOutside > 0 then
+          Delete(LText, 1, LCharsOutside);
+        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 1;
+        FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, [tooOpaque, tooClipped], LRect, PChar(LText), (LLength - LCharsOutside));
+      end;
+    end
+    else
+    if LTextPosition.Line + 1 > TopLine + VisibleLines then
+      Exit;
   end;
 end;
 
@@ -8246,16 +8303,7 @@ var
 
               LKeyword := '';
               LWord := LTokenText;
-              if FSearch.Enabled and (FSearch.SearchText <> '') and (soHighlightResults in FSearch.Options) then
-              begin
-                LKeyword := FSearch.SearchText;
-                if not (soCaseSensitive in FSearch.Options) then
-                begin
-                  LKeyword := AnsiUpperCase(LKeyword);
-                  LWord := AnsiUpperCase(LWord);
-                end;
-              end
-              else
+
               if SelectionAvailable and (soHighlightSimilarTerms in FSelection.Options) then
               begin
                 LTempTextPosition := FSelectionEndPosition;
@@ -11756,7 +11804,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.LoadFromFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+procedure TBCBaseEditor.LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LFileStream: TFileStream;
 begin
@@ -12102,7 +12150,7 @@ begin
   Invalidate;
 end;
 
-procedure TBCBaseEditor.SaveToFile(const AFileName: String; AEncoding: System.SysUtils.TEncoding = nil);
+procedure TBCBaseEditor.SaveToFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LFileStream: TFileStream;
 begin

@@ -7421,15 +7421,18 @@ end;
 procedure TBCBaseEditor.PaintRightMarginMove;
 var
   LRightMarginPosition: Integer;
+  LOldStyle: TBrushStyle;
 begin
   with Canvas do
   begin
     Pen.Width := 1;
     Pen.Style := psDot;
     Pen.Color := FRightMargin.Colors.MovingEdge;
-    FTextDrawer.SetBackgroundColor(Self.Color);
+    LOldStyle := Brush.Style;
+    Brush.Style := bsClear;
     MoveTo(FRightMarginMovePosition, 0);
     LineTo(FRightMarginMovePosition, ClientHeight);
+    Brush.Style := LOldStyle;
     LRightMarginPosition := RowColumnToPixels(GetDisplayPosition(FRightMargin.Position + 1, 0)).X;
     Pen.Style := psSolid;
     Pen.Color := FRightMargin.Colors.Edge;

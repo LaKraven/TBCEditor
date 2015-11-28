@@ -15,21 +15,21 @@ type
   TBCEditorLineAttributeMasks = set of TBCEditorLineAttributeMask;
 
   TBCEditorLineState = (lsNone, lsNormal, lsModified);
-  PBCEditorLineAttribute = ^TBCEditorLineAttribute;
 
   TBCEditorLineAttribute = record
-    Foreground: TColor;
     Background: TColor;
-    Mask: TBCEditorLineAttributeMasks;
+    Foreground: TColor;
     LineState: TBCEditorLineState;
+    Mask: TBCEditorLineAttributeMasks;
   end;
+  PBCEditorLineAttribute = ^TBCEditorLineAttribute;
 
   TBCEditorStringRecord = record
-    Value: string;
-    Range: TBCEditorLinesRange;
-    ExpandedLength: Integer;
-    Flags: TBCEditorStringFlags;
     Attribute: TBCEditorLineAttribute;
+    Flags: TBCEditorStringFlags;
+    ExpandedLength: Integer;
+    Range: TBCEditorLinesRange;
+    Value: string;
   end;
   PBCEditorStringRecord = ^TBCEditorStringRecord;
 
@@ -66,7 +66,7 @@ type
     FTabConvertProc: TBCEditorTabConvertProc;
     FTabWidth: Integer;
     FUpdateCount: Integer;
-    function ExpandString(AIndex: integer): string;
+    function ExpandString(AIndex: Integer): string;
     function GetAttributes(AIndex: Integer): PBCEditorLineAttribute;
     function GetExpandedString(AIndex: Integer): string;
     function GetExpandedStringLength(AIndex: Integer): Integer;
@@ -89,7 +89,6 @@ type
   public
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
-
     function StringLength(AIndex: Integer): Integer;
     function Add(const AValue: string): Integer; override;
     function GetLengthOfLongestLine: Integer; overload;
@@ -293,9 +292,9 @@ begin
   EndUpdate;
 end;
 
-function TBCEditorLines.ExpandString(AIndex: integer): string;
+function TBCEditorLines.ExpandString(AIndex: Integer): string;
 var
-  LHasTabs: boolean;
+  LHasTabs: Boolean;
 begin
   with FList^[AIndex] do
   begin

@@ -18,14 +18,14 @@ type
     FMap: TBCEditorSearchMap;
     FOnChange: TBCEditorSearchChangeEvent;
     FOptions: TBCEditorSearchOptions;
-    FSearchText: String;
+    FSearchText: string;
     procedure DoChange;
     procedure SetEnabled(const AValue: Boolean);
     procedure SetEngine(const AValue: TBCEditorSearchEngine);
     procedure SetHighlighter(const AValue: TBCEditorSearchHighlighter);
     procedure SetMap(const AValue: TBCEditorSearchMap);
     procedure SetOnChange(const AValue: TBCEditorSearchChangeEvent);
-    procedure SetSearchText(const AValue: String);
+    procedure SetSearchText(const AValue: string);
   public
     constructor Create;
     destructor Destroy; override;
@@ -103,7 +103,7 @@ begin
   end;
 end;
 
-procedure TBCEditorSearch.SetSearchText(const AValue: String);
+procedure TBCEditorSearch.SetSearchText(const AValue: string);
 begin
   FSearchText := AValue;
   if Assigned(FOnChange) then

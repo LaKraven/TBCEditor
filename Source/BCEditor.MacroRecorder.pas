@@ -17,7 +17,6 @@ type
   public
     constructor Create; virtual;
     procedure Initialize(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual; abstract;
-
     procedure LoadFromStream(AStream: TStream); virtual; abstract;
     procedure Playback(AEditor: TBCBaseEditor); virtual; abstract;
     procedure SaveToStream(AStream: TStream); virtual; abstract;
@@ -890,7 +889,7 @@ procedure TBCEditorPositionEvent.InitEventParameters(AString: string);
 var
   LDotPosition, LOpenPosition, LClosePosition: Integer;
   X, Y: Integer;
-  AValue: string;
+  LValue: string;
 begin
   inherited;
   AString := Trim(AString);
@@ -900,13 +899,13 @@ begin
   if (not((LDotPosition = 0) or (LOpenPosition = 0) or (LClosePosition = 0))) and ((LDotPosition > LOpenPosition) and
     (LDotPosition < LClosePosition)) then
   begin
-    AValue := Copy(AString, LOpenPosition + 1, LDotPosition - LOpenPosition - 1);
-    X := StrToIntDef(AValue, 1);
+    LValue := Copy(AString, LOpenPosition + 1, LDotPosition - LOpenPosition - 1);
+    X := StrToIntDef(LValue, 1);
     Delete(AString, 1, LDotPosition);
     AString := Trim(AString);
     LClosePosition := Pos(')', AString);
-    AValue := Copy(AString, 1, LClosePosition - 1);
-    Y := StrToIntDef(AValue, 1);
+    LValue := Copy(AString, 1, LClosePosition - 1);
+    Y := StrToIntDef(LValue, 1);
     Position := GetTextPosition(X, Y);
     Delete(AString, 1, LClosePosition);
     AString := Trim(AString);

@@ -54,13 +54,13 @@ Documentation will be written after the project stabilizes and dust settles. Thi
 
 <h3>Screenshots</h3>
 
-![bceditor0](https://cloud.githubusercontent.com/assets/11475177/7647152/44552956-fad8-11e4-9994-8c0ac8a21572.png)
-![bceditor1](https://cloud.githubusercontent.com/assets/11475177/7427349/1766adc6-efe2-11e4-8a2f-a59ec668d217.png)
-![bceditor2](https://cloud.githubusercontent.com/assets/11475177/7427350/177ba3c0-efe2-11e4-92dc-946b026cbfab.png)
-![bceditor3](https://cloud.githubusercontent.com/assets/11475177/7427351/177f5f4c-efe2-11e4-8388-179a0947eb5f.png)
-![bceditor4](https://cloud.githubusercontent.com/assets/11475177/7427352/17843c06-efe2-11e4-8c03-7a3daa4639be.png)
-![bceditor5](https://cloud.githubusercontent.com/assets/11475177/7634347/04a52aa6-fa63-11e4-97d4-5d2a9e93e0b8.png)
-![bceditor6](https://cloud.githubusercontent.com/assets/11475177/7427347/1743c07c-efe2-11e4-9c90-318cdc2b09a0.png)
+![bceditor1](https://cloud.githubusercontent.com/assets/11475177/11452946/6d4d8064-9601-11e5-9d4b-47341e3fd9b5.png)
+![bceditor2](https://cloud.githubusercontent.com/assets/11475177/11452947/6d7633f6-9601-11e5-840f-c65deea43a65.png)
+![bceditor3](https://cloud.githubusercontent.com/assets/11475177/11452948/6d7aa0e4-9601-11e5-963b-83050a710840.png)
+![bceditor4](https://cloud.githubusercontent.com/assets/11475177/11452949/6d87a690-9601-11e5-89be-a3ffd80d2dca.png)
+![bceditor5](https://cloud.githubusercontent.com/assets/11475177/11452950/6d88e776-9601-11e5-904d-ad9c3466037e.png)
+![bceditor6](https://cloud.githubusercontent.com/assets/11475177/11452945/6d4afde4-9601-11e5-8a44-b93ee64f6dd9.png)
+
 
 
 

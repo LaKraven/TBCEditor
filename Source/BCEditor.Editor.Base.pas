@@ -8273,39 +8273,37 @@ var
 
               if FMatchingPair.Enabled then
                 if FCurrentMatchingPair <> trNotFound then
-                  if (Pos(LTokenText, FCurrentMatchingPairMatch.OpenToken) <> 0) or
-                    (LTokenText = FCurrentMatchingPairMatch.CloseToken) then
+                begin
+                  if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
+                     (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
+                     (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
+                     (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
                   begin
-                    if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
-                       (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
-                       (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
-                       (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
+                    if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                     begin
-                      if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
+                      if mpoUseMatchedColor in FMatchingPair.Options then
                       begin
-                        if mpoUseMatchedColor in FMatchingPair.Options then
-                        begin
-                          LIsCustomBackgroundColor := True;
-                          if LForegroundColor = FMatchingPair.Colors.Matched then
-                            LForegroundColor := BackgroundColor;
-                          LBackgroundColor := FMatchingPair.Colors.Matched;
-                        end;
-                        LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
-                      end
-                      else
-                      if mpoHighlightUnmatched in FMatchingPair.Options then
-                      begin
-                        if mpoUseMatchedColor in FMatchingPair.Options then
-                        begin
-                          LIsCustomBackgroundColor := True;
-                          if LForegroundColor = FMatchingPair.Colors.Unmatched then
-                            LForegroundColor := BackgroundColor;
-                          LBackgroundColor := FMatchingPair.Colors.Unmatched;
-                        end;
-                        LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
+                        LIsCustomBackgroundColor := True;
+                        if LForegroundColor = FMatchingPair.Colors.Matched then
+                          LForegroundColor := BackgroundColor;
+                        LBackgroundColor := FMatchingPair.Colors.Matched;
                       end;
+                      LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
+                    end
+                    else
+                    if mpoHighlightUnmatched in FMatchingPair.Options then
+                    begin
+                      if mpoUseMatchedColor in FMatchingPair.Options then
+                      begin
+                        LIsCustomBackgroundColor := True;
+                        if LForegroundColor = FMatchingPair.Colors.Unmatched then
+                          LForegroundColor := BackgroundColor;
+                        LBackgroundColor := FMatchingPair.Colors.Unmatched;
+                      end;
+                      LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
                     end;
                   end;
+                end;
 
               LKeyword := '';
               LWord := LTokenText;

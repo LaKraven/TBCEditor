@@ -8112,6 +8112,7 @@ var
     LSelectionBeginChar, LSelectionEndChar: Integer;
     LTempTextPosition: TBCEditorTextPosition;
     LMatchingPairUnderline: Boolean;
+    LOpenTokenEndPos,LOpenTokenEndLen: Integer;
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8147,8 +8148,13 @@ var
         if Assigned(LFoldRange) and LFoldRange.Collapsed then
         begin
           if LFoldRange.RegionItem.OpenTokenEnd <> '' then
-            LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1, Pos(LFoldRange.RegionItem.OpenTokenEnd,
-               AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])))
+          begin
+            LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd,
+              AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]));
+            LOpenTokenEndLen := Length(LFoldRange.RegionItem.OpenTokenEnd);
+
+            LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1, LOpenTokenEndPos + LOpenTokenEndLen -1);
+          end
           else
             LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1,
               Length(LFoldRange.RegionItem.OpenToken) + Pos(LFoldRange.RegionItem.OpenToken,
@@ -8161,8 +8167,11 @@ var
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
           begin
-            FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +
-              Length(FCurrentMatchingPairMatch.OpenToken) + 2;
+            if LFoldRange.RegionItem.OpenTokenEnd <> '' then
+              FCurrentMatchingPairMatch.CloseTokenPos.Char := LOpenTokenEndPos + LOpenTokenEndLen + 2{ +2 = '..' }
+            else
+              FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +
+                Length(FCurrentMatchingPairMatch.OpenToken) + 2{ +2 = '..' };
             FCurrentMatchingPairMatch.CloseTokenPos.Line := FCurrentMatchingPairMatch.OpenTokenPos.Line;
           end;
         end;

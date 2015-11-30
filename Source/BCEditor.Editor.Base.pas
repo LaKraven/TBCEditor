@@ -169,6 +169,7 @@ type
     FWindowProducedMessage: Boolean;
     FWordWrap: TBCEditorWordWrap;
     FWordWrapLineLengths: array of Integer;
+    function AddMultiByteFillerChars(AText: PChar; ALength: Integer): string;
     function CodeFoldingCollapsableFoldRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingFoldRangeForLineTo(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingLineInsideRange(ALine: Integer): TBCEditorCodeFoldingRange;
@@ -892,6 +893,21 @@ end;
 
 { Private declarations }
 
+function TBCBaseEditor.AddMultiByteFillerChars(AText: PChar; ALength: Integer): string;
+var
+  i, j: Integer;
+  LCharCount: Integer;
+begin
+  Result := '';
+  for i := 0 to ALength - 1 do
+  begin
+    LCharCount := FTextDrawer.GetCharCount(@AText[i]);
+    Result := Result + AText[i];
+    for j := 1 to LCharCount - 1 do
+      Result := Result + BCEDITOR_FILLER_CHAR;
+  end;
+end;
+
 function TBCBaseEditor.CodeFoldingCollapsableFoldRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
 var
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
@@ -1296,6 +1312,7 @@ var
   LLevel, LDeltaLevel: Integer;
   LMatchStackID: Integer;
   LOpenDuplicateLength, LCloseDuplicateLength: Integer;
+  LCurrentLineText: string;
 
   function IsCommentOrString(AElement: string): Boolean;
   begin
@@ -1383,6 +1400,19 @@ var
       Next;
     end;
   end;
+
+  procedure InitializeCurrentLine;
+  begin
+    if APoint.Line = 0 then
+      FHighlighter.ResetCurrentRange
+    else
+      FHighlighter.SetCurrentRange(FLines.Ranges[APoint.Line]);
+    { Get line with tabs converted to spaces like PaintTextLines does. }
+    LCurrentLineText := FLines.ExpandedStrings[APoint.Line];
+    LCurrentLineText := AddMultiByteFillerChars(PChar(LCurrentLineText), Length(LCurrentLineText));
+    FHighlighter.SetCurrentLine(LCurrentLineText);
+  end;
+
 var
   LCaretX: Integer;
 begin
@@ -1393,11 +1423,8 @@ begin
   Dec(APoint.Char);
   with FHighlighter do
   begin
-    if APoint.Line = 0 then
-      ResetCurrentRange
-    else
-      SetCurrentRange(FLines.Ranges[APoint.Line]);
-    SetCurrentLine(FLines.ExpandedStrings[APoint.Line]);
+    InitializeCurrentLine;
+
     LCaretX := DisplayCaretX;
     while not GetEndOfLine and (LCaretX > GetTokenPosition + GetTokenLength) do
       Next;
@@ -1481,11 +1508,9 @@ begin
         SetLength(FMatchingPairMatchStack, 32);
       LMatchStackID := -1;
       LLevel := -1;
-      if APoint.Line = 0 then
-        ResetCurrentRange
-      else
-        SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
-      SetCurrentLine(FLines.ExpandedStrings[APoint.Line]);
+
+      InitializeCurrentLine;
+
       while not GetEndOfLine and (GetTokenPosition < AMatch.CloseTokenPos.Char -1) do
         CheckTokenBack;
       if LMatchStackID > -1 then
@@ -1499,11 +1524,9 @@ begin
       begin
         LDeltaLevel := -LLevel - 1;
         Dec(APoint.Line);
-        if APoint.Line = 0 then
-          ResetCurrentRange
-        else
-          SetCurrentRange(FLines.Ranges[APoint.Line - 1]);
-        SetCurrentLine(FLines.ExpandedStrings[APoint.Line]);
+
+        InitializeCurrentLine;
+
         LMatchStackID := -1;
         while not GetEndOfLine do
           CheckTokenBack;
@@ -8083,25 +8106,10 @@ var
     end;
   end;
 
-  function AddMultiByteFillerChars(AText: PChar; ALength: Integer): string;
-  var
-    i, j: Integer;
-    LCharCount: Integer;
-  begin
-    Result := '';
-    for i := 0 to ALength - 1 do
-    begin
-      LCharCount := FTextDrawer.GetCharCount(@AText[i]);
-      Result := Result + AText[i];
-      for j := 1 to LCharCount - 1 do
-        Result := Result + BCEDITOR_FILLER_CHAR;
-    end;
-  end;
-
   procedure PaintLines;
   var
     LFirstColumn, LLastColumn: Integer;
-    LCurrentLineText: string;
+    LCurrentLineText, LFromLineText, LToLineText, LTempLineText: string;
     LCurrentRow: Integer;
     LFoldRange: TBCEditorCodeFoldingRange;
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
@@ -8148,23 +8156,26 @@ var
           LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LCurrentLine);
         if Assigned(LFoldRange) and LFoldRange.Collapsed then
         begin
+          LTempLineText :=  FLines.ExpandedStrings[LFoldRange.FromLine - 1];
+          LFromLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
+          LTempLineText :=  FLines.ExpandedStrings[LFoldRange.ToLine - 1];
+          LToLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
+
           if LFoldRange.RegionItem.OpenTokenEnd <> '' then
           begin
-            LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd,
-              AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]));
+            LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
             LOpenTokenEndLen := Length(LFoldRange.RegionItem.OpenTokenEnd);
 
-            LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1, LOpenTokenEndPos + LOpenTokenEndLen -1);
+            LCurrentLineText := Copy(LFromLineText, 1, LOpenTokenEndPos + LOpenTokenEndLen - 1);
           end
           else
-            LCurrentLineText := Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1], 1,
-              Length(LFoldRange.RegionItem.OpenToken) + Pos(LFoldRange.RegionItem.OpenToken,
-              AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1])) - 1);
+            LCurrentLineText := Copy(LFromLineText, 1, Length(LFoldRange.RegionItem.OpenToken) +
+              Pos(LFoldRange.RegionItem.OpenToken, AnsiUpperCase(LFromLineText)) - 1);
 
           LCurrentLineText := LCurrentLineText + '..';
           if LFoldRange.RegionItem.CloseToken <> '' then
-            if Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.ToLine - 1])) <> 0 then
-              LCurrentLineText := LCurrentLineText + TrimLeft(FLines.ExpandedStrings[LFoldRange.ToLine - 1]);
+            if Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LToLineText)) <> 0 then
+              LCurrentLineText := LCurrentLineText + TrimLeft(LToLineText);
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
           begin
@@ -8177,9 +8188,8 @@ var
           end;
         end;
       end;
-      LIsCurrentLine := False;
-
       LCurrentLineText := AddMultiByteFillerChars(PChar(LCurrentLineText), Length(LCurrentLineText));
+      LIsCurrentLine := False;
 
       LTokenPosition := 0;
       LTokenLength := 0;

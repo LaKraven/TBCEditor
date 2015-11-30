@@ -8120,6 +8120,7 @@ var
     LKeyWord, LWord: string;
     LSelectionBeginChar, LSelectionEndChar: Integer;
     LTempTextPosition: TBCEditorTextPosition;
+    LAddedMultiByteFillerChars: Boolean;
     LMatchingPairUnderline: Boolean;
     LOpenTokenEndPos,LOpenTokenEndLen: Integer;
   begin
@@ -8150,15 +8151,17 @@ var
       LCurrentLineText := FLines.ExpandedStrings[LCurrentLine - 1];
 
       LFoldRange := nil;
+      LAddedMultiByteFillerChars := False;
       if FCodeFolding.Visible then
       begin
         if FCodeFolding.Visible then
           LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LCurrentLine);
         if Assigned(LFoldRange) and LFoldRange.Collapsed then
         begin
-          LTempLineText :=  FLines.ExpandedStrings[LFoldRange.FromLine - 1];
+          LAddedMultiByteFillerChars := True;
+          LTempLineText := FLines.ExpandedStrings[LFoldRange.FromLine - 1];
           LFromLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
-          LTempLineText :=  FLines.ExpandedStrings[LFoldRange.ToLine - 1];
+          LTempLineText := FLines.ExpandedStrings[LFoldRange.ToLine - 1];
           LToLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
 
           if LFoldRange.RegionItem.OpenTokenEnd <> '' then
@@ -8188,7 +8191,8 @@ var
           end;
         end;
       end;
-      LCurrentLineText := AddMultiByteFillerChars(PChar(LCurrentLineText), Length(LCurrentLineText));
+      if not LAddedMultiByteFillerChars then
+        LCurrentLineText := AddMultiByteFillerChars(PChar(LCurrentLineText), Length(LCurrentLineText));
       LIsCurrentLine := False;
 
       LTokenPosition := 0;

@@ -1,5 +1,5 @@
 inherited MainForm: TMainForm
-  Caption = 'TBCEditor Control Version 1.0b - Property Demo'
+  Caption = 'TBCEditor Control Version 1.0 - Property Demo'
   ClientHeight = 644
   ClientWidth = 1100
   Color = clWhite
@@ -112,6 +112,7 @@ inherited MainForm: TMainForm
       CompletionProposal.ShortCut = 16416
       CompletionProposal.Trigger.Chars = '.'
       CompletionProposal.Trigger.Enabled = False
+      Ctl3D = True
       Directories.Colors = 'Colors'
       Directories.Highlighters = 'Highlighters'
       Font.Charset = DEFAULT_CHARSET
@@ -135,6 +136,7 @@ inherited MainForm: TMainForm
       Minimap.Font.Style = []
       Minimap.Width = 140
       OnCaretChanged = EditorCaretChanged
+      ParentCtl3D = False
       RightMargin.Position = 80
       RightMargin.Visible = True
       Search.Enabled = False
@@ -211,8 +213,8 @@ inherited MainForm: TMainForm
           end
           inherited PanelRight: TBCPanel
             Width = 394
-            inherited LabelSearchResultCount: TBCLabelFX
-              Left = 382
+            inherited LabelSearchResultCount: TsLabel
+              Left = 387
               Height = 21
             end
           end
@@ -233,9 +235,19 @@ inherited MainForm: TMainForm
         end
       end
     end
+    object Button1: TButton
+      Left = 486
+      Top = 132
+      Width = 75
+      Height = 25
+      Caption = 'Button1'
+      TabOrder = 2
+      OnClick = Button1Click
+    end
   end
   inherited SkinManager: TBCSkinManager
     ExtendedBorders = True
+    IsDefault = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
     OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
     Left = 166
@@ -251,27 +263,27 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Height = 21
+        Height = 22
         Index = 0
         Name = 'TitleBarItemFile'
         ShowHint = True
         Style = bsMenu
-        Width = 47
+        Width = 48
       end
       item
         Align = tbaCenterInSpace
-        Caption = 'TBCEditor Control Demo v1.0b'
+        Caption = 'TBCEditor Control Demo v1.0'
         FontData.Font.Charset = DEFAULT_CHARSET
         FontData.Font.Color = clWindowText
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Height = 20
+        Height = 21
         Index = 1
         Name = 'TitleBarItemCaption'
         ShowHint = False
         Style = bsInfo
-        Width = 174
+        Width = 161
       end
       item
         Align = tbaRight
@@ -282,12 +294,12 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Height = 21
+        Height = 22
         Index = 2
         Name = 'TitleBarItemHighlighter'
         ShowHint = False
         Style = bsMenu
-        Width = 103
+        Width = 101
         OnMouseDown = TitleBarItems2MouseDown
       end
       item
@@ -312,12 +324,12 @@ inherited MainForm: TMainForm
         FontData.Font.Height = -11
         FontData.Font.Name = 'Tahoma'
         FontData.Font.Style = []
-        Height = 21
+        Height = 22
         Index = 4
         Name = 'TitleBarItemColors'
         ShowHint = False
         Style = bsMenu
-        Width = 69
+        Width = 68
       end
       item
         Align = tbaRight

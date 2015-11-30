@@ -8162,6 +8162,8 @@ var
           LFromLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
           LTempLineText := FLines.ExpandedStrings[LFoldRange.ToLine - 1];
           LToLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
+          LOpenTokenEndPos := 0;
+          LOpenTokenEndLen := 0;
 
           if LFoldRange.RegionItem.OpenTokenEnd <> '' then
           begin

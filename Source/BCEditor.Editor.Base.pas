@@ -8157,19 +8157,17 @@ var
         LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LCurrentLine);
         if Assigned(LFoldRange) and LFoldRange.Collapsed then
         begin
+          LOpenTokenEndLen := 0;
           LAddedMultiByteFillerChars := True;
           LTempLineText := FLines.ExpandedStrings[LFoldRange.FromLine - 1];
           LFromLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
           LTempLineText := FLines.ExpandedStrings[LFoldRange.ToLine - 1];
           LToLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
-          LOpenTokenEndPos := 0;
-          LOpenTokenEndLen := 0;
 
-          if LFoldRange.RegionItem.OpenTokenEnd <> '' then
+          LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
+          if (LFoldRange.RegionItem.OpenTokenEnd <> '') and (LOpenTokenEndPos > 0) then
           begin
-            LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
             LOpenTokenEndLen := Length(LFoldRange.RegionItem.OpenTokenEnd);
-
             LCurrentLineText := Copy(LFromLineText, 1, LOpenTokenEndPos + LOpenTokenEndLen - 1);
           end
           else
@@ -8183,7 +8181,7 @@ var
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
           begin
-            if LFoldRange.RegionItem.OpenTokenEnd <> '' then
+            if (LFoldRange.RegionItem.OpenTokenEnd <> '') and (LOpenTokenEndPos > 0) then
               FCurrentMatchingPairMatch.CloseTokenPos.Char := LOpenTokenEndPos + LOpenTokenEndLen + 2{ +2 = '..' }
             else
               FCurrentMatchingPairMatch.CloseTokenPos.Char := FCurrentMatchingPairMatch.OpenTokenPos.Char +

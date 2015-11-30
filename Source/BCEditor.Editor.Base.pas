@@ -8154,8 +8154,7 @@ var
       LAddedMultiByteFillerChars := False;
       if FCodeFolding.Visible then
       begin
-        if FCodeFolding.Visible then
-          LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LCurrentLine);
+        LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LCurrentLine);
         if Assigned(LFoldRange) and LFoldRange.Collapsed then
         begin
           LAddedMultiByteFillerChars := True;

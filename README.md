@@ -39,7 +39,7 @@ TBCEditor Control Demo v. 1.0.
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 28.11.2015 19:07, UTC+02:00
+The latest update: 30.11.2015 16:50, UTC+02:00
 
 Demo source build requires <a href="http://www.alphaskins.com/">AlphaSkins</a> and <a href="http://www.ehlib.com/">EhLib</a>. 
 <h3>Documentation</h3>

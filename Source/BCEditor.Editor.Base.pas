@@ -209,7 +209,7 @@ type
     function GetWordAtMouse: string;
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
     function GetWrapAtColumn: Integer;
-    function IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
+    function IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
     function IsKeywordAtLine(ALine: Integer): Boolean;
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
@@ -1959,18 +1959,24 @@ begin
   end
 end;
 
-function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; AIncludeAfterToken: Boolean = True): Boolean;
+function TBCBaseEditor.IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
+var
+  LPosition, i, j: Integer;
+  LKeyword: PChar;
+  LLine, LTempLine: string;
+  LFoldRegion: TBCEditorCodeFoldingRegion;
+  LOffset: Byte;
+begin
+  Result := False;
 
-  function IsKeywordAtCursorPosForFoldRegions(AOpenKeyWord: PBoolean): Boolean;
-  var
-    LPosition, i, j: Integer;
-    LKeyword: PChar;
-    LLine, LTempLine: string;
-    LFoldRegion: TBCEditorCodeFoldingRegion;
-    LOffset: Byte;
+  if not FCodeFolding.Visible then
+    Exit;
+
+  if Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
+    Exit;
+
+  if Assigned(FHighlighter) then
   begin
-    Result := False;
-
     LLine := AnsiUpperCase(FLines.ExpandedStrings[GetTextCaretY]);
 
     for i := 0 to Length(FHighlighter.CodeFoldingRegions) - 1 do
@@ -1978,7 +1984,7 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
       LFoldRegion := FHighlighter.CodeFoldingRegions[i];
 
       LOffset := 0;
-      if not AIncludeAfterToken then
+      if not AHighlightAfterToken then
         LOffset := 1;
 
       for j := 0 to LFoldRegion.Count - 1 do
@@ -1992,12 +1998,10 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
           begin
             if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
             begin
-              Result := True;
+              if Assigned(APOpenKeyWord) then
+                APOpenKeyWord^ := True;
 
-              if Assigned(AOpenKeyWord) then
-                AOpenKeyWord^ := True;
-
-              Exit;
+              Exit(True);
             end
             else
               Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
@@ -2015,12 +2019,10 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
             begin
               if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
               begin
-                Result := True;
+                if Assigned(APOpenKeyWord) then
+                  APOpenKeyWord^ := True;
 
-                if Assigned(AOpenKeyWord) then
-                  AOpenKeyWord^ := True;
-
-                Exit;
+                Exit(True);
               end
               else
                 Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)) - 1);
@@ -2038,12 +2040,10 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
           begin
             if (DisplayCaretX >= LPosition) and (DisplayCaretX <= LPosition + Integer(StrLen(LKeyword)) - LOffset) then
             begin
-              Result := True;
+              if Assigned(APOpenKeyWord) then
+                APOpenKeyWord^ := False;
 
-              if Assigned(AOpenKeyWord) then
-                AOpenKeyWord^ := False;
-
-              Exit;
+              Exit(True);
             end
             else
               Delete(LTempLine, 1, LPosition + Integer(StrLen(LKeyword)));
@@ -2052,18 +2052,6 @@ function TBCBaseEditor.IsKeywordAtCursorPosition(AOpenKeyWord: PBoolean = nil; A
       end;
     end;
   end;
-
-begin
-  Result := False;
-
-  if not FCodeFolding.Visible then
-    Exit;
-
-  if Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
-    Exit;
-
-  if Assigned(FHighlighter) then
-    Result := IsKeywordAtCursorPosForFoldRegions(AOpenKeyWord);
 end;
 
 function TBCBaseEditor.IsKeywordAtLine(ALine: Integer): Boolean;
@@ -8651,7 +8639,7 @@ end;
 
 procedure TBCBaseEditor.ScanMatchingPair;
 var
-  LOpenLineText: string;
+  LOpenLineText, LWordAtCursor, LWordAtOneBeforeCursor: string;
   LLine, LTempPosition: Integer;
   LTextPosition: TBCEditorTextPosition;
   LFoldRange: TBCEditorCodeFoldingRange;
@@ -8674,11 +8662,15 @@ begin
       LFoldRange := CodeFoldingFoldRangeForLineTo(LTextPosition.Line + 1);
     if Assigned(LFoldRange) then
     begin
-      if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
+      LWordAtCursor := AnsiUpperCase(GetWordAtRowColumn(LTextPosition));
+      Dec(LTextPosition.Char);
+      LWordAtOneBeforeCursor := GetWordAtRowColumn(LTextPosition);
+      if (LWordAtCursor = LFoldRange.RegionItem.OpenToken) or
+       (mpoHighlightAfterToken in FMatchingPair.Options) and (LWordAtOneBeforeCursor = LFoldRange.RegionItem.OpenToken) then
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
 
-        LOpenLineText :=  AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]);
+        LOpenLineText := AnsiUpperCase(FLines.ExpandedStrings[LFoldRange.FromLine - 1]);
         LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
 
         FCurrentMatchingPairMatch.OpenToken := System.Copy(FLines.ExpandedStrings[LFoldRange.FromLine - 1],

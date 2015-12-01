@@ -38,7 +38,6 @@ type
     SearchFrame: TBCSearchFrame;
     MenuItemSkins: TMenuItem;
     ActionSkins: TAction;
-    Button1: TButton;
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionPreviewExecute(Sender: TObject);
     procedure ActionSearchExecute(Sender: TObject);
@@ -52,7 +51,6 @@ type
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
     procedure ActionSkinsExecute(Sender: TObject);
     procedure TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure Button1Click(Sender: TObject);
   private
     FStopWatch: TStopWatch;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
@@ -123,12 +121,6 @@ begin
   if KeyState[VK_INSERT] = 1 then
     if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Overwrite') then
       StatusBar.Panels[1].Text := LanguageDataModule.GetConstant('Overwrite');
-end;
-
-procedure TMainForm.Button1Click(Sender: TObject);
-begin
-  inherited;
-  Editor.Text:='(中文)';
 end;
 
 procedure TMainForm.EditorCaretChanged(Sender: TObject; X, Y: Integer);

@@ -235,19 +235,9 @@ inherited MainForm: TMainForm
         end
       end
     end
-    object Button1: TButton
-      Left = 486
-      Top = 132
-      Width = 75
-      Height = 25
-      Caption = 'Button1'
-      TabOrder = 2
-      OnClick = Button1Click
-    end
   end
   inherited SkinManager: TBCSkinManager
     ExtendedBorders = True
-    IsDefault = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
     OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
     Left = 166

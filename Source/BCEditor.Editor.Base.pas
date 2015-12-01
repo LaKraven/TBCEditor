@@ -7842,6 +7842,7 @@ var
     begin
       X := CharWidth(AFirst, AMinimap);
       Dec(AFirst, ACharsBefore);
+      ATokenLength := Min(ATokenLength, FVisibleChars);
       LText := RemoveMultiByteFillerChars(AToken, AFirst, ATokenLength);
       while AToken[AFirst] = BCEDITOR_FILLER_CHAR do
       begin

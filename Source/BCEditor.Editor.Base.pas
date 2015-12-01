@@ -10289,22 +10289,19 @@ procedure TBCBaseEditor.DeleteWhitespace;
 var
   LStrings: TStringList;
 begin
-  if Focused then
+  if SelectionAvailable then
   begin
-    if SelectionAvailable then
-    begin
-      LStrings := TStringList.Create;
-      try
-        LStrings.Text := SelectedText;
-        SelectedText := BCEditor.Utils.DeleteWhiteSpace(LStrings.Text);
-      finally
-        LStrings.Free;
-      end;
-    end
-    else
-      Text := BCEditor.Utils.DeleteWhiteSpace(Text);
-    DoChange;
-  end;
+    LStrings := TStringList.Create;
+    try
+      LStrings.Text := SelectedText;
+      SelectedText := BCEditor.Utils.DeleteWhiteSpace(LStrings.Text);
+    finally
+      LStrings.Free;
+    end;
+  end
+  else
+    Text := BCEditor.Utils.DeleteWhiteSpace(Text);
+  DoChange;
 end;
 
 procedure TBCBaseEditor.DoCutToClipboard;

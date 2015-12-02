@@ -1970,7 +1970,7 @@ var
   var
     LWordAtCursorPtr: PChar;
 
-    function KeywordsAreSame(AKeywordPtr: PChar): Boolean;
+    function AreKeywordsSame(AKeywordPtr: PChar): Boolean;
     begin
       while (AKeywordPtr^ <> BCEDITOR_NONE_CHAR) and (LWordAtCursorPtr^ <> BCEDITOR_NONE_CHAR) and
         (UpCase(LWordAtCursorPtr^) = AKeywordPtr^) do
@@ -1987,14 +1987,14 @@ var
     if LWordAtCursor <> '' then
     begin
       LWordAtCursorPtr := PChar(LWordAtCursor);
-      if KeywordsAreSame(PChar(AKeyword)) then
+      if AreKeywordsSame(PChar(AKeyword)) then
         Result := True
     end
     else
     if AHighlightAfterToken and (LWordAtOneBeforeCursor <> '') then
     begin
       LWordAtCursorPtr := PChar(LWordAtOneBeforeCursor);
-      if KeywordsAreSame(PChar(AKeyword)) then
+      if AreKeywordsSame(PChar(AKeyword)) then
         Result := True;
     end;
 

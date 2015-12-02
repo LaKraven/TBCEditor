@@ -1967,14 +1967,40 @@ var
   LTextPosition: TBCEditorTextPosition;
 
   function CheckToken(AKeyword: string): Boolean;
+  var
+    LWordAtCursorPtr: PChar;
+
+    function KeywordsAreSame(AKeywordPtr: PChar): Boolean;
+    begin
+      while (AKeywordPtr^ <> BCEDITOR_NONE_CHAR) and (LWordAtCursorPtr^ <> BCEDITOR_NONE_CHAR) and
+        (UpCase(LWordAtCursorPtr^) = AKeywordPtr^) do
+      begin
+        Inc(AKeywordPtr);
+        Inc(LWordAtCursorPtr);
+      end;
+      Result := AKeywordPtr^ = BCEDITOR_NONE_CHAR;
+    end;
+
   begin
     Result := False;
-    if (LWordAtCursor = AKeyword) or AHighlightAfterToken and (LWordAtOneBeforeCursor = AKeyword) then
+
+    if LWordAtCursor <> '' then
     begin
+      LWordAtCursorPtr := PChar(LWordAtCursor);
+      if KeywordsAreSame(PChar(AKeyword)) then
+        Result := True
+    end
+    else
+    if AHighlightAfterToken and (LWordAtOneBeforeCursor <> '') then
+    begin
+      LWordAtCursorPtr := PChar(LWordAtOneBeforeCursor);
+      if KeywordsAreSame(PChar(AKeyword)) then
+        Result := True;
+    end;
+
+    if Result then
       if Assigned(APOpenKeyWord) then
         APOpenKeyWord^ := True;
-      Result := True;
-    end;
   end;
 
 begin
@@ -1989,12 +2015,12 @@ begin
   if Assigned(FHighlighter) then
   begin
     LTextPosition := TextCaretPosition;
-    LWordAtCursor := AnsiUpperCase(GetWordAtRowColumn(LTextPosition));
+    LWordAtCursor := GetWordAtRowColumn(LTextPosition);
     LWordAtOneBeforeCursor := '';
     if AHighlightAfterToken then
     begin
       Dec(LTextPosition.Char);
-      LWordAtOneBeforeCursor := AnsiUpperCase(GetWordAtRowColumn(LTextPosition));
+      LWordAtOneBeforeCursor := GetWordAtRowColumn(LTextPosition);
     end;
     if (LWordAtCursor <> '') or (LWordAtOneBeforeCursor <> '') then
     for i := 0 to Length(FHighlighter.CodeFoldingRegions) - 1 do
@@ -10289,6 +10315,9 @@ procedure TBCBaseEditor.DeleteWhitespace;
 var
   LStrings: TStringList;
 begin
+  if ReadOnly then
+    Exit;
+
   if SelectionAvailable then
   begin
     LStrings := TStringList.Create;

@@ -343,12 +343,28 @@ procedure TMainForm.TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButto
 var
   LMenuItem: TMenuItem;
   LTitleCaption: string;
+
+  procedure ClearSubMenuItems;
+  var
+    i, j: Integer;
+    LSubMenuItem: TMenuItem;
+  begin
+    for i := 0 to PopupMenuHighlighters.Items.Count - 1 do
+    begin
+      LSubMenuItem := PopupMenuHighlighters.Items[i];
+      for j := 0 to LSubMenuItem.Count - 1 do
+        LSubMenuItem[j].Checked := False;
+    end;
+  end;
+
 begin
   LTitleCaption := TitleBar.Items[2].Caption;
   LMenuItem := PopupMenuHighlighters.Items.Find(LTitleCaption[1]);
   if Assigned(LMenuItem) then
   begin
     LMenuItem.Checked := True;
+
+    ClearSubMenuItems;
 
     LMenuItem := LMenuItem.Find(LTitleCaption);
     if Assigned(LMenuItem) then

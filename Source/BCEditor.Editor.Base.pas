@@ -264,6 +264,7 @@ type
     procedure MoveCaretHorizontally(const X: Integer; ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; ASelectionCommand: Boolean);
     procedure OpenLink(AURI: string; ALinkType: Integer);
+    procedure RefreshFind;
     procedure RightMarginChanged(Sender: TObject);
     procedure ScrollChanged(Sender: TObject);
     procedure ScrollTimerHandler(Sender: TObject);
@@ -3114,6 +3115,7 @@ begin
         end;
         if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
         begin
+          Dec(LTextPtr);
           New(LPTextPosition);
           LPTextPosition^.Char := LBookmarkTextPtr - PChar(LLine) + 1;
           LPTextPosition^.Line := i;
@@ -3274,6 +3276,14 @@ begin
     FLines[ALine] := TrimRight(ALineText)
   else
     FLines[ALine] := ALineText;
+end;
+
+procedure TBCBaseEditor.RefreshFind;
+begin
+  if FSearch.Enabled then
+    if soHighlightResults in FSearch.Options then
+      if FSearch.SearchText <> '' then
+        FindAll;
 end;
 
 procedure TBCBaseEditor.RightMarginChanged(Sender: TObject);
@@ -6232,6 +6242,7 @@ begin
 
   CreateLineNumbersCache(True);
   CodeFoldingResetCaches;
+  RefreshFind;
 
   InvalidateLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
   InvalidateLeftMarginLines(LNativeIndex + 1, LNativeIndex + FVisibleLines + 1);
@@ -6252,6 +6263,7 @@ begin
       UpdateFoldRanges(AIndex + 1, ACount);
     CreateLineNumbersCache(True);
     CodeFoldingResetCaches;
+    RefreshFind;
   end;
 
   if Assigned(Parent) then
@@ -6296,6 +6308,7 @@ begin
   end;
   if FWordWrap.Enabled then
     FResetLineNumbersCache := True;
+  RefreshFind;
   InvalidateLines(AIndex + 1, LLineEnd);
 
   if Assigned(FOnLinesPutted) then

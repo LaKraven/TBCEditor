@@ -2988,7 +2988,7 @@ procedure TBCBaseEditor.DrawCursor(ACanvas: TCanvas);
 var
   LPoint: TPoint;
   LCaretStyle: TBCEditorCaretStyle;
-  LCaretWidth, LCaretHeight, Y: Integer;
+  LCaretWidth, LCaretHeight, X, Y: Integer;
   LTempBitmap: Vcl.Graphics.TBitmap;
   LTextCaretPosition: TBCEditorTextPosition;
 begin
@@ -2997,8 +2997,9 @@ begin
 
   LPoint := RowColumnToPixels(GetDisplayCaretPosition);
   Y := 0;
+  X := 0;
   LCaretHeight := 1;
-  LCaretWidth := 1;
+  LCaretWidth := FCharWidth;
   if InsertMode then
     LCaretStyle := FCaret.Styles.Insert
   else
@@ -3006,16 +3007,14 @@ begin
   case LCaretStyle of
     csHorizontalLine, csThinHorizontalLine:
       begin
-        LCaretWidth := FCharWidth;
         if LCaretStyle = csHorizontalLine then
           LCaretHeight := 2;
-        Y := FLineHeight;
+        Y := FLineHeight - LCaretHeight;
         LPoint.Y := LPoint.Y + Y;
         LPoint.X := LPoint.X + 1;
       end;
     csHalfBlock:
       begin
-        LCaretWidth := FCharWidth;
         LCaretHeight := FLineHeight div 2;
         Y := FLineHeight div 2;
         LPoint.Y := LPoint.Y + Y;
@@ -3023,15 +3022,16 @@ begin
       end;
     csBlock:
       begin
-        LCaretWidth := FCharWidth;
         LCaretHeight := FLineHeight;
         LPoint.X := LPoint.X + 1;
       end;
     csVerticalLine, csThinVerticalLine:
     begin
+      LCaretWidth := 1;
       if LCaretStyle = csVerticalLine then
         LCaretWidth := 2;
       LCaretHeight := FLineHeight;
+      X := 1;
     end;
   end;
 
@@ -3051,7 +3051,8 @@ begin
     LTempBitmap.Canvas.Font.Height := Font.Height;
     LTempBitmap.Canvas.Font.Size := Font.Size;
     LTextCaretPosition := GetTextCaretPosition;
-    LTempBitmap.Canvas.TextOut(0, 0, Copy(FLines[LTextCaretPosition.Line], LTextCaretPosition.Char, 1));
+    if LTextCaretPosition.Char <= FLines[LTextCaretPosition.Line].Length then
+      LTempBitmap.Canvas.TextOut(X, 0, FLines[LTextCaretPosition.Line][LTextCaretPosition.Char]);
     { Copy rect }
     ACanvas.CopyRect(Rect(LPoint.X + FCaret.Offsets.X, LPoint.Y + FCaret.Offsets.Y, LPoint.X + FCaret.Offsets.X + LCaretWidth,
       LPoint.Y + FCaret.Offsets.Y + LCaretHeight), LTempBitmap.Canvas, Rect(0, Y, LCaretWidth, Y + LCaretHeight));

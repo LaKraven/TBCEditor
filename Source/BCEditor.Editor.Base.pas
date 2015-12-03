@@ -412,7 +412,7 @@ type
     procedure PaintCodeFoldingCollapsedLine(AFoldRange: TBCEditorCodeFoldingRange; ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(AFoldRange: TBCEditorCodeFoldingRange; ATokenPosition, ATokenLength, ALine,
       AScrolledXBy: Integer; ALineRect: TRect);
-    procedure PaintGuideForLine(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+    procedure PaintGuides(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
@@ -6765,6 +6765,8 @@ begin
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
+      if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) then
+        PaintGuides(DrawRect, LLine1, LLine2, False);
     end;
 
     if FCaret.NonBlinking.Enabled then
@@ -6822,6 +6824,8 @@ begin
         end;
 
         PaintTextLines(DrawRect, LLine1, LLine2, True);
+        if FCodeFolding.Visible and (moShowIndentGuides in FMinimap.Options) then
+          PaintGuides(DrawRect, LLine1, LLine2, True);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
@@ -7016,32 +7020,35 @@ begin
   Canvas.Pen.Color := LOldPenColor;
 end;
 
-procedure TBCBaseEditor.PaintGuideForLine(ALine, AScrolledXBy: Integer; ALineRect: TRect; AMinimap: Boolean);
+procedure TBCBaseEditor.PaintGuides(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
 var
-  i: Integer;
+  i, j: Integer;
   X, Y: Integer;
-  LLine, LTempLine: Integer;
+  LLine, LCurrentLine, LTempLine: Integer;
   LOldColor: TColor;
   LDeepestLevel: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TBCEditorCodeFoldingRange;
   LIncY: Boolean;
+  LLineRect: TRect;
+  LScrolledXBy: Integer;
+  LCodeFoldingRanges: array of TBCEditorCodeFoldingRange;
 
   function GetDeepestLevel: Integer;
   begin
     Result := 0;
     if Length(FCodeFoldingRangeFromLine) > 1 then
     begin
-    while LTempLine > 0 do
+      while LTempLine > 0 do
       begin
         LCodeFoldingRange := FCodeFoldingRangeFromLine[LTempLine];
         LCodeFoldingRangeTo := FCodeFoldingRangeToLine[LTempLine];
         if not Assigned(LCodeFoldingRange) and not Assigned(LCodeFoldingRangeTo) then
           Dec(LTempLine)
         else
-        if Assigned(LCodeFoldingRange) and (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) then
+        if Assigned(LCodeFoldingRange) and (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
           Break
         else
-        if Assigned(LCodeFoldingRangeTo) and (LLine >= LCodeFoldingRangeTo.FromLine) and (LLine <= LCodeFoldingRangeTo.ToLine) then
+        if Assigned(LCodeFoldingRangeTo) and (LCurrentLine >= LCodeFoldingRangeTo.FromLine) and (LCurrentLine <= LCodeFoldingRangeTo.ToLine) then
         begin
           LCodeFoldingRange := LCodeFoldingRangeTo;
           Break
@@ -7060,60 +7067,85 @@ begin
   if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) and
     ((not AMinimap) or AMinimap and (moShowIndentGuides in FMinimap.Options)) then
   begin
-    LLine := GetTextCaretY + 1;
-    LTempLine := LLine;
+    LLineRect := AClipRect;
+    LLineRect.Bottom := FLineHeight;
+    LCurrentLine := GetTextCaretY + 1;
+    LTempLine := LCurrentLine;
     LCodeFoldingRange := nil;
-    LIncY := Odd(FLineHeight) and not Odd(ALine);
-
+    LScrolledXBy := (FLeftChar - 1) * FTextDrawer.CharWidth;
     LDeepestLevel := GetDeepestLevel;
 
+    SetLength(LCodeFoldingRanges, FAllCodeFoldingRanges.AllCount);
+    j := 0;
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];
       if Assigned(LCodeFoldingRange) then
+      for LLine := AFirstRow to ALastRow do
         if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
-          (LCodeFoldingRange.FromLine < ALine) and (LCodeFoldingRange.ToLine > ALine) then
+          (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
         begin
-          if not LCodeFoldingRange.RegionItem.ShowGuideLine then
-            Continue;
-          X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
-          X := X * FTextDrawer.CharWidth;
+          LCodeFoldingRanges[j] := LCodeFoldingRange;
+          Inc(j);
+          Break;
+        end;
+    end;
 
-          if (X - AScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
+    for LLine := AFirstRow to ALastRow do
+    begin
+      LIncY := Odd(FLineHeight) and not Odd(LLine);
+      for i := 0 to j - 1 do
+      begin
+        LCodeFoldingRange := LCodeFoldingRanges[i];
+        if Assigned(LCodeFoldingRange) then
+          if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
+            (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
           begin
-            if AMinimap then
-              X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
-            else
-              X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - AScrolledXBy;
+            if not LCodeFoldingRange.RegionItem.ShowGuideLine then
+              Continue;
+            X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
+            X := X * FTextDrawer.CharWidth;
 
-            Y := ALineRect.Top;
-            if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
-              (LLine >= LCodeFoldingRange.FromLine) and (LLine <= LCodeFoldingRange.ToLine) and
-              (cfoHighlightIndentGuides in FCodeFolding.Options) then
+            if (X - LScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
             begin
-              Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
-              Canvas.MoveTo(X, Y);
-              Canvas.LineTo(X, ALineRect.Bottom);
-            end
-            else
-            begin
-              Canvas.Pen.Color := FCodeFolding.Colors.Indent;
+              if AMinimap then
+                X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
+              else
+                X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
 
-              if LIncY then
-                Inc(Y);
-
-              while Y < ALineRect.Bottom do
+              Y := LLineRect.Top;
+              if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
+                (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) and
+                (cfoHighlightIndentGuides in FCodeFolding.Options) then
               begin
+                Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
                 Canvas.MoveTo(X, Y);
-                Inc(Y);
-                Canvas.LineTo(X, Y);
-                Inc(Y);
+                Canvas.LineTo(X, LLineRect.Bottom);
+              end
+              else
+              begin
+                Canvas.Pen.Color := FCodeFolding.Colors.Indent;
+
+                if LIncY then
+                  Inc(Y);
+
+                while Y < LLineRect.Bottom do
+                begin
+                  Canvas.MoveTo(X, Y);
+                  Inc(Y);
+                  Canvas.LineTo(X, Y);
+                  Inc(Y);
+                end;
               end;
             end;
           end;
-        end;
+      end;
+      Inc(LLineRect.Top, FLineHeight);
+      LLineRect.Bottom := LLineRect.Bottom + FLineHeight;
     end;
+    SetLength(LCodeFoldingRanges, 0);
   end;
+
   Canvas.Pen.Color := LOldColor;
 end;
 
@@ -8354,7 +8386,6 @@ var
         end;
 
         PaintHighlightToken(True);
-        PaintGuideForLine(LCurrentLine, LScrolledXBy, LLineRect, AMinimap);
 
         if not AMinimap then
         begin

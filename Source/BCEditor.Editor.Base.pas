@@ -7081,12 +7081,13 @@ begin
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];
       if Assigned(LCodeFoldingRange) then
-      if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed then
+      
         for LLine := AFirstRow to ALastRow do
           if (LCodeFoldingRange.ToLine < TopLine) or (LCodeFoldingRange.FromLine > TopLine + VisibleLines) then
             Break
           else
-          if (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
+          if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
+            (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
           begin
             LCodeFoldingRanges[j] := LCodeFoldingRange;
             Inc(j);

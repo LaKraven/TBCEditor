@@ -6831,6 +6831,8 @@ begin
         FMinimapBufferBmp.Height := DrawRect.Height;
         BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
           DrawRect.Top, SRCCOPY);
+        FTextDrawer.SetBaseFont(Font);
+        FTextDrawer.Style := Font.Style;
       end;
 
     { Search map }

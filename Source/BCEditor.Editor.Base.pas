@@ -8153,6 +8153,7 @@ var
     LAddedMultiByteFillerChars: Boolean;
     LMatchingPairUnderline: Boolean;
     LOpenTokenEndPos,LOpenTokenEndLen: Integer;
+    LElement: string;
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8195,6 +8196,24 @@ var
           LToLineText := AddMultiByteFillerChars(PChar(LTempLineText), Length(LTempLineText));
 
           LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
+
+          if LOpenTokenEndPos > 0 then
+          begin
+            if LCurrentLine = 0 then
+              FHighlighter.ResetCurrentRange
+            else
+              FHighlighter.SetCurrentRange(FLines.Ranges[LCurrentLine]);
+            FHighlighter.SetCurrentLine(LFromLineText);
+            repeat
+              while not FHighlighter.GetEndOfLine and (LOpenTokenEndPos > FHighlighter.GetTokenPosition + FHighlighter.GetTokenLength) do
+                FHighlighter.Next;
+              LElement := FHighlighter.GetCurrentRangeAttribute.Element;
+              if (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT) and (LElement <> BCEDITOR_ATTRIBUTE_ELEMENT_STRING) then
+                Break;
+              LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText), LOpenTokenEndPos + 1);
+            until LOpenTokenEndPos = 0;
+          end;
+
           if (LFoldRange.RegionItem.OpenTokenEnd <> '') and (LOpenTokenEndPos > 0) then
           begin
             LOpenTokenEndLen := Length(LFoldRange.RegionItem.OpenTokenEnd);

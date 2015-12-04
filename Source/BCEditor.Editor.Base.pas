@@ -7568,6 +7568,7 @@ procedure TBCBaseEditor.PaintSearchResults;
 var
   i: Integer;
   LTextPosition: TBCEditorTextPosition;
+  LDisplayPosition: TBCEditorDisplayPosition;
   LRect: TRect;
   LText: string;
   LLength, LLeftMargin, LCharsOutside: Integer;
@@ -7587,6 +7588,7 @@ begin
   for i := 0 to FSearchLines.Count - 1 do
   begin
     LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
+
     if IsTextPositionInSelection(LTextPosition) then
       Continue
     else
@@ -7595,7 +7597,10 @@ begin
       LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
       LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
       LRect.Bottom := LRect.Top + LineHeight;
-      LRect.Left := LLeftMargin + (LTextPosition.Char - FLeftChar) * FTextDrawer.CharWidth;
+
+      LDisplayPosition := TextToDisplayPosition(LTextPosition);
+
+      LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
       LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
       LRect.Left := Max(LLeftMargin, LRect.Left) + 1;
       if LLength - LCharsOutside > 0 then

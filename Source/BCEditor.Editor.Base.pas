@@ -1,4 +1,4 @@
-﻿unit BCEditor.Editor.Base;
+unit BCEditor.Editor.Base;
 
 interface
 
@@ -7022,7 +7022,7 @@ end;
 
 procedure TBCBaseEditor.PaintGuides(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
 var
-  i, j: Integer;
+  i, j, k: Integer;
   X, Y: Integer;
   LLine, LCurrentLine, LTempLine: Integer;
   LOldColor: TColor;
@@ -7031,6 +7031,7 @@ var
   LIncY: Boolean;
   LLineRect: TRect;
   LScrolledXBy: Integer;
+  LTopLine, LBottomLine: Integer;
   LCodeFoldingRanges: array of TBCEditorCodeFoldingRange;
 
   function GetDeepestLevel: Integer;
@@ -7074,33 +7075,39 @@ begin
     LCodeFoldingRange := nil;
     LScrolledXBy := (FLeftChar - 1) * FTextDrawer.CharWidth;
     LDeepestLevel := GetDeepestLevel;
+    LTopLine := GetDisplayTextLineNumber(TopLine);
+    LBottomLine := GetDisplayTextLineNumber(TopLine + VisibleLines);
 
     SetLength(LCodeFoldingRanges, FAllCodeFoldingRanges.AllCount);
-    j := 0;
+    k := 0;
     for i := 0 to FAllCodeFoldingRanges.AllCount - 1 do
     begin
       LCodeFoldingRange := FAllCodeFoldingRanges[i];
       if Assigned(LCodeFoldingRange) then
       
-        for LLine := AFirstRow to ALastRow do
-          if (LCodeFoldingRange.ToLine < TopLine) or (LCodeFoldingRange.FromLine > TopLine + VisibleLines) then
+        for j := AFirstRow to ALastRow do
+        begin
+          LLine := GetDisplayTextLineNumber(j);
+          if (LCodeFoldingRange.ToLine < LTopLine) or (LCodeFoldingRange.FromLine > LBottomLine) then
             Break
           else
           if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
             (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
           begin
-            LCodeFoldingRanges[j] := LCodeFoldingRange;
-            Inc(j);
+            LCodeFoldingRanges[k] := LCodeFoldingRange;
+            Inc(k);
             Break;
           end
+        end;
     end;
 
-    for LLine := AFirstRow to ALastRow do
+    for i := AFirstRow to ALastRow do
     begin
+      LLine := GetDisplayTextLineNumber(i);
       LIncY := Odd(FLineHeight) and not Odd(LLine);
-      for i := 0 to j - 1 do
+      for j := 0 to k - 1 do
       begin
-        LCodeFoldingRange := LCodeFoldingRanges[i];
+        LCodeFoldingRange := LCodeFoldingRanges[j];
         if Assigned(LCodeFoldingRange) then
           if not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
             (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then

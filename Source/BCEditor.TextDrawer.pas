@@ -710,11 +710,8 @@ begin
 end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: PChar): Integer;
-var
-  LCharCode: Cardinal;
 begin
-  LCharCode := Ord(AChar^);
-  if LCharCode <= 128 then
+  if Ord(AChar^) < 128 then
     Result := 1
   else
     Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);

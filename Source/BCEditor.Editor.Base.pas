@@ -7572,6 +7572,7 @@ var
   LRect: TRect;
   LText: string;
   LLength, LLeftMargin, LCharsOutside: Integer;
+  LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
   if not Assigned(FSearchLines) then
     Exit;
@@ -7589,7 +7590,19 @@ begin
   begin
     LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
 
-    if IsTextPositionInSelection(LTextPosition) then
+    LSelectionBeginPosition := SelectionBeginPosition;
+    LSelectionEndPosition := SelectionEndPosition;
+
+    if (LSelectionBeginPosition.Line = LTextPosition.Line) and
+      (LSelectionBeginPosition.Char > LTextPosition.Char) and
+      (LSelectionBeginPosition.Char < LTextPosition.Char + LLength) or
+      (LSelectionEndPosition.Line = LTextPosition.Line) and
+      (LSelectionEndPosition.Char > LTextPosition.Char) and
+      (LSelectionEndPosition.Char < LTextPosition.Char + LLength) or
+      (LSelectionBeginPosition.Line = LTextPosition.Line) and
+      (LSelectionBeginPosition.Char = LTextPosition.Char) and
+      (LSelectionEndPosition.Line = LTextPosition.Line) and
+      (LSelectionEndPosition.Char = LTextPosition.Char) then
       Continue
     else
     if LTextPosition.Line + 1 >= TopLine then
@@ -9558,18 +9571,19 @@ var
 begin
   LBeginTextPosition := SelectionBeginPosition;
   LEndTextPosition := SelectionEndPosition;
+
   if (ATextPosition.Line >= LBeginTextPosition.Line) and (ATextPosition.Line <= LEndTextPosition.Line) and
     ((LBeginTextPosition.Line <> LEndTextPosition.Line) or (LBeginTextPosition.Char <> LEndTextPosition.Char)) then
   begin
     if FSelection.ActiveMode = smLine then
       Result := True
     else
-    if (FSelection.ActiveMode = smColumn) then
+    if FSelection.ActiveMode = smColumn then
     begin
-      if (LBeginTextPosition.Char > LEndTextPosition.Char) then
+      if LBeginTextPosition.Char > LEndTextPosition.Char then
         Result := (ATextPosition.Char >= LEndTextPosition.Char) and (ATextPosition.Char < LBeginTextPosition.Char)
       else
-      if (LBeginTextPosition.Char < LEndTextPosition.Char) then
+      if LBeginTextPosition.Char < LEndTextPosition.Char then
         Result := (ATextPosition.Char >= LBeginTextPosition.Char) and (ATextPosition.Char < LEndTextPosition.Char)
       else
         Result := False;

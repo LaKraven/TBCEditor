@@ -103,7 +103,6 @@ type
     FBaseCharWidth: Integer;
     FCalcExtentBaseStyle: TFontStyles;
     FCharABCWidthCache: array [0 .. 127] of TABC;
-    FCharCountCache: array [0 .. 127] of Integer;
     FCharExtra: Integer;
     FCharWidthCache: array [0 .. 127] of Integer;
     FColor: TColor;
@@ -640,7 +639,6 @@ end;
 procedure TBCEditorTextDrawer.FlushCharABCWidthCache;
 begin
   FillChar(FCharABCWidthCache, SizeOf(TABC) * Length(FCharABCWidthCache), 0);
-  FillChar(FCharCountCache, SizeOf(Integer) * Length(FCharCountCache), 0);
   FillChar(FCharWidthCache, SizeOf(Integer) * Length(FCharWidthCache), 0);
 end;
 
@@ -716,17 +714,10 @@ var
   LCharCode: Cardinal;
 begin
   LCharCode := Ord(AChar^);
-  if LCharCode <= High(FCharCountCache) then
-  begin
-     Result := FCharCountCache[LCharCode];
-     if Result = 0 then
-     begin
-        Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
-        FCharCountCache[LCharCode] := Result;
-     end;
-     Exit;
-  end;
-  Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
+  if LCharCode <= 128 then
+    Result := 1
+  else
+    Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; var ARect: TRect; AText: PChar;

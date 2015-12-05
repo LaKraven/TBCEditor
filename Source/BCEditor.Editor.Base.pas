@@ -7593,43 +7593,44 @@ begin
   begin
     LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
 
-    LSelectionBeginPosition := SelectionBeginPosition;
-    LSelectionEndPosition := SelectionEndPosition;
-
-    if (LSelectionBeginPosition.Line = LTextPosition.Line) and
-      (LSelectionBeginPosition.Char > LTextPosition.Char) and
-      (LSelectionBeginPosition.Char < LTextPosition.Char + LLength) or
-      (LSelectionEndPosition.Line = LTextPosition.Line) and
-      (LSelectionEndPosition.Char > LTextPosition.Char) and
-      (LSelectionEndPosition.Char < LTextPosition.Char + LLength) or
-      (LSelectionBeginPosition.Line = LTextPosition.Line) and
-      (LSelectionBeginPosition.Char = LTextPosition.Char) and
-      (LSelectionEndPosition.Line = LTextPosition.Line) and
-      (LSelectionEndPosition.Char = LTextPosition.Char) then
-      Continue
+    if LTextPosition.Line + 1 > TopLine + VisibleLines then
+      Exit
     else
     if LTextPosition.Line + 1 >= TopLine then
     begin
-      LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
-      LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
-      LRect.Bottom := LRect.Top + LineHeight;
-
-      LDisplayPosition := TextToDisplayPosition(LTextPosition);
-
-      LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
-      LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
-      LRect.Left := Max(LLeftMargin, LRect.Left) + 1;
-      if LLength - LCharsOutside > 0 then
+      LSelectionBeginPosition := SelectionBeginPosition;
+      LSelectionEndPosition := SelectionEndPosition;
+      if (LSelectionBeginPosition.Line = LTextPosition.Line) and
+        (LSelectionBeginPosition.Char > LTextPosition.Char) and
+        (LSelectionBeginPosition.Char < LTextPosition.Char + LLength) or
+        (LSelectionEndPosition.Line = LTextPosition.Line) and
+        (LSelectionEndPosition.Char > LTextPosition.Char) and
+        (LSelectionEndPosition.Char < LTextPosition.Char + LLength) or
+        (LSelectionBeginPosition.Line = LTextPosition.Line) and
+        (LSelectionBeginPosition.Char = LTextPosition.Char) and
+        (LSelectionEndPosition.Line = LTextPosition.Line) and
+        (LSelectionEndPosition.Char = LTextPosition.Char + LLength) then
+        Continue
+      else
       begin
-        if LCharsOutside > 0 then
-          Delete(LText, 1, LCharsOutside);
-        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth;
-        FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, [tooOpaque, tooClipped], LRect, PChar(LText), (LLength - LCharsOutside));
+        LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
+        LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
+        LRect.Bottom := LRect.Top + LineHeight;
+
+        LDisplayPosition := TextToDisplayPosition(LTextPosition);
+
+        LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
+        LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
+        LRect.Left := Max(LLeftMargin, LRect.Left) + 1;
+        if LLength - LCharsOutside > 0 then
+        begin
+          if LCharsOutside > 0 then
+            Delete(LText, 1, LCharsOutside);
+          LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth;
+          FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, [tooOpaque, tooClipped], LRect, PChar(LText), (LLength - LCharsOutside));
+        end;
       end;
-    end
-    else
-    if LTextPosition.Line + 1 > TopLine + VisibleLines then
-      Exit;
+    end;
   end;
 end;
 

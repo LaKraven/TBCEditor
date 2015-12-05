@@ -185,7 +185,7 @@ var
 begin
   ResetCanvas;
   TmpRect := ClientRect;
-  FBufferBitmap.Canvas.FillRect(TmpRect);
+  PatBlt(FBufferBitmap.Canvas.Handle, TmpRect.Left, TmpRect.Top, TmpRect.Width, TmpRect.Height, PATCOPY);
   FBufferBitmap.Canvas.Pen.Color := FBorderColor;
   FBufferBitmap.Canvas.Rectangle(TmpRect);
 

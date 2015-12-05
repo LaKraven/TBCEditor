@@ -711,65 +711,58 @@ end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: PChar): Integer;
 begin
-  if Ord(AChar^) < 128 then
-    Result := 1
-  else
-    Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
+  Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: TBCEditorTextOutOptions; var ARect: TRect; AText: PChar;
   ALength: Integer);
-
-  procedure InitExtTextOutDistance(ACharWidth: Integer);
-  var
-    i: Integer;
+var
+  i, LCharWidth: Integer;
+  LLastChar: Cardinal;
+  LRealCharWidth, LNormalCharWidth: Integer;
+  LCharInfo: TABC;
+  LTextMetricA: TTextMetricA;
+begin
+  LCharWidth := GetCharWidth;
+  if ALength > FExtTextOutLength then
   begin
-    if ALength > FExtTextOutLength then
-    begin
-      FExtTextOutLength := ALength;
-      ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
-    end;
-    for i := 0 to ALength - 1 do
-      FExtTextOutDistance[i] := GetCharCount(@AText[i]) * ACharWidth;
+    FExtTextOutLength := ALength;
+    ReallocMem(FExtTextOutDistance, ALength * SizeOf(Integer));
   end;
+  for i := 0 to ALength - 1 do
+    if Ord(AText[i]) < 128 then
+      FExtTextOutDistance[i] := LCharWidth
+    else
+      FExtTextOutDistance[i] := GetCharCount(@AText[i]) * LCharWidth;
 
   { avoid clipping the last pixels of text in italic }
-  procedure AdjustLastCharWidthAndRect;
-  var
-    LLastChar: Cardinal;
-    LRealCharWidth, LNormalCharWidth: Integer;
-    LCharInfo: TABC;
-    LTextMetricA: TTextMetricA;
+  if ALength > 0 then
   begin
-    if ALength <= 0 then
-      Exit;
     LLastChar := Ord(AText[ALength - 1]);
-    if LLastChar = 32 then
-      Exit;
-    LNormalCharWidth := FExtTextOutDistance[ALength - 1];
-    LRealCharWidth := LNormalCharWidth;
+    if LLastChar <> 32 then
+    begin
+      LNormalCharWidth := FExtTextOutDistance[ALength - 1];
+      LRealCharWidth := LNormalCharWidth;
 
-    if GetCachedABCWidth(LLastChar, LCharInfo) then
-    begin
-      LRealCharWidth := LCharInfo.abcA + Integer(LCharInfo.abcB);
-      if LCharInfo.abcC >= 0 then
-        Inc(LRealCharWidth, LCharInfo.abcC);
-    end
-    else
-    if LLastChar < Ord(High(AnsiChar)) then
-    begin
-      GetTextMetricsA(FHandle, LTextMetricA);
-      LRealCharWidth := LTextMetricA.tmAveCharWidth + LTextMetricA.tmOverhang;
+      if GetCachedABCWidth(LLastChar, LCharInfo) then
+      begin
+        LRealCharWidth := LCharInfo.abcA + Integer(LCharInfo.abcB);
+        if LCharInfo.abcC >= 0 then
+          Inc(LRealCharWidth, LCharInfo.abcC);
+      end
+      else
+      if LLastChar < Ord(High(AnsiChar)) then
+      begin
+        GetTextMetricsA(FHandle, LTextMetricA);
+        LRealCharWidth := LTextMetricA.tmAveCharWidth + LTextMetricA.tmOverhang;
+      end;
+
+      if LRealCharWidth > LNormalCharWidth then
+        Inc(ARect.Right, LRealCharWidth - LNormalCharWidth);
+      FExtTextOutDistance[ALength - 1] := Max(LRealCharWidth, LNormalCharWidth);
     end;
-
-    if LRealCharWidth > LNormalCharWidth then
-      Inc(ARect.Right, LRealCharWidth - LNormalCharWidth);
-    FExtTextOutDistance[ALength - 1] := Max(LRealCharWidth, LNormalCharWidth);
   end;
 
-begin
-  InitExtTextOutDistance(GetCharWidth);
-  AdjustLastCharWidthAndRect;
   UniversalExtTextOut(FHandle, X, Y, AOptions, ARect, AText, ALength, FExtTextOutDistance);
 end;
 

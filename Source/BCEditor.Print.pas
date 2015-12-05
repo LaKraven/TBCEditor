@@ -657,7 +657,7 @@ begin
   begin
     FCanvas.Brush.Color := Color;
     with FMargins do
-      FCanvas.FillRect(Rect(PixelLeft, PixelTop, PixelRight, PixelBottom));
+      PatBlt(FCanvas.Handle, PixelLeft, PixelTop, PixelRight - PixelLeft, PixelBottom - PixelTop, PATCOPY);
     FMargins.InitPage(FCanvas, APageNumber, FPrinterInfo, FLineNumbers, FLineNumbersInMargin, FLines.Count - 1 + FLineOffset);
     FHeader.Print(FCanvas, APageNumber + FPageOffset);
     if FPages.Count > 0 then

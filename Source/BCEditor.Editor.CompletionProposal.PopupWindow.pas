@@ -335,7 +335,7 @@ begin
   with FBitmapBuffer do
   begin
     Canvas.Brush.Color := FCompletionProposal.Colors.Background;
-    Canvas.FillRect(ClientRect);
+    PatBlt(Canvas.Handle, ClientRect.Left, ClientRect.Top, ClientRect.Width, ClientRect.Height, PATCOPY);
     for i := 0 to Min(FCompletionProposal.VisibleLines, Length(FItemIndexArray) - 1) do
     begin
       if i + TopLine >= Length(FItemIndexArray) then

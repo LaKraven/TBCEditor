@@ -902,7 +902,10 @@ begin
   Result := '';
   for i := 0 to ALength - 1 do
   begin
-    LCharCount := FTextDrawer.GetCharCount(@AText[i]);
+    if Ord(AText[i]) < 128 then
+      LCharCount := 1
+    else
+      LCharCount := FTextDrawer.GetCharCount(@AText[i]);
     Result := Result + AText[i];
     for j := 1 to LCharCount - 1 do
       Result := Result + BCEDITOR_FILLER_CHAR;
@@ -6869,7 +6872,7 @@ begin
   LOldPenColor := Canvas.Pen.Color;
 
   Canvas.Brush.Color := FCodeFolding.Colors.Background;
-  Canvas.FillRect(AClipRect); { fill code folding rect }
+  PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { fill code folding rect }
   Canvas.Pen.Style := psSolid;
   Canvas.Brush.Color := FCodeFolding.Colors.FoldingLine;
 
@@ -6887,7 +6890,7 @@ begin
     if (GetTextCaretY + 1 = LLine) and (FCodeFolding.Colors.ActiveLineBackground <> clNone) then
     begin
       Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground;
-      Canvas.FillRect(AClipRect); { active line background }
+      PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { active line background }
     end;
     if Assigned(LFoldRange) and (LLine >= LFoldRange.FromLine) and (LLine <= LFoldRange.ToLine) then
     begin
@@ -7286,7 +7289,7 @@ var
       if FLeftMargin.Colors.BookmarkPanelBackground <> clNone then
       begin
         Canvas.Brush.Color := FLeftMargin.Colors.BookmarkPanelBackground;
-        Canvas.FillRect(LPanelRect); { fill bookmark panel rect }
+        PatBlt(Canvas.Handle, LPanelRect.Left, LPanelRect.Top, LPanelRect.Width, LPanelRect.Height, PATCOPY); { fill bookmark panel rect }
       end;
       if FLeftMargin.Colors.ActiveLineBackground <> clNone then
       begin
@@ -7299,7 +7302,8 @@ var
             LPanelActiveLineRect := System.Types.Rect(0, (i - TopLine) * FLineHeight, FLeftMargin.Bookmarks.Panel.Width,
               (i - TopLine + 1) * FLineHeight);
             Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
-            Canvas.FillRect(LPanelActiveLineRect); { fill bookmark panel active line rect}
+            PatBlt(Canvas.Handle, LPanelActiveLineRect.Left, LPanelActiveLineRect.Top, LPanelActiveLineRect.Width,
+              LPanelActiveLineRect.Height, PATCOPY); { fill bookmark panel active line rect}
           end;
         end;
       end;
@@ -7423,7 +7427,8 @@ var
             Canvas.Brush.Color := FLeftMargin.Colors.LineStateNormal
           else
             Canvas.Brush.Color := FLeftMargin.Colors.LineStateModified;
-          Canvas.FillRect(LLineStateRect); { fill line state rect }
+          PatBlt(Canvas.Handle, LLineStateRect.Left, LLineStateRect.Top, LLineStateRect.Width, LLineStateRect.Height,
+            PATCOPY); { fill line state rect }
         end;
       end;
       Canvas.Brush.Color := LOldColor;
@@ -7458,8 +7463,7 @@ var
 
 begin
   Canvas.Brush.Color := FLeftMargin.Colors.Background;
-  Canvas.FillRect(AClipRect); { fill left margin rect }
-
+  PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { fill left margin rect }
   PaintLineNumbers;
   PaintBookmarkPanel;
   PaintWordWrapIndicator;
@@ -7521,14 +7525,13 @@ begin
   else
   {$ENDIF}
     Canvas.Brush.Color := FBackgroundColor;
-  Canvas.FillRect(AClipRect); { fill search map rect }
+  PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { fill search map rect }
   { Lines in window }
   LHeight := ClientRect.Height / Max(Lines.Count, 1);
   AClipRect.Top := Round((TopLine - 1) * LHeight);
   AClipRect.Bottom := Round((TopLine - 1 + VisibleLines) * LHeight);
   Canvas.Brush.Color := FBackgroundColor;
-  Canvas.FillRect(AClipRect); { fill lines in window rect }
-
+  PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { fill lines in window rect }
   { draw lines }
   if FSearch.Map.Colors.Foreground <> clNone then
     Canvas.Pen.Color := FSearch.Map.Colors.Foreground
@@ -8056,28 +8059,28 @@ var
         begin
           SetDrawingColors(soFromEndOfLine in FSelection.Options);
           LTokenRect.Right := X1;
-          Canvas.FillRect(LTokenRect); { fill end of line rect }
+          PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
           LTokenRect.Left := X1;
         end;
         if LTokenRect.Left < X2 then
         begin
           SetDrawingColors(not (soToEndOfLine in FSelection.Options));
           LTokenRect.Right := X2;
-          Canvas.FillRect(LTokenRect); { fill end of line rect }
+          PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
           LTokenRect.Left := X2;
         end;
         if LTokenRect.Left < LLineRect.Right then
         begin
           SetDrawingColors(False);
           LTokenRect.Right := LLineRect.Right;
-          Canvas.FillRect(LTokenRect); { fill end of line rect }
+          PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
         end;
       end
       else
       begin
         SetDrawingColors(not (soToEndOfLine in FSelection.Options) and LIsLineSelected);
         LTokenRect.Right := LLineRect.Right;
-        Canvas.FillRect(LTokenRect); { fill end of line rect }
+        PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
       end;
     end;
   end;
@@ -8490,7 +8493,7 @@ begin
   begin
     LBackgroundColor := FBackgroundColor;
     SetDrawingColors(False);
-    Canvas.FillRect(LTokenRect);
+    PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY);
   end;
 
   if not AMinimap then
@@ -9444,7 +9447,12 @@ begin
         Inc(LChar, FTabs.Width)
       else
       if i <= LLength then
-        Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      begin
+        if Ord(LTextLine[i]) < 128 then
+          Inc(LChar)
+        else
+          Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      end
       else
         Inc(LChar);
     end;
@@ -9987,7 +9995,12 @@ begin
         Inc(LChar, FTabs.Width)
       else
       if ARealWidth and (i <= LLength) and (LTextLine[i] <> BCEDITOR_SPACE_CHAR) and (LTextLine[i] <> '') then
-        Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      begin
+        if Ord(LTextLine[i]) < 128 then
+          Inc(LChar)
+        else
+          Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+      end
       else
         Inc(LChar);
     end;
@@ -11584,7 +11597,10 @@ begin
           LRealLength := 0;
           for i := 0 to LLength - 1 do
           begin
-            LRealLength := LRealLength + FTextDrawer.GetCharCount(LPChar);
+            if Ord(LPChar^) < 128 then
+              LRealLength := LRealLength + 1
+            else
+              LRealLength := LRealLength + FTextDrawer.GetCharCount(LPChar);
             Inc(LPChar);
           end;
           SetString(S, PChar(AData), LLength);

@@ -200,7 +200,7 @@ begin
     Pen.Style := psSolid;
     if (csDesigning in ComponentState) or (not Assigned(FEditorPrint)) then
     begin
-      FillRect(LClipRect);
+      PatBlt(Canvas.Handle, LClipRect.Left, LClipRect.Top, LClipRect.Width, LClipRect.Height, PATCOPY);
       Brush.Color := FPageBackground;
       Rectangle(MARGIN_WIDTH_LEFT_AND_RIGHT, MARGIN_HEIGHT_TOP_AND_BOTTOM, MARGIN_WIDTH_LEFT_AND_RIGHT + 30,
         MARGIN_HEIGHT_TOP_AND_BOTTOM + 43);
@@ -218,7 +218,7 @@ begin
       PaperRGN := CreateRectRgn(Left, Top, Right + 1, Bottom + 1);
     end;
     if NULLREGION <> ExtSelectClipRgn(Handle, PaperRGN, RGN_DIFF) then
-      FillRect(LClipRect);
+      PatBlt(Canvas.Handle, LClipRect.Left, LClipRect.Top, LClipRect.Width, LClipRect.Height, PATCOPY);
     SelectClipRgn(Handle, PaperRGN);
     Brush.Color := FPageBackground;
     with PaperRect do

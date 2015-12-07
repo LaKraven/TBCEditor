@@ -7603,15 +7603,11 @@ begin
       LSelectionBeginPosition := SelectionBeginPosition;
       LSelectionEndPosition := SelectionEndPosition;
       if (LSelectionBeginPosition.Line = LTextPosition.Line) and
-        (LSelectionBeginPosition.Char > LTextPosition.Char) and
-        (LSelectionBeginPosition.Char < LTextPosition.Char + LLength) or
+        (LSelectionBeginPosition.Char >= LTextPosition.Char) and
+        (LSelectionBeginPosition.Char <= LTextPosition.Char + LLength) or
         (LSelectionEndPosition.Line = LTextPosition.Line) and
-        (LSelectionEndPosition.Char > LTextPosition.Char) and
-        (LSelectionEndPosition.Char < LTextPosition.Char + LLength) or
-        (LSelectionBeginPosition.Line = LTextPosition.Line) and
-        (LSelectionBeginPosition.Char = LTextPosition.Char) and
-        (LSelectionEndPosition.Line = LTextPosition.Line) and
-        (LSelectionEndPosition.Char = LTextPosition.Char + LLength) then
+        (LSelectionEndPosition.Char >= LTextPosition.Char) and
+        (LSelectionEndPosition.Char <= LTextPosition.Char + LLength) then
         Continue
       else
       begin

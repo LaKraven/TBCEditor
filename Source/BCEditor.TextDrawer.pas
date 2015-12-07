@@ -247,14 +247,17 @@ end;
 procedure TBCEditorFontsInfoManager.DestroyFontHandles(ASharedFontsInfo: PBCEditorSharedFontsInfo);
 var
   i: Integer;
+  LFontData: TBCEditorFontData;
 begin
   with ASharedFontsInfo^ do
   for i := Low(TBCEditorStockFontPatterns) to High(TBCEditorStockFontPatterns) do
-  with FontsData[i] do
-  if Handle <> 0 then
   begin
-    DeleteObject(Handle);
-    Handle := 0;
+    LFontData := FontsData[i];
+    if LFontData.Handle <> 0 then
+    begin
+      DeleteObject(LFontData.Handle);
+      LFontData.Handle := 0;
+    end;
   end;
 end;
 

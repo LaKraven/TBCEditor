@@ -145,13 +145,13 @@ type
     procedure Error(const AMessage: string);
     procedure InsertCustomEvent(AIndex: Integer; AEvent: TBCEditorMacroEvent);
     procedure InsertEvent(AIndex: Integer; ACommand: TBCEditorCommand; AChar: Char; AData: Pointer);
-    procedure LoadFromFile(AFilename: string);
+    procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(ASource: TStream; AClear: Boolean = True);
     procedure Pause;
     procedure PlaybackMacro(AEditor: TBCBaseEditor);
     procedure RecordMacro(AEditor: TBCBaseEditor);
     procedure Resume;
-    procedure SaveToFile(AFilename: string);
+    procedure SaveToFile(const AFilename: string);
     procedure SaveToStream(ADestination: TStream);
     procedure Stop;
     property AsString: string read GetAsString write SetAsString;
@@ -707,7 +707,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditorMacroRecorder.LoadFromFile(AFilename: string);
+procedure TBCBaseEditorMacroRecorder.LoadFromFile(const AFilename: string);
 var
   LFileStream: TFileStream;
 begin
@@ -720,7 +720,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditorMacroRecorder.SaveToFile(AFilename: string);
+procedure TBCBaseEditorMacroRecorder.SaveToFile(const AFilename: string);
 var
   LFileStream: TFileStream;
 begin

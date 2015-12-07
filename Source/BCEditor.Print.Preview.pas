@@ -18,7 +18,7 @@ type
     FEditorPrint: TBCEditorPrint;
     FOnPreviewPage: TBCEditorPreviewPageEvent;
     FOnScaleChange: TNotifyEvent;
-    FPageBackground: TColor;
+    FPageBackgroundColor: TColor;
     FPageNumber: Integer;
     FPageSize: TPoint;
     FScaleMode: TBCEditorPreviewScale;
@@ -37,7 +37,7 @@ type
     procedure PaintPaper;
     procedure SetBorderStyle(AValue: TBorderStyle);
     procedure SetEditorPrint(AValue: TBCEditorPrint);
-    procedure SetPageBackground(AValue: TColor);
+    procedure SetPageBackgroundColor(AValue: TColor);
     procedure SetScaleMode(AValue: TBCEditorPreviewScale);
     procedure SetScalePercent(AValue: Integer);
     procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
@@ -76,7 +76,7 @@ type
     property OnMouseUp;
     property OnPreviewPage: TBCEditorPreviewPageEvent read FOnPreviewPage write FOnPreviewPage;
     property OnScaleChange: TNotifyEvent read FOnScaleChange write FOnScaleChange;
-    property PageBackgroundColor: TColor read FPageBackground write SetPageBackground default clWhite;
+    property PageBackgroundColor: TColor read FPageBackgroundColor write SetPageBackgroundColor default clWhite;
     property PopupMenu;
     property ScaleMode: TBCEditorPreviewScale read FScaleMode write SetScaleMode default pscUserScaled;
     property ScalePercent: Integer read FScalePercent write SetScalePercent default 100;
@@ -102,7 +102,7 @@ begin
   FBorderStyle := bsSingle;
   FScaleMode := pscUserScaled;
   FScalePercent := 100;
-  FPageBackground := clWhite;
+  FPageBackgroundColor := clWhite;
   Width := 200;
   Height := 120;
   ParentColor := False;
@@ -201,28 +201,24 @@ begin
     if (csDesigning in ComponentState) or (not Assigned(FEditorPrint)) then
     begin
       PatBlt(Canvas.Handle, LClipRect.Left, LClipRect.Top, LClipRect.Width, LClipRect.Height, PATCOPY);
-      Brush.Color := FPageBackground;
+      Brush.Color := FPageBackgroundColor;
       Rectangle(MARGIN_WIDTH_LEFT_AND_RIGHT, MARGIN_HEIGHT_TOP_AND_BOTTOM, MARGIN_WIDTH_LEFT_AND_RIGHT + 30,
         MARGIN_HEIGHT_TOP_AND_BOTTOM + 43);
       Exit;
     end;
-    with PaperRect do
-    begin
-      Left := FVirtualOffset.X + FScrollPosition.X;
-      if ScaleMode = pscWholePage then
-        Top := FVirtualOffset.Y
-      else
-        Top := FVirtualOffset.Y + FScrollPosition.Y;
-      Right := Left + FPageSize.X;
-      Bottom := Top + FPageSize.Y;
-      PaperRGN := CreateRectRgn(Left, Top, Right + 1, Bottom + 1);
-    end;
+    PaperRect.Left := FVirtualOffset.X + FScrollPosition.X;
+    if ScaleMode = pscWholePage then
+      PaperRect.Top := FVirtualOffset.Y
+    else
+      PaperRect.Top := FVirtualOffset.Y + FScrollPosition.Y;
+    PaperRect.Right := PaperRect.Left + FPageSize.X;
+    PaperRect.Bottom := PaperRect.Top + FPageSize.Y;
+    PaperRGN := CreateRectRgn(PaperRect.Left, PaperRect.Top, PaperRect.Right + 1, PaperRect.Bottom + 1);
     if NULLREGION <> ExtSelectClipRgn(Handle, PaperRGN, RGN_DIFF) then
       PatBlt(Canvas.Handle, LClipRect.Left, LClipRect.Top, LClipRect.Width, LClipRect.Height, PATCOPY);
     SelectClipRgn(Handle, PaperRGN);
-    Brush.Color := FPageBackground;
-    with PaperRect do
-      Rectangle(Left, Top, Right + 1, Bottom + 1);
+    Brush.Color := FPageBackgroundColor;
+    Rectangle(PaperRect.Left, PaperRect.Top, PaperRect.Right + 1, PaperRect.Bottom + 1);
     DeleteObject(PaperRGN);
   end;
 end;
@@ -237,20 +233,18 @@ begin
     if (csDesigning in ComponentState) or (not Assigned(FEditorPrint)) then
       Exit;
     SetMapMode(Handle, MM_ANISOTROPIC);
-    with FEditorPrint.PrinterInfo do
-    begin
-      SetWindowExtEx(Handle, PhysicalWidth, PhysicalHeight, nil);
-      SetViewPortExtEx(Handle, FPageSize.X, FPageSize.Y, nil);
-      LOriginalScreenPoint.X := MulDiv(LeftMargin, FPageSize.X, PhysicalWidth);
-      LOriginalScreenPoint.Y := MulDiv(TopMargin, FPageSize.Y, PhysicalHeight);
-      Inc(LOriginalScreenPoint.X, FVirtualOffset.X + FScrollPosition.X);
-      if ScaleMode = pscWholePage then
-        Inc(LOriginalScreenPoint.Y, FVirtualOffset.Y)
-      else
-        Inc(LOriginalScreenPoint.Y, FVirtualOffset.Y + FScrollPosition.Y);
-      SetViewPortOrgEx(Handle, LOriginalScreenPoint.X, LOriginalScreenPoint.Y, nil);
-      IntersectClipRect(Handle, 0, 0, PrintableWidth, PrintableHeight);
-    end;
+    SetWindowExtEx(Handle, PhysicalWidth, PhysicalHeight, nil);
+    SetViewPortExtEx(Handle, FPageSize.X, FPageSize.Y, nil);
+    LOriginalScreenPoint.X := MulDiv(FEditorPrint.PrinterInfo.LeftMargin, FPageSize.X, PhysicalWidth);
+    LOriginalScreenPoint.Y := MulDiv(FEditorPrint.PrinterInfo.TopMargin, FPageSize.Y, PhysicalHeight);
+    Inc(LOriginalScreenPoint.X, FVirtualOffset.X + FScrollPosition.X);
+    if ScaleMode = pscWholePage then
+      Inc(LOriginalScreenPoint.Y, FVirtualOffset.Y)
+    else
+      Inc(LOriginalScreenPoint.Y, FVirtualOffset.Y + FScrollPosition.Y);
+    SetViewPortOrgEx(Handle, LOriginalScreenPoint.X, LOriginalScreenPoint.Y, nil);
+    IntersectClipRect(Handle, 0, 0, FEditorPrint.PrinterInfo.PrintableWidth,
+      FEditorPrint.PrinterInfo.PrintableHeight);
     FEditorPrint.PrintToCanvas(Canvas, FPageNumber);
   end;
 end;
@@ -419,11 +413,11 @@ begin
   end;
 end;
 
-procedure TBCEditorPrintPreview.SetPageBackground(AValue: TColor);
+procedure TBCEditorPrintPreview.SetPageBackgroundColor(AValue: TColor);
 begin
-  if FPageBackground <> AValue then
+  if FPageBackgroundColor <> AValue then
   begin
-    FPageBackground := AValue;
+    FPageBackgroundColor := AValue;
     Invalidate;
   end;
 end;

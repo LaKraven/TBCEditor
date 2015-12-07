@@ -12,7 +12,7 @@ type
   private
     FHighlighter: TBCEditorHighlighter;
     procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject;
-      AElementPrefix: string);
+      const AElementPrefix: string);
     procedure ImportCodeFolding(ACodeFoldingObject: TJsonObject);
     procedure ImportCodeFoldingFoldRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion; ACodeFoldingObject: TJsonObject);
     procedure ImportCodeFoldingOptions(ACodeFoldingRegion: TBCEditorCodeFoldingRegion; ACodeFoldingObject: TJsonObject);
@@ -25,11 +25,11 @@ type
     procedure ImportElements(AColorsObject: TJsonObject);
     procedure ImportHighlighter(AJSONObject: TJsonObject);
     procedure ImportInfo(AInfoObject: TJsonObject);
-    procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject; AElementPrefix: string);
+    procedure ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject; const AElementPrefix: string);
     procedure ImportMatchingPair(AMatchingPairObject: TJsonObject);
     procedure ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject; AParentRange: TBCEditorRange = nil;
-      ASkipBeforeSubRules: Boolean = False; AElementPrefix: string = '');
-    procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject; AElementPrefix: string);
+      ASkipBeforeSubRules: Boolean = False; const AElementPrefix: string = '');
+    procedure ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject; const AElementPrefix: string);
   public
     constructor Create(AHighlighter: TBCEditorHighlighter); overload;
     procedure ImportFromStream(AStream: TStream);
@@ -241,7 +241,7 @@ begin
 end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute;
-  AAttributesObject: TJsonObject; AElementPrefix: string);
+  AAttributesObject: TJsonObject; const AElementPrefix: string);
 begin
   if Assigned(AAttributesObject) then
   begin
@@ -252,7 +252,7 @@ begin
 end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject;
-  AElementPrefix: string);
+  const AElementPrefix: string);
 var
   i: Integer;
   LWordArray: TJsonArray;
@@ -268,7 +268,7 @@ begin
 end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject;
-  AElementPrefix: string);
+  const AElementPrefix: string);
 begin
   if Assigned(SetObject) then
   begin
@@ -279,7 +279,7 @@ end;
 
 procedure TBCEditorHighlighterJSONImporter.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject;
   AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False;
-  AElementPrefix: string = ''); { Recursive method }
+  const AElementPrefix: string = ''); { Recursive method }
 var
   i, j: Integer;
   LFileName: string;

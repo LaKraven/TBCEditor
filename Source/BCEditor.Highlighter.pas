@@ -64,12 +64,12 @@ type
     procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
     procedure AddKeywords(var AStringList: TStringList);
     procedure Clear;
-    procedure LoadFromFile(AFileName: string);
+    procedure LoadFromFile(const AFileName: string);
     procedure LoadFromStream(AStream: TStream);
     procedure Next;
     procedure NextToEndOfLine;
     procedure ResetCurrentRange;
-    procedure SetCurrentLine(ANewValue: string);
+    procedure SetCurrentLine(const ANewValue: string);
     procedure SetCurrentRange(AValue: Pointer);
     procedure UpdateColors;
     property Attribute[AIndex: Integer]: TBCEditorHighlighterAttribute read GetAttribute;
@@ -180,7 +180,7 @@ begin
     AddAllAttributes(ARange.Ranges[i]);
 end;
 
-procedure TBCEditorHighlighter.SetCurrentLine(ANewValue: string);
+procedure TBCEditorHighlighter.SetCurrentLine(const ANewValue: string);
 begin
   if Assigned(FCurrentRange) then
     if not FCurrentRange.Prepared then
@@ -483,7 +483,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighter.LoadFromFile(AFileName: string);
+procedure TBCEditorHighlighter.LoadFromFile(const AFileName: string);
 var
   LStream: TStream;
   LEditor: TBCBaseEditor;

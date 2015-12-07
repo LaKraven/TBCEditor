@@ -62,7 +62,7 @@ type
     FTitle: string;
     FWrap: Boolean;
     FYPos: Integer;
-    function ClipLineToRect(ALine: string): string;
+    function ClipLineToRect(var ALine: string): string;
     function GetPageCount: Integer;
     procedure CalculatePages;
     procedure HandleWrap(const AText: string);
@@ -476,7 +476,7 @@ begin
   FCanvas.Font.Assign(FOldFont);
 end;
 
-function TBCEditorPrint.ClipLineToRect(ALine: string): string;
+function TBCEditorPrint.ClipLineToRect(var ALine: string): string;
 begin
   while FCanvas.TextWidth(ALine) > FMaxWidth do
     SetLength(ALine, Length(ALine) - 1);

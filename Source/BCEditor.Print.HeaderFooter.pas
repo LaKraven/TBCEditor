@@ -19,7 +19,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetText(NumberOfPages, PageNum: Integer; Roman: Boolean; Title, ATime, ADate: string): string;
+    function GetText(ANumberOfPages, APageNumber: Integer; ARoman: Boolean; const ATitle, ATime, ADate: string): string;
     procedure LoadFromStream(AStream: TStream);
     procedure SaveToStream(AStream: TStream);
   public
@@ -68,14 +68,14 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Add(Text: string; Font: TFont; Alignment: TAlignment; LineNumber: Integer): Integer;
+    function Add(const AText: string; const AFont: TFont; const AAlignment: TAlignment; const ALineNumber: Integer): Integer;
     function Count: Integer;
     function Get(AIndex: Integer): TBCEditorSectionItem;
     procedure Assign(ASource: TPersistent); override;
     procedure Clear;
     procedure Delete(AIndex: Integer);
     procedure FixLines;
-    procedure InitPrint(ACanvas: TCanvas; NumberOfPages: Integer; Title: string; Margins: TBCEditorPrintMargins);
+    procedure InitPrint(ACanvas: TCanvas; NumberOfPages: Integer; const Title: string; Margins: TBCEditorPrintMargins);
     procedure LoadFromStream(AStream: TStream);
     procedure Print(ACanvas: TCanvas; PageNum: Integer);
     procedure SaveToStream(AStream: TStream);
@@ -119,7 +119,7 @@ begin
   FFont.Free;
 end;
 
-function TBCEditorSectionItem.GetText(NumberOfPages, PageNum: Integer; Roman: Boolean; Title, ATime, ADate: string): string;
+function TBCEditorSectionItem.GetText(ANumberOfPages, APageNumber: Integer; ARoman: Boolean; const ATitle, ATime, ADate: string): string;
 var
   LLength, Start, Run: Integer;
   LString: string;
@@ -144,23 +144,23 @@ var
     Macro := AnsiUpperCase(Copy(FText, Start, Run - Start + 1));
     if Macro = '$PAGENUM$' then
     begin
-      if Roman then
-        DoAppend(IntToRoman(PageNum))
+      if ARoman then
+        DoAppend(IntToRoman(APageNumber))
       else
-        DoAppend(IntToStr(PageNum));
+        DoAppend(IntToStr(APageNumber));
       Exit;
     end;
     if Macro = '$PAGECOUNT$' then
     begin
-      if Roman then
-        DoAppend(IntToRoman(NumberOfPages))
+      if ARoman then
+        DoAppend(IntToRoman(ANumberOfPages))
       else
-        DoAppend(IntToStr(NumberOfPages));
+        DoAppend(IntToStr(ANumberOfPages));
       Exit;
     end;
     if Macro = '$TITLE$' then
     begin
-      DoAppend(Title);
+      DoAppend(ATitle);
       Exit;
     end;
     if Macro = '$DATE$' then
@@ -362,19 +362,19 @@ begin
   inherited;
 end;
 
-function TBCEditorSection.Add(Text: string; Font: TFont; Alignment: TAlignment; LineNumber: Integer): Integer;
+function TBCEditorSection.Add(const AText: string; const AFont: TFont; const AAlignment: TAlignment; const ALineNumber: Integer): Integer;
 var
   LSectionItem: TBCEditorSectionItem;
 begin
   LSectionItem := TBCEditorSectionItem.Create;
-  if not Assigned(Font) then
+  if not Assigned(AFont) then
     LSectionItem.Font := FDefaultFont
   else
-    LSectionItem.Font := Font;
-  LSectionItem.Alignment := Alignment;
-  LSectionItem.LineNumber := LineNumber;
+    LSectionItem.Font := AFont;
+  LSectionItem.Alignment := AAlignment;
+  LSectionItem.LineNumber := ALineNumber;
   LSectionItem.Index := FItems.Add(LSectionItem);
-  LSectionItem.Text := Text;
+  LSectionItem.Text := AText;
   Result := LSectionItem.Index;
 end;
 
@@ -482,7 +482,7 @@ begin
   end;
 end;
 
-procedure TBCEditorSection.InitPrint(ACanvas: TCanvas; NumberOfPages: Integer; Title: string; Margins: TBCEditorPrintMargins);
+procedure TBCEditorSection.InitPrint(ACanvas: TCanvas; NumberOfPages: Integer; const Title: string; Margins: TBCEditorPrintMargins);
 begin
   SaveFontPenBrush(ACanvas);
   FDate := DateToStr(Now);
@@ -611,6 +611,7 @@ end;
 procedure TBCEditorSection.Assign(ASource: TPersistent);
 var
   i: Integer;
+  LSectionItem: TBCEditorSectionItem;
 begin
   if Assigned(ASource) and (ASource is TBCEditorSection) then
   with ASource as TBCEditorSection do
@@ -621,8 +622,10 @@ begin
     Self.FShadedColor := FShadedColor;
     Self.FLineColor := FLineColor;
     for i := 0 to FItems.Count - 1 do
-    with TBCEditorSectionItem(FItems[i]) do
-      Self.Add(Text, Font, Alignment, LineNumber);
+    begin
+      LSectionItem := TBCEditorSectionItem(FItems[i]);
+      Self.Add(LSectionItem.Text, LSectionItem.Font, LSectionItem.Alignment, LSectionItem.LineNumber);
+    end;
     Self.FDefaultFont.Assign(FDefaultFont);
     Self.FRomanNumbers := FRomanNumbers;
     Self.FMirrorPosition := FMirrorPosition;

@@ -80,7 +80,6 @@ type
     function GetCount: Integer; override;
     function GetTextStr: string; override;
     procedure Put(AIndex: Integer; const AValue: string); override;
-    procedure PutObject(AIndex: Integer; AObject: TObject); override;
     procedure SetCapacity(AValue: Integer); override;
     procedure SetTabWidth(AValue: Integer);
     procedure SetTextStr(const AValue: string); override;
@@ -98,7 +97,7 @@ type
     procedure Insert(AIndex: Integer; const AValue: string); override;
     procedure InsertLines(AIndex, ACount: Integer; AStrings: TStrings = nil);
     procedure InsertStrings(AIndex: Integer; AStrings: TStrings);
-    procedure InsertText(AIndex: Integer; AText: string);
+    procedure InsertText(AIndex: Integer; const AText: string);
     procedure LoadFromStream(AStream: TStream; AEncoding: TEncoding = nil); override;
     procedure SaveToStream(AStream: TStream; AEncoding: TEncoding = nil); override;
     procedure TrimTrailingSpaces(AIndex: Integer);
@@ -504,7 +503,7 @@ begin
   end;
 end;
 
-procedure TBCEditorLines.InsertText(AIndex: Integer; AText: string);
+procedure TBCEditorLines.InsertText(AIndex: Integer; const AText: string);
 var
   LStringList: TStringList;
 begin
@@ -603,11 +602,6 @@ begin
   if (AIndex < 0) or (AIndex >= FCount) then
     ListIndexOutOfBounds(AIndex);
   FList^[AIndex].Value := TrimRight(FList^[AIndex].Value);
-end;
-
-procedure TBCEditorLines.PutObject(AIndex: Integer; AObject: TObject);
-begin
-  { Do nothing }
 end;
 
 procedure TBCEditorLines.PutRange(AIndex: Integer; ARange: TBCEditorLinesRange);

@@ -255,7 +255,7 @@ type
     procedure DoTrimTrailingSpaces(ATextLine: Integer);
     procedure DragMinimap(Y: Integer);
     procedure DrawCursor(ACanvas: TCanvas);
-    procedure FindAll(ASearchText: string = '');
+    procedure FindAll(const ASearchText: string = '');
     procedure FontChanged(Sender: TObject);
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
@@ -441,10 +441,10 @@ type
     procedure AfterConstruction; override;
     {$ENDIF}
     function CaretInView: Boolean;
-    function CreateFileStream(AFileName: string): TStream; virtual;
+    function CreateFileStream(const AFileName: string): TStream; virtual;
     function DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
-    function GetColorsFileName(AFileName: string): string;
-    function GetHighlighterFileName(AFileName: string): string;
+    function GetColorsFileName(const AFileName: string): string;
+    function GetHighlighterFileName(const AFileName: string): string;
     function FindPrevious: Boolean;
     function FindNext(AChanged: Boolean = False): Boolean;
     function GetBookmark(ABookmark: Integer; var ATextPosition: TBCEditorTextPosition): Boolean;
@@ -896,7 +896,7 @@ end;
 
 function TBCBaseEditor.AddMultiByteFillerChars(AText: PChar; ALength: Integer): string;
 var
-  i, j: Integer;
+  i: Integer;
   LCharCount: Integer;
 begin
   Result := '';
@@ -907,8 +907,7 @@ begin
     else
       LCharCount := FTextDrawer.GetCharCount(@AText[i]);
     Result := Result + AText[i];
-    for j := 1 to LCharCount - 1 do
-      Result := Result + BCEDITOR_FILLER_CHAR;
+    Result := Result + StringOfChar(BCEDITOR_FILLER_CHAR, LCharCount - 1);
   end;
 end;
 
@@ -1921,6 +1920,7 @@ function TBCBaseEditor.GetWordAtMouse: string;
 var
   LTextPosition: TBCEditorTextPosition;
 begin
+  Result := '';
   if GetPositionOfMouse(LTextPosition) then
     Result := GetWordAtRowColumn(LTextPosition);
 end;
@@ -2787,6 +2787,7 @@ procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
     i, LLength: Integer;
     s: string;
   begin
+    Result := '';
     i := 1;
     LLength := Length(AValue);
     while i <= LLength do
@@ -3074,7 +3075,7 @@ begin
   FSearchLines.Clear;
 end;
 
-procedure TBCBaseEditor.FindAll(ASearchText: string = '');
+procedure TBCBaseEditor.FindAll(const ASearchText: string = '');
 var
   i: Integer;
   LLine, LKeyword: string;
@@ -3451,7 +3452,7 @@ var
   function RegionItemsClose: Boolean;
   var
     i, j, LIndexDecrease: Integer;
-    LCodeFoldingRange: TBCEditorCodeFoldingRange;
+    LCodeFoldingRange, LCodeFoldingRangeLast: TBCEditorCodeFoldingRange;
     LRegionItem: TBCEditorCodeFoldingRegionItem;
   begin
     Result := False;
@@ -3499,11 +3500,11 @@ var
               { Check if any shared close }
               if LOpenTokenFoldRangeList.Count > 0 then
               begin
-                LCodeFoldingRange := LOpenTokenFoldRangeList.Last;
-                if Assigned(LCodeFoldingRange.RegionItem) then
+                LCodeFoldingRangeLast := LOpenTokenFoldRangeList.Last;
+                if Assigned(LCodeFoldingRangeLast.RegionItem) then
                   if LCodeFoldingRange.RegionItem.SharedClose and
-                    (LCodeFoldingRange.RegionItem.OpenToken <> LCodeFoldingRange.RegionItem.OpenToken) and
-                    (LCodeFoldingRange.RegionItem.CloseToken = LCodeFoldingRange.RegionItem.CloseToken)then
+                    (LCodeFoldingRange.RegionItem.OpenToken <> LCodeFoldingRangeLast.RegionItem.OpenToken) and
+                    (LCodeFoldingRange.RegionItem.CloseToken = LCodeFoldingRangeLast.RegionItem.CloseToken) then
                   begin
                     if LCodeFoldingRange.RegionItem.TokenEndIsPreviousLine then
                       LCodeFoldingRange.ToLine := LLine - 1 { 0-based }
@@ -4516,10 +4517,13 @@ begin
       UpdateScrollBars;
 
     Exclude(FStateFlags, sfScrollbarChanged);
+
+    {
+    TODO: Needed?
     if not (soPastEndOfLine in FScroll.Options) then
       LeftChar := LeftChar;
     if not (soPastEndOfFileMarker in FScroll.Options) then
-      TopLine := TopLine;
+      TopLine := TopLine;  }
 
     FBufferBmp.Width := ClientRect.Width;
     FBufferBmp.Height := ClientRect.Height;
@@ -5423,7 +5427,7 @@ begin
       LSpaces := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width)
     else
       LSpaces := BCEDITOR_TAB_CHAR;
-    for I := LBlockBeginPosition.Line to LEndOfLine - 1 do
+    for i := LBlockBeginPosition.Line to LEndOfLine - 1 do
       LStringToInsert := LStringToInsert + LSpaces + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
     LStringToInsert := LStringToInsert + LSpaces;
 
@@ -6166,8 +6170,9 @@ begin
     FillChar(FInvalidateRect, SizeOf(TRect), 0);
     if FLeftMargin.LineNumbers.Visible and FLeftMargin.Autosize then
       FLeftMargin.AutosizeDigitCount(Lines.Count);
-    if not (soPastEndOfFileMarker in Scroll.Options) then
-      TopLine := TopLine;
+    // TODO: Needed?
+    //if not (soPastEndOfFileMarker in Scroll.Options) then
+    //  TopLine := TopLine;
   end;
 end;
 
@@ -7334,17 +7339,14 @@ var
     begin
       Pen.Color := FLeftMargin.Colors.Border;
       Pen.Width := 1;
-      with AClipRect do
+      if FLeftMargin.Border.Style = mbsMiddle then
       begin
-        if FLeftMargin.Border.Style = mbsMiddle then
-        begin
-          MoveTo(FLeftMargin.GetWidth - 2, Top);
-          LineTo(FLeftMargin.GetWidth - 2, Bottom);
-          Pen.Color := FLeftMargin.Colors.Background;
-        end;
-        MoveTo(FLeftMargin.GetWidth - 1, Top);
-        LineTo(FLeftMargin.GetWidth - 1, Bottom);
+        MoveTo(FLeftMargin.GetWidth - 2, AClipRect.Top);
+        LineTo(FLeftMargin.GetWidth - 2, AClipRect.Bottom);
+        Pen.Color := FLeftMargin.Colors.Background;
       end;
+      MoveTo(FLeftMargin.GetWidth - 1, AClipRect.Top);
+      LineTo(FLeftMargin.GetWidth - 1, AClipRect.Bottom);
     end;
   end;
 
@@ -7684,8 +7686,7 @@ begin
         end;
         with Canvas do
         begin
-          with ALineRect do
-            Y := (Bottom - Top) shr 1;
+          Y := (ALineRect.Bottom - ALineRect.Top) shr 1;
           i := 0;
           if FSpecialChars.Style = scsDot then
           begin
@@ -7723,24 +7724,22 @@ begin
         Canvas.Pen.Color := FSpecialChars.EndOfLine.Color;
       with Canvas do
       begin
-        with LCharRect do
+        LCharRect.Top := ALineRect.Top;
+        if FSpecialChars.EndOfLine.Style = eolPilcrow then
+          LCharRect.Bottom := ALineRect.Bottom
+        else
+        LCharRect.Bottom := ALineRect.Bottom - 3;
+        LCharRect.Left := LLeftTemp + (LCharPosition - 1) * LCharWidth;
+        if FSpecialChars.EndOfLine.Style = eolEnter then
+          LCharRect.Left := LCharRect.Left + 4;
+        if FSpecialChars.EndOfLine.Style = eolPilcrow then
         begin
-          Top := ALineRect.Top;
-          if FSpecialChars.EndOfLine.Style = eolPilcrow then
-            Bottom := ALineRect.Bottom
-          else
-          Bottom := ALineRect.Bottom - 3;
-          Left := LLeftTemp + (LCharPosition - 1) * LCharWidth;
-          if FSpecialChars.EndOfLine.Style = eolEnter then
-            Left := Left + 4;
-          if FSpecialChars.EndOfLine.Style = eolPilcrow then
-          begin
-            Left := Left + 2;
-            Right := Left + LCharWidth
-          end
-          else
-            Right := Left + FTabs.Width * LCharWidth - 3;
-        end;
+          LCharRect.Left := LCharRect.Left + 2;
+          LCharRect.Right := LCharRect.Left + LCharWidth
+        end
+        else
+          LCharRect.Right := LCharRect.Left + FTabs.Width * LCharWidth - 3;
+
         if LCharRect.Left > FLeftMargin.GetWidth - FCodeFolding.GetWidth then
         begin
           if FSpecialChars.EndOfLine.Style = eolPilcrow then
@@ -9403,7 +9402,7 @@ begin
     (LDisplayPosition.Row >= TopLine) and (LDisplayPosition.Row <= TopLine + VisibleLines);
 end;
 
-function TBCBaseEditor.CreateFileStream(AFileName: string): TStream;
+function TBCBaseEditor.CreateFileStream(const AFileName: string): TStream;
 begin
   Result := TFileStream.Create(GetHighlighterFileName(AFileName), fmOpenRead);
 end;
@@ -9461,7 +9460,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.GetColorsFileName(AFileName: string): string;
+function TBCBaseEditor.GetColorsFileName(const AFileName: string): string;
 begin
   Result := Trim(ExtractFilePath(AFileName));
   if Result = '' then
@@ -9473,7 +9472,7 @@ begin
   {$WARN SYMBOL_PLATFORM ON}
 end;
 
-function TBCBaseEditor.GetHighlighterFileName(AFileName: string): string;
+function TBCBaseEditor.GetHighlighterFileName(const AFileName: string): string;
 begin
   Result := Trim(ExtractFilePath(AFileName));
   if Result = '' then
@@ -10566,9 +10565,10 @@ begin
       LeftChar := LVisibleX
     else
     if LVisibleX >= FVisibleChars + LeftChar then
-      LeftChar := LVisibleX - FVisibleChars + 1
-    else
-      LeftChar := LeftChar;
+      LeftChar := LVisibleX - FVisibleChars + 1;
+    // TODO: Needed?
+    //else
+    //  LeftChar := LeftChar;
 
     LCaretRow := DisplayCaretY;
     if AForceToMiddle then
@@ -10600,9 +10600,10 @@ begin
         TopLine := LCaretRow
       else
       if LCaretRow > TopLine + Max(1, VisibleLines) - 1 then
-        TopLine := LCaretRow - (VisibleLines - 1)
-      else
-        TopLine := TopLine;
+        TopLine := LCaretRow - (VisibleLines - 1);
+      // TODO: Needed?
+      //else
+       // TopLine := TopLine;
     end;
   finally
     DecPaintLock;

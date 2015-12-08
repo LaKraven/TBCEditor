@@ -5,9 +5,9 @@
             "Version": "1.0",
             "Date": "08.12.2015",
             "Sample": [
-               "// Hello World in OCaml\r\n",
+               "(* Hello World in OCaml *)\r\n",
                "\r\n",
-               "print_string \"Hello world!\n\";;"
+               "print_string \"Hello world!\";;"
             ]
          },
          "Author": {

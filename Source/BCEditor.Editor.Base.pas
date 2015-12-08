@@ -9209,15 +9209,10 @@ var
       what's on the clipboard according to what it was when copied.
       Update marks }
     if LInsertedLines > 0 then
-    begin
-      if ((APasteMode = smNormal) and (LStartChar > 1)) or ((APasteMode = smLine) and (LStartChar > 1)) then
-        Inc(LStartLine);
-
       { Trim trailing spaces }
       if eoTrimTrailingSpaces in Options then
         for I := LStartLine to LStartLine + LInsertedLines do
           DoTrimTrailingSpaces(I);
-    end;
 
     { Force caret reset }
     TextCaretPosition := LTextCaretPosition;

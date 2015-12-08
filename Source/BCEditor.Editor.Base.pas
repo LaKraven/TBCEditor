@@ -9181,7 +9181,6 @@ var
 
   var
     I, LStartLine: Integer;
-    LStartChar: Integer;
     LInsertedLines: Integer;
   begin
     if Length(AValue) = 0 then
@@ -9193,7 +9192,6 @@ var
       LTextCaretPosition := ATextCaretPosition;
 
     LStartLine := LTextCaretPosition.Line;
-    LStartChar := LTextCaretPosition.Char;
     case APasteMode of
       smNormal:
         LInsertedLines := InsertNormal;

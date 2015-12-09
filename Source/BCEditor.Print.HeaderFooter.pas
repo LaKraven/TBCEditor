@@ -601,7 +601,7 @@ begin
       end;
     end;
     LOldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
-    ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[LCurrentLine - 1]).MaxBaseDistance, 0, nil, PChar(S),
+    Winapi.Windows.ExtTextOut(ACanvas.Handle, X, Y + TBCEditorLineInfo(FLineInfo[LCurrentLine - 1]).MaxBaseDistance, 0, nil, PChar(S),
       Length(S), nil);
     SetTextAlign(ACanvas.Handle, LOldAlign);
   end;

@@ -504,11 +504,11 @@ var
     if Highlight and Assigned(FHighlighter) and (FLines.Count > 0) then
     begin
       SetBkMode(FCanvas.Handle, TRANSPARENT);
-      FTextDrawer.ExtTextOut(X, Y, [], LClipRect, PChar(AText), Length(AText));
+      FTextDrawer.ExtTextOut(X, Y, 0, LClipRect, PChar(AText), Length(AText));
       SetBkMode(FCanvas.Handle, OPAQUE);
     end
     else
-      ExtTextOut(FCanvas.Handle, X, Y, 0, nil, PChar(AText), Length(AText), nil);
+      Winapi.Windows.ExtTextOut(FCanvas.Handle, X, Y, 0, nil, PChar(AText), Length(AText), nil);
   end;
 
   procedure SplitToken;

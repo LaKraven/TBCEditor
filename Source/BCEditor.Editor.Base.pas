@@ -7275,7 +7275,7 @@ var
           LLineRect.Top := LLineRect.Bottom;
           LLineRect.Bottom := AClipRect.Bottom;
           with LLineRect do
-            FTextDrawer.ExtTextOut(Left, Top, [tooOpaque], LLineRect, '', 0);
+            FTextDrawer.ExtTextOut(Left, Top, ETO_OPAQUE, LLineRect, '', 0);
         end;
       finally
         FTextDrawer.SetBaseFont(Self.Font);
@@ -7626,7 +7626,7 @@ begin
           if LCharsOutside > 0 then
             Delete(LText, 1, LCharsOutside);
           LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth;
-          FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, [tooOpaque, tooClipped], LRect, PChar(LText), (LLength - LCharsOutside));
+          FTextDrawer.ExtTextOut(LRect.Left, LRect.Top, ETO_OPAQUE or ETO_CLIPPED, LRect, PChar(LText), (LLength - LCharsOutside));
         end;
       end;
     end;
@@ -7751,7 +7751,7 @@ begin
             FTextDrawer.ForegroundColor := Canvas.Pen.Color;
             FTextDrawer.Style := [];
             LPilcrow := Char($00B6);
-            FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, [tooOpaque, tooClipped], LCharRect, PChar(LPilcrow), 1);
+            FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, ETO_OPAQUE or ETO_CLIPPED, LCharRect, PChar(LPilcrow), 1);
           end
           else
           if FSpecialChars.EndOfLine.Style = eolArrow then
@@ -7907,8 +7907,7 @@ var
     LText: string;
     X: Integer;
     LOldPenColor: TColor;
-  const
-    ETOOptions = [tooOpaque, tooClipped];
+  //const
 
     function RemoveMultiByteFillerChars(const AToken: string; AFirst: Integer; var ACharCount: Integer): string;
     var
@@ -7946,7 +7945,7 @@ var
         Inc(AFirst);
       end;
 
-      FTextDrawer.ExtTextOut(X + 1, LTokenRect.Top, ETOOptions, LTokenRect, PChar(LText), ATokenLength);
+      FTextDrawer.ExtTextOut(X + 1, LTokenRect.Top, ETO_OPAQUE or ETO_CLIPPED, LTokenRect, PChar(LText), ATokenLength);
 
       if LTokenHelper.MatchingPairUnderline then
       begin

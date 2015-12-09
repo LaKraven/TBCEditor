@@ -907,7 +907,8 @@ begin
     else
       LCharCount := FTextDrawer.GetCharCount(@AText[i]);
     Result := Result + AText[i];
-    Result := Result + StringOfChar(BCEDITOR_FILLER_CHAR, LCharCount - 1);
+    if LCharCount > 1 then
+      Result := Result + StringOfChar(BCEDITOR_FILLER_CHAR, LCharCount - 1);
   end;
 end;
 

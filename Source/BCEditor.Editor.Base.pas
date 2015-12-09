@@ -8087,40 +8087,30 @@ var
   var
     i: Integer;
     LCanAppend: Boolean;
-    LDoSpacesTest, LIsSpaces: Boolean;
-
-    function TokenIsSpaces: Boolean;
-    var
-      PToken: PChar;
-    begin
-      if not LDoSpacesTest then
-      begin
-        LDoSpacesTest := True;
-        PToken := PChar(AToken);
-        while PToken^ <> BCEDITOR_NONE_CHAR do
-        begin
-          if PToken^ <> BCEDITOR_SPACE_CHAR then
-            Break;
-          Inc(PToken);
-        end;
-        LIsSpaces := PToken^ = BCEDITOR_NONE_CHAR;
-      end;
-      Result := LIsSpaces;
-    end;
-
+    LIsSpaces: Boolean;
+    PToken: PChar;
   begin
     if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not LIsCustomBackgroundColor) then
       ABackground := GetBackgroundColor;
     if AForeground = clNone then
       AForeground := Font.Color;
     LCanAppend := False;
-    LDoSpacesTest := False;
+
     if LTokenHelper.Length > 0 then
     begin
+      PToken := PChar(AToken);
+      while PToken^ <> BCEDITOR_NONE_CHAR do
+      begin
+        if PToken^ <> BCEDITOR_SPACE_CHAR then
+          Break;
+        Inc(PToken);
+      end;
+      LIsSpaces := PToken^ = BCEDITOR_NONE_CHAR;
+
       LCanAppend := ((LTokenHelper.FontStyle = AFontStyle) or
-        (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and TokenIsSpaces)) and
+        (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and LIsSpaces)) and
         (LTokenHelper.MatchingPairUnderline = AMatchingPairUnderline) and
-        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or TokenIsSpaces)) or
+        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or LIsSpaces)) or
         (AToken = BCEDITOR_FILLER_CHAR);
       if not LCanAppend then
         PaintHighlightToken(False);

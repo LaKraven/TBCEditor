@@ -6802,6 +6802,9 @@ begin
       end;
     end;
 
+    if soHighlightResults in FSearch.Options then
+      PaintSearchResults;
+
     { Minimap }
     if FMinimap.Visible then
       if LClipRect.Right > LMinimapLeft then
@@ -6855,8 +6858,6 @@ begin
 
     if FRightMargin.Moving then
       PaintRightMarginMove;
-    if soHighlightResults in FSearch.Options then
-      PaintSearchResults;
   finally
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
@@ -7907,7 +7908,6 @@ var
     LText: string;
     X: Integer;
     LOldPenColor: TColor;
-  //const
 
     function RemoveMultiByteFillerChars(const AToken: string; AFirst: Integer; var ACharCount: Integer): string;
     var

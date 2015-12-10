@@ -19,6 +19,7 @@ type
     FOnChange: TBCEditorSearchChangeEvent;
     FOptions: TBCEditorSearchOptions;
     FSearchText: string;
+    FVisible: Boolean;
     procedure DoChange;
     procedure SetEnabled(const AValue: Boolean);
     procedure SetEngine(const AValue: TBCEditorSearchEngine);
@@ -30,6 +31,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
+    property Visible: Boolean read FVisible write FVisible;
   published
     property Enabled: Boolean read FEnabled write SetEnabled default True;
     property Engine: TBCEditorSearchEngine read FEngine write SetEngine default seNormal;

@@ -9795,7 +9795,8 @@ begin
       EndUndoBlock;
     if CanFocus then
       SetFocus;
-    DoChange;
+    if Modified then
+      DoChange;
   end;
 end;
 

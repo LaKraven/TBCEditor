@@ -11169,7 +11169,7 @@ begin
       ecInsertLine, ecLineBreak:
         if not ReadOnly then
         begin
-          UndoList.BeginBlock;
+          FUndoList.BeginBlock;
           try
             if SelectionAvailable then
             begin
@@ -11418,17 +11418,12 @@ begin
 
               if LSpaceCount1 > 0 then
               begin
-                BeginUndoBlock;
-                try
-                  FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1 + 1,
-                    LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 2, LTextCaretPosition.Line), '',
-                    smNormal);
-                  FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
+                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1 + 1,
+                  LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 2, LTextCaretPosition.Line), '',
+                  smNormal);
+                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
 
-                  LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
-                finally
-                  EndUndoBlock;
-                end;
+                LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
               end
               else
               begin

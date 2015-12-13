@@ -131,6 +131,7 @@ type
   TBCEditorSearchMapOptions = set of TBCEditorSearchMapOption;
 
   TBCEditorCompletionProposalOption = (
+    cpoAutoInvoke,
     cpoCaseSensitive,
     cpoFiltered,
     cpoParseItemsFromText,

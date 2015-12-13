@@ -6094,13 +6094,17 @@ begin
   end;
 
   ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
-  if FCompletionProposal.Enabled and (AShift = LShortCutShift) and (AKey = LShortCutKey) then
-  begin
-    AKey := 0;
-    DoExecuteCompletionProposal;
-    Include(FStateFlags, sfIgnoreNextChar);
-    Exit;
-  end;
+  if FCompletionProposal.Enabled then
+    if (AShift = LShortCutShift) and (AKey = LShortCutKey) or (cpoAutoInvoke in FCompletionProposal.Options) then
+    begin
+      DoExecuteCompletionProposal;
+      if not (cpoAutoInvoke in FCompletionProposal.Options) then
+      begin
+        AKey := 0;
+        Include(FStateFlags, sfIgnoreNextChar);
+        Exit;
+      end;
+    end;
 
   if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
     FreeCompletionProposalPopupWindow;
@@ -9795,8 +9799,7 @@ begin
       EndUndoBlock;
     if CanFocus then
       SetFocus;
-    if Modified then
-      DoChange;
+    DoChange;
   end;
 end;
 

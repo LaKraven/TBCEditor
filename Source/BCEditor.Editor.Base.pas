@@ -8015,7 +8015,7 @@ var
           SetDrawingColors(False);
           LTokenRect.Right := CharWidth(LLineSelectionStart, AMinimap) + 1;
           with LTokenHelper do
-            PaintToken(Text, LLineSelectionStart, CharsBefore, LFirstColumn, LLineSelectionStart);
+            PaintToken(Text, LLineSelectionStart - 1, CharsBefore, LFirstColumn, LLineSelectionStart);
         end;
         { selected part of the token }
         SetDrawingColors(True);

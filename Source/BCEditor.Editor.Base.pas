@@ -6095,7 +6095,8 @@ begin
 
   ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
   if FCompletionProposal.Enabled then
-    if (AShift = LShortCutShift) and (AKey = LShortCutKey) or (cpoAutoInvoke in FCompletionProposal.Options) then
+    if (AShift = LShortCutShift) and (AKey = LShortCutKey) or (cpoAutoInvoke in FCompletionProposal.Options) and
+      Chr(AKey).IsLetter then
     begin
       DoExecuteCompletionProposal;
       if not (cpoAutoInvoke in FCompletionProposal.Options) then

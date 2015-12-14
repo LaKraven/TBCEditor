@@ -10,10 +10,12 @@ uses
   BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
   BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
   sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
-  BCControls.Button, System.Diagnostics;
+  BCControls.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color;
 
 const
-  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.0';
+  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.1';
+  TITLE_BAR_HIGHLIGHTER = 2;
+  TITLE_BAR_COLORS = 4;
 
 type
   TMainForm = class(TBCBaseForm)
@@ -30,9 +32,8 @@ type
     ObjectInspectorEh: TObjectInspectorEh;
     PanelLeft: TBCPanel;
     PanelProperty: TBCPanel;
-    PopupMenuColors: TPopupMenu;
     PopupMenuFile: TPopupMenu;
-    PopupMenuHighlighters: TPopupMenu;
+    PopupMenuDummy: TPopupMenu;
     Splitter: TBCSplitter;
     OpenDialog: TsOpenDialog;
     SearchFrame: TBCSearchFrame;
@@ -41,22 +42,27 @@ type
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionPreviewExecute(Sender: TObject);
     procedure ActionSearchExecute(Sender: TObject);
-    procedure ActionSelectHighlighterColorExecute(Sender: TObject);
-    procedure ActionSelectHighlighterExecute(Sender: TObject);
     procedure ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string;
-      var Glyph: TBitmap; var LineVisible: Boolean);
     procedure EditorCaretChanged(Sender: TObject; X, Y: Integer);
     procedure ActionSkinsExecute(Sender: TObject);
-    procedure TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure SelectedHighlighterClick(AHighlighterName: string);
+    procedure SelectedHighlighterColorClick(AHighlighterColorName: string);
+    procedure TitleBarItems2Click(Sender: TObject);
+    procedure TitleBarItems4Click(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     FStopWatch: TStopWatch;
+    FPopupHighlighterDialog: TPopupHighlighterDialog;
+    FPopupHighlighterColorDialog: TPopupHighlighterColorDialog;
+    FHighlighterStrings: TStringList;
+    FHighlighterColorStrings: TStringList;
+    function GetTitleBarItemLeftBottom(AIndex: Integer): TPoint;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
+    procedure LockFormPaint;
     procedure PrintPreview;
-    procedure SetHighlighterColors;
-    procedure SetHighlighters;
+    procedure UnlockFormPaint;
   end;
 
 var
@@ -70,32 +76,10 @@ uses
   BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
   BCCommon.Dialogs.SkinSelect, BCCommon.FileUtils;
 
-procedure TMainForm.ActionSelectHighlighterExecute(Sender: TObject);
-begin
-  with Editor do
-  begin
-    Highlighter.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
-    Lines.Text := Highlighter.Info.General.Sample;
-    CaretZero;
-    SetFocus;
-  end;
-  StatusBar.Panels[3].Text := '';
-  TitleBar.Items[2].Caption := TAction(Sender).Caption;
-  Caption := BCEDITORDEMO_CAPTION;
-  SearchFrame.ClearText;
-end;
-
 procedure TMainForm.ActionSkinsExecute(Sender: TObject);
 begin
   inherited;
   TSkinSelectDialog.ClassShowModal(SkinManager);
-end;
-
-procedure TMainForm.ActionSelectHighlighterColorExecute(Sender: TObject);
-begin
-  Editor.Highlighter.Colors.LoadFromFile(Format('%s.json', [TAction(Sender).Caption]));
-  TitleBar.Items[4].Caption := TAction(Sender).Caption;
-  Editor.SetFocus;
 end;
 
 procedure TMainForm.ApplicationEventsMessage(var Msg: tagMSG; var Handled: Boolean);
@@ -201,34 +185,16 @@ end;
 
 procedure TMainForm.ActionFileOpenExecute(Sender: TObject);
 var
-  i: Integer;
-  FileName, Ext, ItemString, Token, LFileType: string;
+  LFileName: string;
 begin
   OpenDialog.Title := 'Open';
   if OpenDialog.Execute(Handle) then
   begin
     FStopWatch.Reset;
     FStopWatch.Start;
-    FileName := OpenDialog.Files[0];
-    Ext := LowerCase(ExtractFileExt(FileName));
-
-    for i := 0 to MultiStringHolderFileTypes.MultipleStrings.Count - 1 do
-    begin
-      ItemString := MultiStringHolderFileTypes.MultipleStrings.Items[i].Strings.Text;
-      while ItemString <> '' do
-      begin
-        Token := GetNextToken(';', ItemString);
-        ItemString := RemoveTokenFromStart(';', ItemString);
-        if Ext = Token then
-        begin
-          LFileType := MultiStringHolderFileTypes.MultipleStrings.Items[i].Name;
-          PopupMenuHighlighters.Items.Find(LFileType[1]).Find(LFileType).Action.Execute;
-          Break;
-        end;
-      end;
-    end;
-    TitleBar.Items[1].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, FileName]);
-    Editor.LoadFromFile(FileName);
+    LFileName := OpenDialog.Files[0];
+    TitleBar.Items[1].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, LFileName]);
+    Editor.LoadFromFile(LFileName);
     FStopWatch.Stop;
     StatusBar.Panels[3].Text := 'Load: ' + FormatDateTime('s.zzz "s"', FStopWatch.ElapsedMilliseconds / MSecsPerDay);
   end;
@@ -244,6 +210,20 @@ begin
   SearchFrame.SpeedButtonOptions.Images := ImagesDataModule.ImageListSmall;
   PopupMenuFile.Images := ImagesDataModule.ImageList;
   TitleBar.Images := ImagesDataModule.ImageListSmall;
+
+  FHighlighterStrings := GetHighlighters;
+  FHighlighterColorStrings := GetHighlighterColors;
+
+  SelectedHighlighterClick('Object Pascal');
+  SelectedHighlighterColorClick('Default');
+end;
+
+procedure TMainForm.FormDestroy(Sender: TObject);
+begin
+  FHighlighterStrings.Free;
+  FHighlighterColorStrings.Free;
+
+  inherited;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
@@ -252,123 +232,92 @@ begin
   ObjectInspectorEh.LabelColWidth := 145;
 
   SearchFrame.Editor := Editor;
-  SetHighlighters;
-  SetHighlighterColors;
 end;
 
-procedure TMainForm.SetHighlighters;
+function TMainForm.GetTitleBarItemLeftBottom(AIndex: Integer): TPoint;
 var
-  LFileName, LName: string;
-  LMenuItem, LSubMenuItem: TMenuItem;
-  LAction: TAction;
+  LRect: TRect;
 begin
-  PopupMenuHighlighters.Items.Clear;
+  Result.X := TitleBar.Items[AIndex].Rect.Left;
+  Result.Y := TitleBar.Items[AIndex].Rect.Bottom;
 
-  for LFileName in BCCommon.FileUtils.GetFiles(ExtractFilePath(Application.ExeName) + '\Highlighters\', '*.json', False) do
+  if Assigned(TitleBar.Items[AIndex].ExtForm) then
   begin
-    LName := ChangeFileExt(ExtractFileName(LFileName), '');
-
-    LMenuItem := PopupMenuHighlighters.Items.Find(LName[1]);
-    if not Assigned(LMenuItem) then
-    begin
-      LMenuItem := TMenuItem.Create(PopupMenuHighlighters);
-      LMenuItem.Caption := LName[1];
-      LMenuItem.RadioItem := True;
-      PopupMenuHighlighters.Items.Add(LMenuItem);
-    end;
-
-    LAction := TAction.Create(Self);
-    LAction.Caption := LName;
-    LAction.OnExecute := ActionSelectHighlighterExecute;
-    LSubMenuItem := TMenuItem.Create(PopupMenuHighlighters);
-    LSubMenuItem.Action := LAction;
-    LSubMenuItem.RadioItem := True;
-    LSubMenuItem.AutoCheck := True;
-    LMenuItem.Add(LSubMenuItem);
-    if LAction.Caption = 'Object Pascal' then
-    begin
-      LAction.Checked := True;
-      LAction.Execute;
-    end;
+    Inc(Result.X, TitleBar.Items[AIndex].ExtForm.Left);
+    Inc(Result.Y, TitleBar.Items[AIndex].ExtForm.Top);
+  end
+  else
+  begin
+    GetWindowRect(Handle, LRect);
+    Inc(Result.Y, LRect.Top);
+    Inc(Result.X, LRect.Left);
   end;
 end;
 
-procedure TMainForm.SetHighlighterColors;
+procedure TMainForm.TitleBarItems2Click(Sender: TObject);
 var
-  LFileName, LName: string;
-  LMenuItem: TMenuItem;
-  LAction: TAction;
-begin
-  PopupMenuColors.Items.Clear;
-  for LFileName in BCCommon.FileUtils.GetFiles(ExtractFilePath(Application.ExeName) + '\Colors\', '*.json', False) do
-  begin
-    LName := ChangeFileExt(ExtractFileName(LFileName), '');
-
-    LAction := TAction.Create(Self);
-    LAction.Caption := LName;
-    LAction.OnExecute := ActionSelectHighlighterColorExecute;
-    LMenuItem := TMenuItem.Create(PopupMenuColors);
-    LMenuItem.Action := LAction;
-    LMenuItem.RadioItem := True;
-    LMenuItem.AutoCheck := True;
-    PopupMenuColors.Items.Add(LMenuItem);
-    if LAction.Caption = 'Default' then
-    begin
-      LAction.Checked := True;
-      LAction.Execute;
-    end;
-  end;
-end;
-
-procedure TMainForm.SkinManagerGetMenuExtraLineData(FirstItem: TMenuItem; var SkinSection, Caption: string;
-  var Glyph: TBitmap; var LineVisible: Boolean);
+  LPoint: TPoint;
 begin
   inherited;
 
-  if FirstItem = PopupMenuHighlighters.Items[0] then
+  if Assigned(FPopupHighlighterDialog) then
   begin
-    LineVisible := True;
-    Caption := 'Highlighter';
-  end
-  else if FirstItem = PopupMenuColors.Items[0] then
-  begin
-    LineVisible := True;
-    Caption := 'Color';
+    FPopupHighlighterDialog.Visible := False;
+    FPopupHighlighterDialog := nil;
   end
   else
-    LineVisible := False;
+  begin
+    FPopupHighlighterDialog := TPopupHighlighterDialog.Create(Self);
+    FPopupHighlighterDialog.PopupParent := Self;
+    FPopupHighlighterDialog.OnSelectHighlighter := SelectedHighlighterClick;
+
+    LPoint := GetTitleBarItemLeftBottom(TITLE_BAR_HIGHLIGHTER);
+
+    FPopupHighlighterDialog.Left := LPoint.X;
+    FPopupHighlighterDialog.Top := LPoint.Y;
+
+    LockFormPaint;
+
+    FPopupHighlighterDialog.Execute(FHighlighterStrings, TitleBar.Items[TITLE_BAR_HIGHLIGHTER].Caption);
+
+    UnlockFormPaint;
+
+    while Assigned(FPopupHighlighterDialog) and FPopupHighlighterDialog.Visible do
+      Application.HandleMessage;
+    FPopupHighlighterDialog := nil;
+  end;
 end;
 
-procedure TMainForm.TitleBarItems2MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TMainForm.TitleBarItems4Click(Sender: TObject);
 var
-  LMenuItem: TMenuItem;
-  LTitleCaption: string;
-
-  procedure ClearSubMenuItems;
-  var
-    i, j: Integer;
-    LSubMenuItem: TMenuItem;
-  begin
-    for i := 0 to PopupMenuHighlighters.Items.Count - 1 do
-    begin
-      LSubMenuItem := PopupMenuHighlighters.Items[i];
-      for j := 0 to LSubMenuItem.Count - 1 do
-        LSubMenuItem[j].Checked := False;
-    end;
-  end;
-
+  LPoint: TPoint;
 begin
-  LTitleCaption := TitleBar.Items[2].Caption;
-  LMenuItem := PopupMenuHighlighters.Items.Find(LTitleCaption[1]);
-  if Assigned(LMenuItem) then
+  inherited;
+  if Assigned(FPopupHighlighterColorDialog) then
   begin
-    LMenuItem.Checked := True;
+    FPopupHighlighterColorDialog.Visible := False;
+    FPopupHighlighterColorDialog := nil;
+  end
+  else
+  begin
+    FPopupHighlighterColorDialog := TPopupHighlighterColorDialog.Create(Self);
+    FPopupHighlighterColorDialog.PopupParent := Self;
+    FPopupHighlighterColorDialog.OnSelectHighlighterColor := SelectedHighlighterColorClick;
 
-    ClearSubMenuItems;
+    LPoint := GetTitleBarItemLeftBottom(TITLE_BAR_COLORS);
 
-    LMenuItem := LMenuItem.Find(LTitleCaption);
-    if Assigned(LMenuItem) then
-      LMenuItem.Checked := True;
+    FPopupHighlighterColorDialog.Left := LPoint.X;
+    FPopupHighlighterColorDialog.Top := LPoint.Y;
+
+    LockFormPaint;
+
+    FPopupHighlighterColorDialog.Execute(FHighlighterColorStrings, TitleBar.Items[TITLE_BAR_COLORS].Caption);
+
+    UnlockFormPaint;
+
+    while Assigned(FPopupHighlighterColorDialog) and FPopupHighlighterColorDialog.Visible do
+      Application.HandleMessage;
+    FPopupHighlighterColorDialog := nil;
   end;
 end;
 
@@ -377,6 +326,55 @@ begin
   Editor.Search.Enabled := True;
   Application.ProcessMessages; { search frame visible }
   SearchFrame.ComboBoxSearchText.SetFocus;
+end;
+
+procedure TMainForm.SelectedHighlighterClick(AHighlighterName: string);
+begin
+  with Editor do
+  begin
+    Highlighter.LoadFromFile(Format('%s.json', [AHighlighterName]));
+    CodeFolding.Visible := Highlighter.CodeFoldingRangeCount > 0;
+  end;
+  TitleBar.Items[TITLE_BAR_HIGHLIGHTER].Caption := Editor.Highlighter.Name;
+
+  Editor.Lines.Text := Editor.Highlighter.Info.General.Sample;
+  Editor.CaretZero;
+  StatusBar.Panels[3].Text := '';
+  Caption := BCEDITORDEMO_CAPTION;
+  SearchFrame.ClearText;
+
+  if Assigned(FPopupHighlighterDialog) then
+  begin
+    FPopupHighlighterDialog.Visible := False;
+    FPopupHighlighterDialog := nil;
+  end;
+end;
+
+procedure TMainForm.SelectedHighlighterColorClick(AHighlighterColorName: string);
+begin
+  with Editor do
+  begin
+    Highlighter.Colors.LoadFromFile(Format('%s.json', [AHighlighterColorName]));
+    Invalidate;
+  end;
+  TitleBar.Items[TITLE_BAR_COLORS].Caption := Editor.Highlighter.Colors.Name;
+  if Assigned(FPopupHighlighterDialog) then
+  begin
+    FPopupHighlighterColorDialog.Visible := False;
+    FPopupHighlighterColorDialog := nil;
+  end;
+end;
+
+procedure TMainForm.LockFormPaint;
+begin
+  SkinProvider.SkinData.BeginUpdate;
+  SkinProvider.Form.Perform(WM_SETREDRAW, 0, 0);
+end;
+
+procedure TMainForm.UnlockFormPaint;
+begin
+  SkinProvider.SkinData.EndUpdate;
+  SkinProvider.Form.Perform(WM_SETREDRAW, 1, 0);
 end;
 
 end.

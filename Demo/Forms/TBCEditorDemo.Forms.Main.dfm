@@ -1,5 +1,5 @@
 inherited MainForm: TMainForm
-  Caption = 'TBCEditor Control Version 1.0 - Property Demo'
+  Caption = 'TBCEditor Control Version 1.1 - Property Demo'
   ClientHeight = 644
   ClientWidth = 1100
   Color = clWhite
@@ -238,8 +238,9 @@ inherited MainForm: TMainForm
   end
   inherited SkinManager: TBCSkinManager
     ExtendedBorders = True
+    MenuSupport.UseExtraLine = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
-    OnGetMenuExtraLineData = SkinManagerGetMenuExtraLineData
+    ThirdParty.ThirdVirtualTrees = 'TVirtualDrawTree'#13#10
     Left = 166
     Top = 26
   end
@@ -262,7 +263,7 @@ inherited MainForm: TMainForm
       end
       item
         Align = tbaCenterInSpace
-        Caption = 'TBCEditor Control Demo v1.0'
+        Caption = 'TBCEditor Control Demo v1.1'
         FontData.Font.Charset = DEFAULT_CHARSET
         FontData.Font.Color = clWindowText
         FontData.Font.Height = -11
@@ -278,7 +279,7 @@ inherited MainForm: TMainForm
       item
         Align = tbaRight
         Caption = 'Object Pascal'
-        DropdownMenu = PopupMenuHighlighters
+        DropdownMenu = PopupMenuDummy
         FontData.Font.Charset = DEFAULT_CHARSET
         FontData.Font.Color = clWindowText
         FontData.Font.Height = -11
@@ -290,7 +291,7 @@ inherited MainForm: TMainForm
         ShowHint = False
         Style = bsMenu
         Width = 101
-        OnMouseDown = TitleBarItems2MouseDown
+        OnClick = TitleBarItems2Click
       end
       item
         Align = tbaRight
@@ -308,7 +309,7 @@ inherited MainForm: TMainForm
       item
         Align = tbaRight
         Caption = 'Default'
-        DropdownMenu = PopupMenuColors
+        DropdownMenu = PopupMenuDummy
         FontData.Font.Charset = DEFAULT_CHARSET
         FontData.Font.Color = clWindowText
         FontData.Font.Height = -11
@@ -320,6 +321,7 @@ inherited MainForm: TMainForm
         ShowHint = False
         Style = bsMenu
         Width = 68
+        OnClick = TitleBarItems4Click
       end
       item
         Align = tbaRight
@@ -396,13 +398,9 @@ inherited MainForm: TMainForm
       Action = ActionFileExit
     end
   end
-  object PopupMenuHighlighters: TPopupMenu
+  object PopupMenuDummy: TPopupMenu
     Left = 84
     Top = 220
-  end
-  object PopupMenuColors: TPopupMenu
-    Left = 84
-    Top = 276
   end
   object MultiStringHolderFileTypes: TBCMultiStringHolder
     MultipleStrings = <

@@ -5,12 +5,13 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
   BCCommon.Forms.Base, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Highlighter,
-  BCEditor.Editor.Base, BCCommon.Frames.Search, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
+  BCEditor.Editor.Base, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
   BCCommon.Images, BCComponents.SkinProvider, BCComponents.SkinManager, BCControls.Panel, BCControls.StatusBar,
   BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
   BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
   sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
-  BCControls.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color;
+  BCControls.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color,
+  sSpeedButton, BCControls.SpeedButton, sComboBox, BCControls.ComboBox, sLabel;
 
 const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.1';
@@ -36,9 +37,22 @@ type
     PopupMenuDummy: TPopupMenu;
     Splitter: TBCSplitter;
     OpenDialog: TsOpenDialog;
-    SearchFrame: TBCSearchFrame;
     MenuItemSkins: TMenuItem;
     ActionSkins: TAction;
+    PanelSearch: TBCPanel;
+    ComboBoxSearchText: TBCComboBox;
+    BCSplitter1: TBCSplitter;
+    SpeedButtonFindPrevious: TBCSpeedButton;
+    SpeedButtonFindNext: TBCSpeedButton;
+    SpeedButtonDivider: TBCSpeedButton;
+    SpeedButtonOptions: TBCSpeedButton;
+    SpeedButtonClose: TBCSpeedButton;
+    PanelRight: TBCPanel;
+    ActionFindNext: TAction;
+    ActionFindPrevious: TAction;
+    ActionOptions: TAction;
+    ActionClose: TAction;
+    LabelSearchResultCount: TsLabel;
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionPreviewExecute(Sender: TObject);
     procedure ActionSearchExecute(Sender: TObject);
@@ -52,6 +66,12 @@ type
     procedure TitleBarItems2Click(Sender: TObject);
     procedure TitleBarItems4Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure ActionFindNextExecute(Sender: TObject);
+    procedure ActionFindPreviousExecute(Sender: TObject);
+    procedure ActionOptionsExecute(Sender: TObject);
+    procedure ActionCloseExecute(Sender: TObject);
+    procedure ComboBoxSearchTextChange(Sender: TObject);
+    procedure ComboBoxSearchTextKeyPress(Sender: TObject; var Key: Char);
   private
     FStopWatch: TStopWatch;
     FPopupHighlighterDialog: TPopupHighlighterDialog;
@@ -59,9 +79,11 @@ type
     FHighlighterStrings: TStringList;
     FHighlighterColorStrings: TStringList;
     function GetTitleBarItemLeftBottom(AIndex: Integer): TPoint;
+    procedure ClearText;
     procedure InitializeEditorPrint(EditorPrint: TBCEditorPrint);
     procedure LockFormPaint;
     procedure PrintPreview;
+    procedure SetMatchesFound;
     procedure UnlockFormPaint;
   end;
 
@@ -74,7 +96,7 @@ implementation
 
 uses
   BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
-  BCCommon.Dialogs.SkinSelect, BCCommon.FileUtils;
+  BCCommon.Dialogs.SkinSelect, BCCommon.FileUtils, BCEditor.Types, BCCommon.Dialogs.Options.Search;
 
 procedure TMainForm.ActionSkinsExecute(Sender: TObject);
 begin
@@ -87,8 +109,8 @@ var
   InfoText: string;
   KeyState: TKeyboardState;
 begin
-  SearchFrame.Visible := Editor.Search.Enabled;
-  if SearchFrame.Visible then
+  PanelSearch.Visible := Editor.Search.Enabled;
+  if PanelSearch.Visible then
     Editor.Margins.Bottom := 0
   else
     Editor.Margins.Bottom := 5;
@@ -105,6 +127,55 @@ begin
   if KeyState[VK_INSERT] = 1 then
     if StatusBar.Panels[1].Text <> LanguageDataModule.GetConstant('Overwrite') then
       StatusBar.Panels[1].Text := LanguageDataModule.GetConstant('Overwrite');
+end;
+
+procedure TMainForm.ComboBoxSearchTextChange(Sender: TObject);
+begin
+  inherited;
+  if soSearchOnTyping in Editor.Search.Options then
+  begin
+    if Assigned(Editor) then
+      Editor.Search.SearchText := ComboBoxSearchText.Text;
+    SetMatchesFound;
+  end;
+  //if Assigned(FOnSearchText) then
+  //  FOnSearchText(Sender);
+end;
+
+procedure TMainForm.ComboBoxSearchTextKeyPress(Sender: TObject; var Key: Char);
+begin
+  inherited;
+  if (Key = #13) or (Key = #10) then
+  begin
+    if Assigned(Editor) then
+      if Editor.CanFocus then
+        Editor.SetFocus;
+    if ComboBoxSearchText.Items.IndexOf(ComboBoxSearchText.Text) = -1 then
+      ComboBoxSearchText.Items.Add(ComboBoxSearchText.Text);
+    Key := #0;
+  end;
+end;
+
+procedure TMainForm.SetMatchesFound;
+var
+  s: string;
+begin
+  s := '';
+
+  if Assigned(Editor) and (Editor.SearchResultCount > 1) then
+    s := LanguageDataModule.GetConstant('MatchFoundPluralExtension');
+  if Assigned(Editor) and (Editor.SearchResultCount > 0) then
+    s := Format(LanguageDataModule.GetConstant('MatchFound'), [Editor.SearchResultCount, s]);
+
+  LabelSearchResultCount.Caption := s;
+end;
+
+procedure TMainForm.ClearText;
+begin
+  ComboBoxSearchText.Text := '';
+  if Assigned(Editor) then
+    Editor.Search.SearchText := '';
+  SetMatchesFound;
 end;
 
 procedure TMainForm.EditorCaretChanged(Sender: TObject; X, Y: Integer);
@@ -169,6 +240,27 @@ begin
   EditorPrint.Title := Editor.DocumentName;
 end;
 
+procedure TMainForm.ActionFindNextExecute(Sender: TObject);
+begin
+  inherited;
+  if Assigned(Editor) then
+    Editor.FindNext;
+end;
+
+procedure TMainForm.ActionFindPreviousExecute(Sender: TObject);
+begin
+  inherited;
+  if Assigned(Editor) then
+    Editor.FindPrevious;
+end;
+
+procedure TMainForm.ActionOptionsExecute(Sender: TObject);
+begin
+  inherited;
+  if Assigned(Editor) then
+    TSearchOptionsDialog.ClassShowModal(Editor);
+end;
+
 procedure TMainForm.ActionPreviewExecute(Sender: TObject);
 begin
   PrintPreview
@@ -181,6 +273,13 @@ begin
     InitializeEditorPrint(PrintPreview.EditorPrint);
     ShowModal;
   end;
+end;
+
+procedure TMainForm.ActionCloseExecute(Sender: TObject);
+begin
+  inherited;
+  if Assigned(Editor) then
+    Editor.Search.Enabled := False;
 end;
 
 procedure TMainForm.ActionFileOpenExecute(Sender: TObject);
@@ -205,9 +304,6 @@ begin
   inherited;
 
   { IDE can lose these properties }
-  SearchFrame.SpeedButtonFindPrevious.Images := ImagesDataModule.ImageListSmall;
-  SearchFrame.SpeedButtonFindNext.Images := ImagesDataModule.ImageListSmall;
-  SearchFrame.SpeedButtonOptions.Images := ImagesDataModule.ImageListSmall;
   PopupMenuFile.Images := ImagesDataModule.ImageList;
   TitleBar.Images := ImagesDataModule.ImageListSmall;
 
@@ -230,8 +326,6 @@ procedure TMainForm.FormShow(Sender: TObject);
 begin
   ObjectInspectorEh.Component := Editor;
   ObjectInspectorEh.LabelColWidth := 145;
-
-  SearchFrame.Editor := Editor;
 end;
 
 function TMainForm.GetTitleBarItemLeftBottom(AIndex: Integer): TPoint;
@@ -325,7 +419,7 @@ procedure TMainForm.ActionSearchExecute(Sender: TObject);
 begin
   Editor.Search.Enabled := True;
   Application.ProcessMessages; { search frame visible }
-  SearchFrame.ComboBoxSearchText.SetFocus;
+  ComboBoxSearchText.SetFocus;
 end;
 
 procedure TMainForm.SelectedHighlighterClick(AHighlighterName: string);
@@ -341,7 +435,7 @@ begin
   Editor.CaretZero;
   StatusBar.Panels[3].Text := '';
   Caption := BCEDITORDEMO_CAPTION;
-  SearchFrame.ClearText;
+  ClearText;
 
   if Assigned(FPopupHighlighterDialog) then
   begin
@@ -358,7 +452,7 @@ begin
     Invalidate;
   end;
   TitleBar.Items[TITLE_BAR_COLORS].Caption := Editor.Highlighter.Colors.Name;
-  if Assigned(FPopupHighlighterDialog) then
+  if Assigned(FPopupHighlighterColorDialog) then
   begin
     FPopupHighlighterColorDialog.Visible := False;
     FPopupHighlighterColorDialog := nil;

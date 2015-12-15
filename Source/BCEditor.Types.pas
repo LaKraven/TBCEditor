@@ -274,6 +274,8 @@ type
   );
   TBCEditorMinimapOptions = set of TBCEditorMinimapOption;
 
+  TBCEditorMinimapAlign = (maLeft, maRight);
+
   TBCEditorUndoOption = (
     uoGroupUndo
   );

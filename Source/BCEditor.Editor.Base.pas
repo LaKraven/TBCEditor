@@ -1913,6 +1913,8 @@ end;
 function TBCBaseEditor.GetTextOffset: Integer;
 begin
   Result := FLeftMargin.GetWidth + FCodeFolding.GetWidth - (LeftChar - 1) * FCharWidth;
+  if FMinimap.Align = maLeft then
+    Result := Result + FMinimap.GetWidth;
 end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
@@ -2246,8 +2248,13 @@ begin
 end;
 
 function TBCBaseEditor.PixelsToRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
+var
+  LMinimapWidth: Integer;
 begin
-  Result.Column := Max(1, FLeftChar + ((X - FLeftMargin.GetWidth - FCodeFolding.GetWidth) div FCharWidth));
+  LMinimapWidth := 0;
+  if FMinimap.Align = maLeft then
+    LMinimapWidth := FMinimap.GetWidth;
+  Result.Column := Max(1, FLeftChar + ((X - LMinimapWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth) div FCharWidth));
   Result.Row := Max(1, TopLine + Y div FLineHeight);
 end;
 
@@ -2731,15 +2738,20 @@ end;
 procedure TBCBaseEditor.ComputeScroll(X, Y: Integer);
 var
   LScrollBounds: TRect;
+  LScrollBoundsLeft, LScrollBoundsRight: Integer;
 begin
   if not MouseCapture and not Dragging then
   begin
     FScrollTimer.Enabled := False;
     Exit;
   end;
-  LScrollBounds := Bounds(FLeftMargin.GetWidth + FCodeFolding.GetWidth, 0,
-    FVisibleChars * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth + 4,
-    FVisibleLines * FLineHeight);
+
+  LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  if FMinimap.Align = maLeft then
+    LScrollBoundsLeft := LScrollBoundsLeft + FMinimap.GetWidth;
+  LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
+
+  LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
 
   DeflateMinimapRect(LScrollBounds);
 
@@ -2767,7 +2779,10 @@ end;
 
 procedure TBCBaseEditor.DeflateMinimapRect(var ARect: TRect);
 begin
-  ARect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
+  if FMinimap.Align = maRight then
+    ARect.Right := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth
+  else
+    ARect.Left := FMinimap.GetWidth;
 end;
 
 procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
@@ -5360,12 +5375,19 @@ end;
 procedure TBCBaseEditor.DblClick;
 var
   LCursorPoint: TPoint;
+  LCursorInTextArea: Boolean;
 begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
 
-  if (LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth) and
-    (LCursorPoint.X < ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  if FMinimap.Align = maRight then
+    LCursorInTextArea := (LCursorPoint.X >= FLeftMargin.GetWidth + FCodeFolding.GetWidth) and
+      (LCursorPoint.X < ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth)
+  else
+    LCursorInTextArea := (LCursorPoint.X >= FMinimap.GetWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth) and
+      (LCursorPoint.X < ClientRect.Width - FSearch.Map.GetWidth);
+
+  if LCursorInTextArea then
   begin
     if FSelection.Visible then
       SetWordBlock(TextCaretPosition);
@@ -5835,6 +5857,7 @@ var
   LFoldRange: TBCEditorCodeFoldingRange;
   LCodeFoldingRegion: Boolean;
   LTextCaretPosition: TBCEditorTextPosition;
+  LMinimapWidth: Integer;
 begin
   LTextCaretPosition := DisplayToTextPosition(GetDisplayPosition(1, PixelsToRowColumn(X, Y).Row));
   TextCaretPosition := LTextCaretPosition;
@@ -5852,7 +5875,10 @@ begin
     (bpoToggleBookmarkByClick in LeftMargin.Bookmarks.Panel.Options) then
     ToggleBookmark;
 
-  LCodeFoldingRegion := (X >= FLeftMargin.GetWidth) and (X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth);
+  LMinimapWidth := 0;
+  if FMinimap.Align = maLeft then
+    LMinimapWidth := FMinimap.GetWidth;
+  LCodeFoldingRegion := (X >= FLeftMargin.GetWidth + LMinimapWidth) and (X <= FLeftMargin.GetWidth + FCodeFolding.GetWidth + LMinimapWidth);
 
   if FCodeFolding.Visible and LCodeFoldingRegion and (Lines.Count > 0) then
   begin
@@ -6371,6 +6397,8 @@ var
   LLeftMarginWidth: Integer;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  if FMinimap.Align = maLeft then
+    Inc(LLeftMarginWidth, FMinimap.GetWidth);
 
   LWasSelected := False;
 
@@ -6384,12 +6412,13 @@ begin
     FreeCompletionProposalPopupWindow;
   end;
 
-  if not FMinimap.Dragging and FMinimap.Visible and
-    (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
-  begin
-    DoOnMinimapClick(AButton, X, Y);
-    Exit;
-  end;
+  if not FMinimap.Dragging and FMinimap.Visible then
+    if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
+      (FMinimap.Align = maLeft) and (X < FMinimap.GetWidth) then
+    begin
+      DoOnMinimapClick(AButton, X, Y);
+      Exit;
+    end;
 
   inherited MouseDown(AButton, AShift, X, Y);
 
@@ -6525,17 +6554,20 @@ var
   LHintWindow: THintWindow;
   LPositionText: string;
   LLine: Integer;
+  LMinimapWidth: Integer;
 begin
-  if FMinimap.Visible and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
-    if FMinimap.Clicked then
-    begin
-      if FMinimap.Dragging then
-        DragMinimap(Y);
-      if not FMinimap.Dragging then
-        if (ssLeft in AShift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
-          FMinimap.Dragging := True;
-      Exit;
-    end;
+  if FMinimap.Visible then
+    if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
+      (FMinimap.Align = maLeft) and (X < FMinimap.GetWidth) then
+      if FMinimap.Clicked then
+      begin
+        if FMinimap.Dragging then
+          DragMinimap(Y);
+        if not FMinimap.Dragging then
+          if (ssLeft in AShift) and MouseCapture and (Abs(FMouseDownY - Y) >= GetSystemMetrics(SM_CYDRAG)) then
+            FMinimap.Dragging := True;
+        Exit;
+      end;
 
   if FMinimap.Clicked then
     Exit;
@@ -6551,7 +6583,10 @@ begin
 
     if FRightMargin.Moving then
     begin
-      if X > FLeftMargin.GetWidth + FCodeFolding.GetWidth then
+      LMinimapWidth := 0;
+      if FMinimap.Align = maLeft then
+        LMinimapWidth := FMinimap.GetWidth;
+      if X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + LMinimapWidth then
         FRightMarginMovePosition := X;
       if rmoShowMovingHint in FRightMargin.Options then
       begin
@@ -6668,6 +6703,7 @@ var
   LHighlighterAttribute: TBCEditorHighlighterAttribute;
   LCursorPoint: TPoint;
   LTextPosition: TBCEditorTextPosition;
+  LMinimapWidth: Integer;
 begin
   FMinimap.Clicked := False;
   FMinimap.Dragging := False;
@@ -6681,7 +6717,11 @@ begin
   if FCodeFolding.Visible then
     CheckIfAtMatchingKeywords;
 
-  if FMouseOverURI and (AButton = mbLeft) and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth) then
+  LMinimapWidth := 0;
+  if FMinimap.Align = maLeft then
+    LMinimapWidth := FMinimap.GetWidth;
+
+  if FMouseOverURI and (AButton = mbLeft) and (X > FLeftMargin.GetWidth + FCodeFolding.GetWidth + LMinimapWidth) then
   begin
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
@@ -6761,6 +6801,8 @@ begin
   LMinimapLeft := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth;
   LSearchMapLeft := ClientRect.Width - FSearch.Map.GetWidth;
   LTextLinesLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  if Minimap.Align = maLeft then
+    Inc(LTextLinesLeft, FMinimap.GetWidth);
 
   HideCaret;
 
@@ -6777,8 +6819,16 @@ begin
     if LClipRect.Right > LTextLinesLeft then
     begin
       DrawRect := LClipRect;
-      DrawRect.Left := LTextLinesLeft;
-      DrawRect.Right := LMinimapLeft;
+      if FMinimap.Align = maRight then
+      begin
+        DrawRect.Left := LTextLinesLeft;
+        DrawRect.Right := LMinimapLeft;
+      end
+      else
+      begin
+        DrawRect.Left := LTextLinesLeft;
+        DrawRect.Right := LSearchMapLeft;
+      end;
       FTextDrawer.SetBaseFont(Font);
       FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
@@ -6794,10 +6844,14 @@ begin
     if LClipRect.Left < LTextLinesLeft then
     begin
       DrawRect := LClipRect;
+      if FMinimap.Align = maLeft then
+        DrawRect.Left := FMinimap.GetWidth;
       { Left margin }
       if FLeftMargin.Visible then
       begin
         DrawRect.Right := FLeftMargin.GetWidth;
+        if FMinimap.Align = maLeft then
+          DrawRect.Right := DrawRect.Right + FMinimap.GetWidth;
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
       end;
 
@@ -6806,6 +6860,12 @@ begin
       begin
         DrawRect.Left := FLeftMargin.GetWidth;
         DrawRect.Right := DrawRect.Left + FCodeFolding.GetWidth;
+
+        if FMinimap.Align = maLeft then
+        begin
+          DrawRect.Left := DrawRect.Left + FMinimap.GetWidth;
+          DrawRect.Right := DrawRect.Right + FMinimap.GetWidth;
+        end;
         PaintCodeFolding(DrawRect, LLine1, LLine2);
       end;
     end;
@@ -6815,12 +6875,20 @@ begin
 
     { Minimap }
     if FMinimap.Visible then
-      if LClipRect.Right > LMinimapLeft then
+      if (FMinimap.Align = maRight) and (LClipRect.Right > LMinimapLeft) or
+         (FMinimap.Align = maLeft) and (LClipRect.Left < FMinimap.GetWidth) then
       begin
         DrawRect := LClipRect;
-        DrawRect.Left := LMinimapLeft;
-        DrawRect.Right := LSearchMapLeft;
-
+        if FMinimap.Align = maRight then
+        begin
+          DrawRect.Left := LMinimapLeft;
+          DrawRect.Right := LSearchMapLeft;
+        end
+        else
+        begin
+          DrawRect.Left := 0;
+          DrawRect.Right := FMinimap.GetWidth;
+        end;
         FTextDrawer.SetBaseFont(FMinimap.Font);
         FTextDrawer.Style := FMinimap.Font.Style;
 
@@ -7010,6 +7078,8 @@ begin
     AFoldRange.Collapsed and not AFoldRange.ParentCollapsed then
   begin
     LCollapseMarkRect.Left := (ATokenPosition + ATokenLength + 1) * FCharWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    if FMinimap.Align = maLeft then
+      Inc(LCollapseMarkRect.Left, FMinimap.GetWidth);
     LCollapseMarkRect.Top := ALineRect.Top + 2;
     LCollapseMarkRect.Bottom := ALineRect.Bottom - 2;
     LCollapseMarkRect.Right := LCollapseMarkRect.Left + CharWidth * 4 - 2;
@@ -7135,10 +7205,16 @@ begin
 
           if (X - LScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
           begin
-            if AMinimap then
-              X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
+            if FMinimap.Align = maRight then
+            begin
+              if AMinimap then
+                X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
+              else
+                X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
+            end
             else
-              X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
+            if not AMinimap then
+              X := FMinimap.GetWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
 
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
               (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) and
@@ -7193,7 +7269,7 @@ var
         else
           Y := 0;
         with FLeftMargin.Bookmarks do
-          Images.Draw(Canvas, Panel.LeftMargin + ALeftMarginOffset, (AMarkRow - TopLine) * FLineHeight + Y,
+          Images.Draw(Canvas, AClipRect.Left + Panel.LeftMargin + ALeftMarginOffset, (AMarkRow - TopLine) * FLineHeight + Y,
             ABookMark.ImageIndex);
         Inc(ALeftMarginOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
       end;
@@ -7205,7 +7281,7 @@ var
         if not Assigned(FInternalBookmarkImage) then
           FInternalBookmarkImage := TBCEditorInternalImage.Create(HINSTANCE, 'BCEDITORBOOKMARKIMAGES', 9);
         if ALeftMarginOffset = 0 then
-          FInternalBookmarkImage.Draw(Canvas, ABookMark.ImageIndex, FLeftMargin.Bookmarks.Panel.LeftMargin +
+          FInternalBookmarkImage.Draw(Canvas, ABookMark.ImageIndex, AClipRect.Left + FLeftMargin.Bookmarks.Panel.LeftMargin +
             ALeftMarginOffset, (aMarkRow - TopLine) * FLineHeight, FLineHeight, clFuchsia);
         Inc(ALeftMarginOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
       end;
@@ -7257,7 +7333,7 @@ var
               if (lnoIntens in LeftMargin.LineNumbers.Options) and
                 (LLineNumber[Length(LLineNumber)] <> '0') and (i <> LeftMargin.LineNumbers.StartFrom) then
               begin
-                LLeftMarginWidth := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
+                LLeftMarginWidth := LLineRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
                 LOldColor := Canvas.Pen.Color;
                 Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
                 LTop := LLineRect.Top + ((FLineHeight - 1) div 2);
@@ -7273,7 +7349,7 @@ var
           end;
 
           GetTextExtentPoint32(Canvas.Handle, PChar(LLineNumber), Length(LLineNumber), LTextSize);
-          Winapi.Windows.ExtTextOut(Canvas.Handle, (FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 2) - LTextSize.cx,
+          Winapi.Windows.ExtTextOut(Canvas.Handle, LLineRect.Left + (FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 2) - LTextSize.cx,
             LLineRect.Top + ((FLineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, PChar(LLineNumber),
             Length(LLineNumber), nil);
         end;
@@ -7300,7 +7376,7 @@ var
   begin
     if FLeftMargin.Bookmarks.Panel.Visible then
     begin
-      LPanelRect := System.Types.Rect(0, 0, FLeftMargin.Bookmarks.Panel.Width, ClientHeight);
+      LPanelRect := System.Types.Rect(AClipRect.Left, 0, AClipRect.Left + FLeftMargin.Bookmarks.Panel.Width, ClientHeight);
       if FLeftMargin.Colors.BookmarkPanelBackground <> clNone then
       begin
         Canvas.Brush.Color := FLeftMargin.Colors.BookmarkPanelBackground;
@@ -7314,7 +7390,7 @@ var
 
           if LLine = GetTextCaretY + 1 then
           begin
-            LPanelActiveLineRect := System.Types.Rect(0, (i - TopLine) * FLineHeight, FLeftMargin.Bookmarks.Panel.Width,
+            LPanelActiveLineRect := System.Types.Rect(AClipRect.Left, (i - TopLine) * FLineHeight, AClipRect.Left + FLeftMargin.Bookmarks.Panel.Width,
               (i - TopLine + 1) * FLineHeight);
             Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
             PatBlt(Canvas.Handle, LPanelActiveLineRect.Left, LPanelActiveLineRect.Top, LPanelActiveLineRect.Width,
@@ -7338,25 +7414,25 @@ var
       LLine := GetDisplayTextLineNumber(i);
       LPreviousLine := GetDisplayTextLineNumber(i - 1);
       if LLine = LPreviousLine then
-        FWordWrap.Indicator.Draw(Canvas, FWordWrap.Indicator.Left, (i - TopLine) * FLineHeight, FLineHeight);
+        FWordWrap.Indicator.Draw(Canvas, AClipRect.Left + FWordWrap.Indicator.Left, (i - TopLine) * FLineHeight, FLineHeight);
     end;
   end;
 
   procedure PaintBorder;
   begin
-    if (FLeftMargin.Border.Style <> mbsNone) and (AClipRect.Right >= FLeftMargin.GetWidth - 2) then
+    if (FLeftMargin.Border.Style <> mbsNone) and (AClipRect.Right >= AClipRect.Left + FLeftMargin.GetWidth - 2) then
     with Canvas do
     begin
       Pen.Color := FLeftMargin.Colors.Border;
       Pen.Width := 1;
       if FLeftMargin.Border.Style = mbsMiddle then
       begin
-        MoveTo(FLeftMargin.GetWidth - 2, AClipRect.Top);
-        LineTo(FLeftMargin.GetWidth - 2, AClipRect.Bottom);
+        MoveTo(AClipRect.Left + FLeftMargin.GetWidth - 2, AClipRect.Top);
+        LineTo(AClipRect.Left + FLeftMargin.GetWidth - 2, AClipRect.Bottom);
         Pen.Color := FLeftMargin.Colors.Background;
       end;
-      MoveTo(FLeftMargin.GetWidth - 1, AClipRect.Top);
-      LineTo(FLeftMargin.GetWidth - 1, AClipRect.Bottom);
+      MoveTo(AClipRect.Left + FLeftMargin.GetWidth - 1, AClipRect.Top);
+      LineTo(AClipRect.Left + FLeftMargin.GetWidth - 1, AClipRect.Bottom);
     end;
   end;
 
@@ -7410,7 +7486,7 @@ var
   procedure PaintActiveLineIndicator;
   begin
     if FActiveLine.Visible and FActiveLine.Indicator.Visible then
-      FActiveLine.Indicator.Draw(Canvas, FActiveLine.Indicator.Left, (DisplayCaretY - 1) * FLineHeight, FLineHeight);
+      FActiveLine.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left, (DisplayCaretY - 1) * FLineHeight, FLineHeight);
   end;
 
   procedure PaintLineState;
@@ -7423,7 +7499,7 @@ var
     if FLeftMargin.LineState.Enabled then
     begin
       LOldColor := Canvas.Brush.Color;
-      LLineStateRect.Left := FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
+      LLineStateRect.Left := AClipRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
       LLineStateRect.Right := LLineStateRect.Left + FLeftMargin.LineState.Width;
       for i := AFirstLine to ALastTextLine do
       begin
@@ -7456,6 +7532,10 @@ var
     begin
       if Assigned(FOnBookmarkPanelLinePaint) then
       begin
+        LPanelRect.Left := AClipRect.Left;
+        LPanelRect.Top := 0;
+        LPanelRect.Right := FLeftMargin.Bookmarks.Panel.Width;
+        LPanelRect.Bottom := AClipRect.Bottom;
         for i := AFirstLine to ALastLine do
         begin
           LLine := i;
@@ -7601,6 +7681,8 @@ begin
   FTextDrawer.BackgroundColor := FSearch.Highlighter.Colors.Background;
   LLength := Length(FSearch.SearchText);
   LLeftMargin := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  if FMinimap.Align = maLeft then
+    Inc(LLeftMargin, FMinimap.GetWidth);
   for i := 0 to FSearchLines.Count - 1 do
   begin
     LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
@@ -7650,6 +7732,7 @@ var
   LCharPosition, X, Y, LLeftTemp: Integer;
   LCharRect: TRect;
   LPilcrow: string;
+  LMinimapWidth: Integer;
 begin
   if FSpecialChars.Visible then
   begin
@@ -7667,6 +7750,8 @@ begin
 
     LCharPosition := 1;
     LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy;
+    if FMinimap.Align = maLeft then
+      Inc(LLeftTemp, FMinimap.GetWidth);
     while LPLine^ <> BCEDITOR_NONE_CHAR do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
@@ -7746,7 +7831,11 @@ begin
         else
           LCharRect.Right := LCharRect.Left + FTabs.Width * LCharWidth - 3;
 
-        if LCharRect.Left > FLeftMargin.GetWidth - FCodeFolding.GetWidth then
+        LMinimapWidth := 0;
+        if FMinimap.Align = maLeft then
+          LMinimapWidth := FMinimap.GetWidth;
+
+        if LCharRect.Left > FLeftMargin.GetWidth + FCodeFolding.GetWidth + LMinimapWidth then
         begin
           if FSpecialChars.EndOfLine.Style = eolPilcrow then
           begin
@@ -7904,7 +7993,12 @@ var
   function CharWidth(AIndex: Integer; AMinimap: Boolean = False): Integer;
   begin
     if AMinimap then
-      Result := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth
+    begin
+      if FMinimap.Align = maRight then
+        Result := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth
+      else
+        Result := 0;
+    end
     else
       Result := FTextOffset;
 
@@ -7945,7 +8039,10 @@ var
     begin
       X := CharWidth(AFirst, AMinimap);
       Dec(AFirst, ACharsBefore);
-      ATokenLength := Min(ATokenLength, FVisibleChars);
+      if AMinimap then
+        ATokenLength := Min(ATokenLength, LLastChar)
+      else
+        ATokenLength := Min(ATokenLength, FVisibleChars);
       LText := RemoveMultiByteFillerChars(AToken, AFirst, ATokenLength);
       while AToken[AFirst] = BCEDITOR_FILLER_CHAR do
       begin
@@ -9349,13 +9446,22 @@ var
   LCursorPoint: TPoint;
   LTextPosition: TBCEditorTextPosition;
   LNewCursor: TCursor;
+  LMinimapWidth: Integer;
 begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
-  if LCursorPoint.X < FLeftMargin.GetWidth + FCodeFolding.GetWidth then
+
+  LMinimapWidth := 0;
+  if FMinimap.Align = maLeft then
+    LMinimapWidth := FMinimap.GetWidth;
+
+  if (LCursorPoint.X > LMinimapWidth) and (LCursorPoint.X < LMinimapWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth) then
     SetCursor(Screen.Cursors[FLeftMargin.Cursor])
   else
-  if FMinimap.Visible and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) then
+  if FMinimap.Visible and (
+    (FMinimap.Align = maRight) and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
+    (FMinimap.Align = maLeft) and (LCursorPoint.X < FMinimap.GetWidth)
+    ) then
     SetCursor(Screen.Cursors[FMinimap.Cursor])
   else
   begin
@@ -11766,12 +11872,16 @@ end;
 procedure TBCBaseEditor.InvalidateLeftMarginLines(AFirstLine, ALastLine: Integer);
 var
   LInvalidationRect: TRect;
+  LMinimapWidth: Integer;
 begin
   if Visible and HandleAllocated then
   begin
+    LMinimapWidth := 0;
+    if FMinimap.Align = maLeft then
+      LMinimapWidth := FMinimap.GetWidth;
     if (AFirstLine = -1) and (ALastLine = -1) then
     begin
-      LInvalidationRect := Rect(0, 0, FLeftMargin.GetWidth, ClientHeight);
+      LInvalidationRect := Rect(LMinimapWidth, 0, LMinimapWidth + FLeftMargin.GetWidth, ClientHeight);
 
       if sfLinesChanging in FStateFlags then
         UnionRect(FInvalidateRect, FInvalidateRect, LInvalidationRect)
@@ -11790,7 +11900,7 @@ begin
 
       if ALastLine >= AFirstLine then
       begin
-        LInvalidationRect := Rect(0, FLineHeight * (AFirstLine - TopLine), FLeftMargin.GetWidth,
+        LInvalidationRect := Rect(LMinimapWidth, FLineHeight * (AFirstLine - TopLine), LMinimapWidth + FLeftMargin.GetWidth,
           FLineHeight * (ALastLine - TopLine + 1));
 
         if sfLinesChanging in FStateFlags then
@@ -11870,9 +11980,21 @@ end;
 procedure TBCBaseEditor.InvalidateMinimap;
 var
   LInvalidationRect: TRect;
+  LRectLeft, LRectRight: Integer;
 begin
   FMinimapBufferBmp.Height := 0;
-  LInvalidationRect := Rect(ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth, 0, ClientWidth - FSearch.Map.GetWidth,
+  if FMinimap.Align = maRight then
+  begin
+    LRectLeft := ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth;
+    LRectRight := ClientWidth - FSearch.Map.GetWidth;
+  end
+  else
+  begin
+    LRectLeft := 0;
+    LRectRight := FMinimap.GetWidth;
+  end;
+
+  LInvalidationRect := Rect(LRectLeft, 0, LRectRight,
     ClientHeight);
   InvalidateRect(LInvalidationRect);
 end;
@@ -12584,7 +12706,7 @@ begin
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
 
-    if (X >= ClientRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth) and (X < ClientRect.Right) and (Y >= ClientRect.Top) and (Y < ClientRect.Bottom) then
+    if (X >= LClientRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth) and (X < LClientRect.Right) and (Y >= LClientRect.Top) and (Y < LClientRect.Bottom) then
     begin
       SetCaretPos(X, Y);
       ShowCaret;

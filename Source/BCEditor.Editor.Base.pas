@@ -9807,6 +9807,7 @@ end;
 function TBCBaseEditor.SplitTextIntoWords(AStringList: TStrings; ACaseSensitive: Boolean): string;
 var
   i, Line: Integer;
+  LChar: Char;
   LWord, LWordList: string;
   LStringList: TStringList;
   LKeywordStringList: TStringList;
@@ -9930,9 +9931,13 @@ begin
     for i := 0 to LKeywordStringList.Count - 1 do
     begin
       LWord := LKeywordStringList.Strings[i];
-      if (Length(LWord) > 1) and (LWord[1].IsLower or LWord[1].IsUpper or (LWord[1] = BCEDITOR_UNDERSCORE)) then
-        if Pos(LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED, LWordList) = 0 then { no duplicates }
-          LWordList := LWordList + LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+      if Length(LWord) > 1 then
+      begin
+        LChar := LWord[1];
+        if LChar.IsLower or LChar.IsUpper or (LChar = BCEDITOR_UNDERSCORE) then
+          if Pos(LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED, LWordList) = 0 then { no duplicates }
+            LWordList := LWordList + LWord + BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
+      end;
     end;
     LStringList.Text := LWordList;
     LStringList.Sort;
@@ -11375,6 +11380,7 @@ begin
             SelectionEndPosition := LTextCaretPosition;
             EnsureCursorPositionVisible;
           finally
+            DoChange;
             UndoList.EndBlock;
           end;
         end;
@@ -11811,7 +11817,7 @@ begin
 
   if (ALine >= TopLine) and (ALine <= TopLine + VisibleLines) then
   begin
-    LInvalidationRect := Rect(0, FLineHeight * (ALine - TopLine), ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth, 0);
+    LInvalidationRect := Rect(0, FLineHeight * (ALine - TopLine), ClientWidth, 0);
     LInvalidationRect.Bottom := LInvalidationRect.Top + FLineHeight;
     DeflateMinimapRect(LInvalidationRect);
 

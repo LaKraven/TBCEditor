@@ -188,6 +188,7 @@ inherited MainForm: TMainForm
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      SkinData.SkinSection = 'CHECKBOX'
       object BCSplitter1: TBCSplitter
         Left = 200
         Top = 0
@@ -366,7 +367,7 @@ inherited MainForm: TMainForm
     end
   end
   inherited SkinManager: TBCSkinManager
-    ExtendedBorders = True
+    Effects.AllowGlowing = False
     IsDefault = True
     MenuSupport.UseExtraLine = False
     ThirdParty.ThirdEdits = ' '#13#10'TBCEditorPrintPreview'#13#10
@@ -471,7 +472,7 @@ inherited MainForm: TMainForm
   end
   inherited SkinProvider: TBCSkinProvider
     Left = 250
-    Top = 26
+    Top = 30
   end
   inherited ApplicationEvents: TApplicationEvents
     OnMessage = ApplicationEventsMessage

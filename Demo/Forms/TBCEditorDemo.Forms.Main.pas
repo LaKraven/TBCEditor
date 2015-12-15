@@ -303,6 +303,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   inherited;
 
+  SkinManager.ExtendedBorders := True;
   { IDE can lose these properties }
   PopupMenuFile.Images := ImagesDataModule.ImageList;
   TitleBar.Images := ImagesDataModule.ImageListSmall;
@@ -355,10 +356,7 @@ begin
   inherited;
 
   if Assigned(FPopupHighlighterDialog) then
-  begin
-    FPopupHighlighterDialog.Visible := False;
-    FPopupHighlighterDialog := nil;
-  end
+    FPopupHighlighterDialog := nil
   else
   begin
     FPopupHighlighterDialog := TPopupHighlighterDialog.Create(Self);
@@ -388,10 +386,7 @@ var
 begin
   inherited;
   if Assigned(FPopupHighlighterColorDialog) then
-  begin
-    FPopupHighlighterColorDialog.Visible := False;
-    FPopupHighlighterColorDialog := nil;
-  end
+    FPopupHighlighterColorDialog := nil
   else
   begin
     FPopupHighlighterColorDialog := TPopupHighlighterColorDialog.Create(Self);

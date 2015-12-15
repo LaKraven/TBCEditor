@@ -2748,7 +2748,7 @@ begin
 
   LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
-    LScrollBoundsLeft := LScrollBoundsLeft + FMinimap.GetWidth;
+    Inc(LScrollBoundsLeft, FMinimap.GetWidth);
   LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
 
   LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
@@ -6851,7 +6851,7 @@ begin
       begin
         DrawRect.Right := FLeftMargin.GetWidth;
         if FMinimap.Align = maLeft then
-          DrawRect.Right := DrawRect.Right + FMinimap.GetWidth;
+          Inc(DrawRect.Right, FMinimap.GetWidth);
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
       end;
 
@@ -6863,8 +6863,8 @@ begin
 
         if FMinimap.Align = maLeft then
         begin
-          DrawRect.Left := DrawRect.Left + FMinimap.GetWidth;
-          DrawRect.Right := DrawRect.Right + FMinimap.GetWidth;
+          Inc(DrawRect.Left, FMinimap.GetWidth);
+          Inc(DrawRect.Right, FMinimap.GetWidth);
         end;
         PaintCodeFolding(DrawRect, LLine1, LLine2);
       end;

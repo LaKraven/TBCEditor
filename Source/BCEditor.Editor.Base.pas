@@ -12486,51 +12486,48 @@ var
   LStringList: TStringList;
   LOldSelectionBeginPosition, LOldSelectionEndPosition: TBCEditorTextPosition;
 begin
-  if Focused then
-  begin
-    LStringList := TStringList.Create;
-    try
-      if SelectionAvailable then
-        LStringList.Text := SelectedText
-      else
-        LStringList.Text := Text;
-      LStringList.Sort;
-      s := '';
-      if (ASortOrder = soDesc) or (ASortOrder = soToggle) and (FLastSortOrder = soAsc) then
+  LStringList := TStringList.Create;
+  try
+    if SelectionAvailable then
+      LStringList.Text := SelectedText
+    else
+      LStringList.Text := Text;
+    LStringList.Sort;
+    s := '';
+    if (ASortOrder = soDesc) or (ASortOrder = soToggle) and (FLastSortOrder = soAsc) then
+    begin
+      FLastSortOrder := soDesc;
+      for i := LStringList.Count - 1 downto 0 do
       begin
-        FLastSortOrder := soDesc;
-        for i := LStringList.Count - 1 downto 0 do
-        begin
-          s := s + LStringList.Strings[i];
-          if i <> 0 then
-            s := s + Chr(13) + Chr(10);
-        end;
-      end
-      else
-      begin
-        FLastSortOrder := soAsc;
-        s := LStringList.Text;
+        s := s + LStringList.Strings[i];
+        if i <> 0 then
+          s := s + Chr(13) + Chr(10);
       end;
-      s := TrimRight(s);
-      LStringList.Text := s;
-
-      if SelectionAvailable then
-      begin
-        LOldSelectionBeginPosition := GetSelectionBeginPosition;
-        LOldSelectionEndPosition := GetSelectionEndPosition;
-        SelectedText := s;
-        FSelectionBeginPosition := LOldSelectionBeginPosition;
-        FSelectionEndPosition := LOldSelectionEndPosition;
-        LLastLength := Length(LStringList.Strings[LStringList.Count - 1]) + 1;
-        FSelectionEndPosition.Char := LLastLength
-      end
-      else
-        Text := s;
-    finally
-      LStringList.Free;
-      if FCodeFolding.Visible then
-        RescanCodeFoldingRanges;
+    end
+    else
+    begin
+      FLastSortOrder := soAsc;
+      s := LStringList.Text;
     end;
+    s := TrimRight(s);
+    LStringList.Text := s;
+
+    if SelectionAvailable then
+    begin
+      LOldSelectionBeginPosition := GetSelectionBeginPosition;
+      LOldSelectionEndPosition := GetSelectionEndPosition;
+      SelectedText := s;
+      FSelectionBeginPosition := LOldSelectionBeginPosition;
+      FSelectionEndPosition := LOldSelectionEndPosition;
+      LLastLength := Length(LStringList.Strings[LStringList.Count - 1]) + 1;
+      FSelectionEndPosition.Char := LLastLength
+    end
+    else
+      Text := s;
+  finally
+    LStringList.Free;
+    if FCodeFolding.Visible then
+      RescanCodeFoldingRanges;
   end;
 end;
 

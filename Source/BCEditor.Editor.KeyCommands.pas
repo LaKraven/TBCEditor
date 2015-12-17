@@ -141,7 +141,7 @@ const
   ecCollapseCurrent = ecUserFirst + 109;
 
 type
-  TBCEditorCommand = Word;
+  TBCEditorCommand = type Word;
 
   TBCEditorHookedCommandEvent = procedure(Sender: TObject; AfterProcessing: Boolean; var AHandled: Boolean;
     var ACommand: TBCEditorCommand; var AChar: Char; Data: Pointer; AHandlerData: Pointer) of object;

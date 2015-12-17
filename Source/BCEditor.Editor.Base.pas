@@ -8492,7 +8492,7 @@ var
               LKeyword := '';
               LWord := LTokenText;
 
-              if SelectionAvailable and (soHighlightSimilarTerms in FSelection.Options) then
+              if LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
               begin
                 LTempTextPosition := FSelectionEndPosition;
                 LSelectionBeginChar := FSelectionBeginPosition.Char;

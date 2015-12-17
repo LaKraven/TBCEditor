@@ -11,16 +11,12 @@ type
   TBCEditorStringFlag = (sfHasTabs, sfHasNoTabs, sfExpandedLengthUnknown);
   TBCEditorStringFlags = set of TBCEditorStringFlag;
 
-  TBCEditorLineAttributeMask = (amBackground, amForeground);
-  TBCEditorLineAttributeMasks = set of TBCEditorLineAttributeMask;
-
   TBCEditorLineState = (lsNone, lsNormal, lsModified);
 
   TBCEditorLineAttribute = record
     Background: TColor;
     Foreground: TColor;
     LineState: TBCEditorLineState;
-    Mask: TBCEditorLineAttributeMasks;
   end;
   PBCEditorLineAttribute = ^TBCEditorLineAttribute;
 
@@ -286,7 +282,6 @@ begin
   BeginUpdate;
   FList^[AIndex].Attribute.Background := AValue.Background;
   FList^[AIndex].Attribute.Foreground := AValue.Foreground;
-  FList^[AIndex].Attribute.Mask := AValue.Mask;
   FList^[AIndex].Attribute.LineState := AValue.LineState;
   EndUpdate;
 end;
@@ -441,7 +436,6 @@ begin
     Flags := [sfExpandedLengthUnknown];
     Attribute.Foreground := clNone;
     Attribute.Background := clNone;
-    Attribute.Mask := [];
     Attribute.LineState := lsNone;
   end;
   Inc(FCount);
@@ -472,7 +466,6 @@ begin
         Range := CNULLRANGE;
         ExpandedLength := -1;
         Flags := [sfExpandedLengthUnknown];
-        Attribute.Mask := [];
         Attribute.Foreground := clNone;
         Attribute.Background := clNone;
         Attribute.LineState := lsModified;

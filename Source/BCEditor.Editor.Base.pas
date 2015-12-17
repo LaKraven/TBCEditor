@@ -12463,7 +12463,6 @@ procedure TBCBaseEditor.SetLineColor(ALine: Integer; AForegroundColor, ABackgrou
 begin
   if (ALine >= 0) and (ALine < FLines.Count) then
   begin
-    FLines.Attributes[ALine].Mask := FLines.Attributes[ALine].Mask + [amBackground, amForeground];
     FLines.Attributes[ALine].Foreground := AForegroundColor;
     FLines.Attributes[ALine].Background := ABackgroundColor;
     InvalidateLine(ALine + 1);
@@ -12473,10 +12472,7 @@ end;
 procedure TBCBaseEditor.SetLineColorToDefault(ALine: Integer);
 begin
   if (ALine >= 0) and (ALine < FLines.Count) then
-  begin
-    FLines.Attributes[ALine].Mask := FLines.Attributes[ALine].Mask - [amBackground, amForeground];
     InvalidateLine(ALine + 1);
-  end;
 end;
 
 procedure TBCBaseEditor.Sort(ASortOrder: TBCEditorSortOrder = soToggle);

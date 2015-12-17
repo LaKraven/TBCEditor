@@ -4175,7 +4175,7 @@ begin
       if FLeftMargin.Visible then
         LTextAreaRect.Left := LTextAreaRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
       DeflateMinimapRect(LTextAreaRect);
-      ScrollWindow(Handle, LDelta * CharWidth, 0, @LTextAreaRect, @LTextAreaRect);
+      ScrollWindow(Handle, LDelta * FCharWidth, 0, @LTextAreaRect, @LTextAreaRect);
     end
     else
       InvalidateLines(-1, -1);
@@ -6615,7 +6615,7 @@ begin
 
     if Assigned(LFoldRange) and LFoldRange.Collapsed then
     begin
-      LScrolledXBy := (LeftChar - 1) * CharWidth;
+      LScrolledXBy := (LeftChar - 1) * FCharWidth;
       LPoint := Point(X, Y);
       LRect := LFoldRange.CollapseMarkRect;
 
@@ -7082,7 +7082,7 @@ begin
       Inc(LCollapseMarkRect.Left, FMinimap.GetWidth);
     LCollapseMarkRect.Top := ALineRect.Top + 2;
     LCollapseMarkRect.Bottom := ALineRect.Bottom - 2;
-    LCollapseMarkRect.Right := LCollapseMarkRect.Left + CharWidth * 4 - 2;
+    LCollapseMarkRect.Right := LCollapseMarkRect.Left + FCharWidth * 4 - 2;
 
     AFoldRange.CollapseMarkRect := LCollapseMarkRect;
 
@@ -7990,7 +7990,7 @@ var
     end;
   end;
 
-  function CharWidth(AIndex: Integer; AMinimap: Boolean = False): Integer;
+  function GetCharWidth(AIndex: Integer; AMinimap: Boolean = False): Integer;
   begin
     if AMinimap then
     begin
@@ -8037,7 +8037,7 @@ var
   begin
     if (ALast > AFirst) and (LTokenRect.Right > LTokenRect.Left) then
     begin
-      X := CharWidth(AFirst, AMinimap);
+      X := GetCharWidth(AFirst, AMinimap);
       Dec(AFirst, ACharsBefore);
       if AMinimap then
         ATokenLength := Min(ATokenLength, LLastChar)
@@ -8111,7 +8111,7 @@ var
         if LFirstUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := CharWidth(LLineSelectionStart, AMinimap) + 1;
+          LTokenRect.Right := GetCharWidth(LLineSelectionStart, AMinimap) + 1;
           with LTokenHelper do
             PaintToken(Text, LLineSelectionStart - 1, CharsBefore, LFirstColumn, LLineSelectionStart);
         end;
@@ -8119,14 +8119,14 @@ var
         SetDrawingColors(True);
         LSelectionStart := Max(LLineSelectionStart, LFirstColumn);
         LSelectionEnd := Min(LLineSelectionEnd, LLastColumn);
-        LTokenRect.Right := CharWidth(LSelectionEnd, AMinimap) + 1;
+        LTokenRect.Right := GetCharWidth(LSelectionEnd, AMinimap) + 1;
         with LTokenHelper do
           PaintToken(Text, LSelectionEnd - LSelectionStart, CharsBefore, LSelectionStart, LSelectionEnd);
         { second unselected part of the token }
         if LSecondUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
-          LTokenRect.Right := CharWidth(LLastColumn, AMinimap) + 1;
+          LTokenRect.Right := GetCharWidth(LLastColumn, AMinimap) + 1;
           with LTokenHelper do
             PaintToken(Text, LLastColumn - LSelectionEnd, CharsBefore, LLineSelectionEnd, LLastColumn);
         end;
@@ -8134,7 +8134,7 @@ var
       else
       begin
         SetDrawingColors(LSelected);
-        LTokenRect.Right := CharWidth(LLastColumn, AMinimap) + 1;
+        LTokenRect.Right := GetCharWidth(LLastColumn, AMinimap) + 1;
         with LTokenHelper do
           PaintToken(Text, Length, CharsBefore, LFirstColumn, LLastColumn);
       end;
@@ -8154,8 +8154,8 @@ var
 
       if LIsComplexLine then
       begin
-        X1 := CharWidth(LLineSelectionStart, AMinimap);
-        X2 := CharWidth(LLineSelectionEnd, AMinimap);
+        X1 := GetCharWidth(LLineSelectionStart, AMinimap);
+        X2 := GetCharWidth(LLineSelectionEnd, AMinimap);
         if LTokenRect.Left < X1 then
         begin
           SetDrawingColors(soFromEndOfLine in FSelection.Options);
@@ -8635,7 +8635,7 @@ begin
 
   FLineHeight := 0;
   FCharWidth := 0;
-  FTextDrawer.BaseFont := Self.Font;
+  FTextDrawer.BaseFont := Font;
   for i := 0 to 3 do
     if LHasStyle[i] then
     begin

@@ -2394,7 +2394,7 @@ var
     if (FSelection.ActiveMode = smNormal) or not (soSelectedOnly in FSearch.Options) then
     begin
       if ((LCurrentTextPosition.Line = LStartTextPosition.Line) and (AFirst < LStartTextPosition.Char)) or
-        ((LCurrentTextPosition.Line = LEndTextPosition.Line) and (ALast > LEndTextPosition.Char)) then
+        ((LCurrentTextPosition.Line = LEndTextPosition.Line) and (ALast >= LEndTextPosition.Char)) then
         Result := False;
     end
     else
@@ -2439,6 +2439,7 @@ begin
     LStartTextPosition.Line := 0;
     LEndTextPosition.Line := FLines.Count - 1;
     LEndTextPosition.Char := FLines.StringLength(LEndTextPosition.Line);
+
     if LIsFromCursor then
       if LIsBackward then
         LEndTextPosition := TextCaretPosition
@@ -2452,6 +2453,7 @@ begin
     else
       LCurrentTextPosition := SelectionEndPosition
   end;
+
   FSearchEngine.Pattern := ASearchText;
   case FSearch.Engine of
     seNormal:

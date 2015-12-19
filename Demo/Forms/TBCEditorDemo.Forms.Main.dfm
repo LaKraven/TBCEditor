@@ -1,5 +1,5 @@
 inherited MainForm: TMainForm
-  Caption = 'TBCEditor Control Version 1.1 - Property Demo'
+  Caption = ''
   ClientHeight = 644
   ClientWidth = 1100
   Color = clWhite

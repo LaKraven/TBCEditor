@@ -14,7 +14,8 @@ uses
   sSpeedButton, BCControls.SpeedButton, sComboBox, BCControls.ComboBox, sLabel;
 
 const
-  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.1';
+  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.2';
+  TITLE_BAR_CAPTION = 1;
   TITLE_BAR_HIGHLIGHTER = 2;
   TITLE_BAR_COLORS = 4;
 
@@ -138,8 +139,6 @@ begin
       Editor.Search.SearchText := ComboBoxSearchText.Text;
     SetMatchesFound;
   end;
-  //if Assigned(FOnSearchText) then
-  //  FOnSearchText(Sender);
 end;
 
 procedure TMainForm.ComboBoxSearchTextKeyPress(Sender: TObject; var Key: Char);
@@ -292,7 +291,7 @@ begin
     FStopWatch.Reset;
     FStopWatch.Start;
     LFileName := OpenDialog.Files[0];
-    TitleBar.Items[1].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, LFileName]);
+    TitleBar.Items[TITLE_BAR_CAPTION].Caption := Format('%s - %s', [BCEDITORDEMO_CAPTION, LFileName]);
     Editor.LoadFromFile(LFileName);
     FStopWatch.Stop;
     StatusBar.Panels[3].Text := 'Load: ' + FormatDateTime('s.zzz "s"', FStopWatch.ElapsedMilliseconds / MSecsPerDay);
@@ -302,7 +301,7 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   inherited;
-
+  TitleBar.Items[TITLE_BAR_CAPTION].Caption := BCEDITORDEMO_CAPTION;
   SkinManager.ExtendedBorders := True;
   { IDE can lose these properties }
   PopupMenuFile.Images := ImagesDataModule.ImageList;

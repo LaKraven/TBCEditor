@@ -2393,7 +2393,7 @@ var
     Result := True;
     if (FSelection.ActiveMode = smNormal) or not (soSelectedOnly in FSearch.Options) then
     begin
-      if ((LCurrentTextPosition.Line = LStartTextPosition.Line) and (AFirst < LStartTextPosition.Char)) or
+      if ((LCurrentTextPosition.Line = LStartTextPosition.Line) and (AFirst <= LStartTextPosition.Char)) or
         ((LCurrentTextPosition.Line = LEndTextPosition.Line) and (ALast >= LEndTextPosition.Char)) then
         Result := False;
     end

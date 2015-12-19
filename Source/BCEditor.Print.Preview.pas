@@ -233,10 +233,10 @@ begin
     if (csDesigning in ComponentState) or (not Assigned(FEditorPrint)) then
       Exit;
     SetMapMode(Handle, MM_ANISOTROPIC);
-    SetWindowExtEx(Handle, PhysicalWidth, PhysicalHeight, nil);
+    SetWindowExtEx(Handle, FEditorPrint.PrinterInfo.PhysicalWidth, FEditorPrint.PrinterInfo.PhysicalHeight, nil);
     SetViewPortExtEx(Handle, FPageSize.X, FPageSize.Y, nil);
-    LOriginalScreenPoint.X := MulDiv(FEditorPrint.PrinterInfo.LeftMargin, FPageSize.X, PhysicalWidth);
-    LOriginalScreenPoint.Y := MulDiv(FEditorPrint.PrinterInfo.TopMargin, FPageSize.Y, PhysicalHeight);
+    LOriginalScreenPoint.X := MulDiv(FEditorPrint.PrinterInfo.LeftMargin, FPageSize.X, FEditorPrint.PrinterInfo.PhysicalWidth);
+    LOriginalScreenPoint.Y := MulDiv(FEditorPrint.PrinterInfo.TopMargin, FPageSize.Y, FEditorPrint.PrinterInfo.PhysicalHeight);
     Inc(LOriginalScreenPoint.X, FVirtualOffset.X + FScrollPosition.X);
     if ScaleMode = pscWholePage then
       Inc(LOriginalScreenPoint.Y, FVirtualOffset.Y)

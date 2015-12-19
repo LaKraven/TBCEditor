@@ -34,12 +34,12 @@ Note! LoadFromStream does not support multi-highlighters (for example HTML with 
 
 <h3>Demo</h3>
 
-TBCEditor Control Demo v. 1.1. 
+TBCEditor Control Demo v. 1.2. 
 
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 16.12.2015 15:36, UTC+02:00
+The latest update: 19.12.2015 12:56, UTC+02:00
 
 Demo source build requires <a href="http://www.alphaskins.com/">AlphaSkins</a> and <a href="http://www.ehlib.com/">EhLib</a>. 
 <h3>Documentation</h3>

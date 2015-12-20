@@ -81,6 +81,7 @@ type
     procedure SaveToStream(AStream: TStream);
     procedure SetPixelsPerInch(AValue: Integer);
     property SectionType: TBCEditorSectionType read FSectionType write FSectionType;
+    property NumberOfPages: Integer read FNumberOfPages write FNumberOfPages;
   published
     property DefaultFont: TFont read FDefaultFont write SetDefaultFont;
     property FrameTypes: TBCEditorFrameTypes read FFrameTypes write FFrameTypes default [ftLine];

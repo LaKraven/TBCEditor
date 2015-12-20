@@ -663,6 +663,8 @@ begin
   ScaleMode := LOldMode;
   if ScaleMode = pscUserScaled then
     ScalePercent := LOldScale;
+  if FPageNumber > FEditorPrint.PageCount then
+    FPageNumber := FEditorPrint.PageCount;
   if Assigned(FOnPreviewPage) then
     FOnPreviewPage(Self, FPageNumber);
 end;

@@ -81,6 +81,7 @@ type
     procedure SetMargins(const AValue: TBCEditorPrintMargins);
     procedure SetMaxLeftChar(const aValue: Integer);
     procedure SetPixelsPerInch;
+    procedure SetWrap(const AValue: Boolean);
     procedure TextOut(const AText: string; AList: TList);
     procedure WriteLine(const AText: string);
     procedure WriteLineNumber;
@@ -121,7 +122,7 @@ type
     property SelectedOnly: Boolean read FSelectedOnly write FSelectedOnly default False;
     property TabWidth: Integer read FTabWidth write FTabWidth;
     property Title: string read FTitle write FTitle;
-    property Wrap: Boolean read FWrap write FWrap default True;
+    property Wrap: Boolean read FWrap write SetWrap default True;
   end;
 
 implementation
@@ -236,6 +237,20 @@ begin
   FHighlighter := AValue;
   FHighlighterRangesSet := False;
   FPagesCounted := False;
+end;
+
+procedure TBCEditorPrint.SetWrap(const AValue: Boolean);
+begin
+  if AValue <> FWrap then
+  begin
+    FWrap := AValue;
+    if FPages.Count > 0 then
+    begin
+      CalculatePages;
+      FHeader.NumberOfPages := FPageCount;
+      FFooter.NumberOfPages := FPageCount;
+   end;
+  end;
 end;
 
 procedure TBCEditorPrint.InitPrint;
@@ -364,6 +379,7 @@ begin
         LSelectionLength := MaxInt;
       LText := Copy(FLines[i], LSelectionStart, LSelectionLength);
     end;
+
     if LYPos + FLineHeight > FMargins.PixelBottom then
     begin
       LYPos := FMargins.PixelTop;
@@ -372,6 +388,7 @@ begin
       LPageLine.FirstLine := i;
       FPages.Add(LPageLine);
     end;
+
     if Wrap and (TextWidth(FCanvas, LText) > FMaxWidth) then
     begin
       LList := TList.Create;
@@ -397,6 +414,7 @@ begin
         LList.Free;
       end;
     end;
+
     LYPos := LYPos + FLineHeight;
   end;
   FPagesCounted := True;

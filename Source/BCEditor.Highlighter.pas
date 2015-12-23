@@ -376,6 +376,7 @@ var
   i, j: Integer;
   LToken: string;
   LTokenType: TBCEditorRangeType;
+  LCurrentRangeKeyList: TBCEditorKeyList;
 begin
   LTokenType := FCurrentRange.TokenType;
   if LTokenType <> ttUnspecified then
@@ -385,12 +386,15 @@ begin
   begin
     LToken := GetToken;
     for i := 0 to FCurrentRange.KeyListCount - 1 do
-      for j := 0 to FCurrentRange.KeyList[i].KeyList.Count - 1 do
-      if FCurrentRange.KeyList[i].KeyList[j].Equals(LToken) then
+    begin
+      LCurrentRangeKeyList := FCurrentRange.KeyList[i];
+      for j := 0 to LCurrentRangeKeyList.KeyList.Count - 1 do
+      if LCurrentRangeKeyList.KeyList[j].IndexOf(LToken) <> -1 then
       begin
-        Result := Integer(FCurrentRange.KeyList[i].TokenType);
+        Result := Integer(LCurrentRangeKeyList.TokenType);
         Exit;
       end;
+    end;
     Result := 0; { ttUnspecified }
   end;
 end;

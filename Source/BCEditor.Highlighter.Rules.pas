@@ -795,6 +795,7 @@ begin
   inherited;
 
   FKeyList := TStringList.Create;
+  FKeyList.Sorted := True;
   FAttribute.Foreground := clWindowText;
   FAttribute.Background := clWindow;
 end;

@@ -432,22 +432,22 @@ var
 
   procedure SetAttributes(AAttribute: TBCEditorHighlighterAttribute; AParentRange: TBCEditorRange);
   var
-    Element: PBCEditorHighlighterElement;
+    LElement: PBCEditorHighlighterElement;
   begin
-    Element := FColors.GetElement(AAttribute.Element);
+    LElement := FColors.GetElement(AAttribute.Element);
 
     if AAttribute.ParentBackground and Assigned(AParentRange) then
       AAttribute.Background := AParentRange.Attribute.Background
     else
-    if Assigned(Element) then
-      AAttribute.Background := Element.Background;
+    if Assigned(LElement) then
+      AAttribute.Background := LElement.Background;
     if AAttribute.ParentForeground and Assigned(AParentRange) then
       AAttribute.Foreground := AParentRange.Attribute.Foreground
     else
-    if Assigned(Element) then
-      AAttribute.Foreground := Element.Foreground;
-    if Assigned(Element) then
-      AAttribute.Style := Element.Style;
+    if Assigned(LElement) then
+      AAttribute.Foreground := LElement.Foreground;
+    if Assigned(LElement) then
+      AAttribute.Style := LElement.Style;
   end;
 
 begin

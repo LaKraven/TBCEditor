@@ -379,10 +379,10 @@ const
 begin
   with FBaseLogFont do
   begin
-    lfWeight := CBolds[fsBold in Style];
-    lfItalic := Ord(BOOL(fsItalic in Style));
-    lfUnderline := Ord(BOOL(fsUnderline in Style));
-    lfStrikeOut := Ord(BOOL(fsStrikeOut in Style));
+    lfWeight := CBolds[fsBold in AStyle];
+    lfItalic := Ord(BOOL(fsItalic in AStyle));
+    lfUnderline := Ord(BOOL(fsUnderline in AStyle));
+    lfStrikeOut := Ord(BOOL(fsStrikeOut in AStyle));
   end;
   Result := CreateFontIndirect(FBaseLogFont);
 end;

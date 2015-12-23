@@ -6832,7 +6832,7 @@ begin
         DrawRect.Right := LSearchMapLeft;
       end;
       FTextDrawer.SetBaseFont(Font);
-      FTextDrawer.Style := Font.Style;
+      //FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
       if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) then
         PaintGuides(LLine1, LLine2, False);
@@ -6892,7 +6892,7 @@ begin
           DrawRect.Right := FMinimap.GetWidth;
         end;
         FTextDrawer.SetBaseFont(FMinimap.Font);
-        FTextDrawer.Style := FMinimap.Font.Style;
+        //FTextDrawer.Style := FMinimap.Font.Style;
 
         LSelectionAvailable := SelectionAvailable;
 
@@ -6922,7 +6922,7 @@ begin
         BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
           DrawRect.Top, SRCCOPY);
         FTextDrawer.SetBaseFont(Font);
-        FTextDrawer.Style := Font.Style;
+        //FTextDrawer.Style := Font.Style;
       end;
 
     { Search map }
@@ -8617,11 +8617,12 @@ begin
     begin
       LCurrentFontStyle := FHighlighter.Attribute[i].Style * [fsItalic, fsBold];
       for j := 0 to 3 do
-        if LCurrentFontStyle = LFontStyles[j] then
-        begin
-          LHasStyle[j] := True;
-          Break;
-        end;
+        if not LHasStyle[j] then
+          if LCurrentFontStyle = LFontStyles[j] then
+          begin
+            LHasStyle[j] := True;
+            Break;
+          end;
     end;
   end
   else
@@ -8639,12 +8640,12 @@ begin
   FCharWidth := 0;
   FTextDrawer.BaseFont := Font;
   for i := 0 to 3 do
-    if LHasStyle[i] then
-    begin
-      FTextDrawer.BaseStyle := LFontStyles[i];
-      FLineHeight := Max(FLineHeight, FTextDrawer.CharHeight);
-      FCharWidth := Max(FCharWidth, FTextDrawer.CharWidth);
-    end;
+  if LHasStyle[i] then
+  begin
+    FTextDrawer.BaseStyle := LFontStyles[i];
+    FLineHeight := Max(FLineHeight, FTextDrawer.CharHeight);
+    FCharWidth := Max(FCharWidth, FTextDrawer.CharWidth);
+  end;
   Inc(FLineHeight, ExtraLineSpacing);
 end;
 

@@ -1427,6 +1427,7 @@ var
 
 var
   LCaretX: Integer;
+  LMathingPairToken: TBCEditorMatchingPairToken;
 begin
   Result := trNotFound;
   if FHighlighter = nil then
@@ -1456,7 +1457,8 @@ begin
       Exit;
     while i < j do
     begin
-      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.CloseToken then
+      LMathingPairToken := PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^;
+      if LToken = LMathingPairToken.CloseToken then
       begin
         Result := trCloseTokenFound;
         AMatch.CloseToken := LOriginalToken;
@@ -1465,7 +1467,7 @@ begin
         Break;
       end
       else
-      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.OpenToken then
+      if LToken = LMathingPairToken.OpenToken then
       begin
         Result := trOpenTokenFound;
         AMatch.OpenToken := LOriginalToken;
@@ -1488,12 +1490,13 @@ begin
     LCloseDuplicateLength := 0;
     for i := 0 to j - 1 do
     begin
-      if LTokenMatch^.OpenToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.OpenToken then
+      LMathingPairToken := PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^;
+      if LTokenMatch^.OpenToken = LMathingPairToken.OpenToken then
       begin
         FMatchingPairCloseDuplicate[LCloseDuplicateLength] := i;
         Inc(LCloseDuplicateLength);
       end;
-      if LTokenMatch^.CloseToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.CloseToken then
+      if LTokenMatch^.CloseToken = LMathingPairToken.CloseToken then
       begin
         FMatchingPairOpenDuplicate[LOpenDuplicateLength] := i;
         Inc(LOpenDuplicateLength);

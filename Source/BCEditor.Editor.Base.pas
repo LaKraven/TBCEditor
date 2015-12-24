@@ -1406,7 +1406,7 @@ var
           SetLength(FMatchingPairMatchStack, Length(FMatchingPairMatchStack) + 32);
         LMatch:= FMatchingPairMatchStack[LMatchStackID];
         GetToken(LMatch.Token);
-        LMatch.Position.Line := APoint.Line {+ 1};
+        LMatch.Position.Line := APoint.Line;
         LMatch.Position.Char := GetTokenPosition + 1;
       end;
       Next;
@@ -1448,54 +1448,54 @@ begin
     if IsCommentOrString(LElement) then
       Exit;
 
-    I := 0;
-    J := FHighlighter.MatchingPairs.Count;
+    i := 0;
+    j := FHighlighter.MatchingPairs.Count;
     GetToken(LOriginalToken);
     LToken := Trim(LowerCase(LOriginalToken));
     if LToken = '' then
       Exit;
-    while I < J do
+    while i < j do
     begin
-      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.CloseToken then
+      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.CloseToken then
       begin
         Result := trCloseTokenFound;
         AMatch.CloseToken := LOriginalToken;
-        AMatch.CloseTokenPos.Line := APoint.Line {+ 1};
+        AMatch.CloseTokenPos.Line := APoint.Line;
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Break;
       end
       else
-      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.OpenToken then
+      if LToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.OpenToken then
       begin
         Result := trOpenTokenFound;
         AMatch.OpenToken := LOriginalToken;
-        AMatch.OpenTokenPos.Line := APoint.Line {+ 1};
+        AMatch.OpenTokenPos.Line := APoint.Line;
         AMatch.OpenTokenPos.Char := GetTokenPosition + 1;
         Break;
       end;
-      Inc(I);
+      Inc(i);
     end;
     if Result = trNotFound then
       Exit;
-    LTokenMatch := FHighlighter.MatchingPairs.Items[I];
+    LTokenMatch := FHighlighter.MatchingPairs.Items[i];
     AMatch.TokenAttribute := GetTokenAttribute;
-    if J > Length(FMatchingPairOpenDuplicate) then
+    if j > Length(FMatchingPairOpenDuplicate) then
     begin
-      SetLength(FMatchingPairOpenDuplicate, J);
-      SetLength(FMatchingPairCloseDuplicate, J);
+      SetLength(FMatchingPairOpenDuplicate, j);
+      SetLength(FMatchingPairCloseDuplicate, j);
     end;
     LOpenDuplicateLength := 0;
     LCloseDuplicateLength := 0;
-    for I := 0 to J - 1 do
+    for i := 0 to j - 1 do
     begin
-      if LTokenMatch^.OpenToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.OpenToken then
+      if LTokenMatch^.OpenToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.OpenToken then
       begin
-        FMatchingPairCloseDuplicate[LCloseDuplicateLength] := I;
+        FMatchingPairCloseDuplicate[LCloseDuplicateLength] := i;
         Inc(LCloseDuplicateLength);
       end;
-      if (LTokenMatch^.CloseToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[I])^.CloseToken) then
+      if LTokenMatch^.CloseToken = PBCEditorMatchingPairToken(FHighlighter.MatchingPairs[i])^.CloseToken then
       begin
-        FMatchingPairOpenDuplicate[LOpenDuplicateLength] := I;
+        FMatchingPairOpenDuplicate[LOpenDuplicateLength] := i;
         Inc(LOpenDuplicateLength);
       end;
     end;
@@ -1979,6 +1979,7 @@ var
   i, j: Integer;
   LWordAtCursor, LWordAtOneBeforeCursor: string;
   LFoldRegion: TBCEditorCodeFoldingRegion;
+  LFoldRegionItem: TBCEditorCodeFoldingRegionItem;
   LTextPosition: TBCEditorTextPosition;
 
   function CheckToken(AKeyword: string): Boolean;
@@ -2044,14 +2045,15 @@ begin
 
       for j := 0 to LFoldRegion.Count - 1 do
       begin
-        if CheckToken(LFoldRegion[j].OpenToken) then
+        LFoldRegionItem := LFoldRegion.Items[j];
+        if CheckToken(LFoldRegionItem.OpenToken) then
           Exit(True);
 
-        if LFoldRegion[j].OpenTokenCanBeFollowedBy <> '' then
-          if CheckToken(LFoldRegion[j].OpenTokenCanBeFollowedBy) then
+        if LFoldRegionItem.OpenTokenCanBeFollowedBy <> '' then
+          if CheckToken(LFoldRegionItem.OpenTokenCanBeFollowedBy) then
             Exit(True);
 
-        if CheckToken(LFoldRegion[j].CloseToken) then
+        if CheckToken(LFoldRegionItem.CloseToken) then
           Exit(True);
       end;
     end;

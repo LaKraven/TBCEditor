@@ -2065,6 +2065,7 @@ var
   i, j: Integer;
   LLineText: string;
   LFoldRegion: TBCEditorCodeFoldingRegion;
+  LFoldRegionItem: TBCEditorCodeFoldingRegionItem;
   LKeyWordPtr, LBookmarkTextPtr, LTextPtr: PChar;
 
   procedure SkipEmptySpace;
@@ -2111,6 +2112,7 @@ begin
     LFoldRegion := FHighlighter.CodeFoldingRegions[i];
     for j := 0 to LFoldRegion.Count - 1 do
     begin
+      LFoldRegionItem := LFoldRegion.Items[j];
       LTextPtr := PChar(LLineText);
       while LTextPtr^ <> BCEDITOR_NONE_CHAR do
       begin
@@ -2118,7 +2120,7 @@ begin
 
         LBookmarkTextPtr := LTextPtr;
         { check if the open keyword found }
-        LKeyWordPtr := PChar(LFoldRegion[j].OpenToken);
+        LKeyWordPtr := PChar(LFoldRegionItem.OpenToken);
         while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
         begin
           Inc(LTextPtr);
@@ -2135,7 +2137,7 @@ begin
           LTextPtr := LBookmarkTextPtr; { skip region close not found, return pointer back }
 
         { check if the close keyword found }
-        LKeyWordPtr := PChar(LFoldRegion[j].CloseToken);
+        LKeyWordPtr := PChar(LFoldRegionItem.CloseToken);
 
         while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (UpCase(LTextPtr^) = LKeyWordPtr^) do
         begin
@@ -2804,10 +2806,8 @@ procedure TBCBaseEditor.DoToggleSelectedCase(const ACommand: TBCEditorCommand);
     Result := AnsiUpperCase(AValue);
     S := AnsiLowerCase(AValue);
     for i := 1 to Length(AValue) do
-    begin
       if Result[i] = AValue[i] then
         Result[i] := S[i];
-    end;
   end;
 
   function TitleCase(const AValue: string): string;

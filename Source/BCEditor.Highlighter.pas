@@ -56,7 +56,6 @@ type
     function GetCurrentRange: TBCEditorRange;
     function GetCurrentRangeAttribute: TBCEditorHighlighterAttribute;
     function GetEndOfLine: Boolean;
-    function GetToken: string;
     function GetTokenAttribute: TBCEditorHighlighterAttribute;
     function GetTokenKind: Integer;
     function GetTokenLength: Integer;
@@ -64,6 +63,7 @@ type
     procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
     procedure AddKeywords(var AStringList: TStringList);
     procedure Clear;
+    procedure GetToken(var AResult: string);
     procedure LoadFromFile(const AFileName: string);
     procedure LoadFromStream(AStream: TStream);
     procedure Next;
@@ -315,14 +315,6 @@ begin
   Result := FCurrentRange;
 end;
 
-function TBCEditorHighlighter.GetToken: string;
-var
-  LLength: LongInt;
-begin
-  LLength := FRunPosition - FTokenPosition;
-  SetString(Result, FCurrentLine + FTokenPosition, LLength);
-end;
-
 function TBCEditorHighlighter.GetTokenAttribute: TBCEditorHighlighterAttribute;
 begin
   if Assigned(FCurrentToken) then
@@ -366,6 +358,14 @@ begin
       AStringList.Add(FMainRules.KeyList[i].KeyList[j]);
 end;
 
+procedure TBCEditorHighlighter.GetToken(var AResult: string);
+var
+  LLength: LongInt;
+begin
+  LLength := FRunPosition - FTokenPosition;
+  SetString(AResult, FCurrentLine + FTokenPosition, LLength);
+end;
+
 procedure TBCEditorHighlighter.Reset;
 begin
   MainRules.Reset;
@@ -384,7 +384,7 @@ begin
   else
   { keyword token type }
   begin
-    LToken := GetToken;
+    GetToken(LToken);
     for i := 0 to FCurrentRange.KeyListCount - 1 do
     begin
       LCurrentRangeKeyList := FCurrentRange.KeyList[i];

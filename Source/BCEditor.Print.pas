@@ -570,7 +570,7 @@ begin
     LCount := 0;
     while not FHighlighter.GetEndOfLine do
     begin
-      LToken := FHighlighter.GetToken;
+      FHighlighter.GetToken(LToken);
       LTokenPosition := FHighlighter.GetTokenPosition;
       LHighlighterAttribute := FHighlighter.GetTokenAttribute;
 

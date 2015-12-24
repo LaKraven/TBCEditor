@@ -1224,7 +1224,7 @@ begin
     while not Highlighter.GetEndOfLine do
     begin
       AStart := Highlighter.GetTokenPosition + 1;
-      AToken := Highlighter.GetToken;
+      Highlighter.GetToken(AToken);
       if (LPositionX >= AStart) and (LPositionX < AStart + Length(AToken)) then
       begin
         AHighlighterAttribute := Highlighter.GetTokenAttribute;
@@ -1360,7 +1360,8 @@ var
   begin
     with FHighlighter do
     begin
-      LToken := LowerCase(GetToken);
+      GetToken(LToken);
+      LToken := LowerCase(LToken);
       if IsCloseToken then
         Dec(LLevel)
       else
@@ -1369,7 +1370,7 @@ var
       if LLevel = 0 then
       begin
         GetMatchingToken := trOpenAndCloseTokenFound;
-        AMatch.CloseToken := GetToken;
+        GetToken(AMatch.CloseToken);
         AMatch.CloseTokenPos.Line := APoint.Line;
         AMatch.CloseTokenPos.Char := GetTokenPosition + 1;
         Result := True;
@@ -1383,10 +1384,13 @@ var
   end;
 
   procedure CheckTokenBack;
+  var
+    LMatch: TBCEditorMatchingPairTokenMatch;
   begin
     with FHighlighter do
     begin
-      LToken := LowerCase(GetToken);
+      GetToken(LToken);
+      LToken := LowerCase(LToken);
       if IsCloseToken then
       begin
         Dec(LLevel);
@@ -1400,9 +1404,10 @@ var
         Inc(LMatchStackID);
         if LMatchStackID >= Length(FMatchingPairMatchStack) then
           SetLength(FMatchingPairMatchStack, Length(FMatchingPairMatchStack) + 32);
-        FMatchingPairMatchStack[LMatchStackID].Token := GetToken;
-        FMatchingPairMatchStack[LMatchStackID].Position.Line := APoint.Line {+ 1};
-        FMatchingPairMatchStack[LMatchStackID].Position.Char := GetTokenPosition + 1;
+        LMatch:= FMatchingPairMatchStack[LMatchStackID];
+        GetToken(LMatch.Token);
+        LMatch.Position.Line := APoint.Line {+ 1};
+        LMatch.Position.Char := GetTokenPosition + 1;
       end;
       Next;
     end;
@@ -1445,7 +1450,7 @@ begin
 
     I := 0;
     J := FHighlighter.MatchingPairs.Count;
-    LOriginalToken := GetToken;
+    GetToken(LOriginalToken);
     LToken := Trim(LowerCase(LOriginalToken));
     if LToken = '' then
       Exit;
@@ -8433,7 +8438,7 @@ var
         while not FHighlighter.GetEndOfLine do
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
-          LTokenText := FHighlighter.GetToken;
+          FHighlighter.GetToken(LTokenText);
           LTokenLength := FHighlighter.GetTokenLength;
           if LTokenPosition + LTokenLength >= LFirstColumn then
           begin

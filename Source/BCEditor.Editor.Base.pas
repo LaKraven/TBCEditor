@@ -10370,6 +10370,9 @@ procedure TBCBaseEditor.ClearCodeFolding;
 begin
   FAllCodeFoldingRanges.ClearAll;
   FResetLineNumbersCache := True;
+  SetLength(FCodeFoldingTreeLine, 0);
+  SetLength(FCodeFoldingRangeFromLine, 0);
+  SetLength(FCodeFoldingRangeToLine, 0);
 end;
 
 procedure TBCBaseEditor.ClearMatchingPair;
@@ -11907,7 +11910,6 @@ begin
   ClearCodeFolding;
   if Visible then
     CreateLineNumbersCache(True);
-  SetLength(FCodeFoldingRangeFromLine, 0);
   ScanCodeFoldingRanges;
   CodeFoldingResetCaches;
 end;

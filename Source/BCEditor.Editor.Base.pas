@@ -2712,7 +2712,11 @@ begin
   end
   else
   if AEvent = fcRescan then
+  begin
     InitCodeFolding;
+    if FHighlighter.FileName <> '' then
+      FHighlighter.LoadFromFile(FHighlighter.FileName);
+  end;
 
   Invalidate;
 end;
@@ -3439,11 +3443,19 @@ var
   var
     i, j: Integer;
     LSkipRegionItem: TBCEditorSkipRegionItem;
+    LCodeFoldingRange: TBCEditorCodeFoldingRange;
   begin
     Result := False;
+
     if CharInSet(LTextPtr^, FHighlighter.SkipOpenKeyChars) then
       if LOpenTokenSkipFoldRangeList.Count = 0 then
       begin
+        LCodeFoldingRange := nil;
+        if LOpenTokenFoldRangeList.Count > 0 then
+          LCodeFoldingRange := LOpenTokenFoldRangeList.Last;
+        if Assigned(LCodeFoldingRange) and LCodeFoldingRange.RegionItem.NoSubs then
+          Exit;
+
         j := LCurrentCodeFoldingRegion.SkipRegions.Count - 1;
         for i := 0 to j do
         begin
@@ -10465,10 +10477,10 @@ begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
 
-    FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
+    FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or (ACommand = ecLineBreak) or
 
-      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
-       (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
+      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) {or
+       (ACommand = ecLineBreak)}) and IsKeywordAtCursorPosition or
 
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
 

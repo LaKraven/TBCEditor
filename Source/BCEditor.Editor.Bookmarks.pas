@@ -170,24 +170,30 @@ end;
 procedure TBCEditorBookmarkList.ClearLine(ALine: Integer);
 var
   i: Integer;
+  LMark: TBCEditorBookmark;
 begin
   for i := Count - 1 downto 0 do
-    if not Items[i].IsBookmark and (Items[i].Line = ALine) then
+  begin
+    LMark := Items[i];
+    if not LMark.IsBookmark and (LMark.Line = ALine) then
       Delete(i);
+  end;
 end;
 
 procedure TBCEditorBookmarkList.GetMarksForLine(ALine: Integer; var AMarks: TBCEditorBookmarks);
 var
   i, j: Integer;
+  LMark: TBCEditorBookmark;
 begin
   FillChar(AMarks, SizeOf(AMarks), 0);
   j := 0;
   for i := 0 to Count - 1 do
   begin
-    if Items[i].Line = ALine then
+    LMark := Items[i];
+    if LMark.Line = ALine then
     begin
       Inc(j);
-      AMarks[j] := Items[i];
+      AMarks[j] := LMark;
       if j = BCEDITOR_MAX_BOOKMARKS then
         Break;
     end;

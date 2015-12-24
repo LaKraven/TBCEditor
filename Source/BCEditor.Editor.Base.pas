@@ -3822,6 +3822,7 @@ var
 
 var
   i, j, LPreviousLine: Integer;
+  LRegion: TBCEditorCodeFoldingRegion;
   LRegionItem: TBCEditorCodeFoldingRegionItem;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
@@ -3835,15 +3836,18 @@ begin
     LIsOneCharFolds := False;
     { Check, if one char folds }
     for i := 0 to Highlighter.CodeFoldingRangeCount - 1 do
-      for j := 0 to Highlighter.CodeFoldingRegions[i].Count - 1 do
+    begin
+      LRegion := Highlighter.CodeFoldingRegions[i];
+      for j := 0 to LRegion.Count - 1 do
       begin
-        LRegionItem := Highlighter.CodeFoldingRegions[i][j];
+        LRegionItem := LRegion.Items[j];
         if (LRegionItem.OpenTokenLength = 1) and (LRegionItem.CloseTokenLength = 1) then
         begin
           LIsOneCharFolds := True;
           Break;
         end;
       end;
+    end;
     { Go through the text line by line, character by character }
     LPreviousLine := -1;
 
@@ -4234,6 +4238,7 @@ end;
 procedure TBCBaseEditor.SetModified(AValue: Boolean);
 var
   i: Integer;
+  LPLineAttribute: PBCEditorLineAttribute;
 begin
   if FModified <> AValue then
   begin
@@ -4244,8 +4249,11 @@ begin
     if not FModified then
     begin
       for i := 0 to FLines.Count - 1 do
-        if FLines.Attributes[i].LineState = lsModified then
-          FLines.Attributes[i].LineState := lsNormal;
+      begin
+        LPLineAttribute := FLines.Attributes[i];
+        if LPLineAttribute.LineState = lsModified then
+          LPLineAttribute.LineState := lsNormal;
+      end;
       InvalidateLeftMargin;
     end;
   end;
@@ -5911,17 +5919,14 @@ begin
     begin
       Marks.GetMarksForLine(LLine, LMarks);
       LOffset := 0;
-      LMark := nil;
       for i := 1 to BCEDITOR_MAX_BOOKMARKS do
       begin
-        if Assigned(LMarks[i]) then
+        LMark := LMarks[i];
+        if Assigned(LMark) then
         begin
           Inc(LOffset, FLeftMargin.Bookmarks.Panel.OtherMarkXOffset);
           if X < LOffset then
-          begin
-            LMark := LMarks[i];
             Break;
-          end;
         end;
       end;
       FOnLeftMarginClick(Self, AButton, X, Y, LLine, LMark);
@@ -6266,13 +6271,17 @@ end;
 procedure TBCBaseEditor.ListDeleted(Sender: TObject; AIndex: Integer; ACount: Integer);
 var
   i, LNativeIndex, LRunner: Integer;
+  LMark: TBCEditorBookmark;
 begin
   for i := 0 to Marks.Count - 1 do
-    if Marks[i].Line >= AIndex + ACount then
-      Marks[i].Line := Marks[i].Line - ACount
+  begin
+    LMark :=  Marks[i];
+    if LMark.Line >= AIndex + ACount then
+      LMark.Line := LMark.Line - ACount
     else
-    if Marks[i].Line > AIndex then
-      Marks[i].Line := AIndex;
+    if LMark.Line > AIndex then
+      LMark.Line := AIndex;
+  end;
 
   if FCodeFolding.Visible then
     CodeFoldingLinesDeleted(AIndex + 1, ACount);
@@ -6304,12 +6313,16 @@ procedure TBCBaseEditor.ListInserted(Sender: TObject; AIndex: Integer; ACount: I
 var
   i, LLength: Integer;
   LLastScan: Integer;
+  LMark: TBCEditorBookmark;
 begin
   if not FLines.Streaming then
   begin
     for i := 0 to Marks.Count - 1 do
-      if Marks[i].Line >= AIndex + 1 then
-        Marks[i].Line := Marks[i].Line + ACount;
+    begin
+      LMark := Marks[i];
+      if LMark.Line >= AIndex + 1 then
+        LMark.Line := LMark.Line + ACount;
+    end;
 
     if FCodeFolding.Visible then
       UpdateFoldRanges(AIndex + 1, ACount);
@@ -7930,13 +7943,17 @@ var
   function IsBookmarkOnCurrentLine: Boolean;
   var
     i: Integer;
+    LMark: TBCEditorBookmark;
   begin
     Result := False;
 
     for i := 0 to 8 do
-    if Assigned(FBookMarks[i]) then
-      if FBookMarks[i].Line = LCurrentLine - 1 then
-        Exit(True);
+    begin
+      LMark := FBookMarks[i];
+      if Assigned(LMark) then
+        if LMark.Line = LCurrentLine - 1 then
+          Exit(True);
+    end;
   end;
 
   function GetBackgroundColor: TColor;
@@ -9639,16 +9656,20 @@ end;
 function TBCBaseEditor.GetBookmark(ABookmark: Integer; var ATextPosition: TBCEditorTextPosition): Boolean;
 var
   i: Integer;
+  LMark: TBCEditorBookmark;
 begin
   Result := False;
   if Assigned(Marks) then
     for i := 0 to Marks.Count - 1 do
-      if Marks[i].IsBookmark and (Marks[i].Index = ABookmark) then
+    begin
+      LMark := Marks[i];
+      if LMark.IsBookmark and (LMark.Index = ABookmark) then
       begin
-        ATextPosition.Char := Marks[i].Char;
-        ATextPosition.Line := Marks[i].Line;
+        ATextPosition.Char := LMark.Char;
+        ATextPosition.Line := LMark.Line;
         Exit(True);
       end;
+  end;
 end;
 
 function TBCBaseEditor.GetPositionOfMouse(out ATextPosition: TBCEditorTextPosition): Boolean;
@@ -9930,6 +9951,7 @@ var
   LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
   LOpenTokenSkipFoldRangeList: TList;
   LSkipOpenKeyChars, LSkipCloseKeyChars: TBCEditorCharSet;
+  LSkipRegionItem: TBCEditorSkipRegionItem;
 
   procedure AddKeyChars;
   var
@@ -9950,8 +9972,9 @@ var
 
     for i := 0 to FHighlighter.CompletionProposalSkipRegions.Count - 1 do
     begin
-      Add(LSkipOpenKeyChars, PChar(FHighlighter.CompletionProposalSkipRegions[i].OpenToken));
-      Add(LSkipCloseKeyChars, PChar(FHighlighter.CompletionProposalSkipRegions[i].CloseToken));
+      LSkipRegionItem := FHighlighter.CompletionProposalSkipRegions[i];
+      Add(LSkipOpenKeyChars, PChar(LSkipRegionItem.OpenToken));
+      Add(LSkipCloseKeyChars, PChar(LSkipRegionItem.CloseToken));
     end;
   end;
 
@@ -9994,9 +10017,11 @@ begin
         if CharInSet(LTextPtr^, LSkipOpenKeyChars) then
         begin
           for i := 0 to FHighlighter.CompletionProposalSkipRegions.Count - 1 do
-            if LTextPtr^ = PChar(FHighlighter.CompletionProposalSkipRegions[i].OpenToken)^ then { if the first character is a match }
+          begin
+            LSkipRegionItem := FHighlighter.CompletionProposalSkipRegions[i];
+            if LTextPtr^ = PChar(LSkipRegionItem.OpenToken)^ then { if the first character is a match }
             begin
-              LKeyWordPtr := PChar(FHighlighter.CompletionProposalSkipRegions[i].OpenToken);
+              LKeyWordPtr := PChar(LSkipRegionItem.OpenToken);
               LBookmarkTextPtr := LTextPtr;
               { check if the open keyword found }
               while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and (LTextPtr^ = LKeyWordPtr^) do
@@ -10006,20 +10031,21 @@ begin
               end;
               if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then { if found, skip single line comment or push skip region into stack }
               begin
-                if FHighlighter.CompletionProposalSkipRegions[i].RegionType = ritSingleLineComment then
+                if LSkipRegionItem.RegionType = ritSingleLineComment then
                 begin
                   { single line comment skip until next line }
                   while LTextPtr^ <> BCEDITOR_NONE_CHAR do
                     Inc(LTextPtr);
                 end
                 else
-                  LOpenTokenSkipFoldRangeList.Add(FHighlighter.CompletionProposalSkipRegions[i]);
+                  LOpenTokenSkipFoldRangeList.Add(LSkipRegionItem);
                 Dec(LTextPtr); { the end of the while loop will increase }
                 Break; { for i := 0 to BCEditor.Highlighter.CompletionProposalSkipRegions... }
               end
               else
                 LTextPtr := LBookmarkTextPtr; { skip region open not found, return pointer back }
             end;
+          end;
         end;
 
         if LOpenTokenSkipFoldRangeList.Count = 0 then
@@ -12541,6 +12567,7 @@ procedure TBCBaseEditor.ToggleBookmark(AIndex: Integer = -1);
 var
   i: Integer;
   LTextPosition: TBCEditorTextPosition;
+  LMark: TBCEditorBookmark;
 begin
   if AIndex <> -1 then
   begin
@@ -12552,11 +12579,14 @@ begin
   else
   begin
     for i := 0 to Marks.Count - 1 do
-      if GetTextCaretY = Marks[i].Line then
+    begin
+      LMark := Marks[i];
+      if GetTextCaretY = LMark.Line then
       begin
-        ClearBookmark(Marks[i].Index);
+        ClearBookmark(LMark.Index);
         Exit;
       end;
+    end;
     LTextPosition := TextCaretPosition;
     for i := 0 to 8 do
       if not GetBookmark(i, LTextPosition) then { variables used because X and Y are var parameters }

@@ -191,7 +191,7 @@ type
     function GetDisplayTextLineNumber(ADisplayLineNumber: Integer): Integer;
     function GetEndOfLine(ALine: PChar): PChar;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
-      var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
+      var ATokenType: TBCEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetTextCaretPosition: TBCEditorTextPosition;
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
@@ -264,7 +264,7 @@ type
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; ASelectionCommand: Boolean);
-    procedure OpenLink(AURI: string; ALinkType: Integer);
+    procedure OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
     procedure RefreshFind;
     procedure RightMarginChanged(Sender: TObject);
     procedure ScrollChanged(Sender: TObject);
@@ -1205,7 +1205,7 @@ begin
 end;
 
 function TBCBaseEditor.GetHighlighterAttributeAtRowColumn(const ATextPosition: TBCEditorTextPosition; var AToken: string;
-  var ATokenType, AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
+  var ATokenType: TBCEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TBCEditorHighlighterAttribute): Boolean;
 var
   LPositionX, LPositionY: Integer;
   LLine: string;
@@ -3296,9 +3296,9 @@ begin
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationLineChar, ASelectionCommand);
 end;
 
-procedure TBCBaseEditor.OpenLink(AURI: string; ALinkType: Integer);
+procedure TBCBaseEditor.OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
 begin
-  case TBCEditorRangeType(ALinkType) of
+  case TBCEditorRangeType(ARangeType) of
     ttMailtoLink:
       if (Pos(BCEDITOR_MAILTO, AURI) <> 1) then
         AURI := BCEDITOR_MAILTO + AURI;
@@ -6132,7 +6132,8 @@ var
   LData: Pointer;
   LChar: Char;
   LEditorCommand: TBCEditorCommand;
-  LTokenType, LStart: Integer;
+  LRangeType: TBCEditorRangeType;
+  LStart: Integer;
   LToken: string;
   LHighlighterAttribute: TBCEditorHighlighterAttribute;
   LCursorPoint: TPoint;
@@ -6173,8 +6174,8 @@ begin
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
     LTextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));
-    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LTokenType, LStart, LHighlighterAttribute);
-    FMouseOverURI := LTokenType in [Integer(ttWebLink), Integer(ttMailtoLink)];
+    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute);
+    FMouseOverURI := LRangeType in [ttWebLink, ttMailtoLink];
   end;
 
   LData := nil;
@@ -6735,7 +6736,8 @@ end;
 
 procedure TBCBaseEditor.MouseUp(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
 var
-  LTokenType, LStart: Integer;
+  LRangeType: TBCEditorRangeType;
+  LStart: Integer;
   LToken: string;
   LHighlighterAttribute: TBCEditorHighlighterAttribute;
   LCursorPoint: TPoint;
@@ -6763,8 +6765,8 @@ begin
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
     LTextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));
-    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LTokenType, LStart, LHighlighterAttribute);
-    OpenLink(LToken, LTokenType);
+    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute);
+    OpenLink(LToken, LRangeType);
     Exit;
   end;
 

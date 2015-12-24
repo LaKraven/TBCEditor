@@ -57,7 +57,7 @@ type
     function GetCurrentRangeAttribute: TBCEditorHighlighterAttribute;
     function GetEndOfLine: Boolean;
     function GetTokenAttribute: TBCEditorHighlighterAttribute;
-    function GetTokenKind: Integer;
+    function GetTokenKind: TBCEditorRangeType;
     function GetTokenLength: Integer;
     function GetTokenPosition: Integer;
     procedure AddKeyChar(AKeyCharType: TBCEditorKeyCharType; AChar: Char);
@@ -371,7 +371,7 @@ begin
   MainRules.Reset;
 end;
 
-function TBCEditorHighlighter.GetTokenKind: Integer;
+function TBCEditorHighlighter.GetTokenKind: TBCEditorRangeType;
 var
   i, j: Integer;
   LToken: string;
@@ -380,7 +380,7 @@ var
 begin
   LTokenType := FCurrentRange.TokenType;
   if LTokenType <> ttUnspecified then
-    Result := Integer(LTokenType)
+    Result := LTokenType
   else
   { keyword token type }
   begin
@@ -391,11 +391,11 @@ begin
       for j := 0 to LCurrentRangeKeyList.KeyList.Count - 1 do
       if LCurrentRangeKeyList.KeyList[j].IndexOf(LToken) <> -1 then
       begin
-        Result := Integer(LCurrentRangeKeyList.TokenType);
+        Result := LCurrentRangeKeyList.TokenType;
         Exit;
       end;
     end;
-    Result := 0; { ttUnspecified }
+    Result := ttUnspecified
   end;
 end;
 

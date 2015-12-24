@@ -373,7 +373,7 @@ end;
 
 function TBCEditorHighlighter.GetTokenKind: TBCEditorRangeType;
 var
-  i, j: Integer;
+  i: Integer;
   LToken: string;
   LTokenType: TBCEditorRangeType;
   LCurrentRangeKeyList: TBCEditorKeyList;
@@ -388,8 +388,7 @@ begin
     for i := 0 to FCurrentRange.KeyListCount - 1 do
     begin
       LCurrentRangeKeyList := FCurrentRange.KeyList[i];
-      for j := 0 to LCurrentRangeKeyList.KeyList.Count - 1 do
-      if LCurrentRangeKeyList.KeyList[j].IndexOf(LToken) <> -1 then
+      if LCurrentRangeKeyList.KeyList.IndexOf(LToken) <> -1 then
       begin
         Result := LCurrentRangeKeyList.TokenType;
         Exit;

@@ -5858,7 +5858,7 @@ begin
   begin
     LTextCaretY := GetTextCaretY;
     if FRescanCodeFolding or
-      ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar)) and IsKeywordAtLine(LTextCaretY) or
+      ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar) or (ACommand = ecLineBreak)) and IsKeywordAtLine(LTextCaretY) or
       ((ACommand = ecLineBreak) and IsKeywordAtLine(LTextCaretY - 1)) or { the caret is already in the new line }
       (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges
@@ -10494,8 +10494,8 @@ begin
 
     FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
 
-      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
-       (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
+     // ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
+     //  (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
 
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
 

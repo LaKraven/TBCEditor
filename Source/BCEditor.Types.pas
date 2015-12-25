@@ -77,6 +77,7 @@ type
     soALTSetsColumnMode,
     soFromEndOfLine,
     soHighlightSimilarTerms,
+    soToEndOfLastLine,
     soToEndOfLine,
     soTripleClickRowSelect
   );

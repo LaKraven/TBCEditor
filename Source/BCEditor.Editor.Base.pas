@@ -7945,7 +7945,7 @@ var
   LDisplayLine, LCurrentLine: Integer;
   LFirstLine: Integer;
   LForegroundColor, LBackgroundColor: TColor;
-  LIsComplexLine: Boolean;
+  LIsSelectionInsideLine: Boolean;
   LIsLineSelected, LIsCurrentLine: Boolean;
   LLastLine: Integer;
   LLineRect, LTokenRect: TRect;
@@ -8122,7 +8122,7 @@ var
     { Compute some helper variables. }
     LFirstColumn := Max(LFirstChar, LTokenHelper.CharsBefore + 1);
     LLastColumn := Min(LLastChar, LTokenHelper.CharsBefore + LTokenHelper.Length + 1);
-    if LIsComplexLine then
+    if LIsSelectionInsideLine then
     begin
       LFirstUnselectedPartOfToken := LFirstColumn < LLineSelectionStart;
       LSelected := (LFirstColumn < LLineSelectionEnd) and (LLastColumn >= LLineSelectionStart);
@@ -8199,22 +8199,35 @@ var
       if LCustomLineColors and (LCustomBackgroundColor <> clNone) then
         LBackgroundColor := LCustomBackgroundColor;
 
-      if LIsComplexLine then
+      if LIsSelectionInsideLine then
       begin
         X1 := GetCharWidth(LLineSelectionStart, AMinimap);
         X2 := GetCharWidth(LLineSelectionEnd, AMinimap);
         if LTokenRect.Left < X1 then
         begin
           SetDrawingColors(soFromEndOfLine in FSelection.Options);
-          LTokenRect.Right := X1;
+          if (soFromEndOfLine in FSelection.Options) and (soToEndOfLine in FSelection.Options) then
+            LTokenRect.Right := LTokenRect.Left + FCharWidth
+          else
+            LTokenRect.Right := X1;
           PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
-          LTokenRect.Left := X1;
+          if (soFromEndOfLine in FSelection.Options) and (soToEndOfLine in FSelection.Options) then
+            LTokenRect.Left := LTokenRect.Right - FCharWidth
+          else
+            LTokenRect.Left := X1;
         end;
         if LTokenRect.Left < X2 then
         begin
-          SetDrawingColors(not (soToEndOfLine in FSelection.Options));
+          SetDrawingColors(not (soToEndOfLine in FSelection.Options) and not (soToEndOfLastLine in FSelection.Options));
           LTokenRect.Right := X2;
           PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
+          if (soFromEndOfLine in FSelection.Options) and (soToEndOfLine in FSelection.Options) then
+          begin
+            SetDrawingColors(True);
+            LTokenRect.Right := LTokenRect.Left + FCharWidth;
+            PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
+          end;
+          LTokenRect.Right := X2;
           LTokenRect.Left := X2;
         end;
         if LTokenRect.Left < LLineRect.Right then
@@ -8229,6 +8242,12 @@ var
         SetDrawingColors(not (soToEndOfLine in FSelection.Options) and LIsLineSelected);
         LTokenRect.Right := LLineRect.Right;
         PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
+        if (soFromEndOfLine in FSelection.Options) and (soToEndOfLine in FSelection.Options) and LIsLineSelected then
+        begin
+          SetDrawingColors(True);
+          LTokenRect.Right := LTokenRect.Left + FCharWidth;
+          PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
+        end;
       end;
     end;
   end;
@@ -8419,7 +8438,7 @@ var
         LBackgroundColor := GetBackgroundColor;
         LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
 
-        LIsComplexLine := False;
+        LIsSelectionInsideLine := False;
         LLineSelectionStart := 0;
         LLineSelectionEnd := 0;
 
@@ -8439,7 +8458,7 @@ var
             if LSelectionBeginPosition.Column > LFirstChar then
             begin
               LLineSelectionStart := LSelectionBeginPosition.Column;
-              LIsComplexLine := True;
+              LIsSelectionInsideLine := True;
             end;
           end;
           if (FSelection.ActiveMode = smColumn) or
@@ -8454,7 +8473,7 @@ var
             if LSelectionEndPosition.Column < LLastChar then
             begin
               LLineSelectionEnd := LSelectionEndPosition.Column;
-              LIsComplexLine := True;
+              LIsSelectionInsideLine := True;
             end;
           end;
         end;
@@ -8465,7 +8484,7 @@ var
         else
           Inc(LLineRect.Bottom, FLineHeight);
 
-        LIsLineSelected := not LIsComplexLine and (LLineSelectionStart > 0);
+        LIsLineSelected := not LIsSelectionInsideLine and (LLineSelectionStart > 0);
         LTokenRect := LLineRect;
 
         if LCurrentLine - 1 = 0 then

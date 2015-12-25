@@ -6345,7 +6345,7 @@ begin
     end;
 
     if FCodeFolding.Visible then
-      UpdateFoldRanges(AIndex, ACount);
+      UpdateFoldRanges(AIndex + 1, ACount);
     CreateLineNumbersCache(True);
     CodeFoldingResetCaches;
     RefreshFind;

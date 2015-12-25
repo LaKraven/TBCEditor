@@ -6345,7 +6345,7 @@ begin
     end;
 
     if FCodeFolding.Visible then
-      UpdateFoldRanges(AIndex + 1, ACount);
+      UpdateFoldRanges(AIndex, ACount);
     CreateLineNumbersCache(True);
     CodeFoldingResetCaches;
     RefreshFind;
@@ -10492,10 +10492,10 @@ begin
     { notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
 
-    FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or (ACommand = ecLineBreak) or
+    FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
 
-      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) {or
-       (ACommand = ecLineBreak)}) and IsKeywordAtCursorPosition or
+      ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
+       (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
 
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
 

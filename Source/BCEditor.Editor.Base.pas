@@ -1372,8 +1372,6 @@ var
   end;
 
   procedure CheckTokenBack;
-  var
-    LMatch: TBCEditorMatchingPairTokenMatch;
   begin
     with FHighlighter do
     begin
@@ -1392,10 +1390,9 @@ var
         Inc(LMatchStackID);
         if LMatchStackID >= Length(FMatchingPairMatchStack) then
           SetLength(FMatchingPairMatchStack, Length(FMatchingPairMatchStack) + 32);
-        LMatch:= FMatchingPairMatchStack[LMatchStackID];
-        GetToken(LMatch.Token);
-        LMatch.Position.Line := APoint.Line;
-        LMatch.Position.Char := GetTokenPosition + 1;
+        GetToken(FMatchingPairMatchStack[LMatchStackID].Token);
+        FMatchingPairMatchStack[LMatchStackID].Position.Line := APoint.Line;
+        FMatchingPairMatchStack[LMatchStackID].Position.Char := GetTokenPosition + 1;
       end;
       Next;
     end;
@@ -1514,7 +1511,7 @@ begin
 
       InitializeCurrentLine;
 
-      while not GetEndOfLine and (GetTokenPosition < AMatch.CloseTokenPos.Char -1) do
+      while not GetEndOfLine and (GetTokenPosition < AMatch.CloseTokenPos.Char - 1) do
         CheckTokenBack;
       if LMatchStackID > -1 then
       begin

@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "22.12.2015",
+            "Date": "26.12.2015",
             "Sample": [
                "// Hello World in Pascal\r\n",
                "\r\n",
@@ -462,7 +462,6 @@
                {
                   "Type": "Symbol",
                   "Words": [
-                     "..",
                      ":",
                      ";",
                      "<",

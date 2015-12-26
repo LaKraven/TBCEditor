@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "29.11.2015",
+            "Date": "26.12.2015",
             "Sample": [
                "declare @val varbinary (16)\r\n",
                "select @val = textptr (ut) from unitable\r\n",
@@ -396,7 +396,6 @@
                {
                   "Type": "Symbol",
                   "Words": [
-                     "..",
                      ":",
                      ";",
                      "<",

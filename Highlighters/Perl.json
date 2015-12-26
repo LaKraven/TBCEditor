@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "28.10.2015",
+            "Date": "26.12.2015",
             "Sample": [
                "#!/usr/bin/perl -w\r\n",
                "\r\n",
@@ -415,7 +415,6 @@
                {
                   "Type": "Symbol",
                   "Words": [
-                     "..",
                      ":",
                      ";",
                      "<",

@@ -3,7 +3,7 @@
       "Info": {
          "General": {
             "Version": "1.0",
-            "Date": "02.12.2015",
+            "Date": "26.12.2015",
             "Sample": [
                "# hello world example\r\n",
                "first_word = \"Hello\"\r\n",
@@ -227,7 +227,6 @@
                {
                   "Type": "Symbol",
                   "Words": [
-                     "..",
                      ":",
                      ";",
                      "<",

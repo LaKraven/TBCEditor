@@ -33,6 +33,9 @@ type
   TBCEditorCustomLineColorsEvent = procedure(Sender: TObject; ALine: Integer; var AUseColors: Boolean;
     var AForeground: TColor; var ABackground: TColor) of object;
 
+  TBCEditorCustomTokenAttributeEvent = procedure(Sender: TObject; const AText: string; const ALine: Integer;
+    const APosition: Integer; var AForegroundColor: TColor; var ABackgroundColor: TColor; var AStyles: TFontStyles) of object;
+
   TBCEditorStateFlag = (sfCaretChanged, sfScrollBarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
     sfWaitForDragging, sfCodeFoldingInfoClicked, sfInSelection);
   TBCEditorStateFlags = set of TBCEditorStateFlag;

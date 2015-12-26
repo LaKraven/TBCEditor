@@ -111,6 +111,7 @@ type
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
     FOnContextHelp: TBCEditorContextHelpEvent;
     FOnCustomLineColors: TBCEditorCustomLineColorsEvent;
+    FOnCustomTokenAttribute: TBCEditorCustomTokenAttributeEvent;
     FOnDropFiles: TBCEditorDropFilesEvent;
     FOnKeyPressW: TBCEditorKeyPressWEvent;
     FOnLeftMarginClick: TLeftMarginClickEvent;
@@ -177,7 +178,6 @@ type
     function CodeFoldingRangeForLine(ALine: Integer): TBCEditorCodeFoldingRange;
     function CodeFoldingTreeEndForLine(ALine: Integer): Boolean;
     function CodeFoldingTreeLineForLine(ALine: Integer): Boolean;
-    function DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
     function DoOnCodeFoldingHintClick(X, Y: Integer): Boolean;
     function ExtraLineSpacing: Integer;
     function FindHookedCommandEvent(AHookedCommandEvent: TBCEditorHookedCommandEvent): Integer;
@@ -586,6 +586,7 @@ type
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
     property OnContextHelp: TBCEditorContextHelpEvent read FOnContextHelp write FOnContextHelp;
     property OnCustomLineColors: TBCEditorCustomLineColorsEvent read FOnCustomLineColors write FOnCustomLineColors;
+    property OnCustomTokenAttribute: TBCEditorCustomTokenAttributeEvent read FOnCustomTokenAttribute write FOnCustomTokenAttribute;
     property OnDropFiles: TBCEditorDropFilesEvent read FOnDropFiles write FOnDropFiles;
     property OnKeyPress: TBCEditorKeyPressWEvent read FOnKeyPressW write FOnKeyPressW;
     property OnLeftMarginClick: TLeftMarginClickEvent read FOnLeftMarginClick write FOnLeftMarginClick;
@@ -974,19 +975,6 @@ begin
   Result := False;
   if (ALine > 0) and (ALine < Length(FCodeFoldingTreeLine)) then
     Result := FCodeFoldingTreeLine[ALine]
-end;
-
-function TBCBaseEditor.DoOnCustomLineColors(ALine: Integer; var AForeground: TColor; var ABackground: TColor): Boolean;
-begin
-  Result := False;
-
-  AForeground := clNone;
-  ABackground := clNone;
-
-  if FCodeFolding.Visible then
-    ALine := GetDisplayTextLineNumber(ALine);
-  if Assigned(FOnCustomLineColors) then
-    FOnCustomLineColors(Self, ALine, Result, AForeground, ABackground);
 end;
 
 function TBCBaseEditor.DoOnCodeFoldingHintClick(X, Y: Integer): Boolean;
@@ -8436,7 +8424,10 @@ var
         LIsCurrentLine := (GetTextCaretY + 1) = LCurrentLine;
         LForegroundColor := Font.Color;
         LBackgroundColor := GetBackgroundColor;
-        LCustomLineColors := DoOnCustomLineColors(LCurrentLine, LCustomForegroundColor, LCustomBackgroundColor);
+
+        LCustomLineColors := False;
+        if Assigned(FOnCustomLineColors) then
+          FOnCustomLineColors(Self, LCurrentLine, LCustomLineColors, LCustomForegroundColor, LCustomBackgroundColor);
 
         LIsSelectionInsideLine := False;
         LLineSelectionStart := 0;
@@ -8517,6 +8508,10 @@ var
               LForegroundColor := LHighlighterAttribute.Foreground;
               LBackgroundColor := LHighlighterAttribute.Background;
               LStyle := LHighlighterAttribute.Style;
+
+              if Assigned(FOnCustomTokenAttribute) then
+                FOnCustomTokenAttribute(Self, LTokenText, LCurrentLine, LTokenPosition, LForegroundColor,
+                  LBackgroundColor, LStyle);
 
               LIsCustomBackgroundColor := False;
               LMatchingPairUnderline := False;

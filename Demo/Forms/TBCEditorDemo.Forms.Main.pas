@@ -6,12 +6,12 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
   BCCommon.Forms.Base, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Highlighter,
   BCEditor.Editor.Base, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
-  BCCommon.Images, BCComponents.SkinProvider, BCComponents.SkinManager, BCControls.Panel, BCControls.StatusBar,
-  BCComponents.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
-  BCControls.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponents.MultiStringHolder, sSkinManager, sStatusBar,
+  BCCommon.Images, BCComponent.SkinProvider, BCComponent.SkinManager, BCControl.Panel, BCControl.StatusBar,
+  BCComponent.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
+  BCControl.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponent.MultiStringHolder, sSkinManager, sStatusBar,
   sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
-  BCControls.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color,
-  sSpeedButton, BCControls.SpeedButton, sComboBox, BCControls.ComboBox, sLabel;
+  BCControl.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color,
+  sSpeedButton, BCControl.SpeedButton, sComboBox, BCControl.ComboBox, sLabel;
 
 const
   BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.2';

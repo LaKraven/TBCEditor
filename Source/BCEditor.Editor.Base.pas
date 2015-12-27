@@ -9525,8 +9525,7 @@ begin
   else
   if FMinimap.Visible and (
     (FMinimap.Align = maRight) and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
-    (FMinimap.Align = maLeft) and (LCursorPoint.X < FMinimap.GetWidth)
-    ) then
+    (FMinimap.Align = maLeft) and (LCursorPoint.X < FMinimap.GetWidth) ) then
     SetCursor(Screen.Cursors[FMinimap.Cursor])
   else
   begin

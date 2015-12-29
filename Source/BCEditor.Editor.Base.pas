@@ -2390,8 +2390,12 @@ var
     Result := True;
     if (FSelection.ActiveMode = smNormal) or not (soSelectedOnly in FSearch.Options) then
     begin
-      if ((LCurrentTextPosition.Line = LStartTextPosition.Line) and (AFirst <= LStartTextPosition.Char)) or
-        ((LCurrentTextPosition.Line = LEndTextPosition.Line) and (ALast >= LEndTextPosition.Char)) then
+      if ((LCurrentTextPosition.Line = LStartTextPosition.Line) and
+        (not AChanged and (AFirst <= LStartTextPosition.Char) or
+         AChanged and (AFirst < LStartTextPosition.Char)) ) or
+        ((LCurrentTextPosition.Line = LEndTextPosition.Line) and
+        (not AChanged and (ALast >= LEndTextPosition.Char) or
+        AChanged and (ALast > LEndTextPosition.Char)) ) then
         Result := False;
     end
     else
@@ -11679,7 +11683,7 @@ begin
         if not ReadOnly then
           DoToggleSelectedCase(ACommand);
       ecUndo:
-        if not readonly then
+        if not ReadOnly then
         begin
           FUndoRedo := True;
           try
@@ -11689,7 +11693,7 @@ begin
           end;
         end;
       ecRedo:
-        if not readonly then
+        if not ReadOnly then
         begin
           FUndoRedo := True;
           try
@@ -12781,16 +12785,11 @@ begin
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
 
+    SetCaretPos(X, Y);
     if (X >= LClientRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth) and (X < LClientRect.Right) and (Y >= LClientRect.Top) and (Y < LClientRect.Bottom) then
-    begin
-      SetCaretPos(X, Y);
-      ShowCaret;
-    end
+      ShowCaret
     else
-    begin
-      SetCaretPos(X, Y);
       HideCaret;
-    end;
 
     LCompositionForm.dwStyle := CFS_POINT;
     LCompositionForm.ptCurrentPos := Point(X, Y);

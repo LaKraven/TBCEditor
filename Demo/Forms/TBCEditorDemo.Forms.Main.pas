@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls,
-  BCCommon.Forms.Base, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Highlighter,
+  BCCommon.Form.Base, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, BCEditor.Editor, BCEditor.Highlighter,
   BCEditor.Editor.Base, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
   BCCommon.Images, BCComponent.SkinProvider, BCComponent.SkinManager, BCControl.Panel, BCControl.StatusBar,
   BCComponent.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
@@ -96,7 +96,7 @@ implementation
 {$R *.dfm}
 
 uses
-  BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
+  BCCommon.Language.Strings, BCCommon.Form.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
   BCCommon.Dialog.SkinSelect, BCCommon.FileUtils, BCEditor.Types, BCCommon.Dialog.Options.Search;
 
 procedure TMainForm.ActionSkinsExecute(Sender: TObject);

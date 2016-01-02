@@ -8,7 +8,7 @@ uses
   BCEditor.Editor.Base, Vcl.Buttons, Vcl.AppEvnts, System.Actions, Vcl.ActnList, BCEditor.Print,
   BCCommon.Images, BCComponent.SkinProvider, BCComponent.SkinManager, BCControl.Panel, BCControl.StatusBar,
   BCComponent.TitleBar, Vcl.Menus, ToolCtrlsEh, DBGridEhToolCtrls, EhLibVCL, DBAxisGridsEh, ObjectInspectorEh,
-  BCControl.Splitter, GridsEh, BCCommon.Frames.Base, sPanel, BCComponent.MultiStringHolder, sSkinManager, sStatusBar,
+  BCControl.Splitter, GridsEh, BCCommon.Frame.Base, sPanel, BCComponent.MultiStringHolder, sSkinManager, sStatusBar,
   sSplitter, acTitleBar, sSkinProvider, System.Win.TaskbarCore, Vcl.Taskbar, sDialogs, Vcl.StdCtrls, sButton,
   BCControl.Button, System.Diagnostics, BCCommon.Dialog.Popup.Highlighter, BCCommon.Dialog.Popup.Highlighter.Color,
   sSpeedButton, BCControl.SpeedButton, sComboBox, BCControl.ComboBox, sLabel;
@@ -97,7 +97,7 @@ implementation
 
 uses
   BCCommon.Language.Strings, BCCommon.Forms.Print.Preview, BCEditor.Print.Types, BCCommon.StringUtils,
-  BCCommon.Dialogs.SkinSelect, BCCommon.FileUtils, BCEditor.Types, BCCommon.Dialogs.Options.Search;
+  BCCommon.Dialog.SkinSelect, BCCommon.FileUtils, BCEditor.Types, BCCommon.Dialog.Options.Search;
 
 procedure TMainForm.ActionSkinsExecute(Sender: TObject);
 begin

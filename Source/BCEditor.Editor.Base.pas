@@ -5777,6 +5777,7 @@ begin
             (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
         LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
+        LIsPasteAction := LLastChangeReason = crPaste;
       end;
     until not LIsKeepGoing;
 
@@ -11625,11 +11626,16 @@ begin
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition,
-                  GetTextPosition(LTextCaretPosition.Char + 1, LTextCaretPosition.Line), '', smNormal);
-                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
+                BeginUndoBlock;
+                try
+                  FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition,
+                    GetTextPosition(LTextCaretPosition.Char + 1, LTextCaretPosition.Line), '', smNormal);
+                  FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
 
-                LTextCaretPosition.Char := LTextCaretPosition.Char + 1;
+                  LTextCaretPosition.Char := LTextCaretPosition.Char + 1;
+                finally
+                  EndUndoBlock;
+                end;
               end;
             end
             else
@@ -12360,6 +12366,7 @@ begin
             (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
         LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
+        LPasteAction := LLastChangeReason = crPaste;
       end;
     until not LKeepGoing;
 

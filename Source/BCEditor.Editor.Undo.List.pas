@@ -9,6 +9,7 @@ type
   TBCEditorUndoList = class(TPersistent)
   protected
     FBlockCount: Integer;
+    FChangeBlockNumber: Integer;
     FFullUndoImposible: Boolean;
     FInsideRedo: Boolean;
     FInsideUndoBlock: Boolean;
@@ -66,6 +67,7 @@ begin
   FMaxUndoActions := BCEDITOR_MAX_UNDO_ACTIONS;
   FInsideRedo := False;
   FInsideUndoBlock := False;
+  FChangeBlockNumber := 0;
 end;
 
 destructor TBCEditorUndoList.Destroy;
@@ -116,7 +118,7 @@ begin
         ChangeBlockNumber := AChangeBlockNumber
       else
       if FInsideUndoBlock then
-        ChangeBlockNumber := FBlockCount
+        ChangeBlockNumber := FChangeBlockNumber
       else
         ChangeBlockNumber := 0;
       ChangeReason := AReason;
@@ -133,6 +135,7 @@ end;
 procedure TBCEditorUndoList.BeginBlock;
 begin
   Inc(FBlockCount);
+  Inc(FChangeBlockNumber);
   FInsideUndoBlock := True;
 end;
 

@@ -11848,8 +11848,9 @@ begin
   begin
     LTextPosition.Char := FBookmarks[ABookmark].Char;
     LTextPosition.Line := FBookmarks[ABookmark].Line;
-    SetTextCaretPosition(LTextPosition);
-    EnsureCursorPositionVisible(True);
+
+    GotoLineAndCenter(LTextPosition.Line);
+
     if SelectionAvailable then
       InvalidateSelection;
     FSelectionBeginPosition := TextCaretPosition;

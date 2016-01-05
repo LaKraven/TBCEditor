@@ -5462,7 +5462,10 @@ begin
     LBlockEndPosition := SelectionEndPosition;
     LEndOfLine := LBlockEndPosition.Line;
     if LBlockEndPosition.Char = 1 then
-      LCaretPositionX := 1
+    begin
+      LCaretPositionX := 1;
+      Dec(LEndOfLine);
+    end
     else
     begin
       if toTabsToSpaces in FTabs.Options then
@@ -5491,9 +5494,11 @@ begin
       FUndoList.EndBlock;
     end;
     LOldCaretPosition.Char := LCaretPositionX;
+    if LCaretPositionX <> 1 then
+      LBlockEndPosition := GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line);
   finally
     SetCaretAndSelection(LOldCaretPosition, GetTextPosition(LBlockBeginPosition.Char + Length(LSpaces),
-      LBlockBeginPosition.Line), GetTextPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line){LBlockEndPosition});
+      LBlockBeginPosition.Line), LBlockEndPosition);
     FSelection.ActiveMode := LOrgSelectionMode;
   end;
 end;

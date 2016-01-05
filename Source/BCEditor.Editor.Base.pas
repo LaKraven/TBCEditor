@@ -488,6 +488,7 @@ type
     procedure CommandProcessor(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
     procedure CopyToClipboard;
     procedure CutToClipboard;
+    procedure DeleteLines(const ALineNumber: Integer; const ACount: Integer);
     procedure DeleteWhitespace;
     procedure DoUndo;
     procedure DragDrop(ASource: TObject; X, Y: Integer); override;
@@ -498,6 +499,7 @@ type
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
+    procedure InsertLine(const ALineNumber: Integer; const AValue: string);
     procedure InsertBlock(const ABlockBeginPosition, ABlockEndPosition: TBCEditorTextPosition; AChangeStr: PChar; AAddToUndoList: Boolean);
     procedure InvalidateLeftMargin;
     procedure InvalidateLeftMarginLine(ALine: Integer);
@@ -521,6 +523,7 @@ type
     procedure RemoveMouseCursorHandler(AHandler: TBCEditorMouseCursorEvent);
     procedure RemoveMouseDownHandler(AHandler: TMouseEvent);
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
+    procedure ReplaceLine(const ALineNumber: Integer; const AValue: string);
     procedure RescanCodeFoldingRanges;
     procedure SaveToFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding = nil);
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
@@ -10513,12 +10516,7 @@ begin
     NotifyHookedCommandHandlers(False, ACommand, AChar, AData);
 
     FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
-
-     // ((ACommand = ecChar) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or (ACommand = ecBackspace) or
-     //  (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
-
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
-
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars));
 
     if FCodeFolding.Visible then
@@ -10596,6 +10594,18 @@ procedure TBCBaseEditor.CutToClipboard;
 begin
   CommandProcessor(ecCut, BCEDITOR_NONE_CHAR, nil);
   DoChange;
+end;
+
+procedure TBCBaseEditor.DeleteLines(const ALineNumber: Integer; const ACount: Integer);
+begin
+  FSelectionBeginPosition.Char := 1;
+  FSelectionBeginPosition.Line := ALineNumber - 1;
+  FSelectionEndPosition.Char := 1;
+  FSelectionEndPosition.Line := ALineNumber + ACount - 1;
+  SetSelectedTextEmpty;
+
+  RescanCodeFoldingRanges;
+  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.DeleteWhitespace;
@@ -11931,6 +11941,24 @@ begin
   UpdateWordWrap(LOldWrap);
 end;
 
+procedure TBCBaseEditor.InsertLine(const ALineNumber: Integer; const AValue: string);
+var
+  LTextCaretPosition: TBCEditorTextPosition;
+begin
+  FLines.BeginUpdate;
+  FLines.Insert(ALineNumber - 1, AValue);
+  FLines.EndUpdate;
+
+  LTextCaretPosition.Char := 1;
+  LTextCaretPosition.Line := ALineNumber - 1;
+
+  FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition,
+    GetTextPosition(Length(AValue) + 1, LTextCaretPosition.Line), AValue, smNormal);
+
+  RescanCodeFoldingRanges;
+  ScanMatchingPair;
+end;
+
 procedure TBCBaseEditor.InitCodeFolding;
 begin
   ClearCodeFolding;
@@ -12301,7 +12329,8 @@ begin
         FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
           GetTextPosition(FVisibleChars, LEndPositionOfBlock.Line - 1), SelectedText, smLine)
       else
-        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line), LEndPositionOfBlock, SelectedText, smNormal);
+        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
+          LEndPositionOfBlock, SelectedText, smNormal);
     end;
   finally
     EndUndoBlock;
@@ -12433,6 +12462,24 @@ end;
 procedure TBCBaseEditor.RemoveMouseUpHandler(AHandler: TMouseEvent);
 begin
   FKeyboardHandler.RemoveMouseUpHandler(AHandler);
+end;
+
+procedure TBCBaseEditor.ReplaceLine(const ALineNumber: Integer; const AValue: string);
+var
+  LTextCaretPosition: TBCEditorTextPosition;
+begin
+  LTextCaretPosition.Char := 1;
+  LTextCaretPosition.Line := ALineNumber - 1;
+
+  FUndoList.AddChange(crPaste, LTextCaretPosition, LTextCaretPosition,
+    GetTextPosition(Length(AValue) + 1, LTextCaretPosition.Line), FLines.Strings[ALineNumber - 1], smLine);
+
+  FLines.BeginUpdate;
+  FLines.Strings[ALineNumber - 1] := AValue;
+  FLines.EndUpdate;
+
+  RescanCodeFoldingRanges;
+  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.RescanCodeFoldingRanges;

@@ -9698,7 +9698,7 @@ begin
   FSearch.Options := FSearch.Options - [soBackwards];
   if SearchText(FSearch.SearchText, AChanged) = 0 then
   begin
-    if soBeepIfStringNotFound in FSearch.Options then
+    if (soBeepIfStringNotFound in FSearch.Options) and not (soWrapAround in FSearch.Options) then
       Beep;
     SelectionBeginPosition := SelectionEndPosition;
     TextCaretPosition := SelectionBeginPosition;
@@ -9709,11 +9709,19 @@ begin
     end
     else
     if soShowSearchMatchNotFound in FSearch.Options then
+    begin
       if DoSearchMatchNotFoundWraparoundDialog then
       begin
         CaretZero;
         Result := FindNext;
-      end;
+      end
+    end
+    else
+    if soWrapAround in FSearch.Options then
+    begin
+      CaretZero;
+      Result := FindNext;
+    end
   end
   else
     Result := True;

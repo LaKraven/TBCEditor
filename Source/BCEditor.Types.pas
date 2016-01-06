@@ -103,7 +103,8 @@ type
     soSelectedOnly,
     soShowStringNotFound,
     soShowSearchMatchNotFound,
-    soWholeWordsOnly
+    soWholeWordsOnly,
+    soWrapAround
   );
   TBCEditorSearchOptions = set of TBCEditorSearchOption;
 

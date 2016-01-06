@@ -8216,7 +8216,8 @@ var
         end;
         if LTokenRect.Left < X2 then
         begin
-          SetDrawingColors(not (soToEndOfLine in FSelection.Options) and not (soToEndOfLastLine in FSelection.Options));
+          SetDrawingColors(not (soToEndOfLine in FSelection.Options) and not (soToEndOfLastLine in FSelection.Options) or
+            (soToEndOfLastLine in FSelection.Options) and (LDisplayLine <> LSelectionEndPosition.Row) );
           LTokenRect.Right := X2;
           PatBlt(Canvas.Handle, LTokenRect.Left, LTokenRect.Top, LTokenRect.Width, LTokenRect.Height, PATCOPY); { fill end of line rect }
           if (soFromEndOfLine in FSelection.Options) and (soToEndOfLine in FSelection.Options) then

@@ -84,6 +84,8 @@ type
     FMinimap: TBCEditorMinimap;
     FMinimapBufferBmp: Vcl.Graphics.TBitmap;
     FMinimapClickOffsetY: Integer;
+    FMinimapIndicatorBlendFunction: TBlendFunction;
+    FMinimapIndicatorBitmap: Vcl.Graphics.TBitmap;
     FModified: Boolean;
     FMouseDownX: Integer;
     FMouseDownY: Integer;
@@ -147,8 +149,6 @@ type
     {$ENDIF}
     FSearch: TBCEditorSearch;
     FSearchEngine: TBCEditorSearchCustom;
-    FSearchHighlighterBitmap: TBitmap;
-    FSearchHighlighterBlendFunction: TBlendFunction;
     FSearchLines: TList;
     FSelectedCaseCycle: TBCEditorCase;
     FSelectedCaseText: string;
@@ -415,6 +415,7 @@ type
       AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintGuides(AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
+    procedure PaintMinimapVisibleLinesIndicator(AClipRect: TRect);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSearchResults;
@@ -807,8 +808,6 @@ begin
   FCompletionProposalTimer.Enabled := False;
   FCompletionProposalTimer.OnTimer := CompletionProposalTimerHandler;
   { Search }
-  FSearchHighlighterBlendFunction.BlendOp := AC_SRC_OVER;
-  FSearchHighlighterBitmap := TBitmap.Create;
   FSearchLines := TList.Create;
   FSearch := TBCEditorSearch.Create;
   FSearch.OnChange := SearchChanged;
@@ -818,6 +817,10 @@ begin
   FScroll := TBCEditorScroll.Create;
   FScroll.OnChange := ScrollChanged;
   { Mini map }
+  FMinimapIndicatorBlendFunction.BlendOp := AC_SRC_OVER;
+  FMinimapIndicatorBlendFunction.BlendFlags := 0;
+  FMinimapIndicatorBlendFunction.AlphaFormat := 0;
+  FMinimapIndicatorBitmap := Vcl.Graphics.TBitmap.Create;
   FMinimap := TBCEditorMinimap.Create;
   FMinimap.OnChange := MinimapChanged;
   { Active line }
@@ -865,6 +868,7 @@ begin
   FOriginalRedoList.Free;
   FLeftMargin.Free;
   FLeftMargin := nil; { notification has a check }
+  FMinimapIndicatorBitmap.Free;
   FMinimap.Free;
   FWordWrap.Free;
   FTextDrawer.Free;
@@ -879,7 +883,6 @@ begin
   ClearSearchLines;
   FSearchLines.Free;
   FSearch.Free;
-  FSearchHighlighterBitmap.Free;
   FReplace.Free;
   FTabs.Free;
   FUndo.Free;
@@ -6871,7 +6874,6 @@ begin
         DrawRect.Right := LSearchMapLeft;
       end;
       FTextDrawer.SetBaseFont(Font);
-      //FTextDrawer.Style := Font.Style;
       PaintTextLines(DrawRect, LLine1, LLine2, False);
       if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) then
         PaintGuides(LLine1, LLine2, False);
@@ -6931,7 +6933,6 @@ begin
           DrawRect.Right := FMinimap.GetWidth;
         end;
         FTextDrawer.SetBaseFont(FMinimap.Font);
-        //FTextDrawer.Style := FMinimap.Font.Style;
 
         LSelectionAvailable := SelectionAvailable;
 
@@ -6955,13 +6956,14 @@ begin
         PaintTextLines(DrawRect, LLine1, LLine2, True);
         if FCodeFolding.Visible and (moShowIndentGuides in FMinimap.Options) then
           PaintGuides(LLine1, LLine2, True);
+        if FMinimap.Indicator.Visible then
+          PaintMinimapVisibleLinesIndicator(DrawRect);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
         BitBlt(FMinimapBufferBmp.Canvas.Handle, 0, 0, DrawRect.Width, DrawRect.Height, Canvas.Handle, DrawRect.Left,
           DrawRect.Top, SRCCOPY);
         FTextDrawer.SetBaseFont(Font);
-        //FTextDrawer.Style := Font.Style;
       end;
 
     { Search map }
@@ -7607,6 +7609,23 @@ begin
   PaintBookmarkPanelLine;
 end;
 
+procedure TBCBaseEditor.PaintMinimapVisibleLinesIndicator(AClipRect: TRect);
+begin
+  with FMinimapIndicatorBitmap do
+  begin
+    Height := 0;
+    Canvas.Brush.Color := FMinimap.Colors.VisibleLines;
+    Width := AClipRect.Width;
+    Height := FVisibleLines * FMinimap.CharHeight;
+  end;
+
+  FMinimapIndicatorBlendFunction.SourceConstantAlpha := FMinimap.Indicator.AlphaBlending;
+
+  with FMinimapIndicatorBitmap do
+    AlphaBlend(Self.Canvas.Handle, AClipRect.Left, (FTopLine - FMinimap.TopLine) * FMinimap.CharHeight,
+      Width, Height, Canvas.Handle, 0, 0, Width, Height, FMinimapIndicatorBlendFunction);
+end;
+
 procedure TBCBaseEditor.PaintRightMarginMove;
 var
   LRightMarginPosition: Integer;
@@ -8030,7 +8049,7 @@ var
         SetForegroundColor(LForegroundColor);
         LColor := LBackgroundColor;
       end;
-      SetBackgroundColor(LColor); { Text}
+      SetBackgroundColor(LColor); { Text }
       Canvas.Brush.Color := LColor; { Rest of the line }
     end;
   end;
@@ -8142,10 +8161,6 @@ var
 
       FTextDrawer.SetStyle(LTokenHelper.FontStyle);
 
-      if AMinimap then
-        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
-          LBackgroundColor := FMinimap.Colors.VisibleLines;
-
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;
       if LCustomLineColors and (LCustomBackgroundColor <> clNone) then
@@ -8188,9 +8203,6 @@ var
     if AFillToEndOfLine and (LTokenRect.Left < LLineRect.Right) then
     begin
       LBackgroundColor := GetBackgroundColor;
-      if AMinimap then
-        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
-          LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;

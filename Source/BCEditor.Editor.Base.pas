@@ -2455,11 +2455,12 @@ begin
         LStartTextPosition := SelectionBeginPosition
       else
         LStartTextPosition := TextCaretPosition;
-    if LIsBackward then
-      LCurrentTextPosition := SelectionBeginPosition
-    else
-      LCurrentTextPosition := SelectionEndPosition
   end;
+
+  if LIsBackward then
+    LCurrentTextPosition := LEndTextPosition
+  else
+    LCurrentTextPosition := LStartTextPosition;
 
   FSearchEngine.Pattern := ASearchText;
   case FSearch.Engine of
@@ -3129,6 +3130,7 @@ begin
     LKeyword := ASearchText;
   if LKeyword = '' then
     Exit;
+
   LCaseSensitive := soCaseSensitive in FSearch.Options;
 
   for i := 0 to FLines.Count - 1 do
@@ -9689,6 +9691,7 @@ begin
   Result := False;
   if Trim(FSearch.SearchText) = '' then
   begin
+    SelectionEndPosition := SelectionBeginPosition;
     FSearchEngine.Clear;
     Exit;
   end;

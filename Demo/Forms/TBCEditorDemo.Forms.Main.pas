@@ -14,7 +14,7 @@ uses
   sSpeedButton, BCControl.SpeedButton, sComboBox, BCControl.ComboBox, sLabel;
 
 const
-  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.2';
+  BCEDITORDEMO_CAPTION = 'TBCEditor Control Demo v1.3';
   TITLE_BAR_CAPTION = 1;
   TITLE_BAR_HIGHLIGHTER = 2;
   TITLE_BAR_COLORS = 4;

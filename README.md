@@ -1,4 +1,4 @@
-Version 1.2. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
+Version 1.3. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
 <h3>Description</h3>
 

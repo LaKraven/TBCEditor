@@ -8840,6 +8840,9 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;
+      crNothing:
+        FUndoList.AddChange(crNothing, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+          LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
     end;
   finally
     FUndoList.InsideRedo := False;
@@ -9525,6 +9528,9 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;
+      crNothing:
+        FRedoList.AddChange(crNothing, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+          LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
     end;
   finally
     if LChangeScrollPastEndOfLine then

@@ -102,7 +102,7 @@ type
     FCalcExtentBaseStyle: TFontStyles;
     FCharABCWidthCache: array [0 .. 127] of TABC;
     FCharExtra: Integer;
-    FCharWidthCache: array [0 .. 127] of Integer;
+    //FCharWidthCache: array [0 .. 127] of Integer;
     FColor: TColor;
     FCurrentFont: HFont;
     FDrawingCount: Integer;
@@ -130,7 +130,6 @@ type
     function GetCharHeight: Integer; virtual;
     function GetCharWidth: Integer; virtual;
     function TextExtent(const Text: string): TSize;
-    function TextCharWidth(const AChar: PChar): Integer;
     procedure BeginDrawing(AHandle: HDC); virtual;
     procedure EndDrawing; virtual;
     procedure ExtTextOut(X, Y: Integer; AOptions: Longint; var ARect: TRect; AText: PChar; ALength: Integer); virtual;
@@ -623,7 +622,7 @@ end;
 procedure TBCEditorTextDrawer.FlushCharABCWidthCache;
 begin
   FillChar(FCharABCWidthCache, SizeOf(TABC) * Length(FCharABCWidthCache), 0);
-  FillChar(FCharWidthCache, SizeOf(Integer) * Length(FCharWidthCache), 0);
+  //FillChar(FCharWidthCache, SizeOf(Integer) * Length(FCharWidthCache), 0);
 end;
 
 procedure TBCEditorTextDrawer.AfterStyleSet;
@@ -696,7 +695,7 @@ end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: PChar): Integer;
 begin
-  Result := CeilOfIntDiv(TextCharWidth(AChar), CharWidth);
+  Result := CeilOfIntDiv(BCEditor.Utils.TextExtent(FStockBitmap.Canvas, AChar^).cX, CharWidth);
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: Longint; var ARect: TRect; AText: PChar;
@@ -709,6 +708,7 @@ var
   LTextMetricA: TTextMetricA;
 begin
   LCharWidth := GetCharWidth;
+
   if ALength > FExtTextOutLength then
   begin
     FExtTextOutLength := ALength;
@@ -754,24 +754,6 @@ end;
 function TBCEditorTextDrawer.TextExtent(const Text: string): TSize;
 begin
   Result := BCEditor.Utils.TextExtent(FStockBitmap.Canvas, Text);
-end;
-
-function TBCEditorTextDrawer.TextCharWidth(const AChar: PChar): Integer;
-var
-  LCharCode: Cardinal;
-begin
-  LCharCode := Ord(AChar^);
-  if LCharCode <= High(FCharWidthCache) then
-  begin
-     Result := FCharWidthCache[LCharCode];
-     if Result = 0 then
-     begin
-        Result := BCEditor.Utils.TextExtent(FStockBitmap.Canvas, AChar^).cX;
-        FCharWidthCache[LCharCode] := Result;
-     end;
-     Exit;
-  end;
-  Result := BCEditor.Utils.TextExtent(FStockBitmap.Canvas, AChar^).cX;
 end;
 
 initialization

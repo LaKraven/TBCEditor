@@ -8,7 +8,6 @@ uses
 function CeilOfIntDiv(ADividend: Cardinal; ADivisor: Word): Word;
 function DeleteWhitespace(const AText: string): string;
 function GetTabConvertProc(ATabWidth: Integer): TBCEditorTabConvertProc;
-function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
 function MessageDialog(const AMessage: string; ADlgType: TMsgDlgType; AButtons: TMsgDlgButtons): Integer;
 function MinMax(AValue, AMinValue, AMaxValue: Integer): Integer;
 function TextExtent(ACanvas: TCanvas; const AText: string): TSize;
@@ -131,13 +130,6 @@ begin
   Result := TBCEditorTabConvertProc(@ConvertTabs);
 end;
 
-function GetTextSize(AHandle: HDC; AText: PChar; ACount: Integer): TSize;
-begin
-  Result.cx := 0;
-  Result.cy := 0;
-  GetTextExtentPoint32W(AHandle, AText, ACount, Result);
-end;
-
 type
   TAccessCanvas = class(TCanvas);
 
@@ -146,7 +138,9 @@ begin
   with TAccessCanvas(ACanvas) do
   begin
     RequiredState([csHandleValid, csFontValid]);
-    Result := GetTextSize(Handle, PChar(AText), Length(AText));
+    Result.cx := 0;
+    Result.cy := 0;
+    GetTextExtentPoint32(Handle, PChar(AText), Length(AText), Result);
   end;
 end;
 

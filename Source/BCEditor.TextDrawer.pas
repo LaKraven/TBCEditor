@@ -622,7 +622,6 @@ end;
 procedure TBCEditorTextDrawer.FlushCharABCWidthCache;
 begin
   FillChar(FCharABCWidthCache, SizeOf(TABC) * Length(FCharABCWidthCache), 0);
-  //FillChar(FCharWidthCache, SizeOf(Integer) * Length(FCharWidthCache), 0);
 end;
 
 procedure TBCEditorTextDrawer.AfterStyleSet;
@@ -694,8 +693,16 @@ begin
 end;
 
 function TBCEditorTextDrawer.GetCharCount(AChar: PChar): Integer;
+var
+  LTextSize: TSize;
+  LRemainder: Word;
+  LResult: Word;
 begin
-  Result := CeilOfIntDiv(BCEditor.Utils.TextExtent(FStockBitmap.Canvas, AChar^).cX, CharWidth);
+  GetTextExtentPoint32(FStockBitmap.Canvas.Handle, AChar, Length(AChar^), LTextSize);
+  DivMod(LTextSize.cx, CharWidth, LResult, LRemainder);
+  if LRemainder > 0 then
+    Inc(LResult);
+  Result := LResult;
 end;
 
 procedure TBCEditorTextDrawer.ExtTextOut(X, Y: Integer; AOptions: Longint; var ARect: TRect; AText: PChar;
@@ -753,7 +760,7 @@ end;
 
 function TBCEditorTextDrawer.TextExtent(const Text: string): TSize;
 begin
-  Result := BCEditor.Utils.TextExtent(FStockBitmap.Canvas, Text);
+  GetTextExtentPoint32(FStockBitmap.Canvas.Handle, PChar(Text), Length(Text), Result);
 end;
 
 initialization

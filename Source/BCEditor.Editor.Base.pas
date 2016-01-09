@@ -2227,9 +2227,8 @@ begin
       begin
         Inc(Result.Line);
         LLine := FLines[Result.Line];
-        Result.Char := StringWordEnd(LLine, 1);
-        if Result.Char = 0 then
-          Inc(Result.Char);
+        Result.Char := 1;
+        Result := NextWordPosition(Result);
       end;
     end
     else

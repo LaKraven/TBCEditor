@@ -4545,13 +4545,6 @@ begin
 
     Exclude(FStateFlags, sfScrollbarChanged);
 
-    {
-    TODO: Needed?
-    if not (soPastEndOfLine in FScroll.Options) then
-      LeftChar := LeftChar;
-    if not (soPastEndOfFileMarker in FScroll.Options) then
-      TopLine := TopLine;  }
-
     FBufferBmp.Width := ClientRect.Width;
     FBufferBmp.Height := ClientRect.Height;
   end;
@@ -6221,9 +6214,6 @@ begin
     FillChar(FInvalidateRect, SizeOf(TRect), 0);
     if FLeftMargin.LineNumbers.Visible and FLeftMargin.Autosize then
       FLeftMargin.AutosizeDigitCount(Lines.Count);
-    // TODO: Needed?
-    //if not (soPastEndOfFileMarker in Scroll.Options) then
-    //  TopLine := TopLine;
   end;
 end;
 
@@ -10762,9 +10752,6 @@ begin
     else
     if LVisibleX >= FVisibleChars + LeftChar then
       LeftChar := LVisibleX - FVisibleChars + 1;
-    // TODO: Needed?
-    //else
-    //  LeftChar := LeftChar;
 
     LCaretRow := DisplayCaretY;
     if AForceToMiddle then
@@ -10797,9 +10784,6 @@ begin
       else
       if LCaretRow > TopLine + Max(1, VisibleLines) - 1 then
         TopLine := LCaretRow - (VisibleLines - 1);
-      // TODO: Needed?
-      //else
-       // TopLine := TopLine;
     end;
   finally
     DecPaintLock;

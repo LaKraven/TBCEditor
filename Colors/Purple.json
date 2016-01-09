@@ -86,7 +86,7 @@
          },
          {
             "Name":"Directive",
-            "Foreground":"$00999900",
+            "Foreground":"$00969896",
             "Background":"clWindow"
          },
          {

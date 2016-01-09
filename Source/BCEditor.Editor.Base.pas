@@ -2185,7 +2185,7 @@ end;
 
 function TBCBaseEditor.NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
-  X, Y, LLength: Integer;
+  LLength: Integer;
   LLine: string;
 
   function StringScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
@@ -2206,37 +2206,42 @@ var
   end;
 
 begin
-  X := ATextPosition.Char;
-  Y := ATextPosition.Line;
+  Result := ATextPosition;
 
-  if (Y >= 0) and (Y < FLines.Count) then
+  if (Result.Line >= 0) and (Result.Line < FLines.Count) then
   begin
-    LLine := FLines.ExpandedStrings[Y];
+    LLine := FLines[Result.Line];
 
     LLength := Length(LLine);
-    if X >= LLength then
+    if Result.Char >= LLength then
     begin
-      if Y < FLines.Count then
+      if Result.Line >= FLines.Count - 1 then
       begin
-        Inc(Y);
-        LLine := FLines.ExpandedStrings[Y];
-        X := StringWordEnd(LLine, 1);
-        if X = 0 then
-          Inc(X);
+        if not SelectionAvailable then
+        begin
+          Result.Line := 0;
+          Result.Char := 1;
+        end;
+      end
+      else
+      begin
+        Inc(Result.Line);
+        LLine := FLines[Result.Line];
+        Result.Char := StringWordEnd(LLine, 1);
+        if Result.Char = 0 then
+          Inc(Result.Char);
       end;
     end
     else
     begin
-      if not IsWordBreakChar(LLine[X]) then
-        X := StringScan(LLine, X, IsWordBreakChar);
-      if X > 0 then
-        X := StringScan(LLine, X, IsWordChar);
-      if X = 0 then
-        X := LLength + 1;
+      if not IsWordBreakChar(LLine[Result.Char]) then
+        Result.Char := StringScan(LLine, Result.Char, IsWordBreakChar);
+      if Result.Char > 0 then
+        Result.Char := StringScan(LLine, Result.Char, IsWordChar);
+      if Result.Char = 0 then
+        Result.Char := LLength + 1;
     end;
   end;
-  Result.Char := X;
-  Result.Line := Y;
 end;
 
 function TBCBaseEditor.PixelsToNearestRowColumn(X, Y: Integer): TBCEditorDisplayPosition;
@@ -2268,75 +2273,50 @@ end;
 
 function TBCBaseEditor.PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
-  X, Y: Integer;
   LLine: string;
-
-  function StringReverseScan(const ALine: string; AStart: Integer; ACharMethod: TBCEditorCharMethod): Integer;
-  var
-    i: Integer;
-  begin
-    Result := 0;
-    if (AStart > 0) and (AStart <= Length(ALine)) then
-      for i := AStart downto 1 do
-        if ACharMethod(ALine[i]) then
-          Exit(i);
-  end;
-
 begin
-  X := ATextPosition.Char;
-  Y := ATextPosition.Line;
-  if (Y >= 0) and (Y < FLines.Count) then
-  begin
-    LLine := FLines.ExpandedStrings[Y];
-    X := Min(X, Length(LLine) + 1);
+  Result := ATextPosition;
 
-    if X <= 1 then
+  if (Result.Line >= 0) and (Result.Line < FLines.Count) then
+  begin
+    LLine := FLines[Result.Line];
+    Result.Char := Min(Result.Char, Length(LLine) + 1);
+
+    if Result.Char <= 1 then
     begin
-      if Y > 0 then
+      if Result.Line > 0 then
       begin
-        Dec(Y);
-        LLine := FLines.ExpandedStrings[Y];
-        X := StringWordStart(LLine, Length(LLine));
+        Dec(Result.Line);
+        Result.Char := Length(FLines[Result.Line]) + 1;
+        Result := PreviousWordPosition(Result);
       end
       else
-        Y := FLines.Count - 1
+      if not SelectionAvailable then
+        Result.Line := FLines.Count - 1
     end
     else
     begin
-      if X > 0 then
-        X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1;
-      if X = 0 then
-      begin
-        if Y > 1 then
-        begin
-          Dec(Y);
-          LLine := FLines[Y];
-          X := Length(LLine) + 1;
-        end
-        else
-          X := 1;
+      if Result.Char > 1 then
+        if not IsWordBreakChar(LLine[Result.Char - 1]) then
+          Dec(Result.Char);
 
-        { if previous char is a word-break-char search for the last IdentChar }
-        if IsWordBreakChar(LLine[X - 1]) then
-          X := StringReverseScan(LLine, X - 1, IsWordChar);
-        if X > 0 then
-          X := StringReverseScan(LLine, X - 1, IsWordBreakChar) + 1;
-        if X = 0 then
-        begin
-          if Y > 1 then
-          begin
-            Dec(Y);
-            LLine := FLines[Y - 1];
-            X := Length(LLine) + 1;
-          end
-          else
-            X := 1;
-        end;
+      if IsWordBreakChar(LLine[Result.Char]) then
+      begin
+        while (Result.Char > 0) and IsWordBreakChar(LLine[Result.Char]) do
+          Dec(Result.Char);
+      end
+      else
+      begin
+        while (Result.Char > 0) and not IsWordBreakChar(LLine[Result.Char]) do
+          Dec(Result.Char);
+        while (Result.Char > 0) and IsWordBreakChar(LLine[Result.Char]) do
+          Dec(Result.Char);
       end;
+
+      if Result.Char > 0 then
+        Inc(Result.Char);
     end;
   end;
-  Result.Char := X;
-  Result.Line := Y;
 end;
 
 function TBCBaseEditor.RescanHighlighterRangesFrom(AIndex: Integer): Integer;
@@ -11001,14 +10981,14 @@ begin
       ecWordLeft, ecSelectionWordLeft:
         begin
           LCaretNewPosition := WordStart;
-          if AreCaretsEqual(LCaretNewPosition, LTextCaretPosition) then
+          if AreCaretsEqual(LCaretNewPosition, LTextCaretPosition) or (ACommand = ecWordLeft) then
             LCaretNewPosition := PreviousWordPosition;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordLeft);
         end;
       ecWordRight, ecSelectionWordRight:
         begin
           LCaretNewPosition := WordEnd;
-          if AreCaretsEqual(LCaretNewPosition, LTextCaretPosition) then
+          if AreCaretsEqual(LCaretNewPosition, LTextCaretPosition) or (ACommand = ecWordRight) then
             LCaretNewPosition := NextWordPosition;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionWordRight);
         end;

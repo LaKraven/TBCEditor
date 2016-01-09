@@ -10237,23 +10237,19 @@ end;
 
 function TBCBaseEditor.WordEnd(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
-  X, Y: Integer;
   LLine: string;
 begin
-  X := ATextPosition.Char;
-  Y := ATextPosition.Line;
-  if (X >= 1) and (Y < FLines.Count) then
+  Result := ATextPosition;
+  if (Result.Char >= 1) and (Result.Line < FLines.Count) then
   begin
-    LLine := FLines[Y];
-    if X < Length(LLine) then
+    LLine := FLines[Result.Line];
+    if Result.Char < Length(LLine) then
     begin
-      X := StringWordEnd(LLine, X);
-      if X = 0 then
-        X := Length(LLine) + 1;
+      Result.Char := StringWordEnd(LLine, Result.Char);
+      if Result.Char = 0 then
+        Result.Char := Length(LLine) + 1;
     end;
   end;
-  Result.Char := X;
-  Result.Line := Y;
 end;
 
 function TBCBaseEditor.WordStart: TBCEditorTextPosition;
@@ -10263,22 +10259,18 @@ end;
 
 function TBCBaseEditor.WordStart(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
 var
-  X, Y: Integer;
   LLine: string;
 begin
-  X := ATextPosition.Char;
-  Y := ATextPosition.Line;
+  Result := ATextPosition;
 
-  if (Y >= 0) and (Y < FLines.Count) then
+  if (Result.Line >= 0) and (Result.Line < FLines.Count) then
   begin
-    LLine := FLines[Y];
-    X := Min(X, Length(LLine) + 1);
-    X := StringWordStart(LLine, X - 1);
-    if X = 0 then
-      X := 1;
+    LLine := FLines[Result.Line];
+    Result.Char := Min(Result.Char, Length(LLine) + 1);
+    Result.Char := StringWordStart(LLine, Result.Char - 1);
+    if Result.Char = 0 then
+      Result.Char := 1;
   end;
-  Result.Char := X;
-  Result.Line := Y;
 end;
 
 procedure TBCBaseEditor.AddKeyCommand(ACommand: TBCEditorCommand; AShift: TShiftState; AKey: Word;

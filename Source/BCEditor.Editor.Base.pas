@@ -51,7 +51,6 @@ type
     FDirectories: TBCEditorDirectories;
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
-    FExtraTag: Integer;
     FFontDummy: TFont;
     FHighlightedFoldRange: TBCEditorCodeFoldingRange;
     FHighlighter: TBCEditorHighlighter;
@@ -561,7 +560,6 @@ type
     property Cursor default crIBeam;
     property Directories: TBCEditorDirectories read FDirectories write FDirectories;
     property Encoding: TEncoding read FEncoding write FEncoding;
-    property ExtraTag: Integer read FExtraTag write FExtraTag default 0;
     property Font;
     property Highlighter: TBCEditorHighlighter read FHighlighter;
     property InsertMode: Boolean read FInsertMode write SetInsertMode default True;
@@ -708,7 +706,6 @@ begin
   FResetLineNumbersCache := True;
   FSelectedCaseText := '';
   FURIOpener := False;
-  FExtraTag := 0;
 
   { Code folding }
   FAllCodeFoldingRanges := TBCEditorAllCodeFoldingRanges.Create;

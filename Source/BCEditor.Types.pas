@@ -318,6 +318,9 @@ type
 
   TBCEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);
 
+  TBCEditorIndicatorOption = (ioInvertBlending, ioShowBorder);
+  TBCEditorIndicatorOptions = set of TBCEditorIndicatorOption;
+
 implementation
 
 end.

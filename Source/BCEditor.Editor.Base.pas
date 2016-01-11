@@ -7578,6 +7578,8 @@ begin
 end;
 
 procedure TBCBaseEditor.PaintMinimapVisibleLinesIndicator(AClipRect: TRect);
+var
+  LTop: Integer;
 begin
   with FMinimapIndicatorBitmap do
   begin
@@ -7589,9 +7591,29 @@ begin
 
   FMinimapIndicatorBlendFunction.SourceConstantAlpha := FMinimap.Indicator.AlphaBlending;
 
+  LTop := (FTopLine - FMinimap.TopLine) * FMinimap.CharHeight;
+
+  if ioInvertBlending in FMinimap.Indicator.Options then
+  begin
+    if LTop > 0 then
+      with FMinimapIndicatorBitmap do
+        AlphaBlend(Self.Canvas.Handle, AClipRect.Left, 0, Width, LTop, Canvas.Handle, 0, 0, Width, Height,
+          FMinimapIndicatorBlendFunction);
+    with FMinimapIndicatorBitmap do
+      AlphaBlend(Self.Canvas.Handle, AClipRect.Left, LTop + Height, Width, AClipRect.Bottom, Canvas.Handle, 0, 0, Width, Height,
+        FMinimapIndicatorBlendFunction);
+  end
+  else
   with FMinimapIndicatorBitmap do
-    AlphaBlend(Self.Canvas.Handle, AClipRect.Left, (FTopLine - FMinimap.TopLine) * FMinimap.CharHeight,
-      Width, Height, Canvas.Handle, 0, 0, Width, Height, FMinimapIndicatorBlendFunction);
+    AlphaBlend(Self.Canvas.Handle, AClipRect.Left, LTop, Width, Height, Canvas.Handle, 0, 0, Width, Height,
+      FMinimapIndicatorBlendFunction);
+
+  if ioShowBorder in FMinimap.Indicator.Options then
+  begin
+    Canvas.Pen.Color := FMinimap.Colors.VisibleLines;
+    Canvas.Brush.Style := bsClear;
+    Canvas.Rectangle(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FMinimapIndicatorBitmap.Height));
+  end;
 end;
 
 procedure TBCBaseEditor.PaintRightMarginMove;

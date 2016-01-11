@@ -10,6 +10,7 @@ type
   strict private
     FAlphaBlending: Byte;
     FOnChange: TNotifyEvent;
+    FOptions: TBCEditorIndicatorOptions;
     FVisible: Boolean;
     procedure DoChange;
     procedure SetAlphaBlending(const AValue: Byte);
@@ -20,6 +21,7 @@ type
   published
     property AlphaBlending: Byte read FAlphaBlending write SetAlphaBlending default 96;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Options: TBCEditorIndicatorOptions read FOptions write FOptions default [ioShowBorder];
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -33,6 +35,7 @@ begin
 
   FVisible := True;
   FAlphaBlending := 96;
+  FOptions := [ioShowBorder];
 end;
 
 procedure TBCEditorMinimapIndicator.Assign(ASource: TPersistent);

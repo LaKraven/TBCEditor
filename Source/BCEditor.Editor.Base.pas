@@ -7384,7 +7384,9 @@ var
     i: Integer;
     LPanelRect: TRect;
     LPanelActiveLineRect: TRect;
+    LOldColor: TColor;
   begin
+    LOldColor := Canvas.Brush.Color;
     if FLeftMargin.Bookmarks.Panel.Visible then
     begin
       LPanelRect := System.Types.Rect(AClipRect.Left, 0, AClipRect.Left + FLeftMargin.Bookmarks.Panel.Width, ClientHeight);
@@ -7412,7 +7414,7 @@ var
       if Assigned(FOnBeforeBookmarkPanelPaint) then
         FOnBeforeBookmarkPanelPaint(Self, Canvas, LPanelRect, AFirstLine, ALastLine);
     end;
-    Canvas.Brush.Style := bsClear;
+    Canvas.Brush.Color := LOldColor;
   end;
 
   procedure PaintWordWrapIndicator;
@@ -8615,7 +8617,6 @@ var
   end;
 
 begin
-  { Retrieve lines associated with rows }
   LFirstLine := AFirstRow;
   LLastLine := ALastRow;
 

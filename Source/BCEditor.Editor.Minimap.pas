@@ -114,6 +114,7 @@ begin
   FOnChange := AValue;
   FFont.OnChange := AValue;
   FColors.OnChange := AValue;
+  FIndicator.OnChange := AValue;
 end;
 
 procedure TBCEditorMinimap.DoChange;

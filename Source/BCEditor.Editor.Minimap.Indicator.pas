@@ -11,18 +11,15 @@ type
     FAlphaBlending: Byte;
     FOnChange: TNotifyEvent;
     FOptions: TBCEditorIndicatorOptions;
-    FVisible: Boolean;
     procedure DoChange;
     procedure SetAlphaBlending(const AValue: Byte);
-    procedure SetVisible(AValue: Boolean);
   public
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
     property AlphaBlending: Byte read FAlphaBlending write SetAlphaBlending default 96;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
-    property Options: TBCEditorIndicatorOptions read FOptions write FOptions default [ioShowBorder];
-    property Visible: Boolean read FVisible write SetVisible default True;
+    property Options: TBCEditorIndicatorOptions read FOptions write FOptions default [];
   end;
 
 implementation
@@ -33,9 +30,8 @@ constructor TBCEditorMinimapIndicator.Create;
 begin
   inherited;
 
-  FVisible := True;
   FAlphaBlending := 96;
-  FOptions := [ioShowBorder];
+  FOptions := [];
 end;
 
 procedure TBCEditorMinimapIndicator.Assign(ASource: TPersistent);
@@ -44,7 +40,7 @@ begin
   with ASource as TBCEditorMinimapIndicator do
   begin
     Self.FAlphaBlending := FAlphaBlending;
-    Self.FVisible := FVisible;
+    Self.FOptions := FOptions;
     Self.DoChange;
   end
   else
@@ -62,15 +58,6 @@ begin
   if FAlphaBlending <> AValue then
   begin
     FAlphaBlending := AValue;
-    DoChange;
-  end;
-end;
-
-procedure TBCEditorMinimapIndicator.SetVisible(AValue: Boolean);
-begin
-  if FVisible <> AValue then
-  begin
-    FVisible := AValue;
     DoChange;
   end;
 end;

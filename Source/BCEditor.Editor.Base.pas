@@ -414,7 +414,7 @@ type
       AScrolledXBy: Integer; ALineRect: TRect);
     procedure PaintGuides(AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
-    procedure PaintMinimapVisibleLinesIndicator(AClipRect: TRect);
+    procedure PaintMinimapIndicator(AClipRect: TRect);
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSearchResults;
@@ -6924,8 +6924,8 @@ begin
         PaintTextLines(DrawRect, LLine1, LLine2, True);
         if FCodeFolding.Visible and (moShowIndentGuides in FMinimap.Options) then
           PaintGuides(LLine1, LLine2, True);
-        if FMinimap.Indicator.Visible then
-          PaintMinimapVisibleLinesIndicator(DrawRect);
+        if ioUseBlending in FMinimap.Indicator.Options then
+          PaintMinimapIndicator(DrawRect);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
@@ -7579,7 +7579,7 @@ begin
   PaintBookmarkPanelLine;
 end;
 
-procedure TBCBaseEditor.PaintMinimapVisibleLinesIndicator(AClipRect: TRect);
+procedure TBCBaseEditor.PaintMinimapIndicator(AClipRect: TRect);
 var
   LTop: Integer;
 begin
@@ -8153,6 +8153,11 @@ var
 
       FTextDrawer.SetStyle(LTokenHelper.FontStyle);
 
+      if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
+        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
+          if LBackgroundColor <> FSearch.Highlighter.Colors.Background then
+            LBackgroundColor := FMinimap.Colors.VisibleLines;
+
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;
       if LCustomLineColors and (LCustomBackgroundColor <> clNone) then
@@ -8195,6 +8200,10 @@ var
     if AFillToEndOfLine and (LTokenRect.Left < LLineRect.Right) then
     begin
       LBackgroundColor := GetBackgroundColor;
+
+      if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
+        if (LDisplayLine >= TopLine) and (LDisplayLine < TopLine + VisibleLines) then
+          LBackgroundColor := FMinimap.Colors.VisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> clNone) then
         LForegroundColor := LCustomForegroundColor;

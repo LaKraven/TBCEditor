@@ -32,6 +32,7 @@ type
     FCaretOffset: TPoint;
     FDisplayCaretX: Integer;
     FDisplayCaretY: Integer;
+    FDragBeginTextCaretPosition: TBCEditorTextPosition;
     FChainedEditor: TBCBaseEditor;
     FCharWidth: Integer;
     FCodeFolding: TBCEditorCodeFolding;
@@ -4284,10 +4285,12 @@ procedure TBCBaseEditor.SetSelectedText(const AValue: string);
 var
   LTextCaretPosition, LBlockStartPosition, LBlockEndPosition: TBCEditorTextPosition;
 begin
-  BeginUndoBlock;
   ClearCodeFolding;
   try
-    LTextCaretPosition := TextCaretPosition;
+    if sfDragging in FStateFlags then
+      LTextCaretPosition := FDragBeginTextCaretPosition
+    else
+      LTextCaretPosition := TextCaretPosition;
     if SelectionAvailable then
       FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
         FSelection.ActiveMode)
@@ -4305,7 +4308,6 @@ begin
       FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
   finally
     InitCodeFolding;
-    EndUndoBlock;
   end;
 end;
 
@@ -6680,6 +6682,8 @@ begin
     begin
       Exclude(FStateFlags, sfWaitForDragging);
       BeginDrag(False);
+      Include(FStateFlags, sfDragging);
+      FDragBeginTextCaretPosition := TextCaretPosition;
     end;
   end
   else
@@ -10748,6 +10752,7 @@ begin
       end;
     finally
       DecPaintLock;
+      Exclude(FStateFlags, sfDragging);
     end;
   end
   else

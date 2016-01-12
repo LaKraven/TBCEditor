@@ -37,7 +37,7 @@ type
     const APosition: Integer; var AForegroundColor: TColor; var ABackgroundColor: TColor; var AStyles: TFontStyles) of object;
 
   TBCEditorStateFlag = (sfCaretChanged, sfScrollBarChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
-    sfWaitForDragging, sfCodeFoldingInfoClicked, sfInSelection);
+    sfWaitForDragging, sfCodeFoldingInfoClicked, sfInSelection, sfDragging);
   TBCEditorStateFlags = set of TBCEditorStateFlag;
 
   TBCEditorOption = (

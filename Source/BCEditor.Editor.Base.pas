@@ -6016,6 +6016,7 @@ end;
 procedure TBCBaseEditor.DragCanceled;
 begin
   FScrollTimer.Enabled := False;
+  Exclude(FStateFlags, sfDragging);
   inherited;
 end;
 

@@ -94,6 +94,7 @@ begin
     end;
     Self.FInsideUndoBlock := FInsideUndoBlock;
     Self.FBlockCount := FBlockCount;
+    Self.FChangeBlockNumber := FChangeBlockNumber;
     Self.FFullUndoImposible := FFullUndoImposible;
     Self.FLockCount := FLockCount;
     Self.FMaxUndoActions := FMaxUndoActions;

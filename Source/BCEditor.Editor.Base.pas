@@ -2932,7 +2932,6 @@ begin
     end;
 
     FUndoList.AddChange(crDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, LOldSelectedText, smNormal);
-    FUndoList.AddChange(crNothing, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode); { avoid group undo }
   end;
 end;
 
@@ -2988,10 +2987,7 @@ begin
     EnsureCursorPositionVisible;
 
     if FSelection.ActiveMode <> smColumn then
-    begin
       FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode);
-      FUndoList.AddChange(crNothing, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode); { avoid group undo }
-    end;
   finally
     FUndoList.EndBlock;
   end;
@@ -4583,7 +4579,7 @@ end;
 
 procedure TBCBaseEditor.UndoRedoAdded(Sender: TObject);
 var
- LUndoItem: TBCEditorUndoItem;
+  LUndoItem: TBCEditorUndoItem;
 begin
   LUndoItem := nil;
   if Sender = FUndoList then
@@ -5725,7 +5721,6 @@ var
   LLastChangeBlockNumber: Integer;
   LLastChangeReason: TBCEditorChangeReason;
   LLastChangeString: string;
-  LIsAutoComplete: Boolean;
   LIsPasteAction: Boolean;
   LIsKeepGoing: Boolean;
 begin
@@ -5737,39 +5732,28 @@ begin
   LLastChangeBlockNumber := FUndoList.LastChangeBlockNumber;
   LLastChangeReason := FUndoList.LastChangeReason;
   LLastChangeString := FUndoList.LastChangeString;
-  LIsAutoComplete := LLastChangeReason = crAutoCompleteEnd;
   LIsPasteAction := LLastChangeReason = crPaste;
 
   LUndoItem := FUndoList.PeekItem;
   if Assigned(LUndoItem) then
   begin
     repeat
-      Self.UndoItem;
+      UndoItem;
       LUndoItem := FUndoList.PeekItem;
       if not Assigned(LUndoItem) then
         LIsKeepGoing := False
       else
       begin
-        if LIsAutoComplete then
-          LIsKeepGoing := FUndoList.LastChangeReason <> crAutoCompleteBegin
-        else
         if LIsPasteAction then
           LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
         else
-          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
-            not (LLastChangeReason in [crIndent, crUnindent]) or
-            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
+          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and ((LLastChangeReason = LUndoItem.ChangeReason) or
+            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber));
         LLastChangeReason := LUndoItem.ChangeReason;
         LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
         LIsPasteAction := LLastChangeReason = crPaste;
       end;
     until not LIsKeepGoing;
-
-    if LIsAutoComplete and (FUndoList.LastChangeReason = crAutoCompleteBegin) then
-    begin
-      Self.UndoItem;
-      UpdateModifiedStatus;
-    end;
   end;
 end;
 
@@ -8843,9 +8827,6 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;
-      crNothing:
-        FUndoList.AddChange(crNothing, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
-          LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
     end;
   finally
     FUndoList.InsideRedo := False;
@@ -9531,9 +9512,6 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;
-      crNothing:
-        FRedoList.AddChange(crNothing, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
-          LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
     end;
   finally
     if LChangeScrollPastEndOfLine then
@@ -10906,36 +10884,24 @@ begin
       ecLineEnd, ecSelectionLineEnd:
         DoEndKey(ACommand = ecSelectionLineEnd);
       ecUp, ecSelectionUp:
-        begin
-          MoveCaretVertically(-1, ACommand = ecSelectionUp);
-          Invalidate;
-        end;
+        MoveCaretVertically(-1, ACommand = ecSelectionUp);
       ecDown, ecSelectionDown:
-        begin
-          MoveCaretVertically(1, ACommand = ecSelectionDown);
-          Invalidate;
-        end;
+        MoveCaretVertically(1, ACommand = ecSelectionDown);
       ecPageUp, ecSelectionPageUp, ecPageDown, ecSelectionPageDown:
         begin
           LCounter := FVisibleLines shr Ord(soHalfPage in FScroll.Options);
-
           if ACommand in [ecPageUp, ecSelectionPageUp] then
             LCounter := -LCounter;
           TopLine := TopLine + LCounter;
           MoveCaretVertically(LCounter, ACommand in [ecSelectionPageUp, ecSelectionPageDown]);
-          Invalidate;
         end;
-      ecPageTop, ecSelectionPageTop:
+      ecPageTop, ecSelectionPageTop, ecPageBottom, ecSelectionPageBottom:
         begin
-          LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine));
-          MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageTop);
-          Invalidate;
-        end;
-      ecPageBottom, ecSelectionPageBottom:
-        begin
-          LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine + VisibleLines - 1));
-          MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionPageBottom);
-          Invalidate;
+          LCounter := 0;
+          if ACommand in [ecPageBottom, ecSelectionPageBottom] then
+            LCounter := VisibleLines - 1;
+          LCaretNewPosition := DisplayToTextPosition(GetDisplayPosition(DisplayCaretX, TopLine + LCounter));
+          MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand in [ecSelectionPageTop, ecSelectionPageBottom]);
         end;
       ecEditorTop, ecSelectionEditorTop:
         begin
@@ -10945,7 +10911,6 @@ begin
             Line := 0;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorTop);
-          Invalidate;
         end;
       ecEditorBottom, ecSelectionEditorBottom:
         begin
@@ -10954,39 +10919,31 @@ begin
             Char := 1;
             Line := FLines.Count - 1;
             if Line > 0 then
-              Char := Length(Lines.ExpandedStrings[Line]) + 1;
+              Char := Length(FLines[Line]) + 1;
           end;
           MoveCaretAndSelection(LTextCaretPosition, LCaretNewPosition, ACommand = ecSelectionEditorBottom);
-          Invalidate;
         end;
       ecGotoXY, ecSelectionGotoXY:
         if Assigned(AData) then
-        begin
           MoveCaretAndSelection(LTextCaretPosition, TBCEditorTextPosition(AData^), ACommand = ecSelectionGotoXY);
-          Invalidate;
-        end;
       ecGotoBookmark1 .. ecGotoBookmark9:
-        begin
-          if FLeftMargin.Bookmarks.ShortCuts then
-            GotoBookmark(ACommand - ecGotoBookmark1);
-        end;
+        if FLeftMargin.Bookmarks.ShortCuts then
+          GotoBookmark(ACommand - ecGotoBookmark1);
       ecSetBookmark1 .. ecSetBookmark9:
+        if FLeftMargin.Bookmarks.ShortCuts then
         begin
-          if FLeftMargin.Bookmarks.ShortCuts then
+          i := ACommand - ecSetBookmark1;
+          if Assigned(AData) then
+            LTextCaretPosition := TBCEditorTextPosition(AData^);
+          if Assigned(FBookmarks[i]) then
           begin
-            i := ACommand - ecSetBookmark1;
-            if Assigned(AData) then
-              LTextCaretPosition := TBCEditorTextPosition(AData^);
-            if Assigned(FBookmarks[i]) then
-            begin
-              LMoveBookmark := FBookmarks[i].Line <> LTextCaretPosition.Line;
-              ClearBookmark(i);
-              if LMoveBookmark then
-                SetBookmark(i, LTextCaretPosition);
-            end
-            else
+            LMoveBookmark := FBookmarks[i].Line <> LTextCaretPosition.Line;
+            ClearBookmark(i);
+            if LMoveBookmark then
               SetBookmark(i, LTextCaretPosition);
-          end;
+          end
+          else
+            SetBookmark(i, LTextCaretPosition);
         end;
       ecWordLeft, ecSelectionWordLeft:
         begin
@@ -11008,7 +10965,6 @@ begin
         SelectAll;
       ecBackspace:
         if not ReadOnly then
-        begin
           if SelectionAvailable then
             SetSelectedTextEmpty
           else
@@ -11177,10 +11133,8 @@ begin
               end;
             end;
           end;
-        end;
       ecDeleteChar:
         if not ReadOnly then
-        begin
           if SelectionAvailable then
             SetSelectedTextEmpty
           else
@@ -11227,7 +11181,6 @@ begin
               end;
             end;
           end;
-        end;
       ecDeleteWord, ecDeleteEndOfLine:
         if not ReadOnly then
         begin
@@ -11304,7 +11257,7 @@ begin
         begin
           if SelectionAvailable then
             SetSelectionBeginPosition(LTextCaretPosition);
-          LHelper := FLines.ExpandedStrings[LTextCaretPosition.Line];
+          LHelper := FLines[LTextCaretPosition.Line];
           if LTextCaretPosition.Line = FLines.Count - 1 then
           begin
             FLines[LTextCaretPosition.Line] := '';
@@ -11745,7 +11698,7 @@ begin
           end;
         end;
       ecCut:
-        if (not ReadOnly) and SelectionAvailable then
+        if not ReadOnly and SelectionAvailable then
           DoCutToClipboard;
       ecCopy:
         CopyToClipboard;
@@ -11772,7 +11725,6 @@ begin
                 MoveCaretVertically(TopLine - LCaretRow, False);
             end;
             EnsureCursorPositionVisible;
-            Invalidate;
           end;
         end;
       ecScrollLeft:
@@ -12388,7 +12340,6 @@ var
   LLastChangeBlockNumber: Integer;
   LLastChangeReason: TBCEditorChangeReason;
   LLastChangeString: string;
-  LAutoComplete: Boolean;
   LPasteAction: Boolean;
   LKeepGoing: Boolean;
 begin
@@ -12398,7 +12349,6 @@ begin
   LLastChangeBlockNumber := FRedoList.LastChangeBlockNumber;
   LLastChangeReason := FRedoList.LastChangeReason;
   LLastChangeString := FRedoList.LastChangeString;
-  LAutoComplete := LLastChangeReason = crAutoCompleteBegin;
   LPasteAction := LLastChangeReason = crPaste;
 
   LUndoItem := FRedoList.PeekItem;
@@ -12411,26 +12361,16 @@ begin
         LKeepGoing := False
       else
       begin
-        if LAutoComplete then
-          LKeepGoing := FRedoList.LastChangeReason <> crAutoCompleteEnd
-        else
         if LPasteAction then
           LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
         else
-          LKeepGoing := ((uoGroupUndo in FUndo.Options) and (LLastChangeReason = LUndoItem.ChangeReason) and
-            not (LLastChangeReason in [crIndent, crUnindent])) or
-            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
+          LKeepGoing := (uoGroupUndo in FUndo.Options) and ((LLastChangeReason = LUndoItem.ChangeReason)  or
+            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber));
         LLastChangeReason := LUndoItem.ChangeReason;
         LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
         LPasteAction := LLastChangeReason = crPaste;
       end;
     until not LKeepGoing;
-
-    if LAutoComplete and (FRedoList.LastChangeReason = crAutoCompleteEnd) then
-    begin
-      RedoItem;
-      UpdateModifiedStatus;
-    end;
 
     RemoveGroupBreak;
   end;

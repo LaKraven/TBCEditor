@@ -5740,17 +5740,14 @@ begin
     repeat
       UndoItem;
       LUndoItem := FUndoList.PeekItem;
-      if not Assigned(LUndoItem) then
-        LIsKeepGoing := False
-      else
+      LIsKeepGoing := False;
+      if Assigned(LUndoItem) then
       begin
-        if LIsPasteAction then
-          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and (FUndoList.LastChangeString = LLastChangeString)
-        else
-          LIsKeepGoing := (uoGroupUndo in FUndo.Options) and ((LLastChangeReason = LUndoItem.ChangeReason) or
-            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber));
+        if uoGroupUndo in FUndo.Options then
+          LIsKeepGoing := LIsPasteAction and (FUndoList.LastChangeString = LLastChangeString) or
+           (LLastChangeReason = LUndoItem.ChangeReason) or
+           (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
-        LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
         LIsPasteAction := LLastChangeReason = crPaste;
       end;
     until not LIsKeepGoing;
@@ -12357,17 +12354,14 @@ begin
     repeat
       RedoItem;
       LUndoItem := FRedoList.PeekItem;
-      if not Assigned(LUndoItem) then
-        LKeepGoing := False
-      else
+      LKeepGoing := False;
+      if Assigned(LUndoItem) then
       begin
-        if LPasteAction then
-          LKeepGoing := (uoGroupUndo in FUndo.Options) and (FRedoList.LastChangeString = LLastChangeString)
-        else
-          LKeepGoing := (uoGroupUndo in FUndo.Options) and ((LLastChangeReason = LUndoItem.ChangeReason)  or
-            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber));
+        if uoGroupUndo in FUndo.Options then
+          LKeepGoing := LPasteAction and (FRedoList.LastChangeString = LLastChangeString) or
+            (LLastChangeReason = LUndoItem.ChangeReason) or
+            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber >= LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
-        LLastChangeBlockNumber := LUndoItem.ChangeBlockNumber;
         LPasteAction := LLastChangeReason = crPaste;
       end;
     until not LKeepGoing;

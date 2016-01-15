@@ -377,6 +377,7 @@ type
     procedure DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
     procedure DoOnLeftMarginClick(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
     procedure DoOnMinimapClick(AButton: TMouseButton; X, Y: Integer);
+    procedure DoOnSearchMapClick(AButton: TMouseButton; X, Y: Integer);
     procedure DoOnPaint;
     procedure DoOnProcessCommand(var ACommand: TBCEditorCommand; var AChar: Char; AData: pointer); virtual;
     procedure DoSearchStringNotFoundDialog; virtual;
@@ -840,9 +841,15 @@ destructor TBCBaseEditor.Destroy;
 begin
   {$IFDEF USE_ALPHASKINS}
   if FScrollWnd <> nil then
-    FreeAndNil(FScrollWnd);
+  begin
+    FScrollWnd.Free;
+    FScrollWnd := nil;
+  end;
   if Assigned(FCommonData) then
-    FreeAndNil(FCommonData);
+  begin
+    FCommonData.Free;
+    FCommonData := nil;
+  end;
   {$ENDIF}
   ClearCodeFolding;
   FCodeFolding.Free;
@@ -5964,6 +5971,14 @@ begin
   FMinimapClickOffsetY := LNewLine - TopLine;
 end;
 
+procedure TBCBaseEditor.DoOnSearchMapClick(AButton: TMouseButton; X, Y: Integer);
+var
+  LHeight: Double;
+begin
+  LHeight := ClientRect.Height / Max(Lines.Count, 1);
+  GotoLineAndCenter(Round(Y / LHeight));
+end;
+
 procedure TBCBaseEditor.DoOnPaint;
 begin
   if Assigned(FOnPaint) then
@@ -6422,6 +6437,13 @@ begin
     FreeCompletionProposalPopupWindow;
   end;
 
+  if FSearch.Map.Visible then
+    if X > ClientRect.Width - FSearch.Map.GetWidth then
+    begin
+      DoOnSearchMapClick(AButton, X, Y);
+      Exit;
+    end;
+
   if not FMinimap.Dragging and FMinimap.Visible then
     if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
       (FMinimap.Align = maLeft) and (X < FMinimap.GetWidth) then
@@ -6581,6 +6603,10 @@ begin
 
   if FMinimap.Clicked then
     Exit;
+
+  if FSearch.Map.Visible then
+    if X > ClientRect.Width - FSearch.Map.GetWidth then
+      Exit;
 
   inherited MouseMove(AShift, X, Y);
 
@@ -7674,7 +7700,7 @@ begin
   { Lines in window }
   LHeight := ClientRect.Height / Max(Lines.Count, 1);
   AClipRect.Top := Round((TopLine - 1) * LHeight);
-  AClipRect.Bottom := Round((TopLine - 1 + VisibleLines) * LHeight);
+  AClipRect.Bottom := Max(Round((TopLine - 1 + VisibleLines) * LHeight), AClipRect.Top + 1);
   Canvas.Brush.Color := FBackgroundColor;
   PatBlt(Canvas.Handle, AClipRect.Left, AClipRect.Top, AClipRect.Width, AClipRect.Height, PATCOPY); { fill lines in window rect }
   { draw lines }
@@ -9555,6 +9581,9 @@ begin
     (FMinimap.Align = maRight) and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
     (FMinimap.Align = maLeft) and (LCursorPoint.X < FMinimap.GetWidth) ) then
     SetCursor(Screen.Cursors[FMinimap.Cursor])
+  else
+  if FSearch.Map.Visible and (LCursorPoint.X > ClientRect.Width - FSearch.Map.GetWidth) then
+    SetCursor(Screen.Cursors[FSearch.Map.Cursor])
   else
   begin
     LTextPosition := DisplayToTextPosition(PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y));

@@ -9459,7 +9459,7 @@ begin
         begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
-          SetCaretAndSelection(TextCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
+          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
         end;
       crInsert, crPaste, crDragDropInsert:
         begin

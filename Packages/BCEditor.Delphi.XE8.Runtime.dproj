@@ -181,6 +181,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.SpecialChars.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.SpecialChars.EndOfLine.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.SpecialChars.Selection.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Editor.SyncEdit.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Tabs.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Undo.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.Undo.Item.pas"/>
@@ -597,13 +598,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

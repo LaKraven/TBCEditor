@@ -290,6 +290,9 @@
         <DelphiCompile Include="..\Source\BCEditor.Editor.SpecialChars.Selection.pas">
             <BuildOrder>57</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\Source\BCEditor.Editor.SyncEdit.pas">
+            <BuildOrder>57</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Editor.Tabs.pas">
             <BuildOrder>58</BuildOrder>
         </DelphiCompile>

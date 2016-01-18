@@ -4581,7 +4581,7 @@ end;
 
 procedure TBCBaseEditor.SyncEditChanged(Sender: TObject);
 begin
-
+  // TODO: needed?
 end;
 
 procedure TBCBaseEditor.SwapInt(var ALeft, ARight: Integer);
@@ -6161,8 +6161,9 @@ begin
     Exit;
   end;
 
-  ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
   if FCompletionProposal.Enabled then
+  begin
+    ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
     if (AShift = LShortCutShift) and (AKey = LShortCutKey) or
       (AShift = []) and (cpoAutoInvoke in FCompletionProposal.Options) and Chr(AKey).IsLetter then
     begin
@@ -6171,6 +6172,19 @@ begin
       begin
         AKey := 0;
         Include(FStateFlags, sfIgnoreNextChar);
+        Exit;
+      end;
+    end;
+  end;
+
+  if FSyncEdit.Enabled then
+    if SelectionAvailable and (GetWordAtCursor <> '') then
+    begin
+      ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
+      if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
+      begin
+        AKey := 0;
+        FSyncEdit.Active := True;
         Exit;
       end;
     end;
@@ -8386,13 +8400,30 @@ var
     LTokenText: string;
     LTokenPosition, LTokenLength: Integer;
     LStyle: TFontStyles;
-    LKeyWord, LWord: string;
-    LSelectionBeginChar, LSelectionEndChar: Integer;
-    LTempTextPosition: TBCEditorTextPosition;
+    LKeyWord, LWord, LWordAtSelection, LSelectedText: string;
     LAddedMultiByteFillerChars: Boolean;
     LMatchingPairUnderline: Boolean;
-    LOpenTokenEndPos,LOpenTokenEndLen: Integer;
+    LOpenTokenEndPos, LOpenTokenEndLen: Integer;
     LElement: string;
+
+    function GetWordAtSelection(var ASelectedText: string): string;
+    var
+      LTempTextPosition: TBCEditorTextPosition;
+      LSelectionBeginChar, LSelectionEndChar: Integer;
+    begin
+      LTempTextPosition := FSelectionEndPosition;
+      LSelectionBeginChar := FSelectionBeginPosition.Char;
+      LSelectionEndChar := FSelectionEndPosition.Char;
+      if LSelectionBeginChar > LSelectionEndChar then
+        SwapInt(LSelectionBeginChar, LSelectionEndChar);
+      LTempTextPosition.Char := LSelectionEndChar - 1;
+
+      ASelectedText := Copy(FLines[FSelectionBeginPosition.Line], LSelectionBeginChar, LSelectionEndChar -
+        LSelectionBeginChar);
+
+      Result := GetWordAtRowColumn(LTempTextPosition);
+    end;
+
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8405,6 +8436,8 @@ var
       LTokenHelper.MaxLength := Max(128, FVisibleChars);
       SetLength(LTokenHelper.Text, LTokenHelper.MaxLength);
     end;
+
+    LWordAtSelection := GetWordAtSelection(LSelectedText);
 
     LScrolledXBy := (FLeftChar - 1) * FTextDrawer.CharWidth;
     LDisplayLine := LFirstLine;
@@ -8623,27 +8656,21 @@ var
                   end;
                 end;
 
-              LKeyword := '';
-              LWord := LTokenText;
+              if LAnySelection and ((soHighlightSimilarTerms in FSelection.Options) or FSyncEdit.Enabled) then
+              begin
+                LKeyword := '';
+                LWord := LTokenText;
 
-              if LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
-              begin
-                LTempTextPosition := FSelectionEndPosition;
-                LSelectionBeginChar := FSelectionBeginPosition.Char;
-                LSelectionEndChar := FSelectionEndPosition.Char;
-                if LSelectionBeginChar > LSelectionEndChar then
-                  SwapInt(LSelectionBeginChar, LSelectionEndChar);
-                LTempTextPosition.Char := LSelectionEndChar - 1;
-                if LTokenText = GetWordAtRowColumn(LTempTextPosition) then
-                  LKeyWord := Copy(FLines[FSelectionBeginPosition.Line], LSelectionBeginChar, LSelectionEndChar -
-                    LSelectionBeginChar);
-              end;
-              if (LKeyword <> '') and (LKeyword = LWord) then
-              begin
-                LIsCustomBackgroundColor := True;
-                if FSearch.Highlighter.Colors.Foreground <> clNone then
-                  LForegroundColor := FSearch.Highlighter.Colors.Foreground;
-                LBackgroundColor := FSearch.Highlighter.Colors.Background;
+                if LTokenText = LWordAtSelection then
+                  LKeyWord := LSelectedText;
+
+                if (LKeyword <> '') and (LKeyword = LWord) then
+                begin
+                  LIsCustomBackgroundColor := True;
+                  if FSearch.Highlighter.Colors.Foreground <> clNone then
+                    LForegroundColor := FSearch.Highlighter.Colors.Foreground;
+                  LBackgroundColor := FSearch.Highlighter.Colors.Background;
+                end;
               end;
 
               PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle,

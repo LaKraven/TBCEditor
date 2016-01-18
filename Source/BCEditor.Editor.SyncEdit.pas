@@ -9,6 +9,7 @@ type
   TBCEditorSyncEdit = class(TPersistent)
   private
     FActive: Boolean;
+    FEnabled: Boolean;
     FOnChange: TNotifyEvent;
     FShortCut: TShortCut;
     FEditBeginPosition: TBCEditorTextPosition;
@@ -22,6 +23,7 @@ type
     property EditBeginPosition: TBCEditorTextPosition read FEditBeginPosition write FEditBeginPosition;
     property EditEndPosition: TBCEditorTextPosition read FEditEndPosition write FEditEndPosition;
   published
+    property Enabled: Boolean read FEnabled write FEnabled default True;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property ShortCut: TShortCut read FShortCut write FShortCut;
   end;
@@ -38,6 +40,7 @@ begin
   inherited Create;
 
   FActive := False;
+  FEnabled := True;
   FShortCut := Vcl.Menus.ShortCut(Ord('J'), [ssCtrl, ssShift]);
 end;
 
@@ -46,6 +49,7 @@ begin
   if Assigned(ASource) and (ASource is TBCEditorSyncEdit) then
   with ASource as TBCEditorSyncEdit do
   begin
+    Self.Enabled := FEnabled;
     Self.FShortCut := FShortCut;
     Self.DoChange(Self);
   end

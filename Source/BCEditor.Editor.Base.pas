@@ -3175,10 +3175,14 @@ begin
   SizeOrFontChanged(True);
 end;
 
-procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
+procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition;
+  ASelectionCommand: Boolean);
 begin
   if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
     FUndoList.AddGroupBreak;
+
+  FUndoList.AddChange(crCaret, ABeforeTextPosition, ABeforeTextPosition, ABeforeTextPosition, '',
+    FSelection.ActiveMode);
 
   IncPaintLock;
   if ASelectionCommand then

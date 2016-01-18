@@ -14,7 +14,7 @@ uses
   BCEditor.Editor.Selection, BCEditor.Editor.SkipRegions, BCEditor.Editor.SpecialChars, BCEditor.Editor.Tabs,
   BCEditor.Editor.Undo, BCEditor.Editor.Undo.List, BCEditor.Editor.WordWrap, BCEditor.Editor.CodeFolding.Hint.Form,
   BCEditor.Highlighter, BCEditor.Highlighter.Attributes, BCEditor.KeyboardHandler, BCEditor.Lines, BCEditor.Search,
-  BCEditor.Search.RegularExpressions, BCEditor.Search.WildCard, BCEditor.TextDrawer,
+  BCEditor.Search.RegularExpressions, BCEditor.Search.WildCard, BCEditor.TextDrawer, BCEditor.Editor.SyncEdit,
   BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
 type
@@ -157,6 +157,7 @@ type
     FSelectionEndPosition: TBCEditorTextPosition;
     FSpecialChars: TBCEditorSpecialChars;
     FStateFlags: TBCEditorStateFlags;
+    FSyncEdit: TBCEditorSyncEdit;
     FTabs: TBCEditorTabs;
     FTextDrawer: TBCEditorTextDrawer;
     FTextOffset: Integer;
@@ -300,6 +301,7 @@ type
     procedure SetSelectionBeginPosition(AValue: TBCEditorTextPosition);
     procedure SetSelectionEndPosition(AValue: TBCEditorTextPosition);
     procedure SetSpecialChars(const AValue: TBCEditorSpecialChars);
+    procedure SetSyncEdit(const AValue: TBCEditorSyncEdit);
     procedure SetTabs(const AValue: TBCEditorTabs);
     procedure SetText(const AValue: string);
     procedure SetTopLine(AValue: Integer);
@@ -308,6 +310,7 @@ type
     procedure SetWordWrap(const AValue: TBCEditorWordWrap);
     procedure SizeOrFontChanged(const AFontChanged: Boolean);
     procedure SpecialCharsChanged(Sender: TObject);
+    procedure SyncEditChanged(Sender: TObject);
     procedure SwapInt(var ALeft, ARight: Integer);
     procedure TabsChanged(Sender: TObject);
     procedure UndoChanged(Sender: TObject);
@@ -625,6 +628,7 @@ type
     property SkinData: TsScrollWndData read FCommonData write FCommonData;
     {$ENDIF}
     property SpecialChars: TBCEditorSpecialChars read FSpecialChars write SetSpecialChars;
+    property SyncEdit: TBCEditorSyncEdit read FSyncEdit write SetSyncEdit;
     property Tabs: TBCEditorTabs read FTabs write SetTabs;
     property TabStop default True;
     property Text: string read GetText write SetText;
@@ -815,7 +819,7 @@ begin
   { Scroll }
   FScroll := TBCEditorScroll.Create;
   FScroll.OnChange := ScrollChanged;
-  { Mini map }
+  { Minimap }
   FMinimapIndicatorBlendFunction.BlendOp := AC_SRC_OVER;
   FMinimapIndicatorBlendFunction.BlendFlags := 0;
   FMinimapIndicatorBlendFunction.AlphaFormat := 0;
@@ -828,6 +832,9 @@ begin
   { Word wrap }
   FWordWrap := TBCEditorWordWrap.Create;
   FWordWrap.OnChange := WordWrapChanged;
+  { Sync edit }
+  FSyncEdit := TBCEditorSyncEdit.Create;
+  FSyncEdit.OnChange := SyncEditChanged;
   { Do update character constraints }
   FontChanged(nil);
   TabsChanged(nil);
@@ -896,6 +903,7 @@ begin
   FCaret.Free;
   FMatchingPair.Free;
   FCompletionProposal.Free;
+  FSyncEdit.Free;
   if Assigned(FSearchEngine) then
   begin
     FSearchEngine.Free;
@@ -4405,6 +4413,11 @@ begin
   FSpecialChars.Assign(AValue);
 end;
 
+procedure TBCBaseEditor.SetSyncEdit(const AValue: TBCEditorSyncEdit);
+begin
+  FSyncEdit.Assign(AValue);
+end;
+
 procedure TBCBaseEditor.SetTabs(const AValue: TBCEditorTabs);
 begin
   FTabs.Assign(AValue);
@@ -4443,7 +4456,7 @@ begin
     LDelta := TopLine - AValue;
     FTopLine := AValue;
     if FMinimap.Visible and not FMinimap.Dragging then
-      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / (LDisplayLineCount - FVisibleLines)))), 1);
+      FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / Max(LDisplayLineCount - FVisibleLines, 1)))), 1);
     LClientRect := ClientRect;
     DeflateMinimapRect(LClientRect);
     if Abs(LDelta) < FVisibleLines then
@@ -4560,6 +4573,11 @@ end;
 procedure TBCBaseEditor.SpecialCharsChanged(Sender: TObject);
 begin
   Invalidate;
+end;
+
+procedure TBCBaseEditor.SyncEditChanged(Sender: TObject);
+begin
+
 end;
 
 procedure TBCBaseEditor.SwapInt(var ALeft, ARight: Integer);

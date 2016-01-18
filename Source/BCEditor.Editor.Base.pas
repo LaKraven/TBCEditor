@@ -8400,7 +8400,7 @@ var
     LTokenText: string;
     LTokenPosition, LTokenLength: Integer;
     LStyle: TFontStyles;
-    LKeyWord, LWord, LWordAtSelection, LSelectedText: string;
+    LKeyWord, LWordAtSelection, LSelectedText: string;
     LAddedMultiByteFillerChars: Boolean;
     LMatchingPairUnderline: Boolean;
     LOpenTokenEndPos, LOpenTokenEndLen: Integer;
@@ -8659,12 +8659,11 @@ var
               if LAnySelection and ((soHighlightSimilarTerms in FSelection.Options) or FSyncEdit.Enabled) then
               begin
                 LKeyword := '';
-                LWord := LTokenText;
 
                 if LTokenText = LWordAtSelection then
                   LKeyWord := LSelectedText;
 
-                if (LKeyword <> '') and (LKeyword = LWord) then
+                if (LKeyword <> '') and (LKeyword = LTokenText) then
                 begin
                   LIsCustomBackgroundColor := True;
                   if FSearch.Highlighter.Colors.Foreground <> clNone then

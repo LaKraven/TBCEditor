@@ -5896,7 +5896,7 @@ begin
       RescanCodeFoldingRanges
   end;
 
-  if FMatchingPair.Enabled then
+  if FMatchingPair.Enabled and not FSyncEdit.Active then
   case ACommand of
     ecPaste, ecUndo, ecRedo, ecBackspace, ecTab, ecLeft, ecRight, ecUp, ecDown, ecPageUp, ecPageDown, ecPageTop,
     ecPageBottom, ecEditorTop, ecEditorBottom, ecGotoXY, ecBlockIndent, ecBlockUnindent, ecShiftTab, ecInsertLine, ecChar,
@@ -6522,6 +6522,7 @@ begin
     else
     begin
       ComputeCaret(X, Y);
+      SelectionBeginPosition := TextCaretPosition;
       Exit;
     end;
   end;
@@ -8227,10 +8228,13 @@ var
 
       if LTokenHelper.PaintSyncEdit then
       begin
-        Canvas.Brush.Style := bsClear;
         LOldPenColor := Canvas.Pen.Color;
         Canvas.Pen.Color := FSelection.Colors.Background;
-        Canvas.Rectangle(LTokenRect);
+        Canvas.MoveTo(LTokenRect.Left, LTokenRect.Bottom - 1);
+        Canvas.LineTo(LTokenRect.Right - 1, LTokenRect.Bottom - 1);
+        Canvas.LineTo(LTokenRect.Right - 1, LTokenRect.Top);
+        Canvas.LineTo(LTokenRect.Left, LTokenRect.Top);
+        Canvas.LineTo(LTokenRect.Left, LTokenRect.Bottom - 1);
         Canvas.Pen.Color := LOldPenColor;
       end;
 
@@ -8386,13 +8390,14 @@ var
   var
     i: Integer;
     LCanAppend: Boolean;
-    LIsSpaces: Boolean;
+    LAreSpaces: Boolean;
     PToken: PChar;
   begin
     if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not ACustomBackgroundColor) then
       ABackground := GetBackgroundColor;
     if AForeground = clNone then
       AForeground := Font.Color;
+
     LCanAppend := False;
 
     if LTokenHelper.Length > 0 then
@@ -8404,17 +8409,18 @@ var
           Break;
         Inc(PToken);
       end;
-      LIsSpaces := PToken^ = BCEDITOR_NONE_CHAR;
+      LAreSpaces := PToken^ = BCEDITOR_NONE_CHAR;
 
-      LCanAppend := not APaintSyncEdit and ((LTokenHelper.FontStyle = AFontStyle) or
-        (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and LIsSpaces)) and
+      LCanAppend := not LTokenHelper.PaintSyncEdit and ((LTokenHelper.FontStyle = AFontStyle) or
+        (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and LAreSpaces)) and
         (LTokenHelper.MatchingPairUnderline = AMatchingPairUnderline) and
-        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or LIsSpaces)) or
+        ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or LAreSpaces)) or
         (AToken = BCEDITOR_FILLER_CHAR);
 
       if not LCanAppend then
         PaintHighlightToken(False);
     end;
+
     if LCanAppend then
     begin
       if LTokenHelper.Length + ATokenLength > LTokenHelper.MaxLength then
@@ -8680,7 +8686,7 @@ var
               LIsCustomBackgroundColor := False;
               LMatchingPairUnderline := False;
 
-              if FMatchingPair.Enabled then
+              if FMatchingPair.Enabled and not FSyncEdit.Active then
                 if FCurrentMatchingPair <> trNotFound then
                 begin
                   if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
@@ -8690,9 +8696,9 @@ var
                   begin
                     if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                     begin
-                      if mpoUseMatchedColor in FMatchingPair.Options then
+                      LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                      if LIsCustomBackgroundColor then
                       begin
-                        LIsCustomBackgroundColor := True;
                         if LForegroundColor = FMatchingPair.Colors.Matched then
                           LForegroundColor := BackgroundColor;
                         LBackgroundColor := FMatchingPair.Colors.Matched;
@@ -8702,9 +8708,9 @@ var
                     else
                     if mpoHighlightUnmatched in FMatchingPair.Options then
                     begin
-                      if mpoUseMatchedColor in FMatchingPair.Options then
+                      LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                      if LIsCustomBackgroundColor then
                       begin
-                        LIsCustomBackgroundColor := True;
                         if LForegroundColor = FMatchingPair.Colors.Unmatched then
                           LForegroundColor := BackgroundColor;
                         LBackgroundColor := FMatchingPair.Colors.Unmatched;
@@ -8717,8 +8723,7 @@ var
               if FSyncEdit.Enabled and FSyncEdit.Active then
               begin
                 LKeyWord := FSyncEdit.SelectedText;
-                if (LKeyword <> '') and (LKeyword = LTokenText) then
-                  LPaintSyncEdit := True;
+                LPaintSyncEdit := (LKeyword <> '') and (LKeyword = LTokenText);
               end
               else
               if LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
@@ -8728,9 +8733,9 @@ var
                 if LTokenText = LWordAtSelection then
                   LKeyWord := LSelectedText;
 
-                if (LKeyword <> '') and (LKeyword = LTokenText) then
+                LIsCustomBackgroundColor := (LKeyword <> '') and (LKeyword = LTokenText);
+                if LIsCustomBackgroundColor then
                 begin
-                  LIsCustomBackgroundColor := True;
                   if FSearch.Highlighter.Colors.Foreground <> clNone then
                     LForegroundColor := FSearch.Highlighter.Colors.Foreground;
                   LBackgroundColor := FSearch.Highlighter.Colors.Background;

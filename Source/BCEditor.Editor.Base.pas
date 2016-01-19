@@ -4602,7 +4602,18 @@ end;
 
 procedure TBCBaseEditor.SyncEditChanged(Sender: TObject);
 begin
-  // TODO: needed?
+  if FSyncEdit.Active then
+  begin
+    if SelectionAvailable and IsWordSelected then
+    begin
+      FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
+      FSyncEdit.EditEndPosition := FSelectionEndPosition;
+      FSyncEdit.SelectedText := SelectedText;
+      Invalidate;
+    end
+    else
+      FSyncEdit.Active := False;
+  end;
 end;
 
 procedure TBCBaseEditor.SwapInt(var ALeft, ARight: Integer);
@@ -4640,7 +4651,8 @@ begin
   if Sender = FUndoList then
     LUndoItem := FUndoList.PeekItem;
 
-  UpdateModifiedStatus;
+  if Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crCaret) then
+    UpdateModifiedStatus;
 
   if not FUndoList.InsideRedo and Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crGroupBreak) then
     FRedoList.Clear;
@@ -6202,12 +6214,14 @@ begin
   begin
     ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
     if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
-      if SelectionAvailable and IsWordSelected then
+    begin
+      FSyncEdit.Active := True;
+      if FSyncEdit.Active then
       begin
         AKey := 0;
-        FSyncEdit.Active := True;
         Exit;
       end;
+    end;
   end;
 
   if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
@@ -6500,6 +6514,17 @@ begin
       DoOnSearchMapClick(AButton, X, Y);
       Exit;
     end;
+
+  if FSyncEdit.Enabled and FSyncEdit.Active then
+  begin
+    if not FSyncEdit.IsTextPositionInEdit(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
+      FSyncEdit.Active := False
+    else
+    begin
+      ComputeCaret(X, Y);
+      Exit;
+    end;
+  end;
 
   if not FMinimap.Dragging and FMinimap.Visible then
     if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
@@ -8050,7 +8075,6 @@ var
   LCustomLineColors: Boolean;
   LCustomForegroundColor: TColor;
   LCustomBackgroundColor: TColor;
-  LIsCustomBackgroundColor: Boolean;
   LFirstChar, LLastChar: Integer;
   LBookmarkOnCurrentLine: Boolean;
 
@@ -8198,6 +8222,15 @@ var
         Canvas.Pen.Color := FMatchingPair.Colors.Underline;
         Canvas.MoveTo(LTokenRect.Left, LTokenRect.Bottom - 1);
         Canvas.LineTo(LTokenRect.Right, LTokenRect.Bottom - 1);
+        Canvas.Pen.Color := LOldPenColor;
+      end;
+
+      if LTokenHelper.PaintSyncEdit then
+      begin
+        Canvas.Brush.Style := bsClear;
+        LOldPenColor := Canvas.Pen.Color;
+        Canvas.Pen.Color := FSelection.Colors.Background;
+        Canvas.Rectangle(LTokenRect);
         Canvas.Pen.Color := LOldPenColor;
       end;
 
@@ -8349,14 +8382,14 @@ var
   end;
 
   procedure PrepareTokenHelper(const AToken: string; ACharsBefore, ATokenLength: Integer; AForeground, ABackground: TColor;
-    AFontStyle: TFontStyles; AMatchingPairUnderline: Boolean);
+    AFontStyle: TFontStyles; AMatchingPairUnderline: Boolean; ACustomBackgroundColor: Boolean; APaintSyncEdit: Boolean);
   var
     i: Integer;
     LCanAppend: Boolean;
     LIsSpaces: Boolean;
     PToken: PChar;
   begin
-    if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not LIsCustomBackgroundColor) then
+    if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not ACustomBackgroundColor) then
       ABackground := GetBackgroundColor;
     if AForeground = clNone then
       AForeground := Font.Color;
@@ -8373,11 +8406,12 @@ var
       end;
       LIsSpaces := PToken^ = BCEDITOR_NONE_CHAR;
 
-      LCanAppend := ((LTokenHelper.FontStyle = AFontStyle) or
+      LCanAppend := not APaintSyncEdit and ((LTokenHelper.FontStyle = AFontStyle) or
         (not (fsUnderline in AFontStyle) and not (fsUnderline in LTokenHelper.FontStyle) and LIsSpaces)) and
         (LTokenHelper.MatchingPairUnderline = AMatchingPairUnderline) and
         ((LTokenHelper.Background = ABackground) and ((LTokenHelper.Foreground = AForeground) or LIsSpaces)) or
         (AToken = BCEDITOR_FILLER_CHAR);
+
       if not LCanAppend then
         PaintHighlightToken(False);
     end;
@@ -8407,6 +8441,7 @@ var
       LTokenHelper.Background := ABackground;
       LTokenHelper.FontStyle := AFontStyle;
       LTokenHelper.MatchingPairUnderline := AMatchingPairUnderline;
+      LTokenHelper.PaintSyncEdit := APaintSyncEdit;
     end;
   end;
 
@@ -8426,6 +8461,8 @@ var
     LMatchingPairUnderline: Boolean;
     LOpenTokenEndPos, LOpenTokenEndLen: Integer;
     LElement: string;
+    LIsCustomBackgroundColor: Boolean;
+    LPaintSyncEdit: Boolean;
 
     function GetWordAtSelection(var ASelectedText: string): string;
     var
@@ -8676,8 +8713,15 @@ var
                     end;
                   end;
                 end;
-
-              if LAnySelection and ((soHighlightSimilarTerms in FSelection.Options) or FSyncEdit.Enabled) then
+              LPaintSyncEdit := False;
+              if FSyncEdit.Enabled and FSyncEdit.Active then
+              begin
+                LKeyWord := FSyncEdit.SelectedText;
+                if (LKeyword <> '') and (LKeyword = LTokenText) then
+                  LPaintSyncEdit := True;
+              end
+              else
+              if LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
               begin
                 LKeyword := '';
 
@@ -8694,11 +8738,11 @@ var
               end;
 
               PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle,
-                LMatchingPairUnderline)
+                LMatchingPairUnderline, LIsCustomBackgroundColor, LPaintSyncEdit)
             end
             else
               PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
-                False);
+                False, False, False);
           end;
           FHighlighter.Next;
         end;
@@ -9893,10 +9937,11 @@ begin
         Result := False;
     end
     else
-      Result := ((ATextPosition.Line > LBeginTextPosition.Line) or (ATextPosition.Line = LBeginTextPosition.Line) and
-        (ATextPosition.Char >= LBeginTextPosition.Char)) and
-        ((ATextPosition.Line < LEndTextPosition.Line) or (ATextPosition.Line = LEndTextPosition.Line) and
-        (ATextPosition.Char < LEndTextPosition.Char));
+      Result := ((ATextPosition.Line > LBeginTextPosition.Line) or
+        (ATextPosition.Line = LBeginTextPosition.Line) and (ATextPosition.Char >= LBeginTextPosition.Char))
+        and
+        ((ATextPosition.Line < LEndTextPosition.Line) or
+        (ATextPosition.Line = LEndTextPosition.Line) and (ATextPosition.Char < LEndTextPosition.Char));
   end
   else
     Result := False;
@@ -12205,8 +12250,7 @@ begin
     LRectRight := FMinimap.GetWidth;
   end;
 
-  LInvalidationRect := Rect(LRectLeft, 0, LRectRight,
-    ClientHeight);
+  LInvalidationRect := Rect(LRectLeft, 0, LRectRight, ClientHeight);
   InvalidateRect(LInvalidationRect);
 end;
 

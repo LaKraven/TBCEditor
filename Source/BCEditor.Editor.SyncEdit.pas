@@ -11,6 +11,7 @@ type
     FActive: Boolean;
     FEnabled: Boolean;
     FOnChange: TNotifyEvent;
+    FSelectedText: string;
     FShortCut: TShortCut;
     FEditBeginPosition: TBCEditorTextPosition;
     FEditEndPosition: TBCEditorTextPosition;
@@ -18,10 +19,12 @@ type
     procedure SetActive(AValue: Boolean);
   public
     constructor Create;
+    function IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
     procedure Assign(ASource: TPersistent); override;
     property Active: Boolean read FActive write SetActive default False;
     property EditBeginPosition: TBCEditorTextPosition read FEditBeginPosition write FEditBeginPosition;
     property EditEndPosition: TBCEditorTextPosition read FEditEndPosition write FEditEndPosition;
+    property SelectedText: string read FSelectedText write FSelectedText;
   published
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
@@ -70,6 +73,15 @@ begin
     FActive := AValue;
     DoChange(Self);
   end;
+end;
+
+function TBCEditorSyncEdit.IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
+begin
+  Result := ((ATextPosition.Line > FEditBeginPosition.Line) or
+    (ATextPosition.Line = FEditBeginPosition.Line) and (ATextPosition.Char >= FEditBeginPosition.Char))
+    and
+    ((ATextPosition.Line < FEditEndPosition.Line) or
+    (ATextPosition.Line = FEditEndPosition.Line) and (ATextPosition.Char < FEditEndPosition.Char));
 end;
 
 end.

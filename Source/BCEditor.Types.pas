@@ -239,6 +239,7 @@ type
     Foreground, Background: TColor;
     FontStyle: TFontStyles;
     MatchingPairUnderline: Boolean;
+    PaintSyncEdit: Boolean;
   end;
 
   TBCEditorSpecialCharsEndOfLineStyle = (

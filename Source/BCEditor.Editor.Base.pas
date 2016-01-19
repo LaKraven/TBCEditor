@@ -213,6 +213,7 @@ type
     function GetWrapAtColumn: Integer;
     function IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
     function IsKeywordAtLine(ALine: Integer): Boolean;
+    function IsWordSelected: Boolean;
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
@@ -2091,14 +2092,6 @@ var
     Result := not IsValidChar(AFirstChar) and not IsValidChar(ALastChar);
   end;
 
-  function GetLineText(ALine: Integer): string;
-  begin
-    if (ALine >= 0) and (ALine < FLines.Count) then
-      Result := FLines.ExpandedStrings[ALine]
-    else
-      Result := '';
-  end;
-
 begin
   Result := False;
 
@@ -2108,7 +2101,7 @@ begin
   if Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
-  LLineText := GetLineText(ALine);
+  LLineText := FLines.GetLineText(ALine);
 
   if Trim(LLineText) = '' then
     Exit;
@@ -2168,6 +2161,34 @@ begin
       end;
     end;
   end;
+end;
+
+function TBCBaseEditor.IsWordSelected: Boolean;
+var
+  i: Integer;
+  LLineText: string;
+  LTextPtr: PChar;
+begin
+  Result := False;
+
+  if FSelectionBeginPosition.Line <> FSelectionEndPosition.Line then
+    Exit;
+
+  LLineText := FLines.GetLineText(FSelectionBeginPosition.Line);
+  if LLineText = '' then
+    Exit;
+
+  LTextPtr := PChar(LLineText);
+  i := FSelectionBeginPosition.Char;
+  Inc(LTextPtr, i - 1);
+  while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (i < FSelectionEndPosition.Char) do
+  begin
+    if IsWordBreakChar(LTextPtr^) then
+      Exit;
+    Inc(LTextPtr);
+    Inc(i);
+  end;
+  Result := True;
 end;
 
 function TBCBaseEditor.LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
@@ -6178,16 +6199,16 @@ begin
   end;
 
   if FSyncEdit.Enabled then
-    if SelectionAvailable and (GetWordAtCursor <> '') then
-    begin
-      ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
-      if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
+  begin
+    ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
+    if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
+      if SelectionAvailable and IsWordSelected then
       begin
         AKey := 0;
         FSyncEdit.Active := True;
         Exit;
       end;
-    end;
+  end;
 
   if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
     FreeCompletionProposalPopupWindow;
@@ -8527,7 +8548,7 @@ var
 
       while LCurrentRow = LCurrentLine do
       begin
-        LIsCurrentLine := (GetTextCaretY + 1) = LCurrentLine;
+        LIsCurrentLine := GetTextCaretY + 1 = LCurrentLine;
         LForegroundColor := Font.Color;
         LBackgroundColor := GetBackgroundColor;
 

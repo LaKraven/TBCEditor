@@ -108,6 +108,11 @@ type
   );
   TBCEditorSearchOptions = set of TBCEditorSearchOption;
 
+  TBCEditorSyncEditOption = (
+    seCaseSensitive
+  );
+  TBCEditorSyncEditOptions = set of TBCEditorSyncEditOption;
+
   TBCEditorReplaceOption = (
     roBackwards,
     roCaseSensitive,
@@ -239,7 +244,6 @@ type
     Foreground, Background: TColor;
     FontStyle: TFontStyles;
     MatchingPairUnderline: Boolean;
-    PaintSyncEdit: Boolean;
   end;
 
   TBCEditorSpecialCharsEndOfLineStyle = (

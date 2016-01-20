@@ -9,25 +9,31 @@ type
   TBCEditorSyncEdit = class(TPersistent)
   private
     FActive: Boolean;
+    FEditBeginPosition: TBCEditorTextPosition;
+    FEditEndPosition: TBCEditorTextPosition;
     FEnabled: Boolean;
     FOnChange: TNotifyEvent;
     FSelectedText: string;
     FShortCut: TShortCut;
-    FEditBeginPosition: TBCEditorTextPosition;
-    FEditEndPosition: TBCEditorTextPosition;
+    FSyncItems: TList;
+    FOptions: TBCEditorSyncEditOptions;
     procedure DoChange(Sender: TObject);
     procedure SetActive(AValue: Boolean);
   public
     constructor Create;
+    destructor Destroy; override;
     function IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
     procedure Assign(ASource: TPersistent); override;
+    procedure ClearSyncItems;
     property Active: Boolean read FActive write SetActive default False;
     property EditBeginPosition: TBCEditorTextPosition read FEditBeginPosition write FEditBeginPosition;
     property EditEndPosition: TBCEditorTextPosition read FEditEndPosition write FEditEndPosition;
     property SelectedText: string read FSelectedText write FSelectedText;
+    property SyncItems: TList read FSyncItems write FSyncItems;
   published
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Options: TBCEditorSyncEditOptions read FOptions write FOptions default [seCaseSensitive];
     property ShortCut: TShortCut read FShortCut write FShortCut;
   end;
 
@@ -45,6 +51,24 @@ begin
   FActive := False;
   FEnabled := True;
   FShortCut := Vcl.Menus.ShortCut(Ord('J'), [ssCtrl, ssShift]);
+  FOptions := [seCaseSensitive];
+  FSyncItems := TList.Create;
+end;
+
+destructor TBCEditorSyncEdit.Destroy;
+begin
+  ClearSyncItems;
+  FSyncItems.Free;
+  inherited;
+end;
+
+procedure TBCEditorSyncEdit.ClearSyncItems;
+var
+  i: Integer;
+begin
+  for i := FSyncItems.Count - 1 downto 0 do
+    Dispose(PBCEditorTextPosition(FSyncItems.Items[i]));
+  FSyncItems.Clear;
 end;
 
 procedure TBCEditorSyncEdit.Assign(ASource: TPersistent);

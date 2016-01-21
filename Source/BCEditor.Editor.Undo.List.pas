@@ -148,6 +148,7 @@ procedure TBCEditorUndoList.Clear;
 var
   i: Integer;
 begin
+  FBlockCount := 0;
   for i := 0 to FItems.Count - 1 do
     TBCEditorUndoItem(FItems[i]).Free;
   FItems.Clear;

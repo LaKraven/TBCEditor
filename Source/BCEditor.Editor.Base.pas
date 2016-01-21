@@ -3207,7 +3207,7 @@ end;
 procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition;
   ASelectionCommand: Boolean);
 begin
-  if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
+  if not (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
     FUndoList.AddGroupBreak;
 
   FUndoList.AddChange(crCaret, ABeforeTextPosition, ABeforeTextPosition, ABeforeTextPosition, '',
@@ -4667,8 +4667,8 @@ begin
   if not FUndoList.InsideRedo and Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crGroupBreak) then
     FRedoList.Clear;
 
-  if TBCEditorUndoList(Sender).BlockCount = 0 then
-    DoChange;
+  //if TBCEditorUndoList(Sender).BlockCount = 0 then
+  //  DoChange;
 end;
 
 procedure TBCBaseEditor.UpdateFoldRanges(ACurrentLine, ALineCount: Integer);
@@ -6225,12 +6225,9 @@ begin
     ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
     if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
     begin
-      FSyncEdit.Active := True;
-      if FSyncEdit.Active then
-      begin
-        AKey := 0;
-        Exit;
-      end;
+      FSyncEdit.Active := not FSyncEdit.Active;
+      AKey := 0;
+      Exit;
     end;
   end;
 
@@ -6253,7 +6250,18 @@ begin
   LChar := BCEDITOR_NONE_CHAR;
   try
     LEditorCommand := TranslateKeyCode(AKey, AShift, LData);
-    if (LEditorCommand <> ecNone) then
+
+    if FSyncEdit.Active then
+    begin
+      case LEditorCommand of
+        ecChar, ecBackspace, ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
+        ecLineBreak: FSyncEdit.Active := False;
+      else
+        LEditorCommand := ecNone;
+      end;
+    end;
+
+    if LEditorCommand <> ecNone then
     begin
       AKey := 0;
       Include(FStateFlags, sfIgnoreNextChar);
@@ -8079,7 +8087,6 @@ var
   LRect: TRect;
   LText: string;
   LLength, LLeftMargin, LCharsOutside: Integer;
-  LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
   if not Assigned(FSyncEdit.SyncItems) then
     Exit;
@@ -8097,35 +8104,23 @@ begin
     else
     if LTextPosition.Line + 1 >= TopLine then
     begin
-      LSelectionBeginPosition := SelectionBeginPosition;
-      LSelectionEndPosition := SelectionEndPosition;
-      if (LSelectionBeginPosition.Line = LTextPosition.Line) and
-        (LSelectionBeginPosition.Char >= LTextPosition.Char) and
-        (LSelectionBeginPosition.Char <= LTextPosition.Char + LLength) or
-        (LSelectionEndPosition.Line = LTextPosition.Line) and
-        (LSelectionEndPosition.Char >= LTextPosition.Char) and
-        (LSelectionEndPosition.Char <= LTextPosition.Char + LLength) then
-        Continue
-      else
+      LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
+      LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
+      LRect.Bottom := LRect.Top + LineHeight;
+
+      LDisplayPosition := TextToDisplayPosition(LTextPosition);
+
+      LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
+      LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
+      LRect.Left := Max(LLeftMargin, LRect.Left);
+      if LLength - LCharsOutside > 0 then
       begin
-        LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
-        LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
-        LRect.Bottom := LRect.Top + LineHeight;
-
-        LDisplayPosition := TextToDisplayPosition(LTextPosition);
-
-        LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
-        LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
-        LRect.Left := Max(LLeftMargin, LRect.Left);
-        if LLength - LCharsOutside > 0 then
-        begin
-          if LCharsOutside > 0 then
-            Delete(LText, 1, LCharsOutside);
-          LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 2;
-          Canvas.Brush.Style := bsClear;
-          Canvas.Pen.Color := FSelection.Colors.Background;
-          Canvas.Rectangle(LRect);
-        end;
+        if LCharsOutside > 0 then
+          Delete(LText, 1, LCharsOutside);
+        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 2;
+        Canvas.Brush.Style := bsClear;
+        Canvas.Pen.Color := FSelection.Colors.Background;
+        Canvas.Rectangle(LRect);
       end;
     end;
   end;

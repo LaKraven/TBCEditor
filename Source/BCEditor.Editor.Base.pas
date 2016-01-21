@@ -3236,7 +3236,7 @@ var
   LCaretRowColumn: TBCEditorDisplayPosition;
 begin
   LTextCaretPosition := TextCaretPosition;
-  if not SelectionAvailable and not ASelectionCommand then
+  if not SelectionAvailable then
     FSelectionBeginPosition := LTextCaretPosition;
 
   LZeroPosition := LTextCaretPosition;
@@ -3313,7 +3313,7 @@ begin
     DoTrimTrailingSpaces(LDestinationLineChar.Line);
   end;
 
-  if not SelectionAvailable and not ASelectionCommand then
+  if not SelectionAvailable then
     FSelectionBeginPosition := TextCaretPosition;
 
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationLineChar, ASelectionCommand);

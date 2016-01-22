@@ -211,8 +211,8 @@ type
     function GetWordAtMouse: string;
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
     function GetWrapAtColumn: Integer;
-    function IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
-    function IsKeywordAtLine(ACaretPosition: TBCEditorTextPosition; AAfterCaret: Boolean = False): Boolean;
+    function IsKeywordAtCaretPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
+    function IsKeywordAtCaretPositionOrAfter(ACaretPosition: TBCEditorTextPosition): Boolean;
     function IsWordSelected: Boolean;
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
@@ -1984,7 +1984,7 @@ begin
   end
 end;
 
-function TBCBaseEditor.IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
+function TBCBaseEditor.IsKeywordAtCaretPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
 var
   i, j: Integer;
   LWordAtCursor, LWordAtOneBeforeCursor: string;
@@ -2070,7 +2070,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.IsKeywordAtLine(ACaretPosition: TBCEditorTextPosition; AAfterCaret: Boolean = False): Boolean;
+function TBCBaseEditor.IsKeywordAtCaretPositionOrAfter(ACaretPosition: TBCEditorTextPosition): Boolean;
 var
   i, j: Integer;
   LLineText: string;
@@ -2104,8 +2104,14 @@ begin
     Exit;
 
   LLineText := FLines.GetLineText(ACaretPosition.Line);
-  if AAfterCaret then
-    LLineText := Copy(LLineText, ACaretPosition.Char, Length(LLineText));
+  LTextPtr := PChar(LLineText);
+  Inc(LTextPtr, ACaretPosition.Char - 1);
+  while not IsWordBreakChar(LTextPtr^) and (ACaretPosition.Char > 0) do
+  begin
+    Dec(LTextPtr);
+    Dec(ACaretPosition.Char);
+  end;
+  LLineText := Copy(LLineText, ACaretPosition.Char, Length(LLineText));
 
   if Trim(LLineText) = '' then
     Exit;
@@ -2606,7 +2612,7 @@ var
   end;
 
 begin
-  LIsKeyWord := IsKeywordAtCursorPosition(@LOpenKeyWord, mpoHighlightAfterToken in FMatchingPair.Options);
+  LIsKeyWord := IsKeywordAtCaretPosition(@LOpenKeyWord, mpoHighlightAfterToken in FMatchingPair.Options);
 
   if not Assigned(FHighlightedFoldRange) then
   begin
@@ -5899,7 +5905,7 @@ begin
   if FCodeFolding.Visible then
     if FRescanCodeFolding or
       ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar) or (ACommand = ecLineBreak)) and
-      IsKeywordAtLine(TextCaretPosition, True) or (ACommand = ecUndo) or (ACommand = ecRedo) then
+      IsKeywordAtCaretPositionOrAfter(TextCaretPosition) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges;
 
   if FMatchingPair.Enabled and not FSyncEdit.Active then
@@ -9110,7 +9116,7 @@ begin
       LFoldRange := CodeFoldingFoldRangeForLineTo(LTextPosition.Line + 1);
     if Assigned(LFoldRange) then
     begin
-      if IsKeywordAtCursorPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
+      if IsKeywordAtCaretPosition(nil, mpoHighlightAfterToken in FMatchingPair.Options) then
       begin
         FCurrentMatchingPair := trOpenAndCloseTokenFound;
 
@@ -10726,7 +10732,7 @@ begin
     FRescanCodeFolding := (ACommand = ecCut) or (ACommand = ecPaste) or (ACommand = ecDeleteLine) or
       SelectionAvailable and ((ACommand = ecLineBreak) or (ACommand = ecBackspace) or (ACommand = ecChar)) or
       ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecTab) or (ACommand = ecDeleteChar) or
-      (ACommand = ecLineBreak)) and IsKeywordAtCursorPosition or
+      (ACommand = ecLineBreak)) and IsKeywordAtCaretPosition or
       ((ACommand = ecChar) and CharInSet(AChar, FHighlighter.SkipOpenKeyChars + FHighlighter.SkipCloseKeyChars));
 
     if FCodeFolding.Visible then

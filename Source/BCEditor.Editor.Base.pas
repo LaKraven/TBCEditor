@@ -212,7 +212,7 @@ type
     function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
     function GetWrapAtColumn: Integer;
     function IsKeywordAtCursorPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
-    function IsKeywordAtLine(ALine: Integer): Boolean;
+    function IsKeywordAtLine(ACaretPosition: TBCEditorTextPosition; AAfterCaret: Boolean = False): Boolean;
     function IsWordSelected: Boolean;
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
@@ -2070,7 +2070,7 @@ begin
   end;
 end;
 
-function TBCBaseEditor.IsKeywordAtLine(ALine: Integer): Boolean;
+function TBCBaseEditor.IsKeywordAtLine(ACaretPosition: TBCEditorTextPosition; AAfterCaret: Boolean = False): Boolean;
 var
   i, j: Integer;
   LLineText: string;
@@ -2103,7 +2103,9 @@ begin
   if Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
-  LLineText := FLines.GetLineText(ALine);
+  LLineText := FLines.GetLineText(ACaretPosition.Line);
+  if AAfterCaret then
+    LLineText := Copy(LLineText, ACaretPosition.Char, Length(LLineText));
 
   if Trim(LLineText) = '' then
     Exit;
@@ -5893,18 +5895,12 @@ begin
 end;
 
 procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
-var
-  LTextCaretY: Integer;
 begin
   if FCodeFolding.Visible then
-  begin
-    LTextCaretY := GetTextCaretY;
     if FRescanCodeFolding or
-      ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar)) and IsKeywordAtCursorPosition or
-      ((ACommand = ecLineBreak) and IsKeywordAtLine(LTextCaretY - 1)) or { the caret is already in the new line }
-      (ACommand = ecUndo) or (ACommand = ecRedo) then
-      RescanCodeFoldingRanges
-  end;
+      ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar) or (ACommand = ecLineBreak)) and
+      IsKeywordAtLine(TextCaretPosition, True) or (ACommand = ecUndo) or (ACommand = ecRedo) then
+      RescanCodeFoldingRanges;
 
   if FMatchingPair.Enabled and not FSyncEdit.Active then
   case ACommand of

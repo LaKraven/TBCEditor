@@ -259,7 +259,7 @@ type
     procedure DragMinimap(Y: Integer);
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(const ASearchText: string = '');
-    procedure FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean); 
+    procedure FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
     procedure FontChanged(Sender: TObject);
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
@@ -3144,16 +3144,16 @@ begin
   if LKeyword = '' then
     Exit;
 
-  FindKeywords(LKeyword, FSearchLines, soCaseSensitive in FSearch.Options); 
+  FindKeywords(LKeyword, FSearchLines, soCaseSensitive in FSearch.Options, False);
 end;
 
-procedure TBCBaseEditor.FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean); 
+procedure TBCBaseEditor.FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
 var
   i: Integer;
   LLine: string;
   LTextPtr, LKeyWordPtr, LBookmarkTextPtr: PChar;
   LPTextPosition: PBCEditorTextPosition;
-  
+
   function AreCharsSame(APChar1, APChar2: PChar): Boolean;
   begin
     if ACaseSensitive then
@@ -3161,7 +3161,12 @@ var
     else
       Result := UpCase(APChar1^) = UpCase(APChar2^)
   end;
-  
+
+  function IsWholeWord(FirstChar, LastChar: PChar): Boolean;
+  begin
+    Result := IsWordBreakChar(FirstChar^) and IsWordBreakChar(LastChar^);
+  end;
+
 begin
   for i := 0 to FLines.Count - 1 do
   begin
@@ -3179,7 +3184,8 @@ begin
           Inc(LTextPtr);
           Inc(LKeyWordPtr);
         end;
-        if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
+        if (LKeyWordPtr^ = BCEDITOR_NONE_CHAR) and
+          (not AWholeWordsOnly or AWholeWordsOnly and IsWholeWord(LBookmarkTextPtr - 1, LTextPtr)) then
         begin
           Dec(LTextPtr);
           New(LPTextPosition);
@@ -4626,7 +4632,7 @@ begin
       FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
       FSyncEdit.EditEndPosition := FSelectionEndPosition;
       FSyncEdit.SelectedText := SelectedText;
-      FindKeywords(FSyncEdit.SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options);
+      FindKeywords(FSyncEdit.SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
     end
     else
       FSyncEdit.Active := False;

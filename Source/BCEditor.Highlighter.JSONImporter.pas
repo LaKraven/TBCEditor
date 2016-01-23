@@ -732,7 +732,10 @@ begin
     LElement.Foreground := StringToColorDef(LJsonDataValue.ObjectValue['Foreground'].Value, clWindowText);
     LElement.Name := LJsonDataValue.ObjectValue['Name'].Value;
     LElement.Style := StrToFontStyle(LJsonDataValue.ObjectValue['Style'].Value);
-    FHighlighter.Colors.Styles.Add(LElement)
+    FHighlighter.Colors.Styles.Add(LElement);
+
+    if LElement.Name = 'Editor' then
+      (FHighlighter.Editor as TBCBaseEditor).ForegroundColor := LElement.Foreground;
   end;
 end;
 

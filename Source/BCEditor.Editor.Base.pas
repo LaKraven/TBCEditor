@@ -53,6 +53,7 @@ type
     FDoubleClickTime: Cardinal;
     FEncoding: TEncoding;
     FFontDummy: TFont;
+    FForegroundColor: TColor;
     FHighlightedFoldRange: TBCEditorCodeFoldingRange;
     FHighlighter: TBCEditorHighlighter;
     FHookedCommandHandlers: TObjectList;
@@ -149,7 +150,6 @@ type
     {$ENDIF}
     FSearch: TBCEditorSearch;
     FSearchEngine: TBCEditorSearchCustom;
-    FSearchLines: TList;
     FSelectedCaseCycle: TBCEditorCase;
     FSelectedCaseText: string;
     FSelection: TBCEditorSelection;
@@ -231,7 +231,6 @@ type
     procedure CaretChanged(Sender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearCodeFolding;
-    procedure ClearSearchLines;
     procedure CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(AFirstLine: Integer; ACount: Integer);
     procedure CodeFoldingResetCaches;
@@ -282,6 +281,7 @@ type
     procedure SetClipboardText(const AText: string);
     procedure SetCodeFolding(AValue: TBCEditorCodeFolding);
     procedure SetDefaultKeyCommands;
+    procedure SetForegroundColor(const AValue: TColor);
     procedure SetInsertMode(const AValue: Boolean);
     procedure SetTextCaretX(AValue: Integer);
     procedure SetTextCaretY(AValue: Integer);
@@ -569,6 +569,7 @@ type
     property Directories: TBCEditorDirectories read FDirectories write FDirectories;
     property Encoding: TEncoding read FEncoding write FEncoding;
     property Font;
+    property ForegroundColor: TColor read FForegroundColor write SetForegroundColor default clWindowText;
     property Highlighter: TBCEditorHighlighter read FHighlighter;
     property InsertMode: Boolean read FInsertMode write SetInsertMode default True;
     property IsScrolling: Boolean read FIsScrolling;
@@ -655,8 +656,7 @@ uses
   Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character, Vcl.Menus,
   BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
-  BCEditor.Highlighter.Colors, BCEditor.Highlighter.Rules
-  {$IFDEF USE_VCL_STYLES}, Vcl.Themes, BCEditor.StyleHooks{$ENDIF}
+  BCEditor.Highlighter.Rules{$IFDEF USE_VCL_STYLES}, Vcl.Themes, BCEditor.StyleHooks{$ENDIF}
   {$IFDEF USE_ALPHASKINS}, Winapi.CommCtrl, sVCLUtils, sMessages, sConst, sSkinProps{$ENDIF};
 
 type
@@ -710,6 +710,7 @@ begin
   ControlStyle := ControlStyle + [csOpaque, csSetCaption, csNeedsBorderPaint];
 
   FBackgroundColor := clWindow;
+  FForegroundColor := clWindowText;
   FBorderStyle := bsSingle;
   FDoubleClickTime := GetDoubleClickTime;
   FLastSortOrder := soDesc;
@@ -815,7 +816,6 @@ begin
   FCompletionProposalTimer.Enabled := False;
   FCompletionProposalTimer.OnTimer := CompletionProposalTimerHandler;
   { Search }
-  FSearchLines := TList.Create;
   FSearch := TBCEditorSearch.Create;
   FSearch.OnChange := SearchChanged;
   AssignSearchEngine;
@@ -896,8 +896,6 @@ begin
   FActiveLine.Free;
   FRightMargin.Free;
   FScroll.Free;
-  ClearSearchLines;
-  FSearchLines.Free;
   FSearch.Free;
   FReplace.Free;
   FTabs.Free;
@@ -1746,7 +1744,7 @@ end;
 
 function TBCBaseEditor.GetSearchResultCount: Integer;
 begin
-  Result := FSearchLines.Count;
+  Result := FSearch.Lines.Count;
 end;
 
 function TBCBaseEditor.GetSelectionBeginPosition: TBCEditorTextPosition;
@@ -3120,21 +3118,12 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.ClearSearchLines;
-var
-  i: Integer;
-begin
-  for i := FSearchLines.Count - 1 downto 0 do
-    Dispose(PBCEditorTextPosition(FSearchLines.Items[i]));
-  FSearchLines.Clear;
-end;
-
 procedure TBCBaseEditor.FindAll(const ASearchText: string = '');
 var
   LKeyword: string;
 begin
-  ClearSearchLines;
-  
+  FSearch.ClearLines;
+
   if ASearchText = '' then
     LKeyword := FSearch.SearchText
   else
@@ -3143,7 +3132,7 @@ begin
   if LKeyword = '' then
     Exit;
 
-  FindKeywords(LKeyword, FSearchLines, soCaseSensitive in FSearch.Options, False);
+  FindKeywords(LKeyword, FSearch.Lines, soCaseSensitive in FSearch.Options, False);
 end;
 
 procedure TBCBaseEditor.FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
@@ -4162,6 +4151,16 @@ end;
 procedure TBCBaseEditor.SetDefaultKeyCommands;
 begin
   FKeyCommands.ResetDefaults;
+end;
+
+procedure TBCBaseEditor.SetForegroundColor(const AValue: TColor);
+begin
+  if FForegroundColor <> AValue then
+  begin
+    FForegroundColor := AValue;
+    Font.Color := AValue;
+    Invalidate;
+  end;
 end;
 
 procedure TBCBaseEditor.SetInsertMode(const AValue: Boolean);
@@ -6269,7 +6268,21 @@ begin
     if FSyncEdit.Active then
     begin
       case LEditorCommand of
-        ecChar, ecBackspace, ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
+        ecChar, ecBackspace:
+          begin
+            // TODO
+            // - process all positions
+            //   - remember to move all positions in the same line after processed position
+            AKey := 0;
+            Exit;
+          end;
+        ecCut, ecPaste:
+          begin
+            // TODO
+            AKey := 0;
+            Exit;
+          end;
+        ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
         ecLineBreak: FSyncEdit.Active := False;
       else
         LEditorCommand := ecNone;
@@ -7795,7 +7808,7 @@ var
   LStyles: TCustomStyleServices;
   {$ENDIF}
 begin
-  if not Assigned(FSearchLines) then
+  if not Assigned(FSearch.Lines) then
     Exit;
   if not Assigned(FSearchEngine) then
     Exit;
@@ -7834,9 +7847,9 @@ begin
     Canvas.Pen.Color := clHighlight;
   Canvas.Pen.Width := 1;
   Canvas.Pen.Style := psSolid;
-  for i := 0 to FSearchLines.Count - 1 do
+  for i := 0 to FSearch.Lines.Count - 1 do
   begin
-    j := Round((PBCEditorTextPosition(FSearchLines.Items[i])^.Line - 1) * LHeight);
+    j := Round((PBCEditorTextPosition(FSearch.Lines.Items[i])^.Line - 1) * LHeight);
     Canvas.MoveTo(AClipRect.Left, j);
     Canvas.LineTo(AClipRect.Right, j);
     Canvas.MoveTo(AClipRect.Left, j + 1);
@@ -7867,7 +7880,7 @@ var
   LLength, LLeftMargin, LCharsOutside: Integer;
   LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
-  if not Assigned(FSearchLines) then
+  if not Assigned(FSearch.Lines) then
     Exit;
   if not Assigned(FSearchEngine) then
     Exit;
@@ -7881,9 +7894,9 @@ begin
   LLeftMargin := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
     Inc(LLeftMargin, FMinimap.GetWidth);
-  for i := 0 to FSearchLines.Count - 1 do
+  for i := 0 to FSearch.Lines.Count - 1 do
   begin
-    LTextPosition := PBCEditorTextPosition(FSearchLines.Items[i])^;
+    LTextPosition := PBCEditorTextPosition(FSearch.Lines.Items[i])^;
 
     if LTextPosition.Line + 1 > TopLine + VisibleLines then
       Exit
@@ -8102,7 +8115,6 @@ var
   LRect: TRect;
   LText: string;
   LLength, LLeftMargin, LCharsOutside: Integer;
-  LHighlighterElement: PBCEditorHighlighterElement;
 begin
   if not Assigned(FSyncEdit.SyncItems) then
     Exit;
@@ -8112,8 +8124,6 @@ begin
   if FMinimap.Align = maLeft then
     Inc(LLeftMargin, FMinimap.GetWidth);
   Canvas.Brush.Style := bsClear;
-
-  LHighlighterElement := FHighlighter.Colors.GetElement('Editor');
 
   for i := 0 to FSyncEdit.SyncItems.Count - 1 do
   begin
@@ -8139,12 +8149,7 @@ begin
           Delete(LText, 1, LCharsOutside);
         LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 2;
         if (LTextPosition.Char = FSyncEdit.EditBeginPosition.Char) and (LTextPosition.Line = FSyncEdit.EditBeginPosition.Line) then
-        begin
-          if Assigned(LHighlighterElement) then
-            Canvas.Pen.Color := LHighlighterElement.Foreground
-          else
-            Canvas.Pen.Color := clWindowText
-        end
+          Canvas.Pen.Color := FForegroundColor
         else
           Canvas.Pen.Color := FSelection.Colors.Background;
         Canvas.Rectangle(LRect);
@@ -8479,7 +8484,7 @@ var
     if (ABackground = clNone) or ((FActiveLine.Color <> clNone) and LIsCurrentLine and not ACustomBackgroundColor) then
       ABackground := GetBackgroundColor;
     if AForeground = clNone then
-      AForeground := Font.Color;
+      AForeground := FForegroundColor;
 
     LCanAppend := False;
 
@@ -8673,7 +8678,7 @@ var
       while LCurrentRow = LCurrentLine do
       begin
         LIsCurrentLine := GetTextCaretY + 1 = LCurrentLine;
-        LForegroundColor := Font.Color;
+        LForegroundColor := FForegroundColor;
         LBackgroundColor := GetBackgroundColor;
 
         LCustomLineColors := False;

@@ -252,6 +252,7 @@ type
     procedure DoSelectedText(APasteMode: TBCEditorSelectionMode; AValue: PChar; AAddToUndoList: Boolean;
       ATextCaretPosition: TBCEditorTextPosition; AChangeBlockNumber: Integer = 0); overload;
     procedure DoShiftTabKey;
+    procedure DoSyncEdit;
     procedure DoTabKey;
     procedure DoToggleSelectedCase(const ACommand: TBCEditorCommand);
     procedure DoTrimTrailingSpaces(ATextLine: Integer);
@@ -2984,6 +2985,43 @@ begin
   end;
 end;
 
+procedure TBCBaseEditor.DoSyncEdit;
+var
+  i, j: Integer;
+  LEditText: string;
+  LTextCaretPosition, LTextPosition, LEndTextPosition: TBCEditorTextPosition;
+  LDifference: Integer;
+begin
+  BeginUndoBlock;
+  LTextCaretPosition := TextCaretPosition;
+  LEditText := Copy(FLines[FSyncEdit.EditBeginPosition.Line], FSyncEdit.EditBeginPosition.Char,
+    FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char);
+  LDifference := Length(LEditText) - FSyncEdit.EditWidth;
+  for i := 0 to FSyncEdit.SyncItems.Count - 1 do
+  begin
+    SelectionBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
+    LEndTextPosition := SelectionBeginPosition;
+    LEndTextPosition.Char := LEndTextPosition.Char + FSyncEdit.EditWidth;
+    SelectionEndPosition := LEndTextPosition;
+    SelectedText := LEditText;
+    j := i + 1;
+    if j < FSyncEdit.SyncItems.Count then
+    begin
+      LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
+      while (j < FSyncEdit.SyncItems.Count) and (LTextPosition.Line = LEndTextPosition.Line) do
+      begin
+        LTextPosition.Char := LTextPosition.Char + LDifference;
+        Inc(j);
+        if j < FSyncEdit.SyncItems.Count then
+          LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
+      end;
+    end;
+  end;
+  TextCaretPosition := LTextCaretPosition;
+  FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
+  EndUndoBlock;
+end;
+
 procedure TBCBaseEditor.DoTabKey;
 var
   LTextCaretPosition: TBCEditorTextPosition;
@@ -4621,6 +4659,9 @@ begin
 end;
 
 procedure TBCBaseEditor.SyncEditChanged(Sender: TObject);
+var
+  i: Integer;
+  LTextPosition: TBCEditorTextPosition;
 begin
   FSyncEdit.ClearSyncItems;
   if FSyncEdit.Active then
@@ -4629,8 +4670,18 @@ begin
     begin
       FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
       FSyncEdit.EditEndPosition := FSelectionEndPosition;
-      FSyncEdit.SelectedText := SelectedText;
-      FindKeywords(FSyncEdit.SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
+      FSyncEdit.EditWidth := FSelectionEndPosition.Char - FSelectionBeginPosition.Char;
+      FindKeywords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
+      for i := 0 to FSyncEdit.SyncItems.Count - 1 do
+      begin
+        LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
+        if (LTextPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextPosition.Char = FSyncEdit.EditBeginPosition.Char) then
+        begin
+          Dispose(PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i]));
+          FSyncEdit.SyncItems.Delete(i);
+          Break;
+        end;
+      end;
     end
     else
       FSyncEdit.Active := False;
@@ -6268,21 +6319,7 @@ begin
     if FSyncEdit.Active then
     begin
       case LEditorCommand of
-        ecChar, ecBackspace:
-          begin
-            // TODO
-            // - process all positions
-            //   - remember to move all positions in the same line after processed position
-            AKey := 0;
-            Exit;
-          end;
-        ecCut, ecPaste:
-          begin
-            // TODO
-            AKey := 0;
-            Exit;
-          end;
-        ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
+        ecChar, ecBackspace, ecCopy, ecCut, ecPaste, ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
         ecLineBreak: FSyncEdit.Active := False;
       else
         LEditorCommand := ecNone;
@@ -8111,19 +8148,38 @@ procedure TBCBaseEditor.PaintSyncItems;
 var
   i: Integer;
   LTextPosition: TBCEditorTextPosition;
-  LDisplayPosition: TBCEditorDisplayPosition;
-  LRect: TRect;
-  LText: string;
-  LLength, LLeftMargin, LCharsOutside: Integer;
+  LLength, LLeftMargin: Integer;
+
+  procedure DrawRectangle(ATextPosition: TBCEditorTextPosition);
+  var
+    LRect: TRect;
+    LDisplayPosition: TBCEditorDisplayPosition;
+    LCharsOutside: Integer;
+  begin
+    LRect.Top := (ATextPosition.Line - TopLine + 1) * LineHeight;
+    LRect.Bottom := LRect.Top + LineHeight;
+    LDisplayPosition := TextToDisplayPosition(ATextPosition);
+    LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
+    LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
+    LRect.Left := Max(LLeftMargin, LRect.Left);
+    if LLength - LCharsOutside > 0 then
+    begin
+      LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 2;
+      Canvas.Rectangle(LRect);
+    end;
+  end;
+
 begin
   if not Assigned(FSyncEdit.SyncItems) then
     Exit;
 
-  LLength := Length(FSyncEdit.SelectedText);
+  LLength := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
   LLeftMargin := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
     Inc(LLeftMargin, FMinimap.GetWidth);
   Canvas.Brush.Style := bsClear;
+  Canvas.Pen.Color := FForegroundColor;
+  DrawRectangle(FSyncEdit.EditBeginPosition);
 
   for i := 0 to FSyncEdit.SyncItems.Count - 1 do
   begin
@@ -8134,26 +8190,8 @@ begin
     else
     if LTextPosition.Line + 1 >= TopLine then
     begin
-      LText := Copy(FLines[LTextPosition.Line], LTextPosition.Char, LLength);
-      LRect.Top := (LTextPosition.Line - TopLine + 1) * LineHeight;
-      LRect.Bottom := LRect.Top + LineHeight;
-
-      LDisplayPosition := TextToDisplayPosition(LTextPosition);
-
-      LRect.Left := LLeftMargin + (LDisplayPosition.Column - FLeftChar) * FTextDrawer.CharWidth;
-      LCharsOutside := Max(0, (LLeftMargin - LRect.Left) div FTextDrawer.CharWidth);
-      LRect.Left := Max(LLeftMargin, LRect.Left);
-      if LLength - LCharsOutside > 0 then
-      begin
-        if LCharsOutside > 0 then
-          Delete(LText, 1, LCharsOutside);
-        LRect.Right := LRect.Left + (LLength - LCharsOutside) * FTextDrawer.CharWidth + 2;
-        if (LTextPosition.Char = FSyncEdit.EditBeginPosition.Char) and (LTextPosition.Line = FSyncEdit.EditBeginPosition.Line) then
-          Canvas.Pen.Color := FForegroundColor
-        else
-          Canvas.Pen.Color := FSelection.Colors.Background;
-        Canvas.Rectangle(LRect);
-      end;
+      Canvas.Pen.Color := FSelection.Colors.Background;
+      DrawRectangle(LTextPosition);
     end;
   end;
 end;
@@ -11208,10 +11246,17 @@ begin
         SelectAll;
       ecBackspace:
         if not ReadOnly then
+        begin
           if SelectionAvailable then
-            SetSelectedTextEmpty
+          begin
+            if FSyncEdit.Active then
+              FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char);
+            SetSelectedTextEmpty;
+          end
           else
           begin
+            if FSyncEdit.Active then
+              FSyncEdit.MoveEndPositionChar(-1);
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
             LTabBuffer := FLines.Strings[LTextCaretPosition.Line];
@@ -11371,6 +11416,9 @@ begin
               end;
             end;
           end;
+          if FSyncEdit.Active then
+            DoSyncEdit;
+        end;
       ecDeleteChar:
         if not ReadOnly then
           if SelectionAvailable then
@@ -11807,9 +11855,15 @@ begin
         if not ReadOnly and (AChar >= BCEDITOR_SPACE_CHAR) and (AChar <> BCEDITOR_CTRL_BACKSPACE) then
         begin
           if SelectionAvailable then
+          begin
+            if FSyncEdit.Active then
+              FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char + 1);
             SetSelectedTextEmpty(AChar)
+          end
           else
           begin
+            if FSyncEdit.Active then
+              FSyncEdit.MoveEndPositionChar(1);
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
 
@@ -11899,6 +11953,8 @@ begin
             if LTextCaretPosition.Char >= LeftChar + FVisibleChars then
               LeftChar := LeftChar + Min(25, FVisibleChars - 1);
           end;
+          if FSyncEdit.Active then
+            DoSyncEdit;
           DoChange;
         end;
       ecUpperCase, ecLowerCase, ecAlternatingCase, ecSentenceCase, ecTitleCase, ecUpperCaseBlock, ecLowerCaseBlock,

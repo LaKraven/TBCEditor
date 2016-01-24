@@ -2988,8 +2988,8 @@ end;
 procedure TBCBaseEditor.DoSyncEdit;
 var
   i, j: Integer;
-  LEditText: string;
-  LTextCaretPosition, LTextPosition, LEndTextPosition: TBCEditorTextPosition;
+  LEditText, LOldText: string;
+  LTextCaretPosition, LTextBeginPosition, LTextEndPosition, LTextSameLinePosition: TBCEditorTextPosition;
   LDifference: Integer;
 begin
   BeginUndoBlock;
@@ -2999,25 +2999,34 @@ begin
   LDifference := Length(LEditText) - FSyncEdit.EditWidth;
   for i := 0 to FSyncEdit.SyncItems.Count - 1 do
   begin
-    SelectionBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
-    LEndTextPosition := SelectionBeginPosition;
-    LEndTextPosition.Char := LEndTextPosition.Char + FSyncEdit.EditWidth;
-    SelectionEndPosition := LEndTextPosition;
-    SelectedText := LEditText;
+    LTextBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
+    LTextEndPosition := LTextBeginPosition;
+    LTextEndPosition.Char := LTextEndPosition.Char + FSyncEdit.EditWidth;
+    LOldText := Copy(FLines[LTextBeginPosition.Line], LTextBeginPosition.Char, FSyncEdit.EditWidth);
+
+    FUndoList.AddChange(crDelete, LTextCaretPosition, LTextBeginPosition, LTextEndPosition, '', FSelection.ActiveMode);
+
+    LTextEndPosition := LTextBeginPosition;
+    LTextEndPosition.Char := LTextEndPosition.Char + Length(LEditText);
+
+    FUndoList.AddChange(crInsert, LTextCaretPosition, LTextBeginPosition, LTextEndPosition, LOldText, FSelection.ActiveMode);
+
+    FLines[LTextBeginPosition.Line] := Copy(FLines[LTextBeginPosition.Line], 1, LTextBeginPosition.Char - 1) + LEditText +
+      Copy(FLines[LTextBeginPosition.Line], LTextBeginPosition.Char + FSyncEdit.EditWidth, Length(FLines[LTextBeginPosition.Line]));
+
     j := i + 1;
     if j < FSyncEdit.SyncItems.Count then
     begin
-      LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
-      while (j < FSyncEdit.SyncItems.Count) and (LTextPosition.Line = LEndTextPosition.Line) do
+      LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
+      while (j < FSyncEdit.SyncItems.Count) and (LTextSameLinePosition.Line = LTextBeginPosition.Line) do
       begin
-        LTextPosition.Char := LTextPosition.Char + LDifference;
+        LTextSameLinePosition.Char := LTextSameLinePosition.Char + LDifference;
         Inc(j);
         if j < FSyncEdit.SyncItems.Count then
-          LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
+          LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
       end;
     end;
   end;
-  TextCaretPosition := LTextCaretPosition;
   FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
   EndUndoBlock;
 end;
@@ -9027,12 +9036,11 @@ begin
         end;
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition);
+          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition);
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeBlockNumber);
-          TextCaretPosition := LUndoItem.ChangeCaretPosition;
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
-            LUndoItem.ChangeEndPosition, SelectedText, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
+            LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
           if LUndoItem.ChangeReason = crDragDropInsert then
             SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
         end;
@@ -9721,11 +9729,11 @@ begin
         end;
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
+          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeBlockNumber);
-          FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeEndPosition, LUndoItem.ChangeBeginPosition,
+          FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LTempText, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;
       crDelete:
@@ -11897,20 +11905,18 @@ begin
 
               if LSpaceCount1 > 0 then
               begin
+                LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
                 FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1 + 1,
                   LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 2, LTextCaretPosition.Line), '',
                   smNormal);
                 FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
-
-                LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition,
-                  GetTextPosition(LTextCaretPosition.Char + 1, LTextCaretPosition.Line), '', smNormal);
-                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
-
                 LTextCaretPosition.Char := LTextCaretPosition.Char + 1;
+                FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition,
+                  LTextCaretPosition, '', smNormal);
+                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
               end;
             end
             else
@@ -11933,18 +11939,16 @@ begin
 
               if LSpaceCount1 > 0 then
               begin
+                LTextCaretPosition.Char := LLength + LSpaceCount1 + 1;
                 FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1, LTextCaretPosition.Line),
                   GetTextPosition(LLength + LSpaceCount1 + 1, LTextCaretPosition.Line), '', smNormal);
                 FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
-
-                LTextCaretPosition.Char := LLength + LSpaceCount1 + 1;
               end
               else
               begin
-                FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition, GetTextPosition(LTextCaretPosition.Char + 1, LTextCaretPosition.Line), LHelper, smNormal);
-                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
-
                 LTextCaretPosition.Char := LTextCaretPosition.Char + 1;
+                FUndoList.AddChange(crInsert, LTextCaretPosition, LBlockStartPosition, LTextCaretPosition, LHelper, smNormal);
+                FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
               end;
             end;
             if FWordWrap.Enabled and (LTextCaretPosition.Char > GetWrapAtColumn) then

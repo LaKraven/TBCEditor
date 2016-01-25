@@ -2988,6 +2988,13 @@ begin
   for i := 0 to FSyncEdit.SyncItems.Count - 1 do
   begin
     LTextBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
+
+    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextBeginPosition.Char > FSyncEdit.EditEndPosition.Char) then
+    begin
+      LTextBeginPosition.Char := LTextBeginPosition.Char + LDifference;
+      PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^.Char := LTextBeginPosition.Char;
+    end;
+
     LTextEndPosition := LTextBeginPosition;
     LTextEndPosition.Char := LTextEndPosition.Char + FSyncEdit.EditWidth;
     LOldText := Copy(FLines[LTextBeginPosition.Line], LTextBeginPosition.Char, FSyncEdit.EditWidth);
@@ -3008,7 +3015,7 @@ begin
       LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
       while (j < FSyncEdit.SyncItems.Count) and (LTextSameLinePosition.Line = LTextBeginPosition.Line) do
       begin
-        LTextSameLinePosition.Char := LTextSameLinePosition.Char + LDifference;
+        PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^.Char := LTextSameLinePosition.Char + LDifference;
         Inc(j);
         if j < FSyncEdit.SyncItems.Count then
           LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;

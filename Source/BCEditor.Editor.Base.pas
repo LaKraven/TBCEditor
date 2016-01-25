@@ -2989,7 +2989,7 @@ begin
   begin
     LTextBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
 
-    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextBeginPosition.Char > FSyncEdit.EditEndPosition.Char) then
+    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextBeginPosition.Char > FSyncEdit.EditBeginPosition.Char) then
     begin
       LTextBeginPosition.Char := LTextBeginPosition.Char + LDifference;
       PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^.Char := LTextBeginPosition.Char;

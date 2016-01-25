@@ -316,7 +316,6 @@ type
     procedure SyncEditChanged(Sender: TObject);
     procedure SwapInt(var ALeft, ARight: Integer);
     procedure TabsChanged(Sender: TObject);
-    procedure UndoChanged(Sender: TObject);
     procedure UndoRedoAdded(Sender: TObject);
     procedure UpdateFoldRanges(ACurrentLine, ALineCount: Integer); overload;
     procedure UpdateFoldRanges(AFoldRanges: TBCEditorCodeFoldingRanges; ALineCount: Integer); overload;
@@ -769,7 +768,6 @@ begin
   { Undo & Redo }
   FUndoRedo := False;
   FUndo := TBCEditorUndo.Create;
-  FUndo.OnChange := UndoChanged;
   FUndoList := TBCEditorUndoList.Create;
   FUndoList.OnAddedUndo := UndoRedoAdded;
   FOriginalUndoList := FUndoList;
@@ -4710,12 +4708,6 @@ begin
       FResetLineNumbersCache := True;
     InvalidateLeftMargin;
   end;
-end;
-
-procedure TBCBaseEditor.UndoChanged(Sender: TObject);
-begin
-  FUndoList.MaxActions := FUndo.MaxActions;
-  FRedoList.MaxActions := FUndo.MaxActions;
 end;
 
 procedure TBCBaseEditor.UndoRedoAdded(Sender: TObject);

@@ -1750,7 +1750,6 @@ end;
 
 function TBCBaseEditor.GetSelectionBeginPosition: TBCEditorTextPosition;
 var
-  LChar: Char;
   LLineLength: Integer;
 begin
   if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
@@ -1761,22 +1760,12 @@ begin
 
   LLineLength := Length(FLines[Result.Line]);
 
-  if Result.Char <= LLineLength then
-  begin
-    LChar := FLines[Result.Line][Result.Char];
-    if LChar.IsLowSurrogate then
-    begin
-      Dec(Result.Char);
-      SetTextCaretX(FDisplayCaretX - 1);
-    end;
-  end
-  else
+  if Result.Char > LLineLength then
     Result.Char := LLineLength + 1;
 end;
 
 function TBCBaseEditor.GetSelectionEndPosition: TBCEditorTextPosition;
 var
-  LChar: Char;
   LLineLength: Integer;
 begin
   if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
@@ -1787,16 +1776,7 @@ begin
 
   LLineLength := Length(FLines[Result.Line]);
 
-  if Result.Char <= LLineLength then
-  begin
-    LChar := FLines[Result.Line][Result.Char];
-    if LChar.IsLowSurrogate then
-    begin
-      Inc(Result.Char);
-      SetTextCaretX(FDisplayCaretX + 1);
-    end;
-  end
-  else
+  if Result.Char > LLineLength then
     Result.Char := LLineLength + 1;
 end;
 
@@ -3002,7 +2982,6 @@ var
   LTextCaretPosition, LTextBeginPosition, LTextEndPosition, LTextSameLinePosition: TBCEditorTextPosition;
   LDifference: Integer;
 begin
-  //FUndoList.BeginBlock(5);
   LTextCaretPosition := TextCaretPosition;
 
   LEditText := Copy(FLines[FSyncEdit.EditBeginPosition.Line], FSyncEdit.EditBeginPosition.Char,
@@ -3039,7 +3018,6 @@ begin
     end;
   end;
   FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
-  //FUndoList.EndBlock;
 end;
 
 procedure TBCBaseEditor.DoTabKey;
@@ -8278,56 +8256,21 @@ var
     end;
   end;
 
-  function GetPaintSelectionBeginPosition: TBCEditorTextPosition;
-  var
-    LChar: Char;
-  begin
-    if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
-      ((FSelectionEndPosition.Line = FSelectionBeginPosition.Line) and (FSelectionEndPosition.Char < FSelectionBeginPosition.Char)) then
-      Result := FSelectionEndPosition
-    else
-      Result := FSelectionBeginPosition;
-
-    if Result.Char <= Length(FLines[Result.Line]) then
-    begin
-      LChar := FLines[Result.Line][Result.Char];
-      if LChar.IsLowSurrogate then
-      begin
-        Dec(Result.Char);
-        SetTextCaretX(FDisplayCaretX - 1);
-      end;
-    end
-  end;
-
-  function GetPaintSelectionEndPosition: TBCEditorTextPosition;
-  var
-    LChar: Char;
-  begin
-    if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
-      ((FSelectionEndPosition.Line = FSelectionBeginPosition.Line) and (FSelectionEndPosition.Char < FSelectionBeginPosition.Char)) then
-      Result := FSelectionBeginPosition
-    else
-      Result := FSelectionEndPosition;
-
-    if Result.Char <= Length(FLines[Result.Line]) then
-    begin
-      LChar := FLines[Result.Line][Result.Char];
-      if LChar.IsLowSurrogate then
-      begin
-        Inc(Result.Char);
-        SetTextCaretX(FDisplayCaretX + 1);
-      end;
-    end
-  end;
-
   procedure ComputeSelectionInfo;
   begin
     LAnySelection := SelectionAvailable;
     if LAnySelection then
-    begin
-      LSelectionBeginPosition := TextToDisplayPosition(GetPaintSelectionBeginPosition, True);
-      LSelectionEndPosition := TextToDisplayPosition(GetPaintSelectionEndPosition, True);
-    end;
+      if (FSelectionEndPosition.Line < FSelectionBeginPosition.Line) or
+        ((FSelectionEndPosition.Line = FSelectionBeginPosition.Line) and (FSelectionEndPosition.Char < FSelectionBeginPosition.Char)) then
+      begin
+        LSelectionBeginPosition := TextToDisplayPosition(FSelectionEndPosition, True);
+        LSelectionEndPosition := TextToDisplayPosition(FSelectionBeginPosition, True);
+      end
+      else
+      begin
+        LSelectionBeginPosition := TextToDisplayPosition(FSelectionBeginPosition, True);
+        LSelectionEndPosition := TextToDisplayPosition(FSelectionEndPosition, True);
+      end;
   end;
 
   procedure SetDrawingColors(ASelected: Boolean);

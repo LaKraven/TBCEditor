@@ -3002,7 +3002,7 @@ var
   LTextCaretPosition, LTextBeginPosition, LTextEndPosition, LTextSameLinePosition: TBCEditorTextPosition;
   LDifference: Integer;
 begin
-  FUndoList.BeginBlock(5);
+  //FUndoList.BeginBlock(5);
   LTextCaretPosition := TextCaretPosition;
 
   LEditText := Copy(FLines[FSyncEdit.EditBeginPosition.Line], FSyncEdit.EditBeginPosition.Char,
@@ -3039,7 +3039,7 @@ begin
     end;
   end;
   FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
-  FUndoList.EndBlock;
+  //FUndoList.EndBlock;
 end;
 
 procedure TBCBaseEditor.DoTabKey;
@@ -4688,6 +4688,7 @@ begin
   begin
     if SelectionAvailable and IsWordSelected then
     begin
+      FUndoList.BeginBlock;
       FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
       FSyncEdit.EditEndPosition := FSelectionEndPosition;
       FSyncEdit.EditWidth := FSelectionEndPosition.Char - FSelectionBeginPosition.Char;
@@ -4704,7 +4705,10 @@ begin
       end;
     end
     else
+    begin
       FSyncEdit.Active := False;
+      FUndoList.EndBlock;
+    end;
   end;
   Invalidate;
 end;
@@ -6300,7 +6304,7 @@ begin
   if FSyncEdit.Enabled then
   begin
     if FSyncEdit.Active then
-      if AKey = 13 then
+      if (AKey = BCEDITOR_CARRIAGE_RETURN_KEY) or (AKey = BCEDITOR_ESCAPE_KEY) then
       begin
         FSyncEdit.Active := False;
         AKey := 0;

@@ -9324,7 +9324,7 @@ begin
     if FSelection.ActiveMode = smLine then
       LBlockStartPosition.Char := 1;
   end;
-  FUndoList.BeginBlock(3);
+  //FUndoList.BeginBlock(3);
   FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
 
@@ -9332,7 +9332,7 @@ begin
   DoChange;
   if AChangeString <> '' then
     FUndoList.AddChange(crInsert, LBlockStartPosition, LBlockStartPosition, SelectionEndPosition, '', smNormal);
-  FUndoList.EndBlock;
+  //FUndoList.EndBlock;
 end;
 
 procedure TBCBaseEditor.DoSelectedText(const AValue: string);
@@ -11649,7 +11649,7 @@ begin
       ecInsertLine, ecLineBreak:
         if not ReadOnly then
         begin
-          FUndoList.BeginBlock(4);
+          //FUndoList.BeginBlock(4);
           try
             if SelectionAvailable then
             begin
@@ -11852,7 +11852,7 @@ begin
             EnsureCursorPositionVisible;
           finally
             DoChange;
-            UndoList.EndBlock;
+           // UndoList.EndBlock;
           end;
         end;
       ecTab:

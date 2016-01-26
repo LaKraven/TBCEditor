@@ -2,7 +2,7 @@
    "Highlighter": {
       "Info": {
          "General": {
-            "Version": "1.0",
+            "Version": "1.3",
             "Date": "26.01.2016",
             "Sample": [
                "# Filename: Hello.ps1\r\n",
@@ -23,7 +23,7 @@
          "SubRules": {
             "Range": [
                {
-                  "Type": "Comment",
+                  "Type": "BlockComment",
                   "Attributes": {
                      "Element": "Comment"
                   },
@@ -33,7 +33,7 @@
                   }
                },
                {
-                  "Type": "Comment",
+                  "Type": "LineComment",
                   "Attributes": {
                      "Element": "Comment"
                   },

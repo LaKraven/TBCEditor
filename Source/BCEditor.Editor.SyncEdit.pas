@@ -23,6 +23,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
+    procedure Abort;
     procedure Assign(ASource: TPersistent); override;
     procedure ClearSyncItems;
     procedure MoveEndPositionChar(ACount: Integer);
@@ -112,6 +113,11 @@ end;
 procedure TBCEditorSyncEdit.MoveEndPositionChar(ACount: Integer);
 begin
   Inc(FEditEndPosition.Char, ACount);
+end;
+
+procedure TBCEditorSyncEdit.Abort;
+begin
+  FActive := False;
 end;
 
 end.

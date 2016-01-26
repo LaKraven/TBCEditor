@@ -4688,10 +4688,7 @@ begin
       end;
     end
     else
-    begin
       FSyncEdit.Active := False;
-      FUndoList.EndBlock;
-    end;
   end;
   Invalidate;
 end;
@@ -6284,6 +6281,7 @@ begin
       if (AKey = BCEDITOR_CARRIAGE_RETURN_KEY) or (AKey = BCEDITOR_ESCAPE_KEY) then
       begin
         FSyncEdit.Active := False;
+        FUndoList.EndBlock;
         AKey := 0;
         Exit;
       end;
@@ -6291,6 +6289,8 @@ begin
     ShortCutToKey(FSyncEdit.ShortCut, LShortCutKey, LShortCutShift);
     if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
     begin
+      if FSyncEdit.Active then
+        FUndoList.EndBlock;
       FSyncEdit.Active := not FSyncEdit.Active;
       AKey := 0;
       Exit;
@@ -6321,7 +6321,11 @@ begin
     begin
       case LEditorCommand of
         ecChar, ecBackspace, ecCopy, ecCut, ecPaste, ecLeft, ecSelectionLeft, ecRight, ecSelectionRight: ;
-        ecLineBreak: FSyncEdit.Active := False;
+        ecLineBreak:
+          begin
+            FSyncEdit.Active := False;
+            FUndoList.EndBlock;
+          end
       else
         LEditorCommand := ecNone;
       end;
@@ -6602,7 +6606,10 @@ begin
   if FSyncEdit.Enabled and FSyncEdit.Active then
   begin
     if not FSyncEdit.IsTextPositionInEdit(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
-      FSyncEdit.Active := False
+    begin
+      FSyncEdit.Active := False;
+      FUndoList.EndBlock;
+    end
     else
     begin
       ComputeCaret(X, Y);

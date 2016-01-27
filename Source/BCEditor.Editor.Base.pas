@@ -8623,6 +8623,80 @@ var
       Result := GetWordAtRowColumn(LTempTextPosition);
     end;
 
+    procedure PrepareToken;
+    begin
+      LHighlighterAttribute := FHighlighter.GetTokenAttribute;
+      if Assigned(LHighlighterAttribute) then
+      begin
+        LForegroundColor := LHighlighterAttribute.Foreground;
+        LBackgroundColor := LHighlighterAttribute.Background;
+        LStyle := LHighlighterAttribute.Style;
+
+        if Assigned(FOnCustomTokenAttribute) then
+          FOnCustomTokenAttribute(Self, LTokenText, LCurrentLine, LTokenPosition, LForegroundColor,
+            LBackgroundColor, LStyle);
+
+        LIsCustomBackgroundColor := False;
+        LMatchingPairUnderline := False;
+
+        if FMatchingPair.Enabled and not FSyncEdit.Active then
+          if FCurrentMatchingPair <> trNotFound then
+          begin
+            if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
+               (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
+               (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
+               (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
+            begin
+              if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
+              begin
+                LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                if LIsCustomBackgroundColor then
+                begin
+                  if LForegroundColor = FMatchingPair.Colors.Matched then
+                    LForegroundColor := BackgroundColor;
+                  LBackgroundColor := FMatchingPair.Colors.Matched;
+                end;
+                LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
+              end
+              else
+              if mpoHighlightUnmatched in FMatchingPair.Options then
+              begin
+                LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                if LIsCustomBackgroundColor then
+                begin
+                  if LForegroundColor = FMatchingPair.Colors.Unmatched then
+                    LForegroundColor := BackgroundColor;
+                  LBackgroundColor := FMatchingPair.Colors.Unmatched;
+                end;
+                LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
+              end;
+            end;
+          end;
+
+        if not FSyncEdit.Active and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
+        begin
+          LKeyword := '';
+
+          if LTokenText = LWordAtSelection then
+            LKeyWord := LSelectedText;
+
+          LIsCustomBackgroundColor := (LKeyword <> '') and (LKeyword = LTokenText);
+          if LIsCustomBackgroundColor then
+          begin
+            if FSearch.Highlighter.Colors.Foreground <> clNone then
+              LForegroundColor := FSearch.Highlighter.Colors.Foreground;
+            LBackgroundColor := FSearch.Highlighter.Colors.Background;
+          end;
+        end;
+
+        PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle,
+          LMatchingPairUnderline, LIsCustomBackgroundColor)
+      end
+      else
+        PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
+          False, False);
+    end;
+
   begin
     LLineRect := AClipRect;
     if AMinimap then
@@ -8799,6 +8873,8 @@ var
           begin
             if FWordWrap.Enabled then
             begin
+              if LTokenLength > LLastColumn then
+                PrepareToken;
               if LTokenPosition + LTokenLength >= LLastColumn then
               begin
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
@@ -8807,76 +8883,7 @@ var
               end;
               Dec(LTokenPosition, LFirstColumn - LFirstChar);
             end;
-            LHighlighterAttribute := FHighlighter.GetTokenAttribute;
-            if Assigned(LHighlighterAttribute) then
-            begin
-              LForegroundColor := LHighlighterAttribute.Foreground;
-              LBackgroundColor := LHighlighterAttribute.Background;
-              LStyle := LHighlighterAttribute.Style;
-
-              if Assigned(FOnCustomTokenAttribute) then
-                FOnCustomTokenAttribute(Self, LTokenText, LCurrentLine, LTokenPosition, LForegroundColor,
-                  LBackgroundColor, LStyle);
-
-              LIsCustomBackgroundColor := False;
-              LMatchingPairUnderline := False;
-
-              if FMatchingPair.Enabled and not FSyncEdit.Active then
-                if FCurrentMatchingPair <> trNotFound then
-                begin
-                  if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
-                     (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
-                     (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
-                     (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
-                  begin
-                    if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
-                    begin
-                      LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
-                      if LIsCustomBackgroundColor then
-                      begin
-                        if LForegroundColor = FMatchingPair.Colors.Matched then
-                          LForegroundColor := BackgroundColor;
-                        LBackgroundColor := FMatchingPair.Colors.Matched;
-                      end;
-                      LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
-                    end
-                    else
-                    if mpoHighlightUnmatched in FMatchingPair.Options then
-                    begin
-                      LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
-                      if LIsCustomBackgroundColor then
-                      begin
-                        if LForegroundColor = FMatchingPair.Colors.Unmatched then
-                          LForegroundColor := BackgroundColor;
-                        LBackgroundColor := FMatchingPair.Colors.Unmatched;
-                      end;
-                      LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
-                    end;
-                  end;
-                end;
-
-              if not FSyncEdit.Active and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
-              begin
-                LKeyword := '';
-
-                if LTokenText = LWordAtSelection then
-                  LKeyWord := LSelectedText;
-
-                LIsCustomBackgroundColor := (LKeyword <> '') and (LKeyword = LTokenText);
-                if LIsCustomBackgroundColor then
-                begin
-                  if FSearch.Highlighter.Colors.Foreground <> clNone then
-                    LForegroundColor := FSearch.Highlighter.Colors.Foreground;
-                  LBackgroundColor := FSearch.Highlighter.Colors.Background;
-                end;
-              end;
-
-              PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LStyle,
-                LMatchingPairUnderline, LIsCustomBackgroundColor)
-            end
-            else
-              PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, Font.Style,
-                False, False);
+            PrepareToken;
           end;
           FHighlighter.Next;
         end;

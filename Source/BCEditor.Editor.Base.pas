@@ -4669,6 +4669,7 @@ begin
   FSyncEdit.ClearSyncItems;
   if FSyncEdit.Active then
   begin
+    FWordWrap.Enabled := False;
     if SelectionAvailable and IsWordSelected then
     begin
       FUndoList.BeginBlock;

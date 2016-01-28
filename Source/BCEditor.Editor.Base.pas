@@ -6264,8 +6264,6 @@ begin
     Exit;
   end;
 
-  FHighlighter.Comments.ClearIndexes;
-
   if FCompletionProposal.Enabled then
   begin
     ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
@@ -6589,6 +6587,7 @@ begin
     Inc(LLeftMarginWidth, FMinimap.GetWidth);
 
   LWasSelected := False;
+  FHighlighter.Comments.ClearIndexes;
 
   if AButton = mbLeft then
   begin

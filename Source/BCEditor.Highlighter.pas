@@ -8,6 +8,29 @@ uses
   BCEditor.Highlighter.Colors, BCEditor.Editor.CodeFolding.Regions;
 
 type
+  // TODO: Move to own unit
+  TBCEditorHighlighterComments = class(TObject)
+  strict private
+    FBlockCommentIndex: Integer;
+    FBlockComments: TBCEditorArrayOfString;
+    FLineCommentIndex: Integer;
+    FLineComments: TBCEditorArrayOfString;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function BlockCommentCount: Integer;
+    function LineCommentCount: Integer;
+    procedure AddBlockComment(const AOpenToken: string; const ACloseToken: string);
+    procedure AddLineComment(const AToken: string);
+    procedure Clear;
+    procedure ClearIndexes;
+    procedure GetBlockComment(var AOpenToken: string; var ACloseToken: string);
+    procedure GetLineComment(var AToken: string);
+    procedure GetBlockCommentLength(var AOpenTokenLength: Integer; var ACloseTokenLength: Integer);
+    procedure GetLineCommentLength(var ATokenLength: Integer);
+  end;
+
   TBCEditorHighlighter = class(TObject)
   strict private
     FAttributes: TStringList;
@@ -15,6 +38,7 @@ type
     FCodeFoldingRangeCount: Integer;
     FCodeFoldingRegions: TBCEditorCodeFoldingRegions;
     FColors: TBCEditorHighlighterColors;
+    FComments: TBCEditorHighlighterComments;
     FCompletionProposalSkipRegions: TBCEditorSkipRegions;
     FCurrentLine: PChar;
     FCurrentRange: TBCEditorRange;
@@ -77,6 +101,7 @@ type
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
     property CodeFoldingRegions: TBCEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
     property Colors: TBCEditorHighlighterColors read FColors write FColors;
+    property Comments: TBCEditorHighlighterComments read FComments write FComments;
     property CompletionProposalSkipRegions: TBCEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
     property FileName: string read FFileName write FFileName;
@@ -124,6 +149,8 @@ begin
 
   FCodeFoldingRangeCount := 0;
 
+  FComments := TBCEditorHighlighterComments.Create;
+
   FCompletionProposalSkipRegions := TBCEditorSkipRegions.Create(TBCEditorSkipRegionItem);
 
   FPrepared := False;
@@ -150,6 +177,8 @@ destructor TBCEditorHighlighter.Destroy;
 begin
   Clear;
 
+  FComments.Free;
+  FComments := nil;
   FMainRules.Free;
   FMainRules := nil;
   FInfo.Free;
@@ -409,6 +438,7 @@ begin
   FAttributes.Clear;
   FMainRules.Clear;
   FInfo.Clear;
+  FComments.Clear;
   FCompletionProposalSkipRegions.Clear;
   for i := FMatchingPairs.Count - 1 downto 0 do
     Dispose(PBCEditorMatchingPairToken(FMatchingPairs.Items[i]));
@@ -590,6 +620,116 @@ end;
 function TBCEditorHighlighter.GetTokenLength: Integer;
 begin
   Result := FRunPosition - FTokenPosition;
+end;
+
+{ TBCEditorHighlighterComments }
+
+constructor TBCEditorHighlighterComments.Create;
+begin
+  inherited Create;
+
+  ClearIndexes;
+end;
+
+destructor TBCEditorHighlighterComments.Destroy;
+begin
+  Clear;
+
+  inherited Destroy;
+end;
+
+function TBCEditorHighlighterComments.BlockCommentCount: Integer;
+begin
+  Result := Length(FBlockComments);
+end;
+
+procedure TBCEditorHighlighterComments.GetBlockCommentLength(var AOpenTokenLength: Integer; var ACloseTokenLength: Integer);
+begin
+  AOpenTokenLength := 0;
+  ACloseTokenLength := 0;
+  if (FBlockCommentIndex > 0) and (FBlockCommentIndex < Length(FBlockComments)) then
+  begin
+    AOpenTokenLength := Length(FBlockComments[FBlockCommentIndex - 1]);
+    ACloseTokenLength := Length(FBlockComments[FBlockCommentIndex]);
+  end;
+end;
+
+procedure TBCEditorHighlighterComments.GetLineCommentLength(var ATokenLength: Integer);
+begin
+  ATokenLength := 0;
+  if (FLineCommentIndex > -1) and (FLineCommentIndex < Length(FLineComments)) then
+    ATokenLength := Length(FLineComments[FLineCommentIndex]);
+end;
+
+procedure TBCEditorHighlighterComments.AddBlockComment(const AOpenToken: string; const ACloseToken: string);
+var
+  i, LLength: Integer;
+begin
+  LLength := Length(FBlockComments);
+
+  for i := 0 to LLength - 1 do
+    if (FBlockComments[i] = AOpenToken) and (FBlockComments[i + 1] = ACloseToken) then
+      Exit;
+
+  SetLength(FBlockComments, LLength + 2);
+  FBlockComments[LLength] := AOpenToken;
+  FBlockComments[LLength + 1] := ACloseToken;
+end;
+
+function TBCEditorHighlighterComments.LineCommentCount: Integer;
+begin
+  Result := Length(FLineComments);
+end;
+
+procedure TBCEditorHighlighterComments.AddLineComment(const AToken: string);
+var
+  i, LLength: Integer;
+begin
+  LLength := Length(FLineComments);
+
+  for i := 0 to LLength - 1 do
+    if FLineComments[i] = AToken then
+      Exit;
+
+  SetLength(FLineComments, LLength + 1);
+  FLineComments[LLength] := AToken;
+end;
+
+procedure TBCEditorHighlighterComments.Clear;
+begin
+  ClearIndexes;
+  SetLength(FBlockComments, 0);
+  SetLength(FLineComments, 0);
+end;
+
+procedure TBCEditorHighlighterComments.ClearIndexes;
+begin
+  FBlockCommentIndex := -1;
+  FLineCommentIndex := -1;
+end;
+
+procedure TBCEditorHighlighterComments.GetBlockComment(var AOpenToken: string; var ACloseToken: string);
+begin
+  if FBlockCommentIndex < Length(FBlockComments) - 1 then
+  begin
+    Inc(FBlockCommentIndex);
+    AOpenToken := FBlockComments[FBlockCommentIndex];
+    Inc(FBlockCommentIndex);
+    ACloseToken := FBlockComments[FBlockCommentIndex];
+  end
+  else
+    FBlockCommentIndex := -1;
+end;
+
+procedure TBCEditorHighlighterComments.GetLineComment(var AToken: string);
+begin
+  if FLineCommentIndex < Length(FLineComments) - 1 then
+  begin
+    Inc(FLineCommentIndex);
+    AToken := FLineComments[FLineCommentIndex];
+  end
+  else
+    FLineCommentIndex := -1;
 end;
 
 end.

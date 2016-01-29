@@ -10943,7 +10943,7 @@ var
   LTextCaretPosition, LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
   LLength := Length(FHighlighter.Comments.BlockComments);
-  FLines.BeginUpdate;
+
   if LLength > 0 then
   begin
     LTextCaretPosition := TextCaretPosition;
@@ -10984,7 +10984,6 @@ begin
 
     FLines.BeginUpdate;
     FLines.Strings[LLine] := LLineText;
-    FLines.EndUpdate;
 
     if SelectionAvailable then
       LLine := LSelectionEndPosition.Line
@@ -11022,8 +11021,8 @@ begin
       GetTextPosition(Length(LLineText) + 1, LLine), FLines.Strings[LLine], smLine);
 
     FLines.Strings[LLine] := LLineText;
+    FLines.EndUpdate;
   end;
-  FLines.EndUpdate;
   TextCaretPosition := LTextCaretPosition;
   FSelectionBeginPosition := LSelectionBeginPosition;
   FSelectionEndPosition := LSelectionEndPosition;
@@ -12817,7 +12816,7 @@ begin
       LLine := LTextCaretPosition.Line;
       LEndLine := LLine;
     end;
-
+    FLines.BeginUpdate;
     for LLine := LLine to LEndLine do
     begin
       i := 0;
@@ -12856,11 +12855,12 @@ begin
         TextCaretPosition := LTextCaretPosition;
       end;
     end;
+    FLines.EndUpdate;
   end;
-  LSelectionBeginPosition := FSelectionBeginPosition;
-  LSelectionEndPosition := FSelectionEndPosition;
+  FSelectionBeginPosition := LSelectionBeginPosition;
+  FSelectionEndPosition := LSelectionEndPosition;
   if SelectionAvailable then
-    LTextCaretPosition := TextCaretPosition;
+    TextCaretPosition := LTextCaretPosition;
   RescanCodeFoldingRanges;
   ScanMatchingPair;
 end;

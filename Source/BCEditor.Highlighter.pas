@@ -11,24 +11,16 @@ type
   // TODO: Move to own unit
   TBCEditorHighlighterComments = class(TObject)
   strict private
-    FBlockCommentIndex: Integer;
     FBlockComments: TBCEditorArrayOfString;
-    FLineCommentIndex: Integer;
     FLineComments: TBCEditorArrayOfString;
   public
-    constructor Create;
     destructor Destroy; override;
 
-    function BlockCommentCount: Integer;
-    function LineCommentCount: Integer;
     procedure AddBlockComment(const AOpenToken: string; const ACloseToken: string);
     procedure AddLineComment(const AToken: string);
     procedure Clear;
-    procedure ClearIndexes;
-    procedure GetBlockComment(var AOpenToken: string; var ACloseToken: string);
-    procedure GetLineComment(var AToken: string);
-    procedure GetBlockCommentLength(var AOpenTokenLength: Integer; var ACloseTokenLength: Integer);
-    procedure GetLineCommentLength(var ATokenLength: Integer);
+    property BlockComments: TBCEditorArrayOfString read FBlockComments;
+    property LineComments: TBCEditorArrayOfString read FLineComments;
   end;
 
   TBCEditorHighlighter = class(TObject)
@@ -624,41 +616,11 @@ end;
 
 { TBCEditorHighlighterComments }
 
-constructor TBCEditorHighlighterComments.Create;
-begin
-  inherited Create;
-
-  ClearIndexes;
-end;
-
 destructor TBCEditorHighlighterComments.Destroy;
 begin
   Clear;
 
   inherited Destroy;
-end;
-
-function TBCEditorHighlighterComments.BlockCommentCount: Integer;
-begin
-  Result := Length(FBlockComments);
-end;
-
-procedure TBCEditorHighlighterComments.GetBlockCommentLength(var AOpenTokenLength: Integer; var ACloseTokenLength: Integer);
-begin
-  AOpenTokenLength := 0;
-  ACloseTokenLength := 0;
-  if (FBlockCommentIndex > 0) and (FBlockCommentIndex < Length(FBlockComments)) then
-  begin
-    AOpenTokenLength := Length(FBlockComments[FBlockCommentIndex - 1]);
-    ACloseTokenLength := Length(FBlockComments[FBlockCommentIndex]);
-  end;
-end;
-
-procedure TBCEditorHighlighterComments.GetLineCommentLength(var ATokenLength: Integer);
-begin
-  ATokenLength := 0;
-  if (FLineCommentIndex > -1) and (FLineCommentIndex < Length(FLineComments)) then
-    ATokenLength := Length(FLineComments[FLineCommentIndex]);
 end;
 
 procedure TBCEditorHighlighterComments.AddBlockComment(const AOpenToken: string; const ACloseToken: string);
@@ -674,11 +636,6 @@ begin
   SetLength(FBlockComments, LLength + 2);
   FBlockComments[LLength] := AOpenToken;
   FBlockComments[LLength + 1] := ACloseToken;
-end;
-
-function TBCEditorHighlighterComments.LineCommentCount: Integer;
-begin
-  Result := Length(FLineComments);
 end;
 
 procedure TBCEditorHighlighterComments.AddLineComment(const AToken: string);
@@ -697,39 +654,8 @@ end;
 
 procedure TBCEditorHighlighterComments.Clear;
 begin
-  ClearIndexes;
   SetLength(FBlockComments, 0);
   SetLength(FLineComments, 0);
-end;
-
-procedure TBCEditorHighlighterComments.ClearIndexes;
-begin
-  FBlockCommentIndex := -1;
-  FLineCommentIndex := -1;
-end;
-
-procedure TBCEditorHighlighterComments.GetBlockComment(var AOpenToken: string; var ACloseToken: string);
-begin
-  if FBlockCommentIndex < Length(FBlockComments) - 1 then
-  begin
-    Inc(FBlockCommentIndex);
-    AOpenToken := FBlockComments[FBlockCommentIndex];
-    Inc(FBlockCommentIndex);
-    ACloseToken := FBlockComments[FBlockCommentIndex];
-  end
-  else
-    FBlockCommentIndex := -1;
-end;
-
-procedure TBCEditorHighlighterComments.GetLineComment(var AToken: string);
-begin
-  if FLineCommentIndex < Length(FLineComments) - 1 then
-  begin
-    Inc(FLineCommentIndex);
-    AToken := FLineComments[FLineCommentIndex];
-  end
-  else
-    FLineCommentIndex := -1;
 end;
 
 end.

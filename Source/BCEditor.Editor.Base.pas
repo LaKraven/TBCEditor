@@ -6587,7 +6587,6 @@ begin
     Inc(LLeftMarginWidth, FMinimap.GetWidth);
 
   LWasSelected := False;
-  FHighlighter.Comments.ClearIndexes;
 
   if AButton = mbLeft then
   begin
@@ -10933,47 +10932,86 @@ end;
 
 procedure TBCBaseEditor.DoBlockComment;
 var
+  i: Integer;
+  LLength: Integer;
   LLine: Integer;
-  LOpenToken, LCloseToken: string;
-  LOpenTokenLength, LCloseTokenLength: Integer;
-  LBlockStartPosition, LBlockEndPosition: TBCEditorTextPosition;
+  LCommentIndex: Integer;
+  LSpaceCount: Integer;
+  LLineText: string;
+  LLineLength: Integer;
+  LCommentLength: Integer;
   LTextCaretPosition, LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
-  if FHighlighter.Comments.BlockCommentCount > 0 then
+  LLength := Length(FHighlighter.Comments.BlockComments);
+  if LLength > 0 then
   begin
     LTextCaretPosition := TextCaretPosition;
     LSelectionBeginPosition := FSelectionBeginPosition;
     LSelectionEndPosition := FSelectionEndPosition;
-    FHighlighter.Comments.GetBlockCommentLength(LOpenTokenLength, LCloseTokenLength);
-    FHighlighter.Comments.GetBlockComment(LOpenToken, LCloseToken);
 
-    LBlockStartPosition.Char := 1;
-    LBlockEndPosition.Char := LOpenTokenLength + 1;
     if SelectionAvailable then
       LLine := LSelectionBeginPosition.Line
     else
       LLine := LTextCaretPosition.Line;
-    LBlockStartPosition.Line := LLine;
-    LBlockEndPosition.Line := LLine;
 
-    InsertBlock(LBlockStartPosition, LBlockEndPosition, PChar(LOpenToken), True);
+    i := 0;
+    LCommentIndex := -2;
+    LLineText := FLines[LLine];
+    LSpaceCount := LeftSpaceCount(LLineText, True);
+    LLineText := Trim(LLineText);
+    while i < LLength - 1 do
+    begin
+      if Pos(FHighlighter.Comments.BlockComments[i], LLineText) = 1 then
+      begin
+        LCommentIndex := i;
+        Break;
+      end;
+      Inc(i, 2);
+    end;
+
+    if LCommentIndex <> -2 then
+      LLineText := Copy(LLineText, Length(FHighlighter.Comments.BlockComments[LCommentIndex]) + 1, Length(LLineText));
+
+    Inc(LCommentIndex, 2);
+    if LCommentIndex < LLength - 1 then
+      LLineText := FHighlighter.Comments.BlockComments[LCommentIndex] + LLineText;
+
+    FLines[LLine] := StringOfChar(' ', LSpaceCount) + LLineText;
 
     if SelectionAvailable then
       LLine := LSelectionEndPosition.Line
     else
       LLine := LTextCaretPosition.Line;
 
-    LBlockStartPosition.Char := FLines.StringLength(LLine) - LCloseTokenLength + 1;
-    LBlockStartPosition.Line := LLine;
-    LBlockEndPosition.Char := LBlockStartPosition.Char + LCloseTokenLength;
-    LBlockEndPosition.Line := LLine;
+    i := 1;
+    LCommentIndex := -1;
+    LLineText := FLines[LLine];
+    LSpaceCount := LeftSpaceCount(LLineText, True);
+    LLineText := Trim(LLineText);
+    LLineLength := Length(LLineText);
+    LCommentLength := 0;
+    while i < LLength do
+    begin
+      LCommentLength := Length(FHighlighter.Comments.BlockComments[i]);
+      if Pos(FHighlighter.Comments.BlockComments[i], LLineText) = LLineLength - LCommentLength + 1 then
+      begin
+        LCommentIndex := i;
+        Break;
+      end;
+      Inc(i, 2);
+    end;
 
-    InsertBlock(LBlockStartPosition, LBlockEndPosition, PChar(LCloseToken), True);
+    if LCommentIndex <> -1 then
+      LLineText := Copy(LLineText, 1, LLineLength - LCommentLength);
 
-    FSelectionBeginPosition := LSelectionBeginPosition;
-    FSelectionEndPosition := LSelectionEndPosition;
-    TextCaretPosition := LTextCaretPosition;
+    Inc(LCommentIndex, 2);
+    if LCommentIndex < LLength then
+      LLineText := LLineText + FHighlighter.Comments.BlockComments[LCommentIndex];
+
+    FLines[LLine] := StringOfChar(' ', LSpaceCount) + LLineText;
   end;
+  RescanCodeFoldingRanges;
+  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.DoCutToClipboard;
@@ -12737,55 +12775,67 @@ end;
 procedure TBCBaseEditor.DoLineComment;
 var
   i: Integer;
-  LLine: Integer;
-  LToken: string;
-  LTokenLength: Integer;
-  LBlockStartPosition, LBlockEndPosition: TBCEditorTextPosition;
+  LLength: Integer;
+  LLine, LEndLine: Integer;
+  LCommentIndex: Integer;
+  LSpaceCount: Integer;
+  LLineText: string;
+  LComment: string;
   LTextCaretPosition, LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
-  if FHighlighter.Comments.LineCommentCount > 0 then
+  LLength := Length(FHighlighter.Comments.LineComments);
+  if LLength > 0 then
   begin
     LTextCaretPosition := TextCaretPosition;
     LSelectionBeginPosition := FSelectionBeginPosition;
     LSelectionEndPosition := FSelectionEndPosition;
-    FHighlighter.Comments.GetLineCommentLength(LTokenLength);
-    FHighlighter.Comments.GetLineComment(LToken);
-
-    LBlockStartPosition.Char := 1;
-    LBlockEndPosition.Char := LTokenLength + 1;
-    if SelectionAvailable then
-      LLine := LSelectionBeginPosition.Line
-    else
-      LLine := LTextCaretPosition.Line;
-    LBlockStartPosition.Line := LLine;
-    LBlockEndPosition.Line := LLine;
 
     if SelectionAvailable then
-    for i := 0 to LSelectionEndPosition.Line - LSelectionBeginPosition.Line do
     begin
-      InsertBlock(LBlockStartPosition, LBlockEndPosition, PChar(LToken), True);
-      Inc(LBlockStartPosition.Line);
-      Inc(LBlockEndPosition.Line);
+      LLine := LSelectionBeginPosition.Line;
+      LEndLine := LSelectionEndPosition.Line;
     end
     else
     begin
-      if Pos(LToken, FLines[LTextCaretPosition.Line]) = 1 then
-      begin
-        LBlockEndPosition.Char := Length(LToken) + 1;
-        LToken := '';
-      end;
-      InsertBlock(LBlockStartPosition, LBlockEndPosition, PChar(LToken), True);
+      LLine := LTextCaretPosition.Line;
+      LEndLine := LLine;
     end;
 
-    FSelectionBeginPosition := LSelectionBeginPosition;
-    FSelectionEndPosition := LSelectionEndPosition;
-    if not SelectionAvailable then
+    for LLine := LLine to LEndLine do
     begin
-      Inc(LTextCaretPosition.Line);
-      FHighlighter.Comments.ClearIndexes;
+      i := 0;
+      LCommentIndex := -1;
+      LLineText := FLines[LLine];
+      LSpaceCount := LeftSpaceCount(LLineText, True);
+      LLineText := Trim(LLineText);
+      while i < LLength do
+      begin
+        if Pos(FHighlighter.Comments.LineComments[i], LLineText) = 1 then
+        begin
+          LCommentIndex := i;
+          Break;
+        end;
+        Inc(i);
+      end;
+
+      if LCommentIndex <> -1 then
+        LLineText := Copy(LLineText, Length(FHighlighter.Comments.LineComments[LCommentIndex]) + 1, Length(LLineText));
+
+      Inc(LCommentIndex);
+      LComment := '';
+      if LCommentIndex < LLength then
+        LComment := FHighlighter.Comments.LineComments[LCommentIndex];
+
+      FLines[LLine] := LComment + StringOfChar(' ', LSpaceCount) + LLineText;
+      if not SelectionAvailable then
+      begin
+        Inc(LTextCaretPosition.Line);
+        TextCaretPosition := LTextCaretPosition;
+      end;
     end;
-    TextCaretPosition := LTextCaretPosition;
   end;
+  RescanCodeFoldingRanges;
+  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);

@@ -10943,6 +10943,7 @@ var
   LTextCaretPosition, LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
 begin
   LLength := Length(FHighlighter.Comments.BlockComments);
+  FLines.BeginUpdate;
   if LLength > 0 then
   begin
     LTextCaretPosition := TextCaretPosition;
@@ -10976,7 +10977,14 @@ begin
     if LCommentIndex < LLength - 1 then
       LLineText := FHighlighter.Comments.BlockComments[LCommentIndex] + LLineText;
 
-    FLines[LLine] := StringOfChar(' ', LSpaceCount) + LLineText;
+    LLineText := StringOfChar(' ', LSpaceCount) + LLineText;
+
+    FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LLine),
+      GetTextPosition(Length(LLineText) + 1, LLine), FLines.Strings[LLine], smLine);
+
+    FLines.BeginUpdate;
+    FLines.Strings[LLine] := LLineText;
+    FLines.EndUpdate;
 
     if SelectionAvailable then
       LLine := LSelectionEndPosition.Line
@@ -11008,8 +11016,17 @@ begin
     if LCommentIndex < LLength then
       LLineText := LLineText + FHighlighter.Comments.BlockComments[LCommentIndex];
 
-    FLines[LLine] := StringOfChar(' ', LSpaceCount) + LLineText;
+    LLineText := StringOfChar(' ', LSpaceCount) + LLineText;
+
+    FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LLine),
+      GetTextPosition(Length(LLineText) + 1, LLine), FLines.Strings[LLine], smLine);
+
+    FLines.Strings[LLine] := LLineText;
   end;
+  FLines.EndUpdate;
+  TextCaretPosition := LTextCaretPosition;
+  FSelectionBeginPosition := LSelectionBeginPosition;
+  FSelectionEndPosition := LSelectionEndPosition;
   RescanCodeFoldingRanges;
   ScanMatchingPair;
 end;
@@ -12826,7 +12843,13 @@ begin
       if LCommentIndex < LLength then
         LComment := FHighlighter.Comments.LineComments[LCommentIndex];
 
-      FLines[LLine] := LComment + StringOfChar(' ', LSpaceCount) + LLineText;
+      LLineText := LComment + StringOfChar(' ', LSpaceCount) + LLineText;
+
+      FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LLine),
+        GetTextPosition(Length(LLineText) + 1, LLine), FLines.Strings[LLine], smLine);
+
+      FLines.Strings[LLine] := LLineText;
+
       if not SelectionAvailable then
       begin
         Inc(LTextCaretPosition.Line);
@@ -12834,6 +12857,10 @@ begin
       end;
     end;
   end;
+  LSelectionBeginPosition := FSelectionBeginPosition;
+  LSelectionEndPosition := FSelectionEndPosition;
+  if SelectionAvailable then
+    LTextCaretPosition := TextCaretPosition;
   RescanCodeFoldingRanges;
   ScanMatchingPair;
 end;
@@ -12894,8 +12921,8 @@ begin
   LTextCaretPosition.Char := 1;
   LTextCaretPosition.Line := ALineNumber - 1;
 
-  FUndoList.AddChange(crPaste, LTextCaretPosition, LTextCaretPosition,
-    GetTextPosition(Length(AValue) + 1, LTextCaretPosition.Line), FLines.Strings[ALineNumber - 1], smLine);
+  FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, ALineNumber - 1),
+    GetTextPosition(Length(AValue) + 1, ALineNumber - 1), FLines.Strings[ALineNumber - 1], smLine);
 
   FLines.BeginUpdate;
   FLines.Strings[ALineNumber - 1] := AValue;

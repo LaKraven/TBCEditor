@@ -9,11 +9,15 @@ type
   TBCEditorSyncEdit = class(TPersistent)
   private
     FActive: Boolean;
+    FBlockBeginPosition: TBCEditorTextPosition;
+    FBlockEndPosition: TBCEditorTextPosition;
+    FBlockSelected: Boolean;
     FColors: TBCEditorSyncEditColors;
     FEditBeginPosition: TBCEditorTextPosition;
     FEditEndPosition: TBCEditorTextPosition;
     FEditWidth: Integer;
     FEnabled: Boolean;
+    FInEditor: Boolean;
     FOnChange: TNotifyEvent;
     FShortCut: TShortCut;
     FSyncItems: TList;
@@ -23,15 +27,20 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+    function IsTextPositionInBlock(ATextPosition: TBCEditorTextPosition): Boolean;
     function IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
     procedure Abort;
     procedure Assign(ASource: TPersistent); override;
     procedure ClearSyncItems;
     procedure MoveEndPositionChar(ACount: Integer);
     property Active: Boolean read FActive write SetActive default False;
+    property BlockBeginPosition: TBCEditorTextPosition read FBlockBeginPosition write FBlockBeginPosition;
+    property BlockEndPosition: TBCEditorTextPosition read FBlockEndPosition write FBlockEndPosition;
+    property BlockSelected: Boolean read FBlockSelected write FBlockSelected default False;
     property EditBeginPosition: TBCEditorTextPosition read FEditBeginPosition write FEditBeginPosition;
     property EditEndPosition: TBCEditorTextPosition read FEditEndPosition write FEditEndPosition;
     property EditWidth: Integer read FEditWidth write FEditWidth;
+    property InEditor: Boolean read FInEditor write FInEditor default False;
     property SyncItems: TList read FSyncItems write FSyncItems;
   published
     property Colors: TBCEditorSyncEditColors read FColors write FColors;
@@ -53,7 +62,9 @@ begin
   inherited Create;
 
   FActive := False;
+  FBlockSelected := False;
   FEnabled := True;
+  FInEditor := False;
   FShortCut := Vcl.Menus.ShortCut(Ord('J'), [ssCtrl, ssShift]);
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
@@ -98,11 +109,8 @@ end;
 
 procedure TBCEditorSyncEdit.SetActive(AValue: Boolean);
 begin
-  if FActive <> AValue then
-  begin
-    FActive := AValue;
-    DoChange(Self);
-  end;
+  FActive := AValue;
+  DoChange(Self);
 end;
 
 function TBCEditorSyncEdit.IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;
@@ -112,6 +120,15 @@ begin
     and
     ((ATextPosition.Line < FEditEndPosition.Line) or
     (ATextPosition.Line = FEditEndPosition.Line) and (ATextPosition.Char < FEditEndPosition.Char));
+end;
+
+function TBCEditorSyncEdit.IsTextPositionInBlock(ATextPosition: TBCEditorTextPosition): Boolean;
+begin
+  Result := ((ATextPosition.Line > FBlockBeginPosition.Line) or
+    (ATextPosition.Line = FBlockBeginPosition.Line) and (ATextPosition.Char >= FBlockBeginPosition.Char))
+    and
+    ((ATextPosition.Line < FBlockEndPosition.Line) or
+    (ATextPosition.Line = FBlockEndPosition.Line) and (ATextPosition.Char < FBlockEndPosition.Char));
 end;
 
 procedure TBCEditorSyncEdit.MoveEndPositionChar(ACount: Integer);

@@ -4667,34 +4667,59 @@ procedure TBCBaseEditor.SyncEditChanged(Sender: TObject);
 var
   i: Integer;
   LTextPosition: TBCEditorTextPosition;
+  LIsWordSelected: Boolean;
+  LSelectionAvailable: Boolean;
 begin
   FSyncEdit.ClearSyncItems;
   if FSyncEdit.Active then
   begin
     FWordWrap.Enabled := False;
-    if SelectionAvailable and IsWordSelected then
+    LSelectionAvailable := SelectionAvailable;
+    LIsWordSelected := IsWordSelected;
+    if LSelectionAvailable and LIsWordSelected then
     begin
       FUndoList.BeginBlock;
+      FSyncEdit.InEditor := True;
       FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
       FSyncEdit.EditEndPosition := FSelectionEndPosition;
       FSyncEdit.EditWidth := FSelectionEndPosition.Char - FSelectionBeginPosition.Char;
       FindWords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
-      for i := 0 to FSyncEdit.SyncItems.Count - 1 do
+      i := 0;
+      while i < FSyncEdit.SyncItems.Count do
       begin
         LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
-        if (LTextPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextPosition.Char = FSyncEdit.EditBeginPosition.Char) then
+        if (LTextPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextPosition.Char = FSyncEdit.EditBeginPosition.Char) or
+          FSyncEdit.BlockSelected and not FSyncEdit.IsTextPositionInBlock(LTextPosition) then
         begin
           Dispose(PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i]));
           FSyncEdit.SyncItems.Delete(i);
-          Break;
-        end;
+        end
+        else
+          Inc(i);
       end;
+    end
+    else
+    if LSelectionAvailable and not LIsWordSelected then
+    begin
+      FSyncEdit.BlockSelected := True;
+      FSyncEdit.BlockBeginPosition := FSelectionBeginPosition;
+      FSyncEdit.BlockEndPosition := FSelectionEndPosition;
+      FSyncEdit.Abort;
+      FSelectionBeginPosition := TextCaretPosition;
+      FSelectionEndPosition := FSelectionBeginPosition;
     end
     else
       FSyncEdit.Abort;
   end
   else
-    FUndoList.EndBlock;
+  begin
+    FSyncEdit.BlockSelected := False;
+    if FSyncEdit.InEditor then
+    begin
+      FSyncEdit.InEditor := False;
+      FUndoList.EndBlock;
+    end;
+  end;
   Invalidate;
 end;
 
@@ -6605,6 +6630,10 @@ begin
       Exit;
     end;
 
+  if FSyncEdit.Enabled and FSyncEdit.BlockSelected then
+    if not FSyncEdit.IsTextPositionInBlock(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
+      FSyncEdit.Active := False;
+
   if FSyncEdit.Enabled and FSyncEdit.Active then
   begin
     if not FSyncEdit.IsTextPositionInEdit(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
@@ -8210,7 +8239,7 @@ var
   LFirstLine: Integer;
   LForegroundColor, LBackgroundColor: TColor;
   LIsSelectionInsideLine: Boolean;
-  LIsLineSelected, LIsCurrentLine: Boolean;
+  LIsLineSelected, LIsCurrentLine, LIsSyncEditBlock: Boolean;
   LLastLine: Integer;
   LLineRect, LTokenRect: TRect;
   LLineSelectionStart, LLineSelectionEnd: Integer;
@@ -8249,6 +8278,9 @@ var
     else
     if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Color <> clNone) then
       Result := FActiveLine.Color
+    else
+    if LIsSyncEditBlock then
+      Result := FSyncEdit.Colors.Background
     else
     begin
       Result := FBackgroundColor;
@@ -8627,6 +8659,8 @@ var
     end;
 
     procedure PrepareToken;
+    var
+      LTextPosition: TBCEditorTextPosition;
     begin
       LHighlighterAttribute := FHighlighter.GetTokenAttribute;
       if Assigned(LHighlighterAttribute) then
@@ -8675,6 +8709,17 @@ var
               end;
             end;
           end;
+
+        LIsSyncEditBlock := False;
+        if FSyncEdit.BlockSelected then
+        begin
+           LTextPosition := GetTextPosition(LTokenPosition + 1, LCurrentLine - 1);
+           if FSyncEdit.IsTextPositionInBlock(LTextPosition) then
+           begin
+             LIsSyncEditBlock := True;
+             LBackgroundColor := FSyncEdit.Colors.Background;
+           end;
+        end;
 
         if not FSyncEdit.Active and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
         begin

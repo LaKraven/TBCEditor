@@ -60,8 +60,8 @@ const
   clWordWrapIndicatorBackground = $00FFFFFF;
   clWordWrapIndicatorArrow = clNavy;
   clWordWrapIndicatorLines = clBlack;
+  clSyncEditBackground = $00FCFDCD;
   { Undo }
-  BCEDITOR_UNDO_MAX_ACTIONS = 1024;
   BCEDITOR_UNDO_BLOCK_NUMBER_START = 10;
 
 implementation

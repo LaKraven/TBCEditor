@@ -261,7 +261,7 @@ type
     procedure DragMinimap(Y: Integer);
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(const ASearchText: string = '');
-    procedure FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
+    procedure FindWords(AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
     procedure FontChanged(Sender: TObject);
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
@@ -3175,10 +3175,10 @@ begin
   if LKeyword = '' then
     Exit;
 
-  FindKeywords(LKeyword, FSearch.Lines, soCaseSensitive in FSearch.Options, False);
+  FindWords(LKeyword, FSearch.Lines, soCaseSensitive in FSearch.Options, False);
 end;
 
-procedure TBCBaseEditor.FindKeywords(AKeyWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
+procedure TBCBaseEditor.FindWords(AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
 var
   i: Integer;
   LLine: string;
@@ -3205,9 +3205,9 @@ begin
     LTextPtr := PChar(LLine);
     while LTextPtr^ <> BCEDITOR_NONE_CHAR do
     begin
-      if AreCharsSame(LTextPtr, PChar(AKeyword)) then { if the first character is a match }
+      if AreCharsSame(LTextPtr, PChar(AWord)) then { if the first character is a match }
       begin
-        LKeyWordPtr := PChar(AKeyword);
+        LKeyWordPtr := PChar(AWord);
         LBookmarkTextPtr := LTextPtr;
         { check if the keyword found }
         while (LTextPtr^ <> BCEDITOR_NONE_CHAR) and (LKeyWordPtr^ <> BCEDITOR_NONE_CHAR) and AreCharsSame(LTextPtr, LKeyWordPtr) do
@@ -4678,7 +4678,7 @@ begin
       FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
       FSyncEdit.EditEndPosition := FSelectionEndPosition;
       FSyncEdit.EditWidth := FSelectionEndPosition.Char - FSelectionBeginPosition.Char;
-      FindKeywords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
+      FindWords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
       for i := 0 to FSyncEdit.SyncItems.Count - 1 do
       begin
         LTextPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
@@ -8185,7 +8185,7 @@ begin
   if FMinimap.Align = maLeft then
     Inc(LLeftMargin, FMinimap.GetWidth);
   Canvas.Brush.Style := bsClear;
-  Canvas.Pen.Color := FForegroundColor;
+  Canvas.Pen.Color := FSyncEdit.Colors.EditBorder;
   DrawRectangle(FSyncEdit.EditBeginPosition);
 
   for i := 0 to FSyncEdit.SyncItems.Count - 1 do
@@ -8197,7 +8197,7 @@ begin
     else
     if LTextPosition.Line + 1 >= TopLine then
     begin
-      Canvas.Pen.Color := FSelection.Colors.Background;
+      Canvas.Pen.Color := FSyncEdit.Colors.WordBorder;
       DrawRectangle(LTextPosition);
     end;
   end;

@@ -3,12 +3,13 @@ unit BCEditor.Editor.SyncEdit;
 interface
 
 uses
-  System.Classes, BCEditor.Types;
+  System.Classes, BCEditor.Editor.SyncEdit.Colors, BCEditor.Types;
 
 type
   TBCEditorSyncEdit = class(TPersistent)
   private
     FActive: Boolean;
+    FColors: TBCEditorSyncEditColors;
     FEditBeginPosition: TBCEditorTextPosition;
     FEditEndPosition: TBCEditorTextPosition;
     FEditWidth: Integer;
@@ -33,6 +34,7 @@ type
     property EditWidth: Integer read FEditWidth write FEditWidth;
     property SyncItems: TList read FSyncItems write FSyncItems;
   published
+    property Colors: TBCEditorSyncEditColors read FColors write FColors;
     property Enabled: Boolean read FEnabled write FEnabled default True;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Options: TBCEditorSyncEditOptions read FOptions write FOptions default [seCaseSensitive];
@@ -55,12 +57,14 @@ begin
   FShortCut := Vcl.Menus.ShortCut(Ord('J'), [ssCtrl, ssShift]);
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
+  FColors := TBCEditorSyncEditColors.Create;
 end;
 
 destructor TBCEditorSyncEdit.Destroy;
 begin
   ClearSyncItems;
   FSyncItems.Free;
+  FColors.Free;
   inherited;
 end;
 

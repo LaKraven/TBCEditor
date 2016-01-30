@@ -11067,12 +11067,13 @@ begin
 
     FLines.Strings[LLine] := LLineText;
     FLines.EndUpdate;
+
+    TextCaretPosition := LTextCaretPosition;
+    FSelectionBeginPosition := LSelectionBeginPosition;
+    FSelectionEndPosition := LSelectionEndPosition;
+    RescanCodeFoldingRanges;
+    ScanMatchingPair;
   end;
-  TextCaretPosition := LTextCaretPosition;
-  FSelectionBeginPosition := LSelectionBeginPosition;
-  FSelectionEndPosition := LSelectionEndPosition;
-  RescanCodeFoldingRanges;
-  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.DoCutToClipboard;
@@ -12901,13 +12902,14 @@ begin
       end;
     end;
     FLines.EndUpdate;
+
+    FSelectionBeginPosition := LSelectionBeginPosition;
+    FSelectionEndPosition := LSelectionEndPosition;
+    if SelectionAvailable then
+      TextCaretPosition := LTextCaretPosition;
+    RescanCodeFoldingRanges;
+    ScanMatchingPair;
   end;
-  FSelectionBeginPosition := LSelectionBeginPosition;
-  FSelectionEndPosition := LSelectionEndPosition;
-  if SelectionAvailable then
-    TextCaretPosition := LTextCaretPosition;
-  RescanCodeFoldingRanges;
-  ScanMatchingPair;
 end;
 
 procedure TBCBaseEditor.RegisterCommandHandler(const AHookedCommandEvent: TBCEditorHookedCommandEvent; AHandlerData: Pointer);

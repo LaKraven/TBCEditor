@@ -12903,7 +12903,12 @@ begin
       end;
 
       if LCommentIndex <> -1 then
+      begin
+        LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
+        FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1 + LSpaceCount, LLine),
+          GetTextPosition(Length(LComment) + 1 + LSpaceCount, LLine), LComment, FSelection.ActiveMode);
         LLineText := Copy(LLineText,  Length(FHighlighter.Comments.LineComments[LCommentIndex]) + 1, Length(LLineText));
+      end;
 
       Inc(LCommentIndex);
       LComment := '';

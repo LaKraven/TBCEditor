@@ -6630,6 +6630,15 @@ begin
       Exit;
     end;
 
+  if FSyncEdit.Enabled and not FSyncEdit.Active and LWasSelected then
+    if (X < LeftMargin.Bookmarks.Panel.Width) and
+      (Y div FLineHeight <= FSelectionEndPosition.Line - TopLine + 1) and
+      (Y div FLineHeight > FSelectionEndPosition.Line - TopLine) then
+    begin
+      FSyncEdit.Active := True;
+      Exit;
+    end;
+
   if FSyncEdit.Enabled and FSyncEdit.BlockSelected then
     if not FSyncEdit.IsTextPositionInBlock(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
       FSyncEdit.Active := False;
@@ -7731,7 +7740,15 @@ var
   procedure PaintActiveLineIndicator;
   begin
     if FActiveLine.Visible and FActiveLine.Indicator.Visible then
-      FActiveLine.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left, (DisplayCaretY - 1) * FLineHeight, FLineHeight);
+      FActiveLine.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left, (DisplayCaretY - 1) * FLineHeight,
+        FLineHeight);
+  end;
+
+  procedure PaintSyncEditIndicator;
+  begin
+    if FSyncEdit.Enabled and not FSyncEdit.Active and FSyncEdit.Indicator.Visible and SelectionAvailable then
+      FSyncEdit.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left,
+        (SelectionEndPosition.Line - TopLine + 1) * FLineHeight, FLineHeight);
   end;
 
   procedure PaintLineState;
@@ -7807,6 +7824,7 @@ begin
   PaintBorder;
   PaintBookmarks;
   PaintActiveLineIndicator;
+  PaintSyncEditIndicator;
   PaintLineState;
   PaintBookmarkPanelLine;
 end;

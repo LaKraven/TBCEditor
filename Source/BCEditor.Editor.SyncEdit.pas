@@ -3,7 +3,7 @@ unit BCEditor.Editor.SyncEdit;
 interface
 
 uses
-  System.Classes, BCEditor.Editor.SyncEdit.Colors, BCEditor.Types;
+  System.Classes, BCEditor.Editor.SyncEdit.Colors, BCEditor.Editor.Glyph, BCEditor.Types;
 
 type
   TBCEditorSyncEdit = class(TPersistent)
@@ -17,6 +17,7 @@ type
     FEditEndPosition: TBCEditorTextPosition;
     FEditWidth: Integer;
     FEnabled: Boolean;
+    FIndicator: TBCEditorGlyph;
     FInEditor: Boolean;
     FOnChange: TNotifyEvent;
     FShortCut: TShortCut;
@@ -24,6 +25,7 @@ type
     FOptions: TBCEditorSyncEditOptions;
     procedure DoChange(Sender: TObject);
     procedure SetActive(AValue: Boolean);
+    procedure SetIndicator(const AValue: TBCEditorGlyph);
   public
     constructor Create;
     destructor Destroy; override;
@@ -45,6 +47,7 @@ type
   published
     property Colors: TBCEditorSyncEditColors read FColors write FColors;
     property Enabled: Boolean read FEnabled write FEnabled default True;
+    property Indicator: TBCEditorGlyph read FIndicator write SetIndicator;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Options: TBCEditorSyncEditOptions read FOptions write FOptions default [seCaseSensitive];
     property ShortCut: TShortCut read FShortCut write FShortCut;
@@ -53,7 +56,7 @@ type
 implementation
 
 uses
-  Vcl.Menus;
+  Vcl.Menus, Vcl.Graphics;
 
 { TBCEditorSyncEdit }
 
@@ -69,6 +72,7 @@ begin
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
   FColors := TBCEditorSyncEditColors.Create;
+  FIndicator := TBCEditorGlyph.Create(HINSTANCE, 'BCEDITORSYNCEDIT', clFuchsia);
 end;
 
 destructor TBCEditorSyncEdit.Destroy;
@@ -76,6 +80,7 @@ begin
   ClearSyncItems;
   FSyncItems.Free;
   FColors.Free;
+  FIndicator.Free;
   inherited;
 end;
 
@@ -95,6 +100,7 @@ begin
   begin
     Self.Enabled := FEnabled;
     Self.FShortCut := FShortCut;
+    Self.FIndicator.Assign(FIndicator);
     Self.DoChange(Self);
   end
   else
@@ -111,6 +117,11 @@ procedure TBCEditorSyncEdit.SetActive(AValue: Boolean);
 begin
   FActive := AValue;
   DoChange(Self);
+end;
+
+procedure TBCEditorSyncEdit.SetIndicator(const AValue: TBCEditorGlyph);
+begin
+  FIndicator.Assign(AValue);
 end;
 
 function TBCEditorSyncEdit.IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;

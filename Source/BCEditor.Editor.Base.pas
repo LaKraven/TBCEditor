@@ -6606,6 +6606,7 @@ procedure TBCBaseEditor.MouseDown(AButton: TMouseButton; AShift: TShiftState; X,
 var
   LWasSelected: Boolean;
   LLeftMarginWidth: Integer;
+  LSelectionEndPosition: TBCEditorTextPosition;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
@@ -6631,13 +6632,16 @@ begin
     end;
 
   if FSyncEdit.Enabled and not FSyncEdit.Active and LWasSelected then
+  begin
+    LSelectionEndPosition := SelectionEndPosition;
     if (X < LeftMargin.Bookmarks.Panel.Width) and
-      (Y div FLineHeight <= FSelectionEndPosition.Line - TopLine + 1) and
-      (Y div FLineHeight > FSelectionEndPosition.Line - TopLine) then
+      (Y div FLineHeight <= LSelectionEndPosition.Line - TopLine + 1) and
+      (Y div FLineHeight > LSelectionEndPosition.Line - TopLine) then
     begin
       FSyncEdit.Active := True;
       Exit;
     end;
+  end;
 
   if FSyncEdit.Enabled and FSyncEdit.BlockSelected then
     if not FSyncEdit.IsTextPositionInBlock(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then

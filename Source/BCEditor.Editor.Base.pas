@@ -6606,7 +6606,7 @@ procedure TBCBaseEditor.MouseDown(AButton: TMouseButton; AShift: TShiftState; X,
 var
   LWasSelected: Boolean;
   LLeftMarginWidth: Integer;
-  LSelectionEndPosition: TBCEditorTextPosition;
+  LDisplayPosition: TBCEditorDisplayPosition;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
@@ -6633,10 +6633,10 @@ begin
 
   if FSyncEdit.Enabled and not FSyncEdit.Active and LWasSelected then
   begin
-    LSelectionEndPosition := SelectionEndPosition;
+    LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
     if (X < LeftMargin.Bookmarks.Panel.Width) and
-      (Y div FLineHeight <= LSelectionEndPosition.Line - TopLine + 1) and
-      (Y div FLineHeight > LSelectionEndPosition.Line - TopLine) then
+      (Y div FLineHeight <= LDisplayPosition.Row - TopLine) and
+      (Y div FLineHeight > LDisplayPosition.Row - TopLine - 1) then
     begin
       FSyncEdit.Active := True;
       Exit;
@@ -7749,10 +7749,15 @@ var
   end;
 
   procedure PaintSyncEditIndicator;
+  var
+    LDisplayPosition: TBCEditorDisplayPosition;
   begin
     if FSyncEdit.Enabled and not FSyncEdit.Active and FSyncEdit.Indicator.Visible and SelectionAvailable then
+    begin
+      LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
       FSyncEdit.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left,
-        (SelectionEndPosition.Line - TopLine + 1) * FLineHeight, FLineHeight);
+        (LDisplayPosition.Row - TopLine) * FLineHeight, FLineHeight);
+    end;
   end;
 
   procedure PaintLineState;

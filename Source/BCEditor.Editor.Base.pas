@@ -8639,6 +8639,7 @@ var
     LOpenTokenEndPos, LOpenTokenEndLen: Integer;
     LElement: string;
     LIsCustomBackgroundColor: Boolean;
+    LTextPosition: TBCEditorTextPosition;
 
     function GetWordAtSelection(var ASelectedText: string): string;
     var
@@ -8659,8 +8660,6 @@ var
     end;
 
     procedure PrepareToken;
-    var
-      LTextPosition: TBCEditorTextPosition;
     begin
       LHighlighterAttribute := FHighlighter.GetTokenAttribute;
       if Assigned(LHighlighterAttribute) then
@@ -8710,16 +8709,8 @@ var
             end;
           end;
 
-        LIsSyncEditBlock := False;
-        if FSyncEdit.BlockSelected then
-        begin
-           LTextPosition := GetTextPosition(LTokenPosition + 1, LCurrentLine - 1);
-           if FSyncEdit.IsTextPositionInBlock(LTextPosition) then
-           begin
-             LIsSyncEditBlock := True;
-             LBackgroundColor := FSyncEdit.Colors.Background;
-           end;
-        end;
+        if FSyncEdit.BlockSelected and LIsSyncEditBlock then
+          LBackgroundColor := FSyncEdit.Colors.Background;
 
         if not FSyncEdit.Active and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
         begin
@@ -8917,6 +8908,15 @@ var
           LTokenPosition := FHighlighter.GetTokenPosition;
           FHighlighter.GetToken(LTokenText);
           LTokenLength := FHighlighter.GetTokenLength;
+
+          LIsSyncEditBlock := False;
+          if FSyncEdit.BlockSelected then
+          begin
+             LTextPosition := GetTextPosition(LTokenPosition + 1, LCurrentLine - 1);
+             if FSyncEdit.IsTextPositionInBlock(LTextPosition) then
+               LIsSyncEditBlock := True;
+          end;
+
           if LTokenPosition + LTokenLength >= LFirstColumn then
           begin
             if FWordWrap.Enabled then

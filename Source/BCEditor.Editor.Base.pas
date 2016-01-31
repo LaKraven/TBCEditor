@@ -4680,9 +4680,9 @@ begin
     begin
       FUndoList.BeginBlock;
       FSyncEdit.InEditor := True;
-      FSyncEdit.EditBeginPosition := FSelectionBeginPosition;
-      FSyncEdit.EditEndPosition := FSelectionEndPosition;
-      FSyncEdit.EditWidth := FSelectionEndPosition.Char - FSelectionBeginPosition.Char;
+      FSyncEdit.EditBeginPosition := SelectionBeginPosition;
+      FSyncEdit.EditEndPosition := SelectionEndPosition;
+      FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
       FindWords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
       i := 0;
       while i < FSyncEdit.SyncItems.Count do
@@ -4702,8 +4702,8 @@ begin
     if LSelectionAvailable and not LIsWordSelected then
     begin
       FSyncEdit.BlockSelected := True;
-      FSyncEdit.BlockBeginPosition := FSelectionBeginPosition;
-      FSyncEdit.BlockEndPosition := FSelectionEndPosition;
+      FSyncEdit.BlockBeginPosition := SelectionBeginPosition;
+      FSyncEdit.BlockEndPosition := SelectionEndPosition;
       FSyncEdit.Abort;
       FSelectionBeginPosition := TextCaretPosition;
       FSelectionEndPosition := FSelectionBeginPosition;

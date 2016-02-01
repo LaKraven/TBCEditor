@@ -2683,33 +2683,33 @@ end;
 
 procedure TBCBaseEditor.CodeFoldingResetCaches;
 var
-  i, j: Integer;
+  i, j, LLength: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
+  LLength := FLines.Count + 1;
   SetLength(FCodeFoldingTreeLine, 0); { empty }
-  SetLength(FCodeFoldingTreeLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingTreeLine, LLength); { max }
   SetLength(FCodeFoldingRangeFromLine, 0); { empty }
-  SetLength(FCodeFoldingRangeFromLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeFromLine, LLength); { max }
   SetLength(FCodeFoldingRangeToLine, 0); { empty }
-  SetLength(FCodeFoldingRangeToLine, FLines.Count + 1); { max }
+  SetLength(FCodeFoldingRangeToLine, LLength); { max }
   for i := FAllCodeFoldingRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FAllCodeFoldingRanges[i];
     if Assigned(LCodeFoldingRange) then
-    begin
       if (not LCodeFoldingRange.ParentCollapsed) and (LCodeFoldingRange.FromLine <> LCodeFoldingRange.ToLine) then
-      begin
-        FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
-
-        if LCodeFoldingRange.Collapsable then
+        if (LCodeFoldingRange.FromLine > 0) and (LCodeFoldingRange.FromLine <= LLength) then
         begin
-          for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
-            FCodeFoldingTreeLine[j] := True;
+          FCodeFoldingRangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
 
-          FCodeFoldingRangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
+          if LCodeFoldingRange.Collapsable then
+          begin
+            for j := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
+              FCodeFoldingTreeLine[j] := True;
+
+            FCodeFoldingRangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
+          end;
         end;
-      end;
-    end;
   end;
 end;
 
@@ -9461,6 +9461,7 @@ var
               LBeginTextPosition.Line));
             FLines[LBeginTextPosition.Line] := LTempString;
           end;
+
           TextCaretPosition := LBeginTextPosition;
         end;
       smColumn:

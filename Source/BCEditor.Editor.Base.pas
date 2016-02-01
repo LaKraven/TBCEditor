@@ -6631,7 +6631,7 @@ begin
       Exit;
     end;
 
-  if FSyncEdit.Enabled and not FSyncEdit.Active and LWasSelected then
+  if FSyncEdit.Enabled and FSyncEdit.Activator.Visible and not FSyncEdit.Active and LWasSelected then
   begin
     LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
     if (X < LeftMargin.Bookmarks.Panel.Width) and
@@ -7752,10 +7752,10 @@ var
   var
     LDisplayPosition: TBCEditorDisplayPosition;
   begin
-    if FSyncEdit.Enabled and not FSyncEdit.Active and FSyncEdit.Indicator.Visible and SelectionAvailable then
+    if FSyncEdit.Enabled and not FSyncEdit.Active and FSyncEdit.Activator.Visible and SelectionAvailable then
     begin
       LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
-      FSyncEdit.Indicator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left,
+      FSyncEdit.Activator.Draw(Canvas, AClipRect.Left + FActiveLine.Indicator.Left,
         (LDisplayPosition.Row - TopLine) * FLineHeight, FLineHeight);
     end;
   end;

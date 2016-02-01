@@ -9,6 +9,7 @@ type
   TBCEditorSyncEdit = class(TPersistent)
   private
     FActive: Boolean;
+    FActivator: TBCEditorGlyph;
     FBlockBeginPosition: TBCEditorTextPosition;
     FBlockEndPosition: TBCEditorTextPosition;
     FBlockSelected: Boolean;
@@ -17,7 +18,6 @@ type
     FEditEndPosition: TBCEditorTextPosition;
     FEditWidth: Integer;
     FEnabled: Boolean;
-    FIndicator: TBCEditorGlyph;
     FInEditor: Boolean;
     FOnChange: TNotifyEvent;
     FShortCut: TShortCut;
@@ -25,7 +25,7 @@ type
     FOptions: TBCEditorSyncEditOptions;
     procedure DoChange(Sender: TObject);
     procedure SetActive(AValue: Boolean);
-    procedure SetIndicator(const AValue: TBCEditorGlyph);
+    procedure SetActivator(const AValue: TBCEditorGlyph);
   public
     constructor Create;
     destructor Destroy; override;
@@ -47,7 +47,7 @@ type
   published
     property Colors: TBCEditorSyncEditColors read FColors write FColors;
     property Enabled: Boolean read FEnabled write FEnabled default True;
-    property Indicator: TBCEditorGlyph read FIndicator write SetIndicator;
+    property Activator: TBCEditorGlyph read FActivator write SetActivator;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property Options: TBCEditorSyncEditOptions read FOptions write FOptions default [seCaseSensitive];
     property ShortCut: TShortCut read FShortCut write FShortCut;
@@ -72,7 +72,7 @@ begin
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
   FColors := TBCEditorSyncEditColors.Create;
-  FIndicator := TBCEditorGlyph.Create(HINSTANCE, 'BCEDITORSYNCEDIT', clFuchsia);
+  FActivator := TBCEditorGlyph.Create(HINSTANCE, 'BCEDITORSYNCEDIT', clFuchsia);
 end;
 
 destructor TBCEditorSyncEdit.Destroy;
@@ -80,7 +80,7 @@ begin
   ClearSyncItems;
   FSyncItems.Free;
   FColors.Free;
-  FIndicator.Free;
+  FActivator.Free;
   inherited;
 end;
 
@@ -100,7 +100,7 @@ begin
   begin
     Self.Enabled := FEnabled;
     Self.FShortCut := FShortCut;
-    Self.FIndicator.Assign(FIndicator);
+    Self.FActivator.Assign(FActivator);
     Self.DoChange(Self);
   end
   else
@@ -119,9 +119,9 @@ begin
   DoChange(Self);
 end;
 
-procedure TBCEditorSyncEdit.SetIndicator(const AValue: TBCEditorGlyph);
+procedure TBCEditorSyncEdit.SetActivator(const AValue: TBCEditorGlyph);
 begin
-  FIndicator.Assign(AValue);
+  FActivator.Assign(AValue);
 end;
 
 function TBCEditorSyncEdit.IsTextPositionInEdit(ATextPosition: TBCEditorTextPosition): Boolean;

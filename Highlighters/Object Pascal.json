@@ -515,7 +515,8 @@
                      "procedure"
                   ],
                   "Attributes": {
-                     "Element": "Method"
+                     "Element": "Method",
+                     "EscapeChar": "&"
                   }
                },
                {

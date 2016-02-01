@@ -255,8 +255,10 @@ begin
   if Assigned(AAttributesObject) then
   begin
     AHighlighterAttribute.Element := AElementPrefix + AAttributesObject['Element'].Value;
-    AHighlighterAttribute.ParentForeground := AAttributesObject.B['ParentForeground'];
+    AHighlighterAttribute.ParentForeground := StrToBoolDef(AAttributesObject['ParentForeground'].Value, False);
     AHighlighterAttribute.ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
+    if AAttributesObject.Contains('EscapeChar') then
+      AHighlighterAttribute.EscapeChar := AAttributesObject['EscapeChar'].Value[1];
   end;
 end;
 
@@ -635,8 +637,6 @@ procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingOptions(ACodeFolding
 var
   LCodeFoldingObject: TJsonObject;
 begin
-  ACodeFoldingRegion.StringEscapeChar := BCEDITOR_NONE_CHAR;
-
   if ACodeFoldingObject.Contains('Options') then
   begin
     LCodeFoldingObject := ACodeFoldingObject['Options'].ObjectValue;
@@ -646,6 +646,9 @@ begin
 
     if LCodeFoldingObject.Contains('CloseToken') then
       ACodeFoldingRegion.CloseToken := LCodeFoldingObject['CloseToken'].Value;
+
+    if LCodeFoldingObject.Contains('EscapeChar') then
+      ACodeFoldingRegion.EscapeChar := LCodeFoldingObject['EscapeChar'].Value[1];
 
     if LCodeFoldingObject.Contains('StringEscapeChar') then
       ACodeFoldingRegion.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];

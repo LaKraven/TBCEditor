@@ -3,11 +3,13 @@ unit BCEditor.Consts;
 interface
 
 uses
-  BCEditor.Types, Vcl.Graphics;
+  Vcl.Graphics;
+
+type
+  TBCEditorCharSet = set of AnsiChar;
 
 const
   BCEDITOR_WHEEL_DIVISOR = 120;
-  BCEDITOR_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing];
   BCEDITOR_MAILTO = 'mailto:';
   BCEDITOR_HTTP = 'http://';
   { Clipboard formats }

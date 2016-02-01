@@ -4,7 +4,7 @@ interface
 
 uses
   Vcl.Graphics, System.Classes, System.SysUtils, BCEditor.Highlighter.Token, BCEditor.Highlighter.Attributes,
-  BCEditor.Types;
+  BCEditor.Consts, BCEditor.Types;
 
 type
   TBCEditorRange = class;
@@ -170,7 +170,7 @@ type
 implementation
 
 uses
-  BCEditor.Utils, BCEditor.Consts, System.Types;
+  BCEditor.Utils, System.Types;
 
 function CaseNone(AChar: Char): Char;
 begin

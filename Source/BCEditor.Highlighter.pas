@@ -4,8 +4,8 @@ interface
 
 uses
   System.Classes, System.SysUtils, Vcl.Controls, Vcl.Graphics, BCEditor.Highlighter.Rules, BCEditor.Highlighter.Token,
-  BCEditor.Types, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Info, BCEditor.Editor.SkipRegions,
-  BCEditor.Highlighter.Colors, BCEditor.Editor.CodeFolding.Regions, BCEditor.Highlighter.Comments;
+  BCEditor.Consts, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Info, BCEditor.Editor.SkipRegions,
+  BCEditor.Highlighter.Colors, BCEditor.Editor.CodeFolding.Regions, BCEditor.Highlighter.Comments, BCEditor.Types;
 
 type
   TBCEditorHighlighter = class(TObject)
@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Consts, BCEditor.Editor.Base, System.IOUtils;
+  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Editor.Base, System.IOUtils;
 
 { TBCEditorHighlighter }
 

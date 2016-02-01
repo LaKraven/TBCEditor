@@ -17,6 +17,9 @@ uses
   BCEditor.Search.RegularExpressions, BCEditor.Search.WildCard, BCEditor.TextDrawer, BCEditor.Editor.SyncEdit,
   BCEditor.Utils{$IFDEF USE_ALPHASKINS}, sCommonData, acSBUtils{$ENDIF};
 
+const
+  BCEDITOR_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing];
+
 type
   TBCBaseEditor = class(TCustomControl)
   strict private

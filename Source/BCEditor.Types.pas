@@ -232,8 +232,6 @@ type
 
   TBCEditorMouseCursorEvent = procedure(Sender: TObject; const aLineCharPos: TBCEditorTextPosition; var aCursor: TCursor) of object;
 
-  TBCEditorCharSet = set of AnsiChar;
-
   TBCEditorTokenHelper = record
     Position: Integer;
     Length: Integer;

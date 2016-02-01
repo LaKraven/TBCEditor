@@ -298,6 +298,9 @@ begin
         Continue;
       if not Assigned(FindTokenNode.Token) then
         Continue;
+      if FindTokenNode.Token.Attribute.EscapeChar <> BCEDITOR_NONE_CHAR then
+        if (StartPosition > 0) and (APLine[StartPosition - 1] = FindTokenNode.Token.Attribute.EscapeChar) then
+          Continue;
 
       if APLine[ARun] <> BCEDITOR_NONE_CHAR then
         Inc(ARun);

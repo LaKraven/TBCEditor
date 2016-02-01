@@ -3458,6 +3458,13 @@ var
       Result := Odd(CountCharsBefore(ATextPtr, LCurrentCodeFoldingRegion.StringEscapeChar));
   end;
 
+  function EscapeChar(ATextPtr: PChar): Boolean;
+  begin
+    Result := False;
+    if LCurrentCodeFoldingRegion.EscapeChar <> BCEDITOR_NONE_CHAR then
+      Result := ATextPtr^ = LCurrentCodeFoldingRegion.EscapeChar;
+  end;
+
   function IsNextSkipChar(ATextPtr: PChar; ASkipRegionItem: TBCEditorSkipRegionItem): Boolean;
   begin
     Result := False;
@@ -3765,7 +3772,8 @@ var
 
             if LKeyWordPtr^ = BCEDITOR_NONE_CHAR then
             begin
-              if (LRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr) then { not interested in partial hits }
+              if ((LRegionItem.OpenTokenLength = 1) or IsWholeWord(LBookmarkTextPtr - 1, LTextPtr)) and
+                not EscapeChar(LBookmarkTextPtr - 1) then { not interested in partial hits }
               begin
                 { check if special rule found }
                 LSkipIfFoundAfterOpenToken := False;

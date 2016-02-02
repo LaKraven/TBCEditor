@@ -5566,6 +5566,7 @@ begin
   begin
     if FSelection.Visible then
       SetWordBlock(TextCaretPosition);
+    FUndoList.AddChange(crCaret, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
     inherited;
     Include(FStateFlags, sfDblClicked);
     MouseCapture := False;

@@ -6618,6 +6618,7 @@ var
   LWasSelected: Boolean;
   LLeftMarginWidth: Integer;
   LDisplayPosition: TBCEditorDisplayPosition;
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
@@ -6733,7 +6734,11 @@ begin
         Exit;
     end
     else
+    begin
+      LTextCaretPosition := TextCaretPosition;
+      FUndoList.AddChange(crCaret, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode);
       ComputeCaret(X, Y);
+    end;
   end;
 
   if AButton = mbLeft then

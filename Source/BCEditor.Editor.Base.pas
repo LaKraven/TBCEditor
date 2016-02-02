@@ -2893,7 +2893,7 @@ begin
         else
           FUndoList.AddChange(crSelection, LOldCaretPosition, LOldCaretPosition, LOldCaretPosition, '',
             FSelection.ActiveMode);
-        FUndoList.AddChange(crCaret, LOldCaretPosition, LOldCaretPosition, LOldCaretPosition, '',
+        FUndoList.AddChange(crCaret, LOldCaretPosition, LOldBlockBeginPosition, LOldBlockEndPosition, '',
           FSelection.ActiveMode);
         SelectedText := LSelectedText;
       finally
@@ -6618,7 +6618,6 @@ var
   LWasSelected: Boolean;
   LLeftMarginWidth: Integer;
   LDisplayPosition: TBCEditorDisplayPosition;
-  LTextCaretPosition: TBCEditorTextPosition;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
@@ -6735,8 +6734,7 @@ begin
     end
     else
     begin
-      LTextCaretPosition := TextCaretPosition;
-      FUndoList.AddChange(crCaret, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode);
+      FUndoList.AddChange(crCaret, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
       ComputeCaret(X, Y);
     end;
   end;
@@ -6954,6 +6952,7 @@ begin
       LDisplayPosition.Row := DisplayCaretY;
     if not (sfCodeFoldingInfoClicked in FStateFlags) then { no selection when info clicked }
     begin
+      FUndoList.AddChange(crCaret, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
       TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
       SelectionEndPosition := TextCaretPosition;
       if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
@@ -9127,6 +9126,8 @@ begin
           FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', FSelection.ActiveMode, LUndoItem.ChangeBlockNumber);
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
+          SelectionBeginPosition := LUndoItem.ChangeBeginPosition;
+          SelectionEndPosition := LUndoItem.ChangeEndPosition;
         end;
       crSelection:
         begin
@@ -9821,6 +9822,8 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', FSelection.ActiveMode, LUndoItem.ChangeBlockNumber);
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
+          SelectionBeginPosition := LUndoItem.ChangeBeginPosition;
+          SelectionEndPosition := LUndoItem.ChangeEndPosition;
         end;
       crSelection:
         begin

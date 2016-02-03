@@ -3258,8 +3258,10 @@ begin
   if not (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
     FUndoList.AddGroupBreak;
 
-  FUndoList.AddChange(crCaret, ABeforeTextPosition, ABeforeTextPosition, ABeforeTextPosition, '',
-    FSelection.ActiveMode);
+  if ASelectionCommand or SelectionAvailable then
+    FUndoList.AddChange(crSelection, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode)
+  else
+    FUndoList.AddChange(crCaret, ABeforeTextPosition, ABeforeTextPosition, ABeforeTextPosition, '', FSelection.ActiveMode);
 
   IncPaintLock;
   if ASelectionCommand then
@@ -6616,7 +6618,7 @@ end;
 
 procedure TBCBaseEditor.MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
 var
-  LWasSelected: Boolean;
+  LSelectionAvailable: Boolean;
   LLeftMarginWidth: Integer;
   LDisplayPosition: TBCEditorDisplayPosition;
 begin
@@ -6624,11 +6626,10 @@ begin
   if FMinimap.Align = maLeft then
     Inc(LLeftMarginWidth, FMinimap.GetWidth);
 
-  LWasSelected := False;
+  LSelectionAvailable := SelectionAvailable;
 
   if AButton = mbLeft then
   begin
-    LWasSelected := SelectionAvailable;
     FMouseDownX := X;
     FMouseDownY := Y;
     if FMinimap.Visible then
@@ -6643,7 +6644,7 @@ begin
       Exit;
     end;
 
-  if FSyncEdit.Enabled and FSyncEdit.Activator.Visible and not FSyncEdit.Active and LWasSelected then
+  if FSyncEdit.Enabled and FSyncEdit.Activator.Visible and not FSyncEdit.Active and LSelectionAvailable then
   begin
     LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
     if (X < LeftMargin.Bookmarks.Panel.Width) and
@@ -6724,7 +6725,7 @@ begin
     if AButton = mbRight then
     begin
       if (coRightMouseClickMovesCaret in FCaret.Options) and
-        (SelectionAvailable and not IsTextPositionInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) or not SelectionAvailable) then
+        (LSelectionAvailable and not IsTextPositionInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) or not LSelectionAvailable) then
       begin
         InvalidateSelection;
         FSelectionEndPosition := FSelectionBeginPosition;
@@ -6745,7 +6746,7 @@ begin
     MouseCapture := True;
 
     Exclude(FStateFlags, sfWaitForDragging);
-    if LWasSelected and (eoDragDropEditing in FOptions) and (X > LLeftMarginWidth) and
+    if LSelectionAvailable and (eoDragDropEditing in FOptions) and (X > LLeftMarginWidth) and
       (FSelection.Mode = smNormal) and IsTextPositionInSelection(DisplayToTextPosition(PixelsToRowColumn(X, Y))) then
       Include(FStateFlags, sfWaitForDragging);
   end;
@@ -6953,7 +6954,6 @@ begin
       LDisplayPosition.Row := DisplayCaretY;
     if not (sfCodeFoldingInfoClicked in FStateFlags) then { no selection when info clicked }
     begin
-      FUndoList.AddChange(crCaret, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
       TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
       SelectionEndPosition := TextCaretPosition;
       if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then

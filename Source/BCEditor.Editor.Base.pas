@@ -9213,8 +9213,6 @@ begin
               FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
                 LUndoItem.ChangeEndPosition, LTempString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
               TextCaretPosition := LUndoItem.ChangeCaretPosition;
-              SelectionBeginPosition := LUndoItem.ChangeBeginPosition;
-              SelectionEndPosition := LUndoItem.ChangeEndPosition;
             end;
           crLineBreak:
             begin

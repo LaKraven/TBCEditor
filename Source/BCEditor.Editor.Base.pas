@@ -3268,12 +3268,21 @@ begin
 
   procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition;
     ASelectionCommand: Boolean);
+  var
+    LReason: TBCEditorChangeReason;
   begin
     if not(uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
       FUndoList.AddGroupBreak;
 
-    FUndoList.AddChange(crCaret, ABeforeTextPosition, ABeforeTextPosition, ABeforeTextPosition, '',
-      FSelection.ActiveMode);
+    if not ASelectionCommand then
+    begin
+      if SelectionAvailable then
+        LReason := crSelection
+      else
+        LReason := crCaret;
+      FUndoList.AddChange(LReason, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '',
+        FSelection.ActiveMode);
+    end;
 
     IncPaintLock;
     if ASelectionCommand then
@@ -5606,8 +5615,6 @@ begin
     begin
       if FSelection.Visible then
         SetWordBlock(TextCaretPosition);
-      FUndoList.AddChange(crCaret, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, '',
-        FSelection.ActiveMode);
       inherited;
       Include(FStateFlags, sfDblClicked);
       MouseCapture := False;

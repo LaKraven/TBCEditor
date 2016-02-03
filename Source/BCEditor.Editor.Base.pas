@@ -9213,6 +9213,8 @@ begin
               FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
                 LUndoItem.ChangeEndPosition, LTempString, LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
               TextCaretPosition := LUndoItem.ChangeCaretPosition;
+              SelectionBeginPosition := LUndoItem.ChangeBeginPosition;
+              SelectionEndPosition := LUndoItem.ChangeEndPosition;
             end;
           crLineBreak:
             begin
@@ -9918,8 +9920,6 @@ begin
                 FLines.Add('');
               end;
 
-              // SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
-
               DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False,
                 LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBlockNumber);
 
@@ -9927,6 +9927,8 @@ begin
                 LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
 
               TextCaretPosition := LUndoItem.ChangeCaretPosition;
+              SelectionBeginPosition := LUndoItem.ChangeBeginPosition;
+              SelectionEndPosition := LUndoItem.ChangeEndPosition;
               EnsureCursorPositionVisible;
             end;
           crLineBreak:

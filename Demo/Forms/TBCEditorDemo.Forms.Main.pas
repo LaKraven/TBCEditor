@@ -505,6 +505,10 @@ begin
   if LMemo = MemoRedo then
     LUndoList := Editor.RedoList;
 
+  if LMemo.Lines.Count = LUndoList.ItemCount then
+    Exit;
+
+  LMemo.Lines.BeginUpdate;
   LMemo.Clear;
   if Assigned(LUndoList) then
   for i := 0 to LUndoList.ItemCount - 1 do
@@ -521,6 +525,7 @@ begin
       LUndoItem.ChangeEndPosition.Line,
       LUndoItem.ChangeString]));
   end;
+  LMemo.Lines.EndUpdate;
 end;
 
 procedure TMainForm.LockFormPaint;

@@ -12834,6 +12834,9 @@ begin
   if Clipboard.HasFormat(GClipboardFormatMSDev) then
     LPasteMode := smColumn;
 
+
+  FUndoList.BeginBlock;
+
   if SelectionAvailable then
     FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText,
       FSelection.ActiveMode)
@@ -12878,6 +12881,8 @@ begin
       FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
         LEndPositionOfBlock, SelectedText, smNormal);
   end;
+
+  FUndoList.EndBlock;
 
   if FSyncEdit.Active then
     DoSyncEdit;

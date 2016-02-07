@@ -9887,16 +9887,13 @@ begin
       crLineBreak:
         begin
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
-          if TextCaretPosition.Line > 0 then
-          begin
-            LTempText := FLines.Strings[LUndoItem.ChangeBeginPosition.Line];
-            if (TextCaretPosition.Char - 1> Length(LTempText)) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
-              LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, TextCaretPosition.Char - 1 - Length(LTempText));
-            SetLineWithRightTrim(LUndoItem.ChangeBeginPosition.Line, LTempText + LUndoItem.ChangeString);
-            FLines.Delete(LUndoItem.ChangeEndPosition.Line);
-          end
-          else
-            SetLineWithRightTrim(LUndoItem.ChangeEndPosition.Line, LUndoItem.ChangeString);
+
+          LTempText := FLines.Strings[LUndoItem.ChangeBeginPosition.Line];
+          if (TextCaretPosition.Char - 1 > Length(LTempText)) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
+            LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, TextCaretPosition.Char - 1 - Length(LTempText));
+          SetLineWithRightTrim(LUndoItem.ChangeBeginPosition.Line, LTempText + LUndoItem.ChangeString);
+          FLines.Delete(LUndoItem.ChangeEndPosition.Line);
+
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
         end;

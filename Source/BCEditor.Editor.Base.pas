@@ -9444,7 +9444,7 @@ begin
     if FSelection.ActiveMode = smLine then
       LBlockStartPosition.Char := 1;
   end;
-  FUndoList.BeginBlock(3);
+  FUndoList.BeginBlock{(3)};
   FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
 
@@ -11911,7 +11911,7 @@ begin
       ecInsertLine, ecLineBreak:
         if not ReadOnly then
         begin
-          // FUndoList.BeginBlock(4);
+          FUndoList.BeginBlock;
           try
             if SelectionAvailable then
             begin
@@ -12114,7 +12114,7 @@ begin
             EnsureCursorPositionVisible;
           finally
             DoChange;
-            // UndoList.EndBlock;
+            UndoList.EndBlock;
           end;
         end;
       ecTab:

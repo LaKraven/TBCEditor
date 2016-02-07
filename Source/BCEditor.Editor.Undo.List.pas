@@ -13,6 +13,7 @@ type
     FChangeBlockNumber: Integer;
     FInsideRedo: Boolean;
     FInsideUndoBlock: Boolean;
+    FInsideUndoBlockCount: Integer;
     FItems: TList;
     FLockCount: Integer;
     FOnAddedUndo: TNotifyEvent;
@@ -60,6 +61,7 @@ begin
   FItems := TList.Create;
   FInsideRedo := False;
   FInsideUndoBlock := False;
+  FInsideUndoBlockCount := 0;
   FBlockNumber := BCEDITOR_UNDO_BLOCK_NUMBER_START;
 end;
 
@@ -127,6 +129,10 @@ end;
 procedure TBCEditorUndoList.BeginBlock(AChangeBlockNumber: Integer = 0);
 begin
   Inc(FBlockCount);
+
+  if FInsideUndoBlock then
+    Exit;
+
   if AChangeBlockNumber = 0 then
   begin
     Inc(FBlockNumber);
@@ -134,6 +140,8 @@ begin
   end
   else
     FChangeBlockNumber := AChangeBlockNumber;
+
+  FInsideUndoBlockCount := FBlockCount;
   FInsideUndoBlock := True;
 end;
 
@@ -150,8 +158,9 @@ end;
 procedure TBCEditorUndoList.EndBlock;
 begin
   Assert(FBlockCount > 0);
+  if FInsideUndoBlockCount = FBlockCount then
+    FInsideUndoBlock := False;
   Dec(FBlockCount);
-  FInsideUndoBlock := False;
 end;
 
 function TBCEditorUndoList.GetCanUndo: Boolean;

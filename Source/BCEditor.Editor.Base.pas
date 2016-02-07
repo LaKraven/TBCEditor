@@ -9887,11 +9887,11 @@ begin
       crLineBreak:
         begin
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
-          if DisplayCaretY > 0 then
+          if TextCaretPosition.Line > 0 then
           begin
             LTempText := FLines.Strings[LUndoItem.ChangeBeginPosition.Line];
-            if (Length(LTempText) < DisplayCaretX - 1) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
-              LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, DisplayCaretX - 1 - Length(LTempText));
+            if (TextCaretPosition.Char - 1> Length(LTempText)) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
+              LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, TextCaretPosition.Char - 1 - Length(LTempText));
             SetLineWithRightTrim(LUndoItem.ChangeBeginPosition.Line, LTempText + LUndoItem.ChangeString);
             FLines.Delete(LUndoItem.ChangeEndPosition.Line);
           end
@@ -11742,7 +11742,7 @@ begin
       ecDeleteWord, ecDeleteEndOfLine:
         if not ReadOnly then
         begin
-          LLineText := FLines.ExpandedStrings[LTextCaretPosition.Line];
+          LLineText := FLines[LTextCaretPosition.Line];
           LLength := Length(LLineText);
           if ACommand = ecDeleteWord then
           begin

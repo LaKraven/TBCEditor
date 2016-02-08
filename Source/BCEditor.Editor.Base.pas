@@ -3294,7 +3294,10 @@ var
 begin
   LTextCaretPosition := TextCaretPosition;
   if not SelectionAvailable then
+  begin
     FSelectionBeginPosition := LTextCaretPosition;
+    FSelectionEndPosition := LTextCaretPosition;
+  end;
 
   LZeroPosition := LTextCaretPosition;
   LDestinationPosition := LZeroPosition;

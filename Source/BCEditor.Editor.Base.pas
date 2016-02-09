@@ -12173,7 +12173,7 @@ begin
               if LSpaceCount1 > 0 then
               begin
                 LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
-                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1 + 1,
+                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + {LSpaceCount1} + 1,
                   LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 2, LTextCaretPosition.Line), '',
                   smNormal);
                 FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;

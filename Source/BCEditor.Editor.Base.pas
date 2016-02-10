@@ -12173,7 +12173,7 @@ begin
               if LSpaceCount1 > 0 then
               begin
                 LTextCaretPosition.Char := LLength + LSpaceCount1 + 2;
-                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + {LSpaceCount1} + 1,
+                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1,
                   LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 2, LTextCaretPosition.Line), '',
                   smNormal);
                 FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
@@ -12207,7 +12207,7 @@ begin
               if LSpaceCount1 > 0 then
               begin
                 LTextCaretPosition.Char := LLength + LSpaceCount1 + 1;
-                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + LSpaceCount1,
+                FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength {+ LSpaceCount1},
                   LTextCaretPosition.Line), GetTextPosition(LLength + LSpaceCount1 + 1, LTextCaretPosition.Line), '',
                   smNormal);
                 FLines.Attributes[LTextCaretPosition.Line].LineState := lsModified;
@@ -12838,7 +12838,7 @@ begin
   FUndoList.BeginBlock;
 
   if SelectionAvailable then
-    FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText,
+    FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
       FSelection.ActiveMode)
   else
     FSelection.ActiveMode := Selection.Mode;

@@ -4418,16 +4418,20 @@ begin
       LTextCaretPosition := FDragBeginTextCaretPosition
     else
       LTextCaretPosition := TextCaretPosition;
+
+    LBlockStartPosition := SelectionBeginPosition;
+    LBlockEndPosition := SelectionEndPosition;
+
     if SelectionAvailable then
-      FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
+      FUndoList.AddChange(crDelete, LTextCaretPosition, LBlockStartPosition, LBlockEndPosition, GetSelectedText,
         FSelection.ActiveMode)
     else
       FSelection.ActiveMode := FSelection.Mode;
 
-    LBlockStartPosition := SelectionBeginPosition;
-    LBlockEndPosition := SelectionEndPosition;
-    FSelectionBeginPosition := LBlockStartPosition;
-    FSelectionEndPosition := LBlockEndPosition;
+    //LBlockStartPosition := SelectionBeginPosition;
+    //LBlockEndPosition := SelectionEndPosition;
+   // FSelectionBeginPosition := LBlockStartPosition;
+   // FSelectionEndPosition := LBlockEndPosition;
 
     DoSelectedText(AValue);
 
@@ -9882,6 +9886,9 @@ begin
             FLines.Add('');
           end;
 
+          FSelectionBeginPosition := LUndoItem.ChangeBeginPosition;
+          FSelectionEndPosition := FSelectionBeginPosition;
+
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False,
             LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBlockNumber);
 
@@ -11193,12 +11200,9 @@ begin
   if not ReadOnly and SelectionAvailable then
   begin
     BeginUndoBlock;
-    try
-      DoCopyToClipboard(SelectedText);
-      SelectedText := '';
-    finally
-      EndUndoBlock;
-    end;
+    DoCopyToClipboard(SelectedText);
+    SelectedText := '';
+    EndUndoBlock;
   end;
 end;
 

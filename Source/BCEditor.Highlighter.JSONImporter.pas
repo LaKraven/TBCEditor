@@ -40,7 +40,7 @@ implementation
 
 uses
   System.SysUtils, System.TypInfo, Vcl.Graphics, Vcl.Forms, BCEditor.Consts, BCEditor.Types, Vcl.Dialogs,
-  BCEditor.Highlighter.Token, Vcl.GraphUtil;
+  BCEditor.Highlighter.Token, Vcl.GraphUtil, BCEditor.Utils, BCEditor.Language;
 
 function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
 begin
@@ -789,12 +789,17 @@ procedure TBCEditorHighlighterJSONImporter.ImportFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
 begin
-  JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
-  if Assigned(JSONObject) then
   try
-    ImportHighlighter(JSONObject);
-  finally
-    JSONObject.Free;
+    JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
+    if Assigned(JSONObject) then
+    try
+      ImportHighlighter(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
+  except
+    on E: Exception do
+      MessageDialog(SBCEditorErrorInHighlighterImport + E.Message, mtError, [mbOK]);
   end;
 end;
 
@@ -802,12 +807,17 @@ procedure TBCEditorHighlighterJSONImporter.ImportColorsFromStream(AStream: TStre
 var
   JSONObject: TJsonObject;
 begin
-  JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
-  if Assigned(JSONObject) then
   try
-    ImportColors(JSONObject);
-  finally
-    JSONObject.Free;
+    JSONObject := TJsonObject.ParseFromStream(AStream) as TJsonObject;
+    if Assigned(JSONObject) then
+    try
+      ImportColors(JSONObject);
+    finally
+      JSONObject.Free;
+    end;
+  except
+    on E: Exception do
+      MessageDialog(SBCEditorErrorInHighlighterColorImport + E.Message, mtError, [mbOK]);
   end;
 end;
 

@@ -32,6 +32,8 @@ resourcestring
 
   { BCEditor.Highlighter.JSONImporter }
   SBCEditorImporterFileNotFound = 'File ''%s'' not found';
+  SBCEditorErrorInHighlighterImport = 'Error in highlighter import: ';
+  SBCEditorErrorInHighlighterColorImport = 'Error in highlighter color import: ';
 
 implementation
 

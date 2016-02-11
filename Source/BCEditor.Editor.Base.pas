@@ -9568,11 +9568,11 @@ var
       LLeftSide := Copy(FLines[LTextCaretPosition.Line], 1, LTextCaretPosition.Char - 1);
       if LTextCaretPosition.Char - 1 > Length(LLeftSide) then
       begin
-        LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
-
-        FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(Length(LLeftSide), LTextCaretPosition.Line),
+        FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(Length(LLeftSide) + 1, LTextCaretPosition.Line),
           GetTextPosition(Length(LLeftSide) + LTextCaretPosition.Char - 1, LTextCaretPosition.Line), '', FSelection.ActiveMode,
           AChangeBlockNumber);
+
+        LLeftSide := LLeftSide + StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - 1 - Length(LLeftSide));
       end;
       LRightSide := Copy(FLines[LTextCaretPosition.Line], LTextCaretPosition.Char, FLines.StringLength(LTextCaretPosition.Line) - (LTextCaretPosition.Char - 1));
 

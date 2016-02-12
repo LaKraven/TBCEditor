@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.WideStrUtils, System.Classes, Vcl.Controls, Vcl.Graphics, BCEditor.Language,
-  Vcl.Menus, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Types;
+  Vcl.Menus, BCEditor.Editor.Base, BCEditor.Editor.KeyCommands, BCEditor.Types, System.SysUtils;
 
 type
   TBCEditorMacroState = (msStopped, msRecording, msPlaying, msPaused);
@@ -180,10 +180,12 @@ type
     property OnUserCommand;
   end;
 
+  EBCEditorMacroRecorderException = class(Exception);
+
 implementation
 
 uses
-  Vcl.Forms, System.SysUtils, BCEditor.Editor.Utils, BCEditor.Consts, System.Types;
+  Vcl.Forms, BCEditor.Editor.Utils, BCEditor.Consts, System.Types;
 
 { TBCEditorDatAEvent }
 
@@ -396,7 +398,7 @@ end;
 
 procedure TBCBaseEditorMacroRecorder.Error(const AMessage: string);
 begin
-  raise Exception.Create(AMessage);
+  raise EBCEditorMacroRecorderException.Create(AMessage);
 end;
 
 function TBCBaseEditorMacroRecorder.GetEvent(AIndex: Integer): TBCEditorMacroEvent;
@@ -741,7 +743,7 @@ begin
   Assert(ANewShortCut <> 0);
   if [csDesigning] * ComponentState = [csDesigning] then
     if TBCBaseEditor(AEditor).KeyCommands.FindShortcut(ANewShortCut) >= 0 then
-      raise Exception.Create('Shortcut already exists')
+      raise EBCEditorMacroRecorderException.Create('Shortcut already exists')
     else
       Exit;
   if AOldShortCut <> 0 then

@@ -655,6 +655,8 @@ type
     property WordWrap: TBCEditorWordWrap read FWordWrap write SetWordWrap;
   end;
 
+  EBCEditorBaseException = class(Exception);
+
 implementation
 
 {$R BCEditor.res}
@@ -2430,7 +2432,7 @@ var
 
 begin
   if not Assigned(FSearchEngine) then
-    raise Exception.Create(SBCEditorSearchEngineNotAssigned);
+    raise EBCEditorBaseException.Create(SBCEditorSearchEngineNotAssigned);
 
   Result := 0;
   if Length(ASearchText) = 0 then
@@ -10266,7 +10268,7 @@ var
 
 begin
   if not Assigned(FSearchEngine) then
-    raise Exception.Create(SBCEditorSearchEngineNotAssigned);
+    raise EBCEditorBaseException.Create(SBCEditorSearchEngineNotAssigned);
 
   Result := 0;
   if Length(ASearchText) = 0 then

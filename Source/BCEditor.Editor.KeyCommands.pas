@@ -192,6 +192,8 @@ type
     property SecondaryShortCut: TShortCut read GetSecondaryShortCut write SetSecondaryShortCut default 0;
   end;
 
+  EBCEditorKeyCommandException = class(Exception);
+
   TBCEditorKeyCommands = class(TCollection)
   strict private
     FOwner: TPersistent;
@@ -452,7 +454,7 @@ begin
   begin
     LDuplicate := TBCEditorKeyCommands(Collection).FindShortcuts(AValue, SecondaryShortCut);
     if (LDuplicate <> -1) and (LDuplicate <> Self.Index) then
-      raise Exception.Create(SBCEditorDuplicateShortcut);
+      raise EBCEditorKeyCommandException.Create(SBCEditorDuplicateShortcut);
   end;
 
   Vcl.Menus.ShortCutToKey(AValue, LNewKey, LNewShiftState);
@@ -486,7 +488,7 @@ begin
   begin
     LDuplicate := TBCEditorKeyCommands(Collection).FindShortcuts(ShortCut, AValue);
     if (LDuplicate <> -1) and (LDuplicate <> Self.Index) then
-      raise Exception.Create(SBCEditOrduplicateShortcut);
+      raise EBCEditorKeyCommandException.Create(SBCEditOrduplicateShortcut);
   end;
 
   Vcl.Menus.ShortCutToKey(AValue, LNewKey, LNewShiftState);

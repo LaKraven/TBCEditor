@@ -157,6 +157,9 @@ function GetFontsInfoManager: TBCEditorFontsInfoManager;
 
 implementation
 
+uses
+  BCEditor.Language;
+
 var
   GFontsInfoManager: TBCEditorFontsInfoManager;
 
@@ -455,7 +458,7 @@ begin
     end;
   end
   else
-    raise EBCEditorFontStockException.Create('SetBaseFont: ''Value'' must be specified.');
+    raise EBCEditorFontStockException.Create(SBCEditorValueMustBeSpecified);
 end;
 
 procedure TBCEditorFontStock.SetStyle(AValue: TFontStyles);
@@ -594,7 +597,7 @@ begin
     SetStyle(AValue.Style);
   end
   else
-    raise EBCEditorTextDrawerException.Create('SetBaseFont: ''Value'' must be specified.');
+    raise EBCEditorTextDrawerException.Create(SBCEditorValueMustBeSpecified);
 end;
 
 procedure TBCEditorTextDrawer.SetBaseStyle(const AValue: TFontStyles);

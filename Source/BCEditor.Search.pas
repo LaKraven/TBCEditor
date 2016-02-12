@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  System.Character, BCEditor.Consts;
+  System.Character, BCEditor.Consts, BCEditor.Language;
 
 constructor TBCEditorNormalSearch.Create;
 begin
@@ -122,7 +122,7 @@ var
 begin
   FPatternLength := Length(FPattern);
   if FPatternLength = 0 then
-    raise EBCEditorSearchException.Create('Pattern is empty');
+    raise EBCEditorSearchException.Create(SBCEditorPatternIsEmpty);
   FPatternLengthSuccessor := FPatternLength + 1;
   FLookAt := 1;
   for LAnsiChar := Low(AnsiChar) to High(AnsiChar) do

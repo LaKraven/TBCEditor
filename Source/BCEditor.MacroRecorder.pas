@@ -743,7 +743,7 @@ begin
   Assert(ANewShortCut <> 0);
   if [csDesigning] * ComponentState = [csDesigning] then
     if TBCBaseEditor(AEditor).KeyCommands.FindShortcut(ANewShortCut) >= 0 then
-      raise EBCEditorMacroRecorderException.Create('Shortcut already exists')
+      raise EBCEditorMacroRecorderException.Create(SBCEditorShortcutAlreadyExists)
     else
       Exit;
   if AOldShortCut <> 0 then

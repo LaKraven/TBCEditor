@@ -11728,6 +11728,7 @@ begin
             begin
               if LTextCaretPosition.Line < FLines.Count - 1 then
               begin
+                FUndoList.BeginBlock;
                 LSpaceCount1 := LTextCaretPosition.Char - 1 - LLength;
                 if toTabsToSpaces in FTabs.Options then
                   LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1)
@@ -11738,19 +11739,24 @@ begin
                 else
                   LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1);
 
+                if LSpaceCount1 > 0 then
+                  FUndoList.AddChange(crInsert, LTextCaretPosition,
+                    GetTextPosition(LTextCaretPosition.Char - LSpaceCount1, LTextCaretPosition.Line),
+                    GetTextPosition(LTextCaretPosition.Char, LTextCaretPosition.Line), '', smNormal);
+
                 with LTextCaretPosition do
                 begin
                   Char := 1;
                   Line := Line + 1;
                 end;
 
-                LHelper := SLineBreak;
-                FUndoList.AddChange(crDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, LHelper, smNormal);
+                FUndoList.AddChange(crDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, SLineBreak, smNormal);
 
                 FLines[LTextCaretPosition.Line - 1] := LLineText + LSpaceBuffer + FLines[LTextCaretPosition.Line];
                 FLines.Attributes[LTextCaretPosition.Line - 1].LineState := lsModified;
                 FLines.Delete(LTextCaretPosition.Line);
                 DoChange;
+                FUndoList.EndBlock;
               end;
             end;
           end;

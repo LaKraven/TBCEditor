@@ -332,7 +332,7 @@
         <DelphiCompile Include="..\Source\BCEditor.Highlighter.Info.pas">
             <BuildOrder>68</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\BCEditor.Highlighter.JSONImporter.pas">
+        <DelphiCompile Include="..\Source\BCEditor.Highlighter.Import.JSON.pas">
             <BuildOrder>69</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Highlighter.pas">

@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  BCEditor.Highlighter.JSONImporter, System.Types, BCEditor.Editor.Base, System.IOUtils;
+  BCEditor.Highlighter.Import.JSON, System.Types, BCEditor.Editor.Base, System.IOUtils;
 
 { TBCEditorHighlighter }
 
@@ -534,7 +534,7 @@ begin
         LTempLines.Text := LEditor.Lines.Text;
       end;
       LEditor.Lines.Clear;
-      with TBCEditorHighlighterJSONImporter.Create(Self) do
+      with TBCEditorHighlighterImportJSON.Create(Self) do
       try
         ImportFromStream(AStream);
       finally

@@ -510,6 +510,7 @@ type
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual;
+    procedure ExportToHTML(const AFileName: string);
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
@@ -12411,6 +12412,11 @@ begin
   finally
     DecPaintLock;
   end;
+end;
+
+procedure TBCBaseEditor.ExportToHTML(const AFileName: string);
+begin
+  // TODO
 end;
 
 procedure TBCBaseEditor.GotoBookmark(ABookmark: Integer);

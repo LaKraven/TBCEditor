@@ -1,4 +1,4 @@
-unit BCEditor.Highlighter.JSONImporter;
+unit BCEditor.Highlighter.Import.JSON;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   BCEditor.Editor.CodeFolding.Regions, BCEditor.JsonDataObjects;
 
 type
-  TBCEditorHighlighterJSONImporter = class(TObject)
+  TBCEditorHighlighterImportJSON = class(TObject)
   private
     FHighlighter: TBCEditorHighlighter;
     procedure ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute; AAttributesObject: TJsonObject;
@@ -116,15 +116,15 @@ begin
     Result := TBCEditorRangeType(i);
 end;
 
-{ TBCEditorHighlighterJSONImporter }
+{ TBCEditorHighlighterImportJSON }
 
-constructor TBCEditorHighlighterJSONImporter.Create(AHighlighter: TBCEditorHighlighter);
+constructor TBCEditorHighlighterImportJSON.Create(AHighlighter: TBCEditorHighlighter);
 begin
   inherited Create;
   FHighlighter := AHighlighter;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportInfo(AInfoObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportInfo(AInfoObject: TJsonObject);
 var
   i: Integer;
   LSampleArray: TJsonArray;
@@ -150,7 +150,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportColorsInfo(AInfoObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportColorsInfo(AInfoObject: TJsonObject);
 var
   LHighlighterInfo: TBCEditorHighlighterInfo;
   LObject: TJsonObject;
@@ -170,13 +170,13 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportEditorProperties(AEditorObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportEditorProperties(AEditorObject: TJsonObject);
 begin
   if Assigned(AEditorObject) then
     TBCBaseEditor(FHighlighter.Editor).URIOpener := StrToBoolDef(AEditorObject['URIOpener'].Value, False);
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportColorsEditorProperties(AEditorObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportColorsEditorProperties(AEditorObject: TJsonObject);
 var
   LColorsObject, LFontsObject, LFontSizesObject: TJsonObject;
   LEditor: TBCBaseEditor;
@@ -252,7 +252,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute;
+procedure TBCEditorHighlighterImportJSON.ImportAttributes(AHighlighterAttribute: TBCEditorHighlighterAttribute;
   AAttributesObject: TJsonObject; const AElementPrefix: string);
 begin
   if Assigned(AAttributesObject) then
@@ -265,7 +265,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject;
+procedure TBCEditorHighlighterImportJSON.ImportKeyList(AKeyList: TBCEditorKeyList; KeyListObject: TJsonObject;
   const AElementPrefix: string);
 var
   i: Integer;
@@ -281,7 +281,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject;
+procedure TBCEditorHighlighterImportJSON.ImportSet(ASet: TBCEditorSet; SetObject: TJsonObject;
   const AElementPrefix: string);
 begin
   if Assigned(SetObject) then
@@ -291,7 +291,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject;
+procedure TBCEditorHighlighterImportJSON.ImportRange(ARange: TBCEditorRange; RangeObject: TJsonObject;
   AParentRange: TBCEditorRange = nil; ASkipBeforeSubRules: Boolean = False;
   const AElementPrefix: string = ''); { Recursive method }
 var
@@ -430,7 +430,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCompletionProposal(ACompletionProposalObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportCompletionProposal(ACompletionProposalObject: TJsonObject);
 var
   i: Integer;
   LSkipRegionItem: TBCEditorSkipRegionItem;
@@ -479,7 +479,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingSkipRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
+procedure TBCEditorHighlighterImportJSON.ImportCodeFoldingSkipRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   i: Integer;
@@ -552,7 +552,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingFoldRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
+procedure TBCEditorHighlighterImportJSON.ImportCodeFoldingFoldRegion(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   i, j: Integer;
@@ -635,7 +635,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFoldingOptions(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
+procedure TBCEditorHighlighterImportJSON.ImportCodeFoldingOptions(ACodeFoldingRegion: TBCEditorCodeFoldingRegion;
   ACodeFoldingObject: TJsonObject);
 var
   LCodeFoldingObject: TJsonObject;
@@ -661,7 +661,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportCodeFolding(ACodeFoldingObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportCodeFolding(ACodeFoldingObject: TJsonObject);
 var
   i, LCount: Integer;
   LCodeFoldingObject: TJsonObject;
@@ -686,7 +686,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportMatchingPair(AMatchingPairObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportMatchingPair(AMatchingPairObject: TJsonObject);
 var
   i: Integer;
   LTokenMatch: PBCEditorMatchingPairToken;
@@ -732,7 +732,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportElements(AColorsObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportElements(AColorsObject: TJsonObject);
 var
   i: Integer;
   LElement: PBCEditorHighlighterElement;
@@ -758,7 +758,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportHighlighter(AJSONObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportHighlighter(AJSONObject: TJsonObject);
 var
   LHighlighterObject: TJsonObject;
 begin
@@ -773,7 +773,7 @@ begin
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportColors(AJSONObject: TJsonObject);
+procedure TBCEditorHighlighterImportJSON.ImportColors(AJSONObject: TJsonObject);
 var
   LColorsObject: TJsonObject;
 begin
@@ -785,7 +785,7 @@ begin
   ImportElements(AJSONObject['Colors'].ObjectValue);
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportFromStream(AStream: TStream);
+procedure TBCEditorHighlighterImportJSON.ImportFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
 begin
@@ -803,7 +803,7 @@ begin
   end;
 end;
 
-procedure TBCEditorHighlighterJSONImporter.ImportColorsFromStream(AStream: TStream);
+procedure TBCEditorHighlighterImportJSON.ImportColorsFromStream(AStream: TStream);
 var
   JSONObject: TJsonObject;
 begin

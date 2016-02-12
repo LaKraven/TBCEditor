@@ -31,7 +31,7 @@ resourcestring
   SBCEditorListIndexOutOfBounds = 'Invalid stringlist index %d';
   SBCEditorInvalidCapacity = 'Stringlist capacity cannot be smaller than count';
 
-  { BCEditor.Highlighter.JSONImporter }
+  { BCEditor.Highlighter.Import.JSON }
   SBCEditorImporterFileNotFound = 'File ''%s'' not found';
   SBCEditorErrorInHighlighterImport = 'Error in highlighter import: ';
   SBCEditorErrorInHighlighterColorImport = 'Error in highlighter color import: ';

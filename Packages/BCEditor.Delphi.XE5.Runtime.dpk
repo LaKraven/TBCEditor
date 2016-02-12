@@ -108,7 +108,7 @@ contains
   BCEditor.Highlighter.Colors in '..\Source\BCEditor.Highlighter.Colors.pas',
   BCEditor.Highlighter.Comments in '..\Source\BCEditor.Highlighter.Comments.pas',
   BCEditor.Highlighter.Info in '..\Source\BCEditor.Highlighter.Info.pas',
-  BCEditor.Highlighter.JSONImporter in '..\Source\BCEditor.Highlighter.JSONImporter.pas',
+  BCEditor.Highlighter.Import.JSON in '..\Source\BCEditor.Highlighter.Import.JSON.pas',
   BCEditor.Highlighter.Rules in '..\Source\BCEditor.Highlighter.Rules.pas',
   BCEditor.Highlighter.Token in '..\Source\BCEditor.Highlighter.Token.pas',
   BCEditor.KeyboardHandler in '..\Source\BCEditor.KeyboardHandler.pas',

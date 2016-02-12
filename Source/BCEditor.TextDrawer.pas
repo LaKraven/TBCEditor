@@ -163,8 +163,6 @@ uses
 var
   GFontsInfoManager: TBCEditorFontsInfoManager;
 
-  { utility routines }
-
 function GetFontsInfoManager: TBCEditorFontsInfoManager;
 begin
   if not Assigned(GFontsInfoManager) then
@@ -195,7 +193,7 @@ begin
     BaseFont := TFont.Create;
     BaseFont.Assign(ABaseFont);
     BaseLogFont := ALogFont;
-    IsTrueType := (0 <> (TRUETYPE_FONTTYPE and ALogFont.lfPitchAndFamily));
+    IsTrueType := 0 <> (TRUETYPE_FONTTYPE and ALogFont.lfPitchAndFamily);
   except
     Result^.BaseFont.Free;
     Dispose(Result);

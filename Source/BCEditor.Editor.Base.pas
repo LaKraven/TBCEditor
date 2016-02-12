@@ -10006,9 +10006,9 @@ end;
 function TBCBaseEditor.CreateFileStream(const AFileName: string): TStream;
 begin
   if Assigned(FOnCreateFileStream) then
-    FOnCreateFileStream(Self, GetHighlighterFileName(AFileName), Result)
+    FOnCreateFileStream(Self, AFileName, Result)
   else
-    Result := TFileStream.Create(GetHighlighterFileName(AFileName), fmOpenRead);
+    Result := TFileStream.Create(AFileName, fmOpenRead);
 end;
 
 function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;

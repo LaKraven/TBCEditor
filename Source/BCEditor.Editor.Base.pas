@@ -116,6 +116,7 @@ type
     FOnChainUndoAdded: TNotifyEvent;
     FOnCommandProcessed: TBCEditorProcessCommandEvent;
     FOnContextHelp: TBCEditorContextHelpEvent;
+    FOnCreateFileStream: TBCEditorCreateFileStreamEvent;
     FOnCustomLineColors: TBCEditorCustomLineColorsEvent;
     FOnCustomTokenAttribute: TBCEditorCustomTokenAttributeEvent;
     FOnDropFiles: TBCEditorDropFilesEvent;
@@ -601,6 +602,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnCommandProcessed: TBCEditorProcessCommandEvent read FOnCommandProcessed write FOnCommandProcessed;
     property OnContextHelp: TBCEditorContextHelpEvent read FOnContextHelp write FOnContextHelp;
+    property OnCreateFileStream: TBCEditorCreateFileStreamEvent read FOnCreateFileStream write FOnCreateFileStream;
     property OnCustomLineColors: TBCEditorCustomLineColorsEvent read FOnCustomLineColors write FOnCustomLineColors;
     property OnCustomTokenAttribute: TBCEditorCustomTokenAttributeEvent read FOnCustomTokenAttribute write FOnCustomTokenAttribute;
     property OnDropFiles: TBCEditorDropFilesEvent read FOnDropFiles write FOnDropFiles;
@@ -10003,7 +10005,10 @@ end;
 
 function TBCBaseEditor.CreateFileStream(const AFileName: string): TStream;
 begin
-  Result := TFileStream.Create(GetHighlighterFileName(AFileName), fmOpenRead);
+  if Assigned(FOnCreateFileStream) then
+    FOnCreateFileStream(Self, GetHighlighterFileName(AFileName), Result)
+  else
+    Result := TFileStream.Create(GetHighlighterFileName(AFileName), fmOpenRead);
 end;
 
 function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;

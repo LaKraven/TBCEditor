@@ -128,7 +128,9 @@ var
   i: Integer;
   LTextLine, LToken: string;
   LHighlighterAttribute: TBCEditorHighlighterAttribute;
+  LPreviousElement: string;
 begin
+  LPreviousElement := '';
   for i := 0 to FLines.Count - 1 do
   begin
     if i = 0 then
@@ -157,13 +159,22 @@ begin
         LTextLine := LTextLine + '&quot;'
       else
       if Assigned(LHighlighterAttribute) then
-        LTextLine := LTextLine + '<span class="' + LHighlighterAttribute.Element + '">' + LToken + '</span>'
+      begin
+        if (LPreviousElement <> '') and (LPreviousElement <> LHighlighterAttribute.Element) then
+          LTextLine := LTextLine + '</span>';
+        if LPreviousElement <> LHighlighterAttribute.Element then
+          LTextLine := LTextLine + '<span class="' + LHighlighterAttribute.Element + '">';
+        LTextLine := LTextLine + LToken;
+        LPreviousElement := LHighlighterAttribute.Element;
+      end
       else
         LTextLine := LTextLine + LToken;
       FHighlighter.Next;
     end;
     FStringList.Add(LTextLine + '<br>');
   end;
+  if LPreviousElement <> '' then
+    FStringList.Add('</span>');
 end;
 
 procedure TBCEditorExportHTML.CreateFooter;

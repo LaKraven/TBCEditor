@@ -3,12 +3,13 @@ unit BCEditor.Export.HTML;
 interface
 
 uses
-  System.Classes, System.SysUtils, BCEditor.Lines, BCEditor.Highlighter;
+  System.Classes, System.SysUtils, Vcl.Graphics, BCEditor.Lines, BCEditor.Highlighter;
 
 type
   TBCEditorExportHTML = class(TObject)
   private
     FCharSet: string;
+    FFont: TFont;
     FHighlighter: TBCEditorHighlighter;
     FLines: TBCEditorLines;
     FStringList: TStrings;
@@ -18,7 +19,7 @@ type
     procedure CreateLines;
     procedure CreateFooter;
   public
-    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; ACharSet: string); overload;
+    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; ACharSet: string); overload;
     destructor Destroy; override;
 
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
@@ -27,9 +28,9 @@ type
 implementation
 
 uses
-  System.UITypes, System.Math, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Colors;
+  Winapi.Windows, System.UITypes, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Colors, BCEditor.Consts;
 
-constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; ACharSet: string);
+constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; ACharSet: string);
 begin
   inherited Create;
 
@@ -40,6 +41,7 @@ begin
     FCharSet := 'utf-8';
   FLines := ALines;
   FHighlighter := AHighlighter;
+  FFont := AFont;
 end;
 
 destructor TBCEditorExportHTML.Destroy;
@@ -73,7 +75,12 @@ begin
 
   FStringList.Add('</head>');
   FStringList.Add('');
-  FStringList.Add('<body>');
+  FStringList.Add('<body class="Editor">');
+end;
+
+function ColorToHex(AColor: TColor): string;
+begin
+  Result := IntToHex(GetRValue(AColor), 2) + IntToHex(GetGValue(AColor), 2) + IntToHex(GetBValue(AColor), 2);
 end;
 
 procedure TBCEditorExportHTML.CreateInternalCSS;
@@ -84,15 +91,19 @@ var
 begin
   FStringList.Add('  <style>');
 
-  LStyles := FHighlighter.Colors.Styles;
+  FStringList.Add('    body {');
+  FStringList.Add('      font-family: ' + FFont.Name + ';');
+  FStringList.Add('      font-size: ' + IntToStr(FFont.Size) + 'px;');
+  FStringList.Add('    }');
 
+  LStyles := FHighlighter.Colors.Styles;
   for i := 0 to LStyles.Count - 1 do
   begin
     LElement := LStyles.Items[i];
 
-    FStringList.Add('    ' + LElement^.Name + ' { ');
-    FStringList.Add('      color: #' + IntToHex(LElement^.Foreground, 6) + ';');
-    FStringList.Add('      background-color: #' + IntToHex(LElement^.Background, 6) + ';');
+    FStringList.Add('    .' + LElement^.Name + ' { ');
+    FStringList.Add('      color: #' + ColorToHex(LElement^.Foreground) + ';');
+    FStringList.Add('      background-color: #' + ColorToHex(LElement^.Background) + ';');
 
     if TFontStyle.fsBold in LElement^.Style then
       FStringList.Add('      font-weight: bold;');
@@ -107,6 +118,7 @@ begin
       FStringList.Add('      text-decoration: line-through;');
 
     FStringList.Add('    }');
+    FStringList.Add('');
   end;
   FStringList.Add('  </style>');
 end;
@@ -114,6 +126,7 @@ end;
 procedure TBCEditorExportHTML.CreateLines;
 var
   i: Integer;
+  LTextLine, LToken: string;
   LHighlighterAttribute: TBCEditorHighlighterAttribute;
 begin
   for i := 0 to FLines.Count - 1 do
@@ -123,21 +136,35 @@ begin
     else
       FHighlighter.SetCurrentRange(FLines.Ranges[i]);
     FHighlighter.SetCurrentLine(FLines[i]);
+    LTextLine := '';
     while not FHighlighter.GetEndOfLine do
     begin
       LHighlighterAttribute := FHighlighter.GetTokenAttribute;
-
-
+      FHighlighter.GetToken(LToken);
+      if LToken = BCEDITOR_SPACE_CHAR then
+        LTextLine := LTextLine + '&nbsp;'
+      else
+      if LToken = '&' then
+        LTextLine := LTextLine + '&amp;'
+      else
+      if LToken = '<' then
+        LTextLine := LTextLine + '&lt;'
+      else
+      if LToken = '>' then
+        LTextLine := LTextLine + '&gt;'
+      else
+      if LToken = '"' then
+        LTextLine := LTextLine + '&quot;'
+      else
+      if Assigned(LHighlighterAttribute) then
+        LTextLine := LTextLine + '<span class="' + LHighlighterAttribute.Element + '">' + LToken + '</span>'
+      else
+        LTextLine := LTextLine + LToken;
       FHighlighter.Next;
     end;
+    FStringList.Add(LTextLine + '<br>');
   end;
 end;
-
-{
-&	&amp;
-<	&lt;
->	&gt;
-"	&quot;}
 
 procedure TBCEditorExportHTML.CreateFooter;
 begin

@@ -12429,7 +12429,7 @@ end;
 
 procedure TBCBaseEditor.ExportToHTML(AStream: TStream; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
 begin
-  with TBCEditorExportHTML.Create(FLines, FHighlighter, ACharSet) do
+  with TBCEditorExportHTML.Create(FLines, FHighlighter, Font, ACharSet) do
   try
     SaveToStream(AStream, AEncoding);
   finally

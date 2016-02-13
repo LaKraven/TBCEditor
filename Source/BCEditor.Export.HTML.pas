@@ -3,42 +3,43 @@ unit BCEditor.Export.HTML;
 interface
 
 uses
-  System.Classes, BCEditor.Lines, BCEditor.Highlighter;
+  System.Classes, System.SysUtils, BCEditor.Lines, BCEditor.Highlighter;
 
 type
   TBCEditorExportHTML = class(TObject)
   private
-    FEncodingName: string;
+    FCharSet: string;
     FHighlighter: TBCEditorHighlighter;
     FLines: TBCEditorLines;
     FStringList: TStrings;
-    procedure Execute;
+    procedure CreateHTMLDocument;
     procedure CreateHeader;
     procedure CreateInternalCSS;
     procedure CreateLines;
     procedure CreateFooter;
   public
-    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AEncodingName: string); overload;
+    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; ACharSet: string); overload;
     destructor Destroy; override;
 
-    procedure SaveToFile(const AFileName: string);
-    procedure SaveToStream(var AStream: TStream);
+    procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
   end;
 
 implementation
 
 uses
-  BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Colors, System.SysUtils, System.UITypes;
+  System.UITypes, System.Math, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Colors;
 
-constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AEncodingName: string);
+constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; ACharSet: string);
 begin
   inherited Create;
 
   FStringList := TStringList.Create;
 
+  FCharSet := ACharSet;
+  if FCharSet = '' then
+    FCharSet := 'utf-8';
   FLines := ALines;
   FHighlighter := AHighlighter;
-  FEncodingName := AEncodingName;
 end;
 
 destructor TBCEditorExportHTML.Destroy;
@@ -48,7 +49,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TBCEditorExportHTML.Execute;
+procedure TBCEditorExportHTML.CreateHTMLDocument;
 begin
   if not Assigned(FHighlighter) then
     Exit;
@@ -66,7 +67,7 @@ begin
   FStringList.Add('');
   FStringList.Add('<html>');
   FStringList.Add('<head>');
-	FStringList.Add('  <meta charset="' + FEncodingName + '">');
+	FStringList.Add('  <meta charset="' + FCharSet + '">');
 
   CreateInternalCSS;
 
@@ -132,22 +133,24 @@ begin
   end;
 end;
 
+{
+&	&amp;
+<	&lt;
+>	&gt;
+"	&quot;}
+
 procedure TBCEditorExportHTML.CreateFooter;
 begin
   FStringList.Add('</body>');
   FStringList.Add('</html>');
 end;
 
-procedure TBCEditorExportHTML.SaveToFile(const AFileName: string);
+procedure TBCEditorExportHTML.SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
 begin
-  Execute;
-  FStringList.SaveToFile(AFileName);
-end;
-
-procedure TBCEditorExportHTML.SaveToStream(var AStream: TStream);
-begin
-  Execute;
-  FStringList.SaveToStream(AStream);
+  CreateHTMLDocument;
+  if not Assigned(AEncoding) then
+    AEncoding := TEncoding.UTF8;
+  FStringList.SaveToStream(AStream, AEncoding);
 end;
 
 end.

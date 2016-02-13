@@ -510,8 +510,8 @@ type
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual;
-    procedure ExportToHTML(const AFileName: string); overload;
-    procedure ExportToHTML(var AStream: TStream); overload;
+    procedure ExportToHTML(const AFileName: string; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
+    procedure ExportToHTML(AStream: TStream; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
@@ -12415,21 +12415,23 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.ExportToHTML(const AFileName: string);
+procedure TBCBaseEditor.ExportToHTML(const AFileName: string; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
+var
+  LFileStream: TFileStream;
 begin
-  with TBCEditorExportHTML.Create(FLines, FHighlighter, Encoding.EncodingName) do
+  LFileStream := TFileStream.Create(AFileName, fmCreate);
   try
-    SaveToFile(AFileName);
+    ExportToHTML(LFileStream, ACharSet, AEncoding);
   finally
-    Free;
+    LFileStream.Free;
   end;
 end;
 
-procedure TBCBaseEditor.ExportToHTML(var AStream: TStream);
+procedure TBCBaseEditor.ExportToHTML(AStream: TStream; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
 begin
-  with TBCEditorExportHTML.Create(FLines, FHighlighter, Encoding.EncodingName) do
+  with TBCEditorExportHTML.Create(FLines, FHighlighter, ACharSet) do
   try
-    SaveToStream(AStream);
+    SaveToStream(AStream, AEncoding);
   finally
     Free;
   end;

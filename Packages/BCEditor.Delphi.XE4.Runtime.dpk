@@ -103,6 +103,7 @@ contains
   BCEditor.Editor.WordWrap in '..\Source\BCEditor.Editor.WordWrap.pas',
   BCEditor.Editor.WordWrap.Colors in '..\Source\BCEditor.Editor.WordWrap.Colors.pas',
   BCEditor.Encoding in '..\Source\BCEditor.Encoding.pas',
+  BCEditor.Export.HTML in '..\Source\BCEditor.Export.HTML.pas',
   BCEditor.Highlighter in '..\Source\BCEditor.Highlighter.pas',
   BCEditor.Highlighter.Attributes in '..\Source\BCEditor.Highlighter.Attributes.pas',
   BCEditor.Highlighter.Colors in '..\Source\BCEditor.Highlighter.Colors.pas',

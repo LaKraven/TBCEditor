@@ -192,6 +192,7 @@
         <DCCReference Include="..\Source\BCEditor.Editor.WordWrap.pas"/>
         <DCCReference Include="..\Source\BCEditor.Editor.WordWrap.Colors.pas"/>
         <DCCReference Include="..\Source\BCEditor.Encoding.pas"/>
+        <DCCReference Include="..\Source\BCEditor.Export.HTML.pas"/>
         <DCCReference Include="..\Source\BCEditor.Highlighter.pas"/>
         <DCCReference Include="..\Source\BCEditor.Highlighter.Attributes.pas"/>
         <DCCReference Include="..\Source\BCEditor.Highlighter.Colors.pas"/>

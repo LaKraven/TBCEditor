@@ -320,6 +320,9 @@
         <DelphiCompile Include="..\Source\BCEditor.Encoding.pas">
             <BuildOrder>67</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\Source\BCEditor.Export.HTML.pas">
+            <BuildOrder>67</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\Source\BCEditor.Highlighter.Attributes.pas">
             <BuildOrder>68</BuildOrder>
         </DelphiCompile>

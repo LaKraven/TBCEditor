@@ -510,7 +510,8 @@ type
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual;
-    procedure ExportToHTML(const AFileName: string);
+    procedure ExportToHTML(const AFileName: string); overload;
+    procedure ExportToHTML(var AStream: TStream); overload;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
@@ -666,7 +667,7 @@ uses
   Winapi.ShellAPI, Winapi.Imm, System.Math, System.Types, Vcl.Clipbrd, System.Character, Vcl.Menus,
   BCEditor.Editor.LeftMargin.Border, BCEditor.Editor.LeftMargin.LineNumbers, BCEditor.Editor.Scroll.Hint,
   BCEditor.Editor.Search.Map, BCEditor.Editor.Undo.Item, BCEditor.Editor.Utils, BCEditor.Encoding, BCEditor.Language,
-  BCEditor.Highlighter.Rules{$IFDEF USE_VCL_STYLES}, Vcl.Themes, BCEditor.StyleHooks{$ENDIF}
+  BCEditor.Highlighter.Rules, BCEditor.Export.HTML{$IFDEF USE_VCL_STYLES}, Vcl.Themes, BCEditor.StyleHooks{$ENDIF}
   {$IFDEF USE_ALPHASKINS}, Winapi.CommCtrl, sVCLUtils, sMessages, sConst, sSkinProps{$ENDIF};
 
 type
@@ -12416,7 +12417,22 @@ end;
 
 procedure TBCBaseEditor.ExportToHTML(const AFileName: string);
 begin
-  // TODO
+  with TBCEditorExportHTML.Create(FLines, FHighlighter, Encoding.EncodingName) do
+  try
+    SaveToFile(AFileName);
+  finally
+    Free;
+  end;
+end;
+
+procedure TBCBaseEditor.ExportToHTML(var AStream: TStream);
+begin
+  with TBCEditorExportHTML.Create(FLines, FHighlighter, Encoding.EncodingName) do
+  try
+    SaveToStream(AStream);
+  finally
+    Free;
+  end;
 end;
 
 procedure TBCBaseEditor.GotoBookmark(ABookmark: Integer);

@@ -19,7 +19,7 @@ type
     procedure CreateLines;
     procedure CreateFooter;
   public
-    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; ACharSet: string); overload;
+    constructor Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; const ACharSet: string); overload;
     destructor Destroy; override;
 
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
@@ -30,7 +30,7 @@ implementation
 uses
   Winapi.Windows, System.UITypes, BCEditor.Highlighter.Attributes, BCEditor.Highlighter.Colors, BCEditor.Consts;
 
-constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; ACharSet: string);
+constructor TBCEditorExportHTML.Create(ALines: TBCEditorLines; AHighlighter: TBCEditorHighlighter; AFont: TFont; const ACharSet: string);
 begin
   inherited Create;
 

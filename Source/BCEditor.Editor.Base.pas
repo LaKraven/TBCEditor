@@ -510,8 +510,8 @@ type
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible(AForceToMiddle: Boolean = False; AEvenIfVisible: Boolean = False);
     procedure ExecuteCommand(ACommand: TBCEditorCommand; AChar: Char; AData: Pointer); virtual;
-    procedure ExportToHTML(const AFileName: string; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
-    procedure ExportToHTML(AStream: TStream; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
+    procedure ExportToHTML(const AFileName: string; const ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
+    procedure ExportToHTML(AStream: TStream; const ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil); overload;
     procedure GotoBookmark(ABookmark: Integer);
     procedure GotoLineAndCenter(ATextLine: Integer);
     procedure HookEditorLines(ALines: TBCEditorLines; AUndo, ARedo: TBCEditorUndoList);
@@ -6313,6 +6313,17 @@ var
   LTextPosition: TBCEditorTextPosition;
   LShortCutKey: Word;
   LShortCutShift: TShiftState;
+
+  function IsKeyDown(const AVirtualKey: Integer): Boolean;
+  begin
+    Result := GetKeyState(AVirtualKey) and $8000 <> 0;
+  end;
+
+  function IsKeyOn(const AVirtualKey: Integer): Boolean;
+  begin
+    Result := GetKeyState(AVirtualKey) and 1 = 1;
+  end;
+
 begin
   inherited;
 
@@ -6320,22 +6331,6 @@ begin
   begin
     Include(FStateFlags, sfIgnoreNextChar);
     Exit;
-  end;
-
-  if FCompletionProposal.Enabled then
-  begin
-    ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
-    if (AShift = LShortCutShift) and (AKey = LShortCutKey) or
-      (AShift = []) and (cpoAutoInvoke in FCompletionProposal.Options) and Chr(AKey).IsLetter then
-    begin
-      DoExecuteCompletionProposal;
-      if not (cpoAutoInvoke in FCompletionProposal.Options) then
-      begin
-        AKey := 0;
-        Include(FStateFlags, sfIgnoreNextChar);
-        Exit;
-      end;
-    end;
   end;
 
   if FSyncEdit.Enabled then
@@ -6356,9 +6351,6 @@ begin
       Exit;
     end;
   end;
-
-  if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
-    FreeCompletionProposalPopupWindow;
 
   FKeyboardHandler.ExecuteKeyDown(Self, AKey, AShift);
 
@@ -6404,6 +6396,25 @@ begin
     if Assigned(LData) then
       FreeMem(LData);
   end;
+
+  if FCompletionProposal.Enabled and not Assigned(FCompletionProposalPopupWindow) then
+  begin
+    ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
+    if (AShift = LShortCutShift) and (AKey = LShortCutKey) or
+      (AKey <> LShortCutKey) and (cpoAutoInvoke in FCompletionProposal.Options) and Chr(AKey).IsLetter then
+    begin
+      DoExecuteCompletionProposal;
+      if not (cpoAutoInvoke in FCompletionProposal.Options) then
+      begin
+        AKey := 0;
+        Include(FStateFlags, sfIgnoreNextChar);
+        Exit;
+      end;
+    end;
+  end;
+
+  if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
+    FreeCompletionProposalPopupWindow;
 end;
 
 procedure TBCBaseEditor.KeyPressW(var AKey: Char);
@@ -12415,7 +12426,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.ExportToHTML(const AFileName: string; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
+procedure TBCBaseEditor.ExportToHTML(const AFileName: string; const ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LFileStream: TFileStream;
 begin
@@ -12427,7 +12438,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.ExportToHTML(AStream: TStream; ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
+procedure TBCBaseEditor.ExportToHTML(AStream: TStream; const ACharSet: string = ''; AEncoding: System.SysUtils.TEncoding = nil);
 begin
   with TBCEditorExportHTML.Create(FLines, FHighlighter, Font, ACharSet) do
   try

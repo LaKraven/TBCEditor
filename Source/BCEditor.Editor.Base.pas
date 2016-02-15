@@ -3000,10 +3000,12 @@ begin
   begin
     LTextBeginPosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^;
 
-    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and (LTextBeginPosition.Char > FSyncEdit.EditBeginPosition.Char) then
+    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and
+      (LTextBeginPosition.Char < FSyncEdit.EditBeginPosition.Char) then
     begin
-      LTextBeginPosition.Char := LTextBeginPosition.Char + LDifference;
-      PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^.Char := LTextBeginPosition.Char;
+      FSyncEdit.MoveBeginPositionChar(LDifference);
+      FSyncEdit.MoveEndPositionChar(LDifference);
+      SetTextCaretX(TextCaretPosition.Char + LDifference);
     end;
 
     LTextEndPosition := LTextBeginPosition;
@@ -3024,9 +3026,11 @@ begin
     if j < FSyncEdit.SyncItems.Count then
     begin
       LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
+
       while (j < FSyncEdit.SyncItems.Count) and (LTextSameLinePosition.Line = LTextBeginPosition.Line) do
       begin
         PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^.Char := LTextSameLinePosition.Char + LDifference;
+
         Inc(j);
         if j < FSyncEdit.SyncItems.Count then
           LTextSameLinePosition := PBCEditorTextPosition(FSyncEdit.SyncItems.Items[j])^;
@@ -6641,6 +6645,7 @@ var
   LSelectionAvailable: Boolean;
   LLeftMarginWidth: Integer;
   LDisplayPosition: TBCEditorDisplayPosition;
+  LRow, LRowCount: Integer;
 begin
   LLeftMarginWidth := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
   if FMinimap.Align = maLeft then
@@ -6667,12 +6672,16 @@ begin
   if FSyncEdit.Enabled and FSyncEdit.Activator.Visible and not FSyncEdit.Active and LSelectionAvailable then
   begin
     LDisplayPosition := TextToDisplayPosition(SelectionEndPosition);
-    if (X < LeftMargin.Bookmarks.Panel.Width) and
-      (Y div FLineHeight <= LDisplayPosition.Row - TopLine) and
-      (Y div FLineHeight > LDisplayPosition.Row - TopLine - 1) then
+
+    if X < LeftMargin.Bookmarks.Panel.Width then
     begin
-      FSyncEdit.Active := True;
-      Exit;
+      LRowCount := Y div FLineHeight;
+      LRow := LDisplayPosition.Row - TopLine;
+      if (LRowCount <= LRow) and (LRowCount > LRow - 1) then
+      begin
+        FSyncEdit.Active := True;
+        Exit;
+      end;
     end;
   end;
 
@@ -11541,13 +11550,21 @@ begin
           if SelectionAvailable then
           begin
             if FSyncEdit.Active then
+            begin
+              if LTextCaretPosition.Char < FSyncEdit.EditBeginPosition.Char then
+                Exit;
               FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char);
+            end;
             SetSelectedTextEmpty;
           end
           else
           begin
             if FSyncEdit.Active then
+            begin
+              if LTextCaretPosition.Char <= FSyncEdit.EditBeginPosition.Char then
+                Exit;
               FSyncEdit.MoveEndPositionChar(-1);
+            end;
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
             LTabBuffer := FLines.Strings[LTextCaretPosition.Line];

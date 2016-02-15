@@ -34,6 +34,7 @@ type
     procedure Abort;
     procedure Assign(ASource: TPersistent); override;
     procedure ClearSyncItems;
+    procedure MoveBeginPositionChar(ACount: Integer);
     procedure MoveEndPositionChar(ACount: Integer);
     property Active: Boolean read FActive write SetActive default False;
     property BlockBeginPosition: TBCEditorTextPosition read FBlockBeginPosition write FBlockBeginPosition;
@@ -140,6 +141,11 @@ begin
     and
     ((ATextPosition.Line < FBlockEndPosition.Line) or
     (ATextPosition.Line = FBlockEndPosition.Line) and (ATextPosition.Char < FBlockEndPosition.Char));
+end;
+
+procedure TBCEditorSyncEdit.MoveBeginPositionChar(ACount: Integer);
+begin
+  Inc(FEditBeginPosition.Char, ACount);
 end;
 
 procedure TBCEditorSyncEdit.MoveEndPositionChar(ACount: Integer);

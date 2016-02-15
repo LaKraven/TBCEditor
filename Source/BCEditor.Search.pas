@@ -15,7 +15,7 @@ type
     procedure SetPattern(const AValue: string); virtual; abstract;
   public
     function FindAll(const AText: string): Integer; virtual; abstract;
-    function Replace(const AOccurrence, aReplacement: string): string; virtual; abstract;
+    function Replace(const AOccurrence, AReplacement: string): string; virtual; abstract;
     procedure Clear; virtual; abstract;
     property Lengths[AIndex: Integer]: Integer read GetLength;
     property Pattern: string read GetPattern write SetPattern;

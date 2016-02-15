@@ -6313,17 +6313,6 @@ var
   LTextPosition: TBCEditorTextPosition;
   LShortCutKey: Word;
   LShortCutShift: TShiftState;
-
-  function IsKeyDown(const AVirtualKey: Integer): Boolean;
-  begin
-    Result := GetKeyState(AVirtualKey) and $8000 <> 0;
-  end;
-
-  function IsKeyOn(const AVirtualKey: Integer): Boolean;
-  begin
-    Result := GetKeyState(AVirtualKey) and 1 = 1;
-  end;
-
 begin
   inherited;
 

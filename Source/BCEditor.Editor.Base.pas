@@ -11759,13 +11759,13 @@ begin
               begin
                 FUndoList.BeginBlock;
                 LSpaceCount1 := LTextCaretPosition.Char - 1 - LLength;
-                if toTabsToSpaces in FTabs.Options then
+                {if toTabsToSpaces in FTabs.Options then
                   LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1)
                 else
                 if AllWhiteUpToCaret(LLineText, LLength) then
                   LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, LSpaceCount1 div FTabs.Width) +
                     StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1 mod FTabs.Width)
-                else
+                else }
                   LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1);
 
                 if LSpaceCount1 > 0 then
@@ -12861,6 +12861,7 @@ var
   LPasteMode: TBCEditorSelectionMode;
   LGlobalMem: HGLOBAL;
   LFirstByteOfMemoryBlock: PByte;
+  LLength: Integer;
 begin
   if not CanPaste then
     Exit;
@@ -12908,14 +12909,20 @@ begin
   if Clipboard.HasFormat(GClipboardFormatMSDev) then
     LPasteMode := smColumn;
 
-
   FUndoList.BeginBlock;
 
   if SelectionAvailable then
     FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
       FSelection.ActiveMode)
   else
+  begin
     FSelection.ActiveMode := Selection.Mode;
+
+    LLength := Length(FLines[LTextCaretPosition.Line]);
+    if LTextCaretPosition.Char > LLength then
+      FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1, LTextCaretPosition.Line),
+        LTextCaretPosition, '', smNormal);
+  end;
 
   LClipBoardText := GetClipboardText;
 

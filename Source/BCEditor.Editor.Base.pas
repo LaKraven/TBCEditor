@@ -10255,13 +10255,14 @@ function TBCBaseEditor.ReplaceText(const ASearchText: string; const AReplaceText
 var
   LStartTextPosition, LEndTextPosition: TBCEditorTextPosition;
   LCurrentTextPosition: TBCEditorTextPosition;
-  LSearchLength, LSearchIndex, LFound: Integer;
+  LSearchLength, LReplaceLength, LSearchIndex, LFound: Integer;
   LCurrentLine: Integer;
   LIsBackward, LIsFromCursor: Boolean;
   LIsPrompt: Boolean;
   LIsReplaceAll, LIsDeleteLine: Boolean;
   LIsEndUndoBlock: Boolean;
   LActionReplace: TBCEditorReplaceAction;
+  LResultOffset: Integer;
 
   function InValidSearchRange(First, Last: Integer): Boolean;
   begin
@@ -10338,6 +10339,7 @@ begin
   else
     LCurrentTextPosition := LStartTextPosition;
 
+  LReplaceLength := 0;
   if LIsReplaceAll and not LIsPrompt then
   begin
     IncPaintLock;
@@ -10351,6 +10353,7 @@ begin
     while (LCurrentTextPosition.Line >= LStartTextPosition.Line) and (LCurrentTextPosition.Line <= LEndTextPosition.Line) do
     begin
       LCurrentLine := FSearchEngine.FindAll(Lines[LCurrentTextPosition.Line]);
+      LResultOffset := 0;
 
       if LIsBackward then
         LSearchIndex := FSearchEngine.ResultCount - 1
@@ -10359,7 +10362,7 @@ begin
 
       while LCurrentLine > 0 do
       begin
-        LFound := FSearchEngine.Results[LSearchIndex];// + LResultOffset;
+        LFound := FSearchEngine.Results[LSearchIndex] + LResultOffset;
         LSearchLength := FSearchEngine.Lengths[LSearchIndex];
         if LIsBackward then
           Dec(LSearchIndex)
@@ -10372,6 +10375,7 @@ begin
         LCurrentTextPosition.Char := LFound;
 
         SelectionBeginPosition := LCurrentTextPosition;
+
         Inc(LCurrentTextPosition.Char, LSearchLength);
         SelectionEndPosition := LCurrentTextPosition;
 
@@ -10410,7 +10414,23 @@ begin
             Dec(LCurrentTextPosition.Line);
           end
           else
+          begin
             SelectedText := FSearchEngine.Replace(SelectedText, AReplaceText);
+            LReplaceLength := TextCaretPosition.Char - LFound;
+          end
+        end;
+        if not LIsBackward then
+        begin
+          SetTextCaretX(LFound + LReplaceLength);
+          if (LSearchLength <> LReplaceLength) and (LActionReplace <> raSkip) then
+          begin
+            Inc(LResultOffset, LReplaceLength - LSearchLength);
+            if (FSelection.ActiveMode <> smColumn) and (GetTextCaretY = LEndTextPosition.Line) then
+            begin
+              Inc(LEndTextPosition.Char, LReplaceLength - LSearchLength);
+              SelectionEndPosition := LEndTextPosition;
+            end;
+          end;
         end;
 
         if not LIsReplaceAll then

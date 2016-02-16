@@ -11759,14 +11759,7 @@ begin
               begin
                 FUndoList.BeginBlock;
                 LSpaceCount1 := LTextCaretPosition.Char - 1 - LLength;
-                {if toTabsToSpaces in FTabs.Options then
-                  LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1)
-                else
-                if AllWhiteUpToCaret(LLineText, LLength) then
-                  LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, LSpaceCount1 div FTabs.Width) +
-                    StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1 mod FTabs.Width)
-                else }
-                  LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1);
+                LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount1);
 
                 if LSpaceCount1 > 0 then
                   FUndoList.AddChange(crInsert, LTextCaretPosition,

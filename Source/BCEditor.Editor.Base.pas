@@ -1130,42 +1130,44 @@ begin
   Result := '';
   if not OpenClipboard then
     Exit;
-  if Clipboard.HasFormat(CF_UNICODETEXT) then
-  begin
-    LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
-    try
-      if LGlobalMem <> 0 then
-        Result := PChar(GlobalLock(LGlobalMem));
-    finally
-      Clipboard.Close;
-      if LGlobalMem <> 0 then
-        GlobalUnlock(LGlobalMem);
-    end;
-  end
-  else
-  begin
-    LLocaleID := 0;
-    LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
-    try
-      if LGlobalMem <> 0 then
-        LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
-    finally
-      if LGlobalMem <> 0 then
-        GlobalUnlock(LGlobalMem);
-    end;
+  try
+    if Clipboard.HasFormat(CF_UNICODETEXT) then
+    begin
+      LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
+      try
+        if LGlobalMem <> 0 then
+          Result := PChar(GlobalLock(LGlobalMem));
+      finally
+        if LGlobalMem <> 0 then
+          GlobalUnlock(LGlobalMem);
+      end;
+    end
+    else
+    begin
+      LLocaleID := 0;
+      LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
+      try
+        if LGlobalMem <> 0 then
+          LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
+      finally
+        if LGlobalMem <> 0 then
+          GlobalUnlock(LGlobalMem);
+      end;
 
-    LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
-    try
-      if LGlobalMem <> 0 then
-      begin
-        LBytePointer := GlobalLock(LGlobalMem);
-        Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
-      end
-    finally
-      Clipboard.Close;
-      if LGlobalMem <> 0 then
-        GlobalUnlock(LGlobalMem);
+      LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
+      try
+        if LGlobalMem <> 0 then
+        begin
+          LBytePointer := GlobalLock(LGlobalMem);
+          Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
+        end
+      finally
+        if LGlobalMem <> 0 then
+          GlobalUnlock(LGlobalMem);
+      end;
     end;
+  finally
+    Clipboard.Close;
   end;
 end;
 
@@ -4199,46 +4201,48 @@ begin
   if AText = '' then
     Exit;
   LLength := Length(AText);
+
   if not OpenClipboard then
     Exit;
 
   Clipboard.Clear;
-
-  { set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
-  if Win32Platform <> VER_PLATFORM_WIN32_NT then
-  begin
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
+  try
+    { set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
+    if Win32Platform <> VER_PLATFORM_WIN32_NT then
+    begin
+      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
+      if LGlobalMem <> 0 then
+      begin
+        LPGlobalLock := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LPGlobalLock) then
+          begin
+            Move(PAnsiChar(AnsiString(AText))^, LPGlobalLock^, LLength + 1);
+            Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
+          end;
+        finally
+          GlobalUnlock(LGlobalMem);
+        end;
+      end;
+    end;
+    { Set unicode text, this also works on Win9X, even if the clipboard-viewer
+      can't show it, Word 2000+ can paste it including the unicode only characters }
+    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
     if LGlobalMem <> 0 then
     begin
       LPGlobalLock := GlobalLock(LGlobalMem);
       try
         if Assigned(LPGlobalLock) then
         begin
-          Move(PAnsiChar(AnsiString(AText))^, LPGlobalLock^, LLength + 1);
-          Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
+          Move(PChar(AText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
+          Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
         end;
       finally
-        Clipboard.Close;
         GlobalUnlock(LGlobalMem);
       end;
     end;
-  end;
-  { Set unicode text, this also works on Win9X, even if the clipboard-viewer
-    can't show it, Word 2000+ can paste it including the unicode only characters }
-  LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
-  if LGlobalMem <> 0 then
-  begin
-    LPGlobalLock := GlobalLock(LGlobalMem);
-    try
-      if Assigned(LPGlobalLock) then
-      begin
-        Move(PChar(AText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
-        Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
-      end;
-    finally
-      Clipboard.Close;
-      GlobalUnlock(LGlobalMem);
-    end;
+  finally
+    Clipboard.Close;
   end;
 end;
 
@@ -5846,66 +5850,63 @@ begin
     you want to put more than one format on it at a time. }
   if not OpenClipboard then
     Exit;
-  { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
-  LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
-  if LGlobalMem <> 0 then
-  begin
-    LBytePointer := GlobalLock(LGlobalMem);
-    try
-      if Assigned(LBytePointer) then
+  try
+    { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
+    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
+    if LGlobalMem <> 0 then
+    begin
+      LBytePointer := GlobalLock(LGlobalMem);
+      try
+        if Assigned(LBytePointer) then
+        begin
+          PBCEditorSelectionMode(LBytePointer)^ := FSelection.ActiveMode;
+          Inc(LBytePointer, SizeOf(TBCEditorSelectionMode));
+          Move(PAnsiChar(AnsiString(AText))^, LBytePointer^, LTextLength + 1);
+          SetClipboardData(GClipboardFormatBCEditor, LGlobalMem);
+        end;
+      finally
+        GlobalUnlock(LGlobalMem);
+      end;
+    end;
+
+    if FSelection.Mode = smColumn then
+    begin
+      { Borland-IDE }
+      LSmType := $02;
+      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
+      if LGlobalMem <> 0 then
       begin
-        PBCEditorSelectionMode(LBytePointer)^ := FSelection.ActiveMode;
-        Inc(LBytePointer, SizeOf(TBCEditorSelectionMode));
-        Move(PAnsiChar(AnsiString(AText))^, LBytePointer^, LTextLength + 1);
-        SetClipboardData(GClipboardFormatBCEditor, LGlobalMem);
-      end;
-    finally
-      Clipboard.Close;
-      GlobalUnlock(LGlobalMem);
-    end;
-  end;
-
-  if FSelection.Mode = smColumn then
-  begin
-    { Borland-IDE }
-    LSmType := $02;
-    if not OpenClipboard then
-      Exit;
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-    if LGlobalMem <> 0 then
-    begin
-      LBytePointer := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LBytePointer) then
-        begin
-          Move(LSmType, LBytePointer^, SizeOf(LSmType));
-          SetClipboardData(GClipboardFormatBorland, LGlobalMem);
+        LBytePointer := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LBytePointer) then
+          begin
+            Move(LSmType, LBytePointer^, SizeOf(LSmType));
+            SetClipboardData(GClipboardFormatBorland, LGlobalMem);
+          end;
+        finally
+          GlobalUnlock(LGlobalMem);
         end;
-      finally
-        Clipboard.Close;
-        GlobalUnlock(LGlobalMem);
       end;
-    end;
 
-    { Microsoft VisualStudio }
-    LSmType := $02;
-    if not OpenClipboard then
-      Exit;
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-    if LGlobalMem <> 0 then
-    begin
-      LBytePointer := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LBytePointer) then
-        begin
-          Move(LSmType, LBytePointer^, SizeOf(LSmType));
-          SetClipboardData(GClipboardFormatMSDev, LGlobalMem);
+      { Microsoft VisualStudio }
+      LSmType := $02;
+      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
+      if LGlobalMem <> 0 then
+      begin
+        LBytePointer := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LBytePointer) then
+          begin
+            Move(LSmType, LBytePointer^, SizeOf(LSmType));
+            SetClipboardData(GClipboardFormatMSDev, LGlobalMem);
+          end;
+        finally
+          GlobalUnlock(LGlobalMem);
         end;
-      finally
-        Clipboard.Close;
-        GlobalUnlock(LGlobalMem);
       end;
     end;
+  finally
+    Clipboard.Close;
   end;
 end;
 
@@ -12880,103 +12881,104 @@ begin
   LTextCaretPosition := TextCaretPosition;
   LPasteMode := FSelection.Mode;
 
-  if Clipboard.HasFormat(GClipboardFormatBCEditor) then
-  begin
-    if not OpenClipboard then
-      Exit;
-    LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
-    LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-    try
-      if Assigned(LFirstByteOfMemoryBlock) then
-        LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
-    finally
-      Clipboard.Close;
-      GlobalUnlock(LGlobalMem);
+  if not OpenClipboard then
+    Exit;
+  try
+    if Clipboard.HasFormat(GClipboardFormatBCEditor) then
+    begin
+      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
+      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
+      try
+        if Assigned(LFirstByteOfMemoryBlock) then
+          LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
+      finally
+        GlobalUnlock(LGlobalMem);
+      end
     end
-  end
-  else
-  if Clipboard.HasFormat(GClipboardFormatBorland) then
-  begin
-    if not OpenClipboard then
-      Exit;
-    LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
-    LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-    try
-      if Assigned(LFirstByteOfMemoryBlock) then
-        if LFirstByteOfMemoryBlock^ = $02 then
-          LPasteMode := smColumn
-        else
-          LPasteMode := smNormal;
-    finally
-      Clipboard.Close;
-      GlobalUnlock(LGlobalMem);
-    end
-  end
-  else
-  if Clipboard.HasFormat(GClipboardFormatMSDev) then
-    LPasteMode := smColumn;
-
-  FUndoList.BeginBlock;
-
-  if SelectionAvailable then
-    FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
-      FSelection.ActiveMode)
-  else
-  begin
-    FSelection.ActiveMode := Selection.Mode;
-
-    LLength := Length(FLines[LTextCaretPosition.Line]);
-    if LTextCaretPosition.Char > LLength then
-      FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1, LTextCaretPosition.Line),
-        LTextCaretPosition, '', smNormal);
-  end;
-
-  LClipBoardText := GetClipboardText;
-
-  if SelectionAvailable then
-  begin
-    LStartPositionOfBlock := SelectionBeginPosition;
-    LEndPositionOfBlock := SelectionEndPosition;
-    FSelectionBeginPosition := LStartPositionOfBlock;
-    FSelectionEndPosition := LEndPositionOfBlock;
-
-    if FSelection.ActiveMode = smLine then
-      LStartPositionOfBlock.Char := 1;
-
-    if FSyncEdit.Active then
-      FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char + Length(LClipBoardText));
-  end
-  else
-  begin
-    LStartPositionOfBlock := LTextCaretPosition;
-
-    if FSyncEdit.Active then
-      FSyncEdit.MoveEndPositionChar(Length(LClipBoardText));
-  end;
-
-  DoSelectedText(LPasteMode, PChar(LClipBoardText), True);
-
-  LEndPositionOfBlock := SelectionEndPosition;
-  if LPasteMode = smNormal then
-    FUndoList.AddChange(crPaste, LTextCaretPosition, LStartPositionOfBlock, LEndPositionOfBlock, SelectedText, LPasteMode)
-  else
-  if LPasteMode = smLine then
-  begin
-    if DisplayCaretX = 1 then
-      FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
-        GetTextPosition(FVisibleChars, LEndPositionOfBlock.Line - 1), SelectedText, smLine)
     else
-      FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
-        LEndPositionOfBlock, SelectedText, smNormal);
+    if Clipboard.HasFormat(GClipboardFormatBorland) then
+    begin
+      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
+      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
+      try
+        if Assigned(LFirstByteOfMemoryBlock) then
+          if LFirstByteOfMemoryBlock^ = $02 then
+            LPasteMode := smColumn
+          else
+            LPasteMode := smNormal;
+      finally
+        GlobalUnlock(LGlobalMem);
+      end
+    end
+    else
+    if Clipboard.HasFormat(GClipboardFormatMSDev) then
+      LPasteMode := smColumn;
+
+    FUndoList.BeginBlock;
+
+    if SelectionAvailable then
+      FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
+        FSelection.ActiveMode)
+    else
+    begin
+      FSelection.ActiveMode := Selection.Mode;
+
+      LLength := Length(FLines[LTextCaretPosition.Line]);
+      if LTextCaretPosition.Char > LLength then
+        FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1, LTextCaretPosition.Line),
+          LTextCaretPosition, '', smNormal);
+    end;
+
+    LClipBoardText := GetClipboardText;
+
+    if SelectionAvailable then
+    begin
+      LStartPositionOfBlock := SelectionBeginPosition;
+      LEndPositionOfBlock := SelectionEndPosition;
+      FSelectionBeginPosition := LStartPositionOfBlock;
+      FSelectionEndPosition := LEndPositionOfBlock;
+
+      if FSelection.ActiveMode = smLine then
+        LStartPositionOfBlock.Char := 1;
+
+      if FSyncEdit.Active then
+        FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char + Length(LClipBoardText));
+    end
+    else
+    begin
+      LStartPositionOfBlock := LTextCaretPosition;
+
+      if FSyncEdit.Active then
+        FSyncEdit.MoveEndPositionChar(Length(LClipBoardText));
+    end;
+
+    DoSelectedText(LPasteMode, PChar(LClipBoardText), True);
+
+    LEndPositionOfBlock := SelectionEndPosition;
+    if LPasteMode = smNormal then
+      FUndoList.AddChange(crPaste, LTextCaretPosition, LStartPositionOfBlock, LEndPositionOfBlock, SelectedText, LPasteMode)
+    else
+    if LPasteMode = smLine then
+    begin
+      if DisplayCaretX = 1 then
+        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
+          GetTextPosition(FVisibleChars, LEndPositionOfBlock.Line - 1), SelectedText, smLine)
+      else
+        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
+          LEndPositionOfBlock, SelectedText, smNormal);
+    end;
+
+    FUndoList.EndBlock;
+
+    if FSyncEdit.Active then
+      DoSyncEdit;
+
+  finally
+    Clipboard.Close;
+
+    EnsureCursorPositionVisible;
+    Invalidate;
   end;
-
-  FUndoList.EndBlock;
-
-  if FSyncEdit.Active then
-    DoSyncEdit;
-
-  EnsureCursorPositionVisible;
-  Invalidate;
 end;
 
 procedure TBCBaseEditor.DoRedo;

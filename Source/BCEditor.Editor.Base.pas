@@ -4204,9 +4204,8 @@ begin
 
   if not OpenClipboard then
     Exit;
-
-  Clipboard.Clear;
   try
+    Clipboard.Clear;
     { set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
     if Win32Platform <> VER_PLATFORM_WIN32_NT then
     begin
@@ -11838,7 +11837,7 @@ begin
             FSelection.ActiveMode := smNormal;
             LHelper := SelectedText;
             DoSelectedText('');
-            FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition{LTextCaretPosition}, LWordPosition, LHelper, smNormal);
+            FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, LWordPosition, LHelper, smNormal);
           end;
         end;
       ecDeleteLastWord, ecDeleteBeginningOfLine:
@@ -12869,15 +12868,15 @@ var
   LFirstByteOfMemoryBlock: PByte;
   LLength: Integer;
 begin
-  if not CanPaste then
-    Exit;
-
   LTextCaretPosition := TextCaretPosition;
   LPasteMode := FSelection.Mode;
 
   if not OpenClipboard then
     Exit;
   try
+    if not CanPaste then
+      Exit;
+
     if Clipboard.HasFormat(GClipboardFormatBCEditor) then
     begin
       LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);

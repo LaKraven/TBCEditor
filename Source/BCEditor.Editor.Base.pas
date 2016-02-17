@@ -4467,11 +4467,6 @@ begin
     else
       FSelection.ActiveMode := FSelection.Mode;
 
-    //LBlockStartPosition := SelectionBeginPosition;
-    //LBlockEndPosition := SelectionEndPosition;
-   // FSelectionBeginPosition := LBlockStartPosition;
-   // FSelectionEndPosition := LBlockEndPosition;
-
     DoSelectedText(AValue);
 
     if (AValue <> '') and (FSelection.ActiveMode <> smColumn) then
@@ -9486,7 +9481,7 @@ begin
     if FSelection.ActiveMode = smLine then
       LBlockStartPosition.Char := 1;
   end;
-  FUndoList.BeginBlock{(3)};
+  FUndoList.BeginBlock;
   FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
 
@@ -11811,9 +11806,8 @@ begin
             if (LWordPosition.Char < LTextCaretPosition.Char) or
               ((LWordPosition.Char = LTextCaretPosition.Char) and (LWordPosition.Line < FLines.Count)) then
             begin
-              if LWordPosition.Char > LLength + 1 then
+              if LWordPosition.Char > LLength then
               begin
-                //xxx
                 Inc(LWordPosition.Line);
                 LWordPosition.Char := 1;
                 LLineText := FLines[LWordPosition.Line];
@@ -11843,8 +11837,8 @@ begin
             SetSelectionEndPosition(LWordPosition);
             FSelection.ActiveMode := smNormal;
             LHelper := SelectedText;
-            DoSelectedText(StringOfChar(' ', LTextCaretPosition.Char - SelectionBeginPosition.Char));
-            FUndoList.AddChange(crDelete, LTextCaretPosition, LTextCaretPosition, LWordPosition, LHelper, smNormal);
+            DoSelectedText('');
+            FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition{LTextCaretPosition}, LWordPosition, LHelper, smNormal);
           end;
         end;
       ecDeleteLastWord, ecDeleteBeginningOfLine:

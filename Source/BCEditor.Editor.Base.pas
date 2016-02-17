@@ -11823,14 +11823,14 @@ begin
             if (LWordPosition.Char < LTextCaretPosition.Char) or
               ((LWordPosition.Char = LTextCaretPosition.Char) and (LWordPosition.Line < FLines.Count)) then
             begin
-              if LWordPosition.Char > LLength then
+              if LWordPosition.Char > LLength + 1 then
               begin
                 Inc(LWordPosition.Line);
                 LWordPosition.Char := 1;
                 LLineText := FLines[LWordPosition.Line];
               end
               else
-              if LLineText[LWordPosition.Char] <> BCEDITOR_SPACE_CHAR then
+              if (LWordPosition.Char <= LLength) and (LLineText[LWordPosition.Char] <> BCEDITOR_SPACE_CHAR) then
                 Inc(LWordPosition.Char);
             end
             else

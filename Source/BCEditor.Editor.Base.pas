@@ -222,6 +222,7 @@ type
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
+    function OpenClipboard: Boolean;
     function PreviousWordPosition: TBCEditorTextPosition; overload;
     function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function RescanHighlighterRangesFrom(AIndex: Integer): Integer;
@@ -1127,7 +1128,8 @@ var
 
 begin
   Result := '';
-  Clipboard.Open;
+  if not OpenClipboard then
+    Exit;
   try
     if Clipboard.HasFormat(CF_UNICODETEXT) then
     begin
@@ -2308,6 +2310,30 @@ begin
     LMinimapWidth := FMinimap.GetWidth;
   Result.Column := Max(1, FLeftChar + ((X - LMinimapWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth) div FCharWidth));
   Result.Row := Max(1, TopLine + Y div FLineHeight);
+end;
+
+function TBCBaseEditor.OpenClipboard: Boolean;
+var
+  LRetryCount: Integer;
+  LDelayStepMs: Integer;
+begin
+  LDelayStepMs := BCEDITOR_CLIPBOARD_DELAY_STEP_MS;
+  Result := False;
+  for LRetryCount := 1 to BCEDITOR_CLIPBOARD_MAX_RETRIES do
+  try
+    Clipboard.Open;
+    Result := True;
+    Break;
+  except
+    on Exception do
+    if LRetryCount = BCEDITOR_CLIPBOARD_MAX_RETRIES then
+      raise
+    else
+    begin
+      Sleep(LDelayStepMs);
+      Inc(LDelayStepMs, BCEDITOR_CLIPBOARD_DELAY_STEP_MS);
+    end;
+  end;
 end;
 
 function TBCBaseEditor.PreviousWordPosition: TBCEditorTextPosition;
@@ -4175,7 +4201,8 @@ begin
   if AText = '' then
     Exit;
   LLength := Length(AText);
-  Clipboard.Open;
+  if not OpenClipboard then
+    Exit;
   try
     Clipboard.Clear;
 
@@ -5821,7 +5848,8 @@ begin
   LTextLength := Length(AText);
   { Open and Close are the only TClipboard methods used because TClipboard is very hard (impossible) to work with if
     you want to put more than one format on it at a time. }
-  Clipboard.Open;
+  if not OpenClipboard then
+    Exit;
   try
     { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
     LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
@@ -5848,7 +5876,8 @@ begin
   begin
     { Borland-IDE }
     LSmType := $02;
-    Clipboard.Open;
+    if not OpenClipboard then
+      Exit;
     try
       LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
       if LGlobalMem <> 0 then
@@ -5870,7 +5899,8 @@ begin
 
     { Microsoft VisualStudio }
     LSmType := $02;
-    Clipboard.Open;
+    if not OpenClipboard then
+      Exit;
     try
       LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
       if LGlobalMem <> 0 then
@@ -12864,7 +12894,8 @@ begin
 
   if Clipboard.HasFormat(GClipboardFormatBCEditor) then
   begin
-    Clipboard.Open;
+    if not OpenClipboard then
+      Exit;
     try
       LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
       LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
@@ -12881,7 +12912,8 @@ begin
   else
   if Clipboard.HasFormat(GClipboardFormatBorland) then
   begin
-    Clipboard.Open;
+    if not OpenClipboard then
+      Exit;
     try
       LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
       LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);

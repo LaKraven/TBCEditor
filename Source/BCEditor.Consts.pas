@@ -9,6 +9,8 @@ type
   TBCEditorCharSet = set of AnsiChar;
 
 const
+  BCEDITOR_CLIPBOARD_MAX_RETRIES = 5;
+  BCEDITOR_CLIPBOARD_DELAY_STEP_MS = 200;
   BCEDITOR_WHEEL_DIVISOR = 120;
   BCEDITOR_MAILTO = 'mailto:';
   BCEDITOR_HTTP = 'http://';

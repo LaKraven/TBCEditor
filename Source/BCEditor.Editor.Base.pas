@@ -9934,8 +9934,8 @@ begin
           TextCaretPosition := LUndoItem.ChangeCaretPosition;
 
           LTempText := FLines.Strings[LUndoItem.ChangeBeginPosition.Line];
-          if (TextCaretPosition.Char - 1 > Length(LTempText)) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
-            LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, TextCaretPosition.Char - 1 - Length(LTempText));
+          if (LUndoItem.ChangeBeginPosition.Char - 1 > Length(LTempText)) and (LeftSpaceCount(LUndoItem.ChangeString) = 0) then
+            LTempText := LTempText + StringOfChar(BCEDITOR_SPACE_CHAR, LUndoItem.ChangeBeginPosition.Char - 1 - Length(LTempText));
           SetLineWithRightTrim(LUndoItem.ChangeBeginPosition.Line, LTempText + LUndoItem.ChangeString);
           FLines.Delete(LUndoItem.ChangeEndPosition.Line);
 
@@ -12108,8 +12108,9 @@ begin
                     DisplayCaretX := 1;
                 end;
 
-                FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition,
-                  GetTextPosition(DisplayCaretX, LTextCaretPosition.Line + 1), '', smNormal);
+                FUndoList.AddChange(crLineBreak, LTextCaretPosition,
+                  GetTextPosition(Length(FLines[LTextCaretPosition.Line]) + 1, LTextCaretPosition.Line),
+                  GetTextPosition(1, LTextCaretPosition.Line + 1), '', smNormal);
               end;
             end
             else

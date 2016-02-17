@@ -1130,44 +1130,42 @@ begin
   Result := '';
   if not OpenClipboard then
     Exit;
-  try
-    if Clipboard.HasFormat(CF_UNICODETEXT) then
-    begin
-      LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
-      try
-        if LGlobalMem <> 0 then
-          Result := PChar(GlobalLock(LGlobalMem));
-      finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
-      end;
-    end
-    else
-    begin
-      LLocaleID := 0;
-      LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
-      try
-        if LGlobalMem <> 0 then
-          LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
-      finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
-      end;
-
-      LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
-      try
-        if LGlobalMem <> 0 then
-        begin
-          LBytePointer := GlobalLock(LGlobalMem);
-          Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
-        end
-      finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
-      end;
+  if Clipboard.HasFormat(CF_UNICODETEXT) then
+  begin
+    LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
+    try
+      if LGlobalMem <> 0 then
+        Result := PChar(GlobalLock(LGlobalMem));
+    finally
+      Clipboard.Close;
+      if LGlobalMem <> 0 then
+        GlobalUnlock(LGlobalMem);
     end;
-  finally
-    Clipboard.Close;
+  end
+  else
+  begin
+    LLocaleID := 0;
+    LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
+    try
+      if LGlobalMem <> 0 then
+        LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
+    finally
+      if LGlobalMem <> 0 then
+        GlobalUnlock(LGlobalMem);
+    end;
+
+    LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
+    try
+      if LGlobalMem <> 0 then
+      begin
+        LBytePointer := GlobalLock(LGlobalMem);
+        Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
+      end
+    finally
+      Clipboard.Close;
+      if LGlobalMem <> 0 then
+        GlobalUnlock(LGlobalMem);
+    end;
   end;
 end;
 
@@ -4203,46 +4201,44 @@ begin
   LLength := Length(AText);
   if not OpenClipboard then
     Exit;
-  try
-    Clipboard.Clear;
 
-    { set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
-    if Win32Platform <> VER_PLATFORM_WIN32_NT then
-    begin
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
-      if LGlobalMem <> 0 then
-      begin
-        LPGlobalLock := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LPGlobalLock) then
-          begin
-            Move(PAnsiChar(AnsiString(AText))^, LPGlobalLock^, LLength + 1);
-            Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end;
-      end;
-    end;
-    { Set unicode text, this also works on Win9X, even if the clipboard-viewer
-      can't show it, Word 2000+ can paste it including the unicode only characters }
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
+  Clipboard.Clear;
+
+  { set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
+  if Win32Platform <> VER_PLATFORM_WIN32_NT then
+  begin
+    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
     if LGlobalMem <> 0 then
     begin
       LPGlobalLock := GlobalLock(LGlobalMem);
       try
         if Assigned(LPGlobalLock) then
         begin
-          Move(PChar(AText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
-          Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
+          Move(PAnsiChar(AnsiString(AText))^, LPGlobalLock^, LLength + 1);
+          Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
         end;
       finally
+        Clipboard.Close;
         GlobalUnlock(LGlobalMem);
       end;
     end;
-    { Don't free Mem! It belongs to the clipboard now, and it will free it when it is done with it. }
-  finally
-    Clipboard.Close;
+  end;
+  { Set unicode text, this also works on Win9X, even if the clipboard-viewer
+    can't show it, Word 2000+ can paste it including the unicode only characters }
+  LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
+  if LGlobalMem <> 0 then
+  begin
+    LPGlobalLock := GlobalLock(LGlobalMem);
+    try
+      if Assigned(LPGlobalLock) then
+      begin
+        Move(PChar(AText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
+        Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
+      end;
+    finally
+      Clipboard.Close;
+      GlobalUnlock(LGlobalMem);
+    end;
   end;
 end;
 
@@ -5850,74 +5846,65 @@ begin
     you want to put more than one format on it at a time. }
   if not OpenClipboard then
     Exit;
-  try
-    { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
-    if LGlobalMem <> 0 then
-    begin
-      LBytePointer := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LBytePointer) then
-        begin
-          PBCEditorSelectionMode(LBytePointer)^ := FSelection.ActiveMode;
-          Inc(LBytePointer, SizeOf(TBCEditorSelectionMode));
-          Move(PAnsiChar(AnsiString(AText))^, LBytePointer^, LTextLength + 1);
-          SetClipboardData(GClipboardFormatBCEditor, LGlobalMem);
-        end;
-      finally
-        GlobalUnlock(LGlobalMem);
+  { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
+  LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
+  if LGlobalMem <> 0 then
+  begin
+    LBytePointer := GlobalLock(LGlobalMem);
+    try
+      if Assigned(LBytePointer) then
+      begin
+        PBCEditorSelectionMode(LBytePointer)^ := FSelection.ActiveMode;
+        Inc(LBytePointer, SizeOf(TBCEditorSelectionMode));
+        Move(PAnsiChar(AnsiString(AText))^, LBytePointer^, LTextLength + 1);
+        SetClipboardData(GClipboardFormatBCEditor, LGlobalMem);
       end;
+    finally
+      Clipboard.Close;
+      GlobalUnlock(LGlobalMem);
     end;
-    { Don't free Mem! It belongs to the clipboard now, and it will free it when it is done with it. }
-  finally
-    Clipboard.Close;
   end;
+
   if FSelection.Mode = smColumn then
   begin
     { Borland-IDE }
     LSmType := $02;
     if not OpenClipboard then
       Exit;
-    try
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-      if LGlobalMem <> 0 then
-      begin
-        LBytePointer := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LBytePointer) then
-          begin
-            Move(LSmType, LBytePointer^, SizeOf(LSmType));
-            SetClipboardData(GClipboardFormatBorland, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
+    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
+    if LGlobalMem <> 0 then
+    begin
+      LBytePointer := GlobalLock(LGlobalMem);
+      try
+        if Assigned(LBytePointer) then
+        begin
+          Move(LSmType, LBytePointer^, SizeOf(LSmType));
+          SetClipboardData(GClipboardFormatBorland, LGlobalMem);
         end;
+      finally
+        Clipboard.Close;
+        GlobalUnlock(LGlobalMem);
       end;
-    finally
-      Clipboard.Close;
     end;
 
     { Microsoft VisualStudio }
     LSmType := $02;
     if not OpenClipboard then
       Exit;
-    try
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-      if LGlobalMem <> 0 then
-      begin
-        LBytePointer := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LBytePointer) then
-          begin
-            Move(LSmType, LBytePointer^, SizeOf(LSmType));
-            SetClipboardData(GClipboardFormatMSDev, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
+    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
+    if LGlobalMem <> 0 then
+    begin
+      LBytePointer := GlobalLock(LGlobalMem);
+      try
+        if Assigned(LBytePointer) then
+        begin
+          Move(LSmType, LBytePointer^, SizeOf(LSmType));
+          SetClipboardData(GClipboardFormatMSDev, LGlobalMem);
         end;
+      finally
+        Clipboard.Close;
+        GlobalUnlock(LGlobalMem);
       end;
-    finally
-      Clipboard.Close;
     end;
   end;
 end;
@@ -11825,6 +11812,7 @@ begin
             begin
               if LWordPosition.Char > LLength + 1 then
               begin
+                //xxx
                 Inc(LWordPosition.Line);
                 LWordPosition.Char := 1;
                 LLineText := FLines[LWordPosition.Line];
@@ -12896,39 +12884,33 @@ begin
   begin
     if not OpenClipboard then
       Exit;
+    LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
+    LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
     try
-      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
-      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LFirstByteOfMemoryBlock) then
-          LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end
+      if Assigned(LFirstByteOfMemoryBlock) then
+        LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
     finally
       Clipboard.Close;
-    end;
+      GlobalUnlock(LGlobalMem);
+    end
   end
   else
   if Clipboard.HasFormat(GClipboardFormatBorland) then
   begin
     if not OpenClipboard then
       Exit;
+    LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
+    LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
     try
-      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
-      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LFirstByteOfMemoryBlock) then
-          if LFirstByteOfMemoryBlock^ = $02 then
-            LPasteMode := smColumn
-          else
-            LPasteMode := smNormal;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end
+      if Assigned(LFirstByteOfMemoryBlock) then
+        if LFirstByteOfMemoryBlock^ = $02 then
+          LPasteMode := smColumn
+        else
+          LPasteMode := smNormal;
     finally
       Clipboard.Close;
-    end;
+      GlobalUnlock(LGlobalMem);
+    end
   end
   else
   if Clipboard.HasFormat(GClipboardFormatMSDev) then

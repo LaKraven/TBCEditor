@@ -12913,72 +12913,71 @@ begin
     else
     if Clipboard.HasFormat(GClipboardFormatMSDev) then
       LPasteMode := smColumn;
-
-    FUndoList.BeginBlock;
-
-    if SelectionAvailable then
-      FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
-        FSelection.ActiveMode)
-    else
-    begin
-      FSelection.ActiveMode := Selection.Mode;
-
-      LLength := Length(FLines[LTextCaretPosition.Line]);
-      if LTextCaretPosition.Char > LLength then
-        FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1, LTextCaretPosition.Line),
-          LTextCaretPosition, '', smNormal);
-    end;
-
-    LClipBoardText := GetClipboardText;
-
-    if SelectionAvailable then
-    begin
-      LStartPositionOfBlock := SelectionBeginPosition;
-      LEndPositionOfBlock := SelectionEndPosition;
-      FSelectionBeginPosition := LStartPositionOfBlock;
-      FSelectionEndPosition := LEndPositionOfBlock;
-
-      if FSelection.ActiveMode = smLine then
-        LStartPositionOfBlock.Char := 1;
-
-      if FSyncEdit.Active then
-        FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char + Length(LClipBoardText));
-    end
-    else
-    begin
-      LStartPositionOfBlock := LTextCaretPosition;
-
-      if FSyncEdit.Active then
-        FSyncEdit.MoveEndPositionChar(Length(LClipBoardText));
-    end;
-
-    DoSelectedText(LPasteMode, PChar(LClipBoardText), True);
-
-    LEndPositionOfBlock := SelectionEndPosition;
-    if LPasteMode = smNormal then
-      FUndoList.AddChange(crPaste, LTextCaretPosition, LStartPositionOfBlock, LEndPositionOfBlock, SelectedText, LPasteMode)
-    else
-    if LPasteMode = smLine then
-    begin
-      if DisplayCaretX = 1 then
-        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
-          GetTextPosition(FVisibleChars, LEndPositionOfBlock.Line - 1), SelectedText, smLine)
-      else
-        FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
-          LEndPositionOfBlock, SelectedText, smNormal);
-    end;
-
-    FUndoList.EndBlock;
-
-    if FSyncEdit.Active then
-      DoSyncEdit;
-
   finally
     Clipboard.Close;
-
-    EnsureCursorPositionVisible;
-    Invalidate;
   end;
+
+  FUndoList.BeginBlock;
+
+  if SelectionAvailable then
+    FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
+      FSelection.ActiveMode)
+  else
+  begin
+    FSelection.ActiveMode := Selection.Mode;
+
+    LLength := Length(FLines[LTextCaretPosition.Line]);
+    if LTextCaretPosition.Char > LLength then
+      FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(LLength + 1, LTextCaretPosition.Line),
+        LTextCaretPosition, '', smNormal);
+  end;
+
+  LClipBoardText := GetClipboardText;
+
+  if SelectionAvailable then
+  begin
+    LStartPositionOfBlock := SelectionBeginPosition;
+    LEndPositionOfBlock := SelectionEndPosition;
+    FSelectionBeginPosition := LStartPositionOfBlock;
+    FSelectionEndPosition := LEndPositionOfBlock;
+
+    if FSelection.ActiveMode = smLine then
+      LStartPositionOfBlock.Char := 1;
+
+    if FSyncEdit.Active then
+      FSyncEdit.MoveEndPositionChar(-FSelectionEndPosition.Char + FSelectionBeginPosition.Char + Length(LClipBoardText));
+  end
+  else
+  begin
+    LStartPositionOfBlock := LTextCaretPosition;
+
+    if FSyncEdit.Active then
+      FSyncEdit.MoveEndPositionChar(Length(LClipBoardText));
+  end;
+
+  DoSelectedText(LPasteMode, PChar(LClipBoardText), True);
+
+  LEndPositionOfBlock := SelectionEndPosition;
+  if LPasteMode = smNormal then
+    FUndoList.AddChange(crPaste, LTextCaretPosition, LStartPositionOfBlock, LEndPositionOfBlock, SelectedText, LPasteMode)
+  else
+  if LPasteMode = smLine then
+  begin
+    if DisplayCaretX = 1 then
+      FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
+        GetTextPosition(FVisibleChars, LEndPositionOfBlock.Line - 1), SelectedText, smLine)
+    else
+      FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, LStartPositionOfBlock.Line),
+        LEndPositionOfBlock, SelectedText, smNormal);
+  end;
+
+  FUndoList.EndBlock;
+
+  if FSyncEdit.Active then
+    DoSyncEdit;
+
+  EnsureCursorPositionVisible;
+  Invalidate;
 end;
 
 procedure TBCBaseEditor.DoRedo;

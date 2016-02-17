@@ -1134,36 +1134,31 @@ begin
     if Clipboard.HasFormat(CF_UNICODETEXT) then
     begin
       LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
+      if LGlobalMem <> 0 then
       try
-        if LGlobalMem <> 0 then
-          Result := PChar(GlobalLock(LGlobalMem));
+        Result := PChar(GlobalLock(LGlobalMem));
       finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
+        GlobalUnlock(LGlobalMem);
       end;
     end
     else
     begin
       LLocaleID := 0;
       LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
+      if LGlobalMem <> 0 then
       try
-        if LGlobalMem <> 0 then
-          LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
+        LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
       finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
+        GlobalUnlock(LGlobalMem);
       end;
 
       LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
+      if LGlobalMem <> 0 then
       try
-        if LGlobalMem <> 0 then
-        begin
-          LBytePointer := GlobalLock(LGlobalMem);
-          Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
-        end
+        LBytePointer := GlobalLock(LGlobalMem);
+        Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
       finally
-        if LGlobalMem <> 0 then
-          GlobalUnlock(LGlobalMem);
+        GlobalUnlock(LGlobalMem);
       end;
     end;
   finally
@@ -12881,28 +12876,34 @@ begin
     if Clipboard.HasFormat(GClipboardFormatBCEditor) then
     begin
       LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
-      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LFirstByteOfMemoryBlock) then
-          LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end
+      if LGlobalMem <> 0 then
+      begin
+        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LFirstByteOfMemoryBlock) then
+            LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
+        finally
+          GlobalUnlock(LGlobalMem);
+        end
+      end;
     end
     else
     if Clipboard.HasFormat(GClipboardFormatBorland) then
     begin
       LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
-      LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LFirstByteOfMemoryBlock) then
-          if LFirstByteOfMemoryBlock^ = $02 then
-            LPasteMode := smColumn
-          else
-            LPasteMode := smNormal;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end
+      if LGlobalMem <> 0 then
+      begin
+        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LFirstByteOfMemoryBlock) then
+            if LFirstByteOfMemoryBlock^ = $02 then
+              LPasteMode := smColumn
+            else
+              LPasteMode := smNormal;
+        finally
+          GlobalUnlock(LGlobalMem);
+        end
+      end;
     end
     else
     if Clipboard.HasFormat(GClipboardFormatMSDev) then

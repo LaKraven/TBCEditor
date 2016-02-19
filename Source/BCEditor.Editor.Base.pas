@@ -9727,12 +9727,10 @@ var
             Inc(LPText);
           Inc(LCurrentLine);
           Inc(LTextCaretPosition.Line);
-          //Inc(FDisplayCaretY);
         end;
         LPStart := LPText;
       until LPText^ = BCEDITOR_NONE_CHAR;
       Inc(LTextCaretPosition.Char, Length(LStr));
-      //Inc(FDisplayCaretX, Length(LStr));
     end;
 
     function InsertLine: Integer;
@@ -9754,8 +9752,6 @@ var
       LDoCaretFix := False;
 
       { Insert strings }
-      //FDisplayCaretX := 1;
-      //LTextCaretPosition.Char := 1;
       LPStart := PChar(AValue);
       repeat
         LPText := GetEndOfLine(LPStart);
@@ -9770,16 +9766,15 @@ var
         if LDoReplace then
         begin
           LDoReplace := False;
-          FLines[GetTextCaretY] := LLine;
+          FLines[LTextCaretPosition.Line] := LLine;
           LDoCaretFix := True;
         end
         else
         begin
-          FLines.Insert(GetTextCaretY + Ord(LIsAfterLine), LLine);
+          FLines.Insert(LTextCaretPosition.Line + Ord(LIsAfterLine), LLine);
           Inc(Result);
         end;
 
-        //Inc(FDisplayCaretY);
         Inc(LTextCaretPosition.Line);
 
         if LPText^ = BCEDITOR_CARRIAGE_RETURN then
@@ -9791,7 +9786,6 @@ var
 
       if LDoCaretFix then
         Inc(LTextCaretPosition.Char, Length(LLine) + 1);
-        //FDisplayCaretX := Length(LLine) + 1;
     end;
 
   var
@@ -9802,7 +9796,7 @@ var
       Exit;
 
     if SelectionAvailable then
-      LTextCaretPosition := LBeginTextPosition // SelectionBeginPosition
+      LTextCaretPosition := LBeginTextPosition
     else
       LTextCaretPosition := ATextCaretPosition;
 

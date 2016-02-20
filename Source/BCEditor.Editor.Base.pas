@@ -434,7 +434,7 @@ type
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSearchResults;
-    procedure PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
+    procedure PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
     procedure PaintSyncItems;
     procedure PaintTextLines(AClipRect: TRect; AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure RecalculateCharExtent;
@@ -8117,7 +8117,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.PaintSpecialChars(ALine, AScrolledXBy: Integer; ALineRect: TRect);
+procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
 var
   i: Integer;
   LPLine: PChar;
@@ -8130,19 +8130,21 @@ begin
   if FSpecialChars.Visible then
   begin
     LPLine := PChar(FLines.Strings[ALine - 1]);
+    LCharWidth := FCharWidth;
+
+    Inc(LPLine, AFirstColumn - 1);
 
     if scoUseTextColor in FSpecialChars.Options then
       Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
     else
       Canvas.Pen.Color := FSpecialChars.Color;
 
-    LCharWidth := FCharWidth;
     LTextHeight := Max(FLineHeight - 8, 0) shr 4;
     with ALineRect do
       X := Top + (Bottom - Top) shr 1 - 1;
 
     LCharPosition := 1;
-    LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth - AScrolledXBy;
+    LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LLeftTemp, FMinimap.GetWidth);
     while LPLine^ <> BCEDITOR_NONE_CHAR do
@@ -8749,6 +8751,7 @@ var
     LElement: string;
     LIsCustomBackgroundColor: Boolean;
     LTextPosition: TBCEditorTextPosition;
+    LPreviousFirstColumn: Integer;
 
     function GetWordAtSelection(var ASelectedText: string): string;
     var
@@ -8942,6 +8945,7 @@ var
       LCurrentRow := LCurrentLine;
 
       LFirstColumn := LFirstChar;
+      LPreviousFirstColumn := LFirstChar;
       LLastColumn := LLastChar;
       if FWordWrap.Enabled then
         if FWordWrapLineLengths[LDisplayLine] <> 0 then
@@ -9051,7 +9055,8 @@ var
         if not AMinimap then
         begin
           PaintCodeFoldingCollapseMark(LFoldRange, LTokenPosition, LTokenLength, LCurrentLine, LScrolledXBy, LLineRect);
-          PaintSpecialChars(LCurrentLine, LScrolledXBy, LLineRect);
+          PaintSpecialChars(LCurrentLine, LPreviousFirstColumn, LLineRect);
+          LPreviousFirstColumn := LFirstColumn;
           PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
         end;
 

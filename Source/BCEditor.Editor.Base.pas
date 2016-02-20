@@ -190,6 +190,7 @@ type
     function GetCanPaste: Boolean;
     function GetCanRedo: Boolean;
     function GetCanUndo: Boolean;
+    function GetCharAtCursor: Char;
     function GetClipboardText: string;
     function GetDisplayCaretPosition: TBCEditorDisplayPosition;
     function GetDisplayLineNumber(const ADisplayLineNumber: Integer): Integer;
@@ -569,6 +570,7 @@ type
     property CanUndo: Boolean read GetCanUndo;
     property Canvas;
     property Caret: TBCEditorCaret read FCaret write FCaret;
+    property CharAtCursor: Char read GetCharAtCursor;
     property DisplayCaretX: Integer read FDisplayCaretX write SetDisplayCaretX;
     property DisplayCaretPosition: TBCEditorDisplayPosition read GetDisplayCaretPosition write SetDisplayCaretPosition;
     property DisplayCaretY: Integer read FDisplayCaretY write SetDisplayCaretY;
@@ -1100,6 +1102,25 @@ function TBCBaseEditor.GetDisplayCaretPosition: TBCEditorDisplayPosition;
 begin
   Result.Column := FDisplayCaretX;
   Result.Row := FDisplayCaretY;
+end;
+
+function TBCBaseEditor.GetCharAtCursor: Char;
+var
+  LTextPosition: TBCEditorTextPosition;
+  LTextLine: string;
+  LLength: Integer;
+begin
+  Result := BCEDITOR_NONE_CHAR;
+  LTextPosition := TextCaretPosition;
+  if (LTextPosition.Line >= 0) and (LTextPosition.Line < FLines.Count) then
+  begin
+    LTextLine := FLines[LTextPosition.Line];
+    LLength := Length(LTextLine);
+    if LLength = 0 then
+      Exit;
+    if LTextPosition.Char <= LLength then
+      Result := LTextLine[LTextPosition.Char];
+  end;
 end;
 
 function TBCBaseEditor.GetClipboardText: string;
@@ -1728,17 +1749,21 @@ function TBCBaseEditor.GetSelectedText: string;
         end;
       smLine:
         begin
-          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast + 1) - 1 do
+          if (SelectionEndPosition.Char = 1) and (LFirst < LLast) then
+            Dec(LLast);
+          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast) do
             Inc(LTotalLength, Length(TrimRight(Lines[i])) + Length(SLineBreak));
-          if LLast = FLines.Count then
+
+          if (LLast = FLines.Count) or (LFirst = LLast) then
             Dec(LTotalLength, Length(SLineBreak));
 
           SetLength(Result, LTotalLength);
           P := PChar(Result);
-          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast + 1) - 1 do
+          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast) do
           begin
             CopyAndForward(TrimRight(Lines[i]), 1, MaxInt, P);
-            CopyAndForward(SLineBreak, 1, MaxInt, P);
+            if (LFirst <> LLast) and (LLast <> FLines.Count) then
+              CopyAndForward(SLineBreak, 1, MaxInt, P);
           end;
         end;
     end;
@@ -1956,7 +1981,7 @@ begin
     LLength := Length(LTextLine);
     if LLength = 0 then
       Exit;
-    if (ATextPosition.Char >= 1) and (ATextPosition.Char <= LLength + 1) and not IsWordBreakChar(LTextLine[ATextPosition.Char]) then
+    if (ATextPosition.Char >= 1) and (ATextPosition.Char <= LLength) and not IsWordBreakChar(LTextLine[ATextPosition.Char]) then
     begin
       LStop := ATextPosition.Char;
       while (LStop <= LLength) and not IsWordBreakChar(LTextLine[LStop]) do
@@ -9553,7 +9578,7 @@ var
         end;
       smLine:
         begin
-          FLines.DeleteLines(LBeginTextPosition.Line, (LEndTextPosition.Line - LBeginTextPosition.Line) + 1);
+          FLines.DeleteLines(LBeginTextPosition.Line, Max(LEndTextPosition.Line - LBeginTextPosition.Line, 1));
           TextCaretPosition := GetTextPosition(1, LBeginTextPosition.Line);
         end;
     end;
@@ -9775,17 +9800,19 @@ var
           Inc(Result);
         end;
 
-        Inc(LTextCaretPosition.Line);
+        if not LDoCaretFix or (LPText^ = BCEDITOR_CARRIAGE_RETURN) or (LPText^ = BCEDITOR_LINEFEED) then
+          Inc(LTextCaretPosition.Line);
 
         if LPText^ = BCEDITOR_CARRIAGE_RETURN then
           Inc(LPText);
         if LPText^ = BCEDITOR_LINEFEED then
           Inc(LPText);
+
         LPStart := LPText;
       until LPText^ = BCEDITOR_NONE_CHAR;
 
       if LDoCaretFix then
-        Inc(LTextCaretPosition.Char, Length(LLine) + 1);
+        Inc(LTextCaretPosition.Char, Length(LLine));
     end;
 
   var
@@ -12947,7 +12974,7 @@ begin
 
   if FSelection.ActiveMode = smLine then
   begin
-    if LTextCaretPosition.Char > LLength then
+    if (LLength > 0) and (LTextCaretPosition.Char > LLength) then
       Inc(LStartPositionOfBlock.Line);
     LStartPositionOfBlock.Char := 1;
   end;

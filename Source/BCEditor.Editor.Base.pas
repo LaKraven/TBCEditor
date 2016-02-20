@@ -8131,8 +8131,14 @@ begin
   begin
     LPLine := PChar(FLines.Strings[ALine - 1]);
     LCharWidth := FCharWidth;
+    LCharPosition := 1;
 
-    Inc(LPLine, AFirstColumn - 1);
+    for i := 1 to AFirstColumn - 1 do
+    begin
+      Inc(LPLine);
+      if LPLine^ = BCEDITOR_TAB_CHAR then
+        Inc(LCharPosition, FTabs.Width - 1)
+    end;
 
     if scoUseTextColor in FSpecialChars.Options then
       Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
@@ -8143,7 +8149,6 @@ begin
     with ALineRect do
       X := Top + (Bottom - Top) shr 1 - 1;
 
-    LCharPosition := 1;
     LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LLeftTemp, FMinimap.GetWidth);

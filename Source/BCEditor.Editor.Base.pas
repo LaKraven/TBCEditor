@@ -13094,6 +13094,7 @@ begin
       LEndLine := LLine;
     end;
     FLines.BeginUpdate;
+    FUndoList.BeginBlock;
     for LLine := LLine to LEndLine do
     begin
       LCodeFoldingRange := CodeFoldingRangeForLine(LLine + 1);
@@ -13142,6 +13143,7 @@ begin
         TextCaretPosition := LTextCaretPosition;
       end;
     end;
+    FUndoList.EndBlock;
     FLines.EndUpdate;
 
     FSelectionBeginPosition := LSelectionBeginPosition;

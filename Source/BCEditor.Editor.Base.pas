@@ -13118,7 +13118,7 @@ begin
 
       if LCommentIndex <> -1 then
       begin
-        LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
+        LComment := FHighlighter.Comments.LineComments[LCommentIndex];
         FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1 + LSpaceCount, LLine),
           GetTextPosition(Length(LComment) + 1 + LSpaceCount, LLine), LComment, smNormal);
         LLineText := Copy(LLineText,  Length(FHighlighter.Comments.LineComments[LCommentIndex]) + 1, Length(LLineText));

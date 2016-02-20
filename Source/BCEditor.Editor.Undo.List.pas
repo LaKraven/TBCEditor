@@ -30,7 +30,8 @@ type
     function LastChangeBlockNumber: Integer;
     function LastChangeReason: TBCEditorChangeReason;
     function LastChangeString: string;
-    procedure AddChange(AReason: TBCEditorChangeReason; const ACaretPosition, ASelectionBeginPosition, ASelectionEndPosition: TBCEditorTextPosition;
+    procedure AddChange(AReason: TBCEditorChangeReason;
+      const ACaretPosition, ASelectionBeginPosition, ASelectionEndPosition: TBCEditorTextPosition;
       const AChangeText: string; SelectionMode: TBCEditorSelectionMode; AChangeBlockNumber: Integer = 0);
     procedure BeginBlock(AChangeBlockNumber: Integer = 0);
     procedure Clear;

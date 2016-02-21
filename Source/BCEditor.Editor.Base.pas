@@ -10105,6 +10105,13 @@ begin
     begin
       LIsWrapped := True;
       Result.Char := Result.Char + FWordWrapLineLengths[LRow];
+      i := 1;
+      while i < Result.Char do
+      begin
+        if FLines[Result.Line - 1][i] = BCEDITOR_TAB_CHAR then
+          Dec(Result.Char, FTabs.Width - 1);
+        Inc(i);
+      end;
       Dec(LRow);
       LPreviousLine := GetDisplayTextLineNumber(LRow);
     end;
@@ -10670,6 +10677,15 @@ var
   LTextLine: string;
   LLength, LChar: Integer;
   LIsWrapped: Boolean;
+
+  function GetWrapLineLength(ARow: Integer): Integer;
+  begin
+    if FWordWrapLineLengths[ARow] <> 0 then
+      Result := FWordWrapLineLengths[ARow]
+    else
+      Result := GetWrapAtColumn
+  end;
+
 begin
   Result := TBCEditorDisplayPosition(ATextPosition);
   Result.Row := GetDisplayLineNumber(ATextPosition.Line + 1);
@@ -10677,11 +10693,16 @@ begin
   LIsWrapped := False;
   if Visible and FWordWrap.Enabled then
   begin
-    LLength := GetWrapAtColumn;
-    if FWordWrapLineLengths[Result.Row] <> 0 then
-      LLength := FWordWrapLineLengths[Result.Row];
+    i := 1;
+    while i < Result.Column do
+    begin
+      if FLines[ATextPosition.Line][i] = BCEDITOR_TAB_CHAR then
+        Inc(Result.Column, FTabs.Width - 1);
+      Inc(i);
+    end;
+
     if FVisibleChars > 0 then
-    while Result.Column - 1 > LLength do
+    while Result.Column - 1 > GetWrapLineLength(Result.Row) do
     begin
       LIsWrapped := True;
       if FWordWrapLineLengths[Result.Row] <> 0  then
@@ -13614,9 +13635,11 @@ begin
     LCompositionForm.ptCurrentPos := Point(X, Y);
     ImmSetCompositionWindow(ImmGetContext(Handle), @LCompositionForm);
 
-    LCaretTextPosition := TextCaretPosition;
     if Assigned(FOnCaretChanged) then
+    begin
+      LCaretTextPosition := TextCaretPosition;
       FOnCaretChanged(Self, LCaretTextPosition.Char, LCaretTextPosition.Line + FLeftMargin.LineNumbers.StartFrom);
+    end;
   end;
 end;
 

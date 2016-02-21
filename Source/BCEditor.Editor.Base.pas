@@ -10106,10 +10106,12 @@ begin
       LIsWrapped := True;
       Result.Char := Result.Char + FWordWrapLineLengths[LRow];
       i := 1;
+      if Result.Char <= Length(FLines[Result.Line - 1]) then
       while i < Result.Char do
       begin
-        if FLines[Result.Line - 1][i] = BCEDITOR_TAB_CHAR then
-          Dec(Result.Char, FTabs.Width - 1);
+        if (Result.Line - 1 >= 0) and (Result.Line - 1 < FLines.Count) then
+          if FLines[Result.Line - 1][i] = BCEDITOR_TAB_CHAR then
+            Dec(Result.Char, FTabs.Width - 1);
         Inc(i);
       end;
       Dec(LRow);
@@ -10694,10 +10696,12 @@ begin
   if Visible and FWordWrap.Enabled then
   begin
     i := 1;
+    if Result.Column <= Length(FLines[ATextPosition.Line]) then
     while i < Result.Column do
     begin
-      if FLines[ATextPosition.Line][i] = BCEDITOR_TAB_CHAR then
-        Inc(Result.Column, FTabs.Width - 1);
+      if (ATextPosition.Line >= 0) and (ATextPosition.Line < FLines.Count) then
+        if FLines[ATextPosition.Line][i] = BCEDITOR_TAB_CHAR then
+          Inc(Result.Column, FTabs.Width - 1);
       Inc(i);
     end;
 

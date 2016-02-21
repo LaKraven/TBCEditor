@@ -8129,28 +8129,30 @@ end;
 procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
 var
   i: Integer;
-  LPLine, LPStart: PChar;
+  LPLine: PChar;
   LCharWidth, LTextHeight: Integer;
-  LCharPosition, X, Y, LLeftTemp: Integer;
+  LDisplayCharPosition, X, Y, LLeftTemp: Integer;
   LCharRect: TRect;
   LPilcrow: string;
   LMinimapWidth: Integer;
 begin
   if FSpecialChars.Visible then
   begin
-    LPLine := PChar(FLines.Strings[ALine - 1]);
+    LPLine := PChar(FLines[ALine - 1]);
 
-    LCharWidth := FCharWidth;
-    LCharPosition := 1;
-
-    for i := 1 to AFirstColumn - 1 do
+    LDisplayCharPosition := 1;
+    while LDisplayCharPosition < AFirstColumn do
     begin
-      Inc(LPLine);
       if LPLine^ = BCEDITOR_TAB_CHAR then
-        Inc(LCharPosition, FTabs.Width - 1)
+        Inc(LDisplayCharPosition, FTabs.Width)
+      else
+        Inc(LDisplayCharPosition);
+
+      Inc(LPLine);
     end;
 
-    LPStart := LPLine;
+    LDisplayCharPosition := 1;
+    LCharWidth := FCharWidth;
 
     if scoUseTextColor in FSpecialChars.Options then
       Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
@@ -8164,7 +8166,7 @@ begin
     LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LLeftTemp, FMinimap.GetWidth);
-    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LPLine - LPStart < FVisibleChars) do
+    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LDisplayCharPosition <= FVisibleChars) do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
       begin
@@ -8172,7 +8174,7 @@ begin
         begin
           Top := X - LTextHeight;
           Bottom := X + 2 + LTextHeight;
-          Left := LLeftTemp + LCharPosition * LCharWidth - LCharWidth div 2 - 1;
+          Left := LLeftTemp + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
           Right := Left + 2;
         end;
         with Canvas, LCharRect do
@@ -8184,7 +8186,7 @@ begin
         begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom;
-          Left := LLeftTemp + LCharPosition * LCharWidth - LCharWidth div 2 - 1;
+          Left := LLeftTemp + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
           Right := Left + FTabs.Width * LCharWidth - 6;
         end;
         with Canvas do
@@ -8213,10 +8215,10 @@ begin
           MoveTo(i, LCharRect.Top + Y);
           LineTo(i - (Y shr 1), LCharRect.Top + Y + (Y shr 1));
         end;
-        Inc(LCharPosition, FTabs.Width)
+        Inc(LDisplayCharPosition, FTabs.Width);
       end
       else
-        Inc(LCharPosition, Length(LPLine^));
+        Inc(LDisplayCharPosition, Length(LPLine^));
       Inc(LPLine);
     end;
     if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) then
@@ -8232,7 +8234,7 @@ begin
           LCharRect.Bottom := ALineRect.Bottom
         else
           LCharRect.Bottom := ALineRect.Bottom - 3;
-        LCharRect.Left := LLeftTemp + (LCharPosition - 1) * LCharWidth;
+        LCharRect.Left := LLeftTemp + (LDisplayCharPosition - 1) * LCharWidth;
         if FSpecialChars.EndOfLine.Style = eolEnter then
           LCharRect.Left := LCharRect.Left + 4;
         if FSpecialChars.EndOfLine.Style = eolPilcrow then
@@ -8251,7 +8253,7 @@ begin
         begin
           if FSpecialChars.EndOfLine.Style = eolPilcrow then
           begin
-            if IsTextPositionInSelection(GetTextPosition(LCharPosition, ALine - 1)) then
+            if IsTextPositionInSelection(GetTextPosition(LDisplayCharPosition, ALine - 1)) then
               FTextDrawer.BackgroundColor := FSelection.Colors.Background
             else
             if GetTextCaretY = ALine - 1 then

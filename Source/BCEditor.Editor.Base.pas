@@ -9061,7 +9061,8 @@ var
               begin
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
                 LLastColumn := LFirstColumn + FVisibleChars;
-                PrepareToken;
+                if LTokenPosition + LTokenLength - LPreviousFirstColumn < FVisibleChars then
+                  PrepareToken;
                 Break;
               end;
               Dec(LTokenPosition, LFirstColumn - LFirstChar);

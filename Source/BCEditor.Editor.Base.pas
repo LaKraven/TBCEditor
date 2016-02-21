@@ -1888,10 +1888,10 @@ begin
       begin
         LTextLine := FLines.ExpandedStrings[j - 1];
         LStringLength := Length(LTextLine);
-        if (LStringLength > GetWrapAtColumn) and (GetWrapAtColumn > 0) then
+        LMaxRowLength := GetWrapAtColumn;
+        if (LStringLength > LMaxRowLength) and (LMaxRowLength > 0) then
         begin
           LRowBegin := PChar(LTextLine);
-          LMaxRowLength := GetWrapAtColumn;
           LMinRowLength := Max(LMaxRowLength div 3, 1);
           LRowEnd := LRowBegin + LMaxRowLength;
           LLineEnd := LRowBegin + LStringLength;
@@ -1904,6 +1904,8 @@ begin
               if IsWordBreakChar(LRunner^) then
               begin
                 LRowEnd := LRunner;
+                if LRowEnd - LRowBegin < LMaxRowLength then
+                  Inc(LRowEnd);
                 Break;
               end;
               Dec(LRunner);
@@ -4328,8 +4330,11 @@ var
   LMaxLineWidth: Integer;
   LDelta: Integer;
   LTextAreaRect: TRect;
+  LWrapAtColumn: Integer;
 begin
-  if FWordWrap.Enabled and (GetWrapAtColumn <= FVisibleChars) then
+  LWrapAtColumn := GetWrapAtColumn;
+
+  if FWordWrap.Enabled and (LWrapAtColumn <= FVisibleChars) then
     AValue := 1;
 
   if soPastEndOfLine in FScroll.Options then
@@ -4342,7 +4347,7 @@ begin
   else
   begin
     if FWordWrap.Enabled then
-      LMaxLineWidth := GetWrapAtColumn
+      LMaxLineWidth := LWrapAtColumn
     else
       LMaxLineWidth := FLines.GetLengthOfLongestLine;
     if LMaxLineWidth > FVisibleChars then
@@ -4953,15 +4958,19 @@ var
   end;
 
   procedure UpdateHorizontalScrollBar;
+  var
+    LWrapAtColumn: Integer;
   begin
+    LWrapAtColumn := GetWrapAtColumn;
+
     if (FScroll.Bars in [ssBoth, ssHorizontal]) and
-      (not FWordWrap.Enabled or (FWordWrap.Enabled and (GetWrapAtColumn > FVisibleChars))) then
+      (not FWordWrap.Enabled or (FWordWrap.Enabled and (LWrapAtColumn > FVisibleChars))) then
     begin
       if soPastEndOfLine in FScroll.Options then
         LMaxScroll := FScroll.MaxWidth
       else
       if FWordWrap.Enabled then
-        LMaxScroll := GetWrapAtColumn
+        LMaxScroll := LWrapAtColumn
       else
         LMaxScroll := Max(FLines.GetLengthOfLongestLine, 1);
       if LMaxScroll <= BCEDITOR_MAX_SCROLL_RANGE then
@@ -8120,7 +8129,7 @@ end;
 procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
 var
   i: Integer;
-  LPLine: PChar;
+  LPLine, LPStart: PChar;
   LCharWidth, LTextHeight: Integer;
   LCharPosition, X, Y, LLeftTemp: Integer;
   LCharRect: TRect;
@@ -8130,6 +8139,7 @@ begin
   if FSpecialChars.Visible then
   begin
     LPLine := PChar(FLines.Strings[ALine - 1]);
+
     LCharWidth := FCharWidth;
     LCharPosition := 1;
 
@@ -8139,6 +8149,8 @@ begin
       if LPLine^ = BCEDITOR_TAB_CHAR then
         Inc(LCharPosition, FTabs.Width - 1)
     end;
+
+    LPStart := LPLine;
 
     if scoUseTextColor in FSpecialChars.Options then
       Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
@@ -8152,7 +8164,7 @@ begin
     LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LLeftTemp, FMinimap.GetWidth);
-    while LPLine^ <> BCEDITOR_NONE_CHAR do
+    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LPLine - LPStart < FVisibleChars) do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
       begin
@@ -8757,6 +8769,7 @@ var
     LIsCustomBackgroundColor: Boolean;
     LTextPosition: TBCEditorTextPosition;
     LPreviousFirstColumn: Integer;
+    LTextCaretY: Integer;
 
     function GetWordAtSelection(var ASelectedText: string): string;
     var
@@ -8952,13 +8965,15 @@ var
       LFirstColumn := LFirstChar;
       LPreviousFirstColumn := LFirstChar;
       LLastColumn := LLastChar;
+      LTextCaretY := GetTextCaretY + 1;
+
       if FWordWrap.Enabled then
         if FWordWrapLineLengths[LDisplayLine] <> 0 then
           LLastColumn := FWordWrapLineLengths[LDisplayLine];
 
       while LCurrentRow = LCurrentLine do
       begin
-        LIsCurrentLine := GetTextCaretY + 1 = LCurrentLine;
+        LIsCurrentLine := LTextCaretY = LCurrentLine;
         LForegroundColor := FForegroundColor;
         LBackgroundColor := GetBackgroundColor;
 
@@ -9046,6 +9061,7 @@ var
               begin
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
                 LLastColumn := LFirstColumn + FVisibleChars;
+                PrepareToken;
                 Break;
               end;
               Dec(LTokenPosition, LFirstColumn - LFirstChar);

@@ -3115,7 +3115,8 @@ begin
     EnsureCursorPositionVisible;
 
     if FSelection.ActiveMode <> smColumn then
-      FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode);
+      FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, GetTextPosition(LTextCaretPosition.Char + 1,
+        LTextCaretPosition.Line), '', FSelection.ActiveMode);
   finally
     FUndoList.EndBlock;
   end;

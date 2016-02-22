@@ -61,7 +61,6 @@ const
   { Selection modes }
   ecNormalSelect = 231;
   ecColumnSelect = 232;
-  ecLineSelect = 233;
   { Bookmark }
   ecGotoBookmark1 = 302;
   ecGotoBookmark2 = 303;
@@ -232,7 +231,7 @@ type
   end;
 
 const
-  EditorCommandStrings: array [0 .. 111] of TBCEditorCommandString = (
+  EditorCommandStrings: array [0 .. 110] of TBCEditorCommandString = (
     (Value: ecNone; Name: 'ecNone'),
     (Value: ecLeft; Name: 'ecLeft'),
     (Value: ecRight; Name: 'ecRight'),
@@ -300,7 +299,6 @@ const
     (Value: ecShiftTab; Name: 'ecShiftTab'),
     (Value: ecNormalSelect; Name: 'ecNormalSelect'),
     (Value: ecColumnSelect; Name: 'ecColumnSelect'),
-    (Value: ecLineSelect; Name: 'ecLineSelect'),
     (Value: ecUserFirst; Name: 'ecUserFirst'),
     (Value: ecContextHelp; Name: 'ecContextHelp'),
     (Value: ecGotoBookmark1; Name: 'ecGotoBookmark1'),
@@ -720,7 +718,6 @@ begin
   { Selection modes }
   Add(ecNormalSelect, [ssCtrl, ssAlt], Ord('N'));
   Add(ecColumnSelect, [ssCtrl, ssAlt], Ord('C'));
-  Add(ecLineSelect, [ssCtrl, ssAlt], Ord('L'));
   { Comments }
   Add(ecLineComment, [ssCtrl], VK_OEM_2);
   Add(ecBlockComment, [ssCtrl, ssShift], VK_OEM_2);

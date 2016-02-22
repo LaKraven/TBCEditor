@@ -365,7 +365,7 @@ begin
   end;
   for i := LStartLine to LEndLine do
   begin
-    if not FSelectedOnly or (FSelectionMode = smLine) then
+    if not FSelectedOnly then
       LText := FLines[i]
     else
     begin
@@ -690,7 +690,7 @@ begin
         FLineNumber := i + 1;
         if (not FSelectedOnly or ((i >= FBlockBeginPosition.Line - 1) and (i <= FBlockEndPosition.Line - 1))) then
         begin
-          if (not FSelectedOnly or (FSelectionMode = smLine)) then
+          if not FSelectedOnly then
             WriteLine(FLines[i])
           else
           begin

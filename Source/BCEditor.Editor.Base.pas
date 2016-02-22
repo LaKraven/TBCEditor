@@ -1681,7 +1681,6 @@ function TBCBaseEditor.GetSelectedText: string;
     LFirst := SelectionBeginPosition.Line;
     LColumnTo := SelectionEndPosition.Char;
     LLast := SelectionEndPosition.Line;
-    LTotalLength := 0;
     case FSelection.ActiveMode of
       smNormal:
         begin
@@ -1746,25 +1745,6 @@ function TBCBaseEditor.GetSelectedText: string;
             CopyAndForward(SLineBreak, 1, MaxInt, P);
           end;
           SetLength(Result, Max(LTotalLength - Length(SLineBreak), 0));
-        end;
-      smLine:
-        begin
-          if (SelectionEndPosition.Char = 1) and (LFirst < LLast) then
-            Dec(LLast);
-          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast) do
-            Inc(LTotalLength, Length(TrimRight(Lines[i])) + Length(SLineBreak));
-
-          if (LLast = FLines.Count) or (LFirst = LLast) then
-            Dec(LTotalLength, Length(SLineBreak));
-
-          SetLength(Result, LTotalLength);
-          P := PChar(Result);
-          for i := GetDisplayTextLineNumber(LFirst) to GetDisplayTextLineNumber(LLast) do
-          begin
-            CopyAndForward(TrimRight(Lines[i]), 1, MaxInt, P);
-            if (LFirst <> LLast) and (LLast <> FLines.Count) then
-              CopyAndForward(SLineBreak, 1, MaxInt, P);
-          end;
         end;
     end;
   end;
@@ -2498,12 +2478,6 @@ begin
   begin
     LStartTextPosition := SelectionBeginPosition;
     LEndTextPosition := SelectionEndPosition;
-    if FSelection.ActiveMode = smLine then
-    begin
-      LStartTextPosition.Char := 1;
-      LEndTextPosition.Char := FLines.StringLength(LEndTextPosition.Line);
-    end
-    else
     if FSelection.ActiveMode = smColumn then
       if LStartTextPosition.Char > LEndTextPosition.Char then
         SwapInt(LStartTextPosition.Char, LEndTextPosition.Char);
@@ -9529,11 +9503,7 @@ var
   LBlockStartPosition: TBCEditorTextPosition;
 begin
   if AChangeString <> '' then
-  begin
     LBlockStartPosition := SelectionBeginPosition;
-    if FSelection.ActiveMode = smLine then
-      LBlockStartPosition.Char := 1;
-  end;
   FUndoList.BeginBlock;
   FUndoList.AddChange(crDelete, TextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
     FSelection.ActiveMode);
@@ -9610,11 +9580,6 @@ var
             FLines[LCurrentLine] := LTempString;
           end;
           TextCaretPosition := GetTextPosition(LBeginTextPosition.Char, FSelectionEndPosition.Line);
-        end;
-      smLine:
-        begin
-          FLines.DeleteLines(LBeginTextPosition.Line, Max(LEndTextPosition.Line - LBeginTextPosition.Line, 1));
-          TextCaretPosition := GetTextPosition(1, LBeginTextPosition.Line);
         end;
     end;
   end;
@@ -9793,63 +9758,6 @@ var
       Inc(LTextCaretPosition.Char, Length(LStr));
     end;
 
-    function InsertLine: Integer;
-    var
-      LPStart: PChar;
-      LPText: PChar;
-      LLine: string;
-      LLength: Integer;
-      LIsAfterLine, LDoReplace, LDoCaretFix: Boolean;
-    begin
-      Result := 0;
-
-      if FLines.Count = 0 then
-        FLines.Add('');
-
-      LLength := FLines.StringLength(LTextCaretPosition.Line);
-      LIsAfterLine := LTextCaretPosition.Char > LLength;
-      LDoReplace := LLength = 0;
-      LDoCaretFix := False;
-
-      { Insert strings }
-      LPStart := PChar(AValue);
-      repeat
-        LPText := GetEndOfLine(LPStart);
-        if LPText <> LPStart then
-        begin
-          SetLength(LLine, LPText - LPStart);
-          Move(LPStart^, LLine[1], (LPText - LPStart) * SizeOf(Char));
-        end
-        else
-          LLine := '';
-
-        if LDoReplace then
-        begin
-          LDoReplace := False;
-          FLines[LTextCaretPosition.Line] := LLine;
-          LDoCaretFix := True;
-        end
-        else
-        begin
-          FLines.Insert(LTextCaretPosition.Line + Ord(LIsAfterLine), LLine);
-          Inc(Result);
-        end;
-
-        if not LDoCaretFix or (LPText^ = BCEDITOR_CARRIAGE_RETURN) or (LPText^ = BCEDITOR_LINEFEED) then
-          Inc(LTextCaretPosition.Line);
-
-        if LPText^ = BCEDITOR_CARRIAGE_RETURN then
-          Inc(LPText);
-        if LPText^ = BCEDITOR_LINEFEED then
-          Inc(LPText);
-
-        LPStart := LPText;
-      until LPText^ = BCEDITOR_NONE_CHAR;
-
-      if LDoCaretFix then
-        Inc(LTextCaretPosition.Char, Length(LLine));
-    end;
-
   var
     i, LStartLine: Integer;
     LInsertedLines: Integer;
@@ -9868,17 +9776,11 @@ var
         LInsertedLines := InsertNormal;
       smColumn:
         LInsertedLines := InsertColumn;
-      smLine:
-        LInsertedLines := InsertLine;
     else
       LInsertedLines := 0;
     end;
 
-    { We delete selected based on the current selection mode, but paste
-      what's on the clipboard according to what it was when copied.
-      Update marks }
     if LInsertedLines > 0 then
-      { Trim trailing spaces }
       if eoTrimTrailingSpaces in Options then
         for i := LStartLine to LStartLine + LInsertedLines do
           DoTrimTrailingSpaces(i);
@@ -10292,9 +10194,6 @@ begin
   if (ATextPosition.Line >= LBeginTextPosition.Line) and (ATextPosition.Line <= LEndTextPosition.Line) and
     ((LBeginTextPosition.Line <> LEndTextPosition.Line) or (LBeginTextPosition.Char <> LEndTextPosition.Char)) then
   begin
-    if FSelection.ActiveMode = smLine then
-      Result := True
-    else
     if FSelection.ActiveMode = smColumn then
     begin
       if LBeginTextPosition.Char > LEndTextPosition.Char then
@@ -10388,12 +10287,6 @@ begin
   begin
     LStartTextPosition := SelectionBeginPosition;
     LEndTextPosition := SelectionEndPosition;
-    if FSelection.ActiveMode = smLine then
-    begin
-      LStartTextPosition.Char := 1;
-      LEndTextPosition.Char := Length(Lines[LEndTextPosition.Line]) + 1;
-    end
-    else
     if FSelection.ActiveMode = smColumn then
       if LStartTextPosition.Char > LEndTextPosition.Char then
         SwapInt(LStartTextPosition.Char, LEndTextPosition.Char);
@@ -12450,8 +12343,6 @@ begin
         FSelection.Mode := smNormal;
       ecColumnSelect:
         FSelection.Mode := smColumn;
-      ecLineSelect:
-        FSelection.Mode := smLine;
       ecContextHelp:
         begin
           if Assigned(FOnContextHelp) then
@@ -13037,13 +12928,6 @@ begin
       FSyncEdit.MoveEndPositionChar(Length(LClipBoardText));
   end;
 
-  if FSelection.ActiveMode = smLine then
-  begin
-    if (LLength > 0) and (LTextCaretPosition.Char > LLength) then
-      Inc(LStartPositionOfBlock.Line);
-    LStartPositionOfBlock.Char := 1;
-  end;
-
   DoSelectedText(LPasteMode, PChar(LClipBoardText), True);
 
   LEndPositionOfBlock := SelectionEndPosition;
@@ -13267,7 +13151,7 @@ begin
   LTextCaretPosition.Line := ALineNumber - 1;
 
   FUndoList.AddChange(crPaste, LTextCaretPosition, GetTextPosition(1, ALineNumber - 1),
-    GetTextPosition(Length(AValue) + 1, ALineNumber - 1), FLines.Strings[ALineNumber - 1], smLine);
+    GetTextPosition(Length(AValue) + 1, ALineNumber - 1), FLines.Strings[ALineNumber - 1], FSelection.ActiveMode);
 
   FLines.BeginUpdate;
   FLines.Strings[ALineNumber - 1] := AValue;

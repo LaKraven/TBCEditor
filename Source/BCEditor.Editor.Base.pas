@@ -8130,6 +8130,7 @@ procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRec
 var
   i: Integer;
   LPLine: PChar;
+  LLineLength: Integer;
   LCharWidth, LTextHeight: Integer;
   LDisplayCharPosition, X, Y, LLeftTemp: Integer;
   LCharRect: TRect;
@@ -8139,6 +8140,7 @@ begin
   if FSpecialChars.Visible then
   begin
     LPLine := PChar(FLines[ALine - 1]);
+    LLineLength := Length(FLines[ALine - 1]);
 
     LDisplayCharPosition := 1;
     while LDisplayCharPosition < AFirstColumn do
@@ -8221,7 +8223,9 @@ begin
         Inc(LDisplayCharPosition, Length(LPLine^));
       Inc(LPLine);
     end;
-    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) then
+
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and
+      (LLineLength - AFirstColumn < FVisibleChars) then
     begin
       if scoUseTextColor in FSpecialChars.Options then
         Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
@@ -10091,6 +10095,7 @@ var
   LTextLine: string;
   i, LLength, LChar, LPreviousLine, LRow: Integer;
   LIsWrapped: Boolean;
+  LPLine: PChar;
 begin
   Result := TBCEditorTextPosition(ADisplayPosition);
   Result.Line := GetDisplayTextLineNumber(Result.Line);
@@ -10106,13 +10111,14 @@ begin
       LIsWrapped := True;
       Result.Char := Result.Char + FWordWrapLineLengths[LRow];
       i := 1;
+      LPLine := PChar(FLines[Result.Line - 1]);
       if Result.Char <= Length(FLines[Result.Line - 1]) then
-      while i < Result.Char do
+      while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
       begin
-        if (Result.Line - 1 >= 0) and (Result.Line - 1 < FLines.Count) then
-          if FLines[Result.Line - 1][i] = BCEDITOR_TAB_CHAR then
-            Dec(Result.Char, FTabs.Width - 1);
+        if LPLine^ = BCEDITOR_TAB_CHAR then
+          Dec(Result.Char, FTabs.Width - 1);
         Inc(i);
+        Inc(LPLine);
       end;
       Dec(LRow);
       LPreviousLine := GetDisplayTextLineNumber(LRow);
@@ -10679,6 +10685,7 @@ var
   LTextLine: string;
   LLength, LChar: Integer;
   LIsWrapped: Boolean;
+  LPLine: PChar;
 
   function GetWrapLineLength(ARow: Integer): Integer;
   begin
@@ -10696,13 +10703,15 @@ begin
   if Visible and FWordWrap.Enabled then
   begin
     i := 1;
+
+    LPLine := PChar(FLines[ATextPosition.Line]);
     if Result.Column <= Length(FLines[ATextPosition.Line]) then
-    while i < Result.Column do
+    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Column) do
     begin
-      if (ATextPosition.Line >= 0) and (ATextPosition.Line < FLines.Count) then
-        if FLines[ATextPosition.Line][i] = BCEDITOR_TAB_CHAR then
-          Inc(Result.Column, FTabs.Width - 1);
+      if LPLine^ = BCEDITOR_TAB_CHAR then
+        Inc(Result.Column, FTabs.Width - 1);
       Inc(i);
+      Inc(LPLine);
     end;
 
     if FVisibleChars > 0 then

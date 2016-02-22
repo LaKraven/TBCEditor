@@ -6891,6 +6891,7 @@ var
   LPositionText: string;
   LLine: Integer;
   LMinimapWidth: Integer;
+  LTextCaretPosition: TBCEditorTextPosition;
 begin
   if FMinimap.Visible then
     if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
@@ -7027,8 +7028,9 @@ begin
       LDisplayPosition.Row := DisplayCaretY;
     if not (sfCodeFoldingInfoClicked in FStateFlags) then { no selection when info clicked }
     begin
-      TextCaretPosition := DisplayToTextPosition(LDisplayPosition);
-      SelectionEndPosition := TextCaretPosition;
+      LTextCaretPosition := DisplayToTextPosition(LDisplayPosition);
+      TextCaretPosition := LTextCaretPosition;
+      SelectionEndPosition := LTextCaretPosition;
       if (uoGroupUndo in FUndo.Options) and UndoList.CanUndo then
         FUndoList.AddGroupBreak;
     end;
@@ -10110,18 +10112,18 @@ begin
     begin
       LIsWrapped := True;
       Result.Char := Result.Char + FWordWrapLineLengths[LRow];
-      i := 1;
-      LPLine := PChar(FLines[Result.Line - 1]);
-      if Result.Char <= Length(FLines[Result.Line - 1]) then
-      while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
-      begin
-        if LPLine^ = BCEDITOR_TAB_CHAR then
-          Dec(Result.Char, FTabs.Width - 1);
-        Inc(i);
-        Inc(LPLine);
-      end;
       Dec(LRow);
       LPreviousLine := GetDisplayTextLineNumber(LRow);
+    end;
+    i := 1;
+    LPLine := PChar(FLines[Result.Line - 1]);
+    if Result.Char <= Length(FLines.ExpandedStrings[Result.Line - 1]) then
+    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
+    begin
+      if LPLine^ = BCEDITOR_TAB_CHAR then
+        Dec(Result.Char, FTabs.Width - 1);
+      Inc(i);
+      Inc(LPLine);
     end;
   end;
 

@@ -11162,7 +11162,7 @@ begin
     FUndoList.AddChange(crInsert, LTextCaretPosition, GetTextPosition(1 + LSpaceCount, LStartLine),
       GetTextPosition(1 + LSpaceCount + Length(LComment), LStartLine), '', FSelection.ActiveMode);
 
-    i := 0;
+    i := 1;
     LCommentIndex := -1;
     LLineText := FLines[LEndLine];
     LSpaceCount := LeftSpaceCount(LLineText, True);
@@ -11174,11 +11174,12 @@ begin
     while i < LLength do
     begin
       LCommentLength := Length(FHighlighter.Comments.BlockComments[i]);
-      if Pos(FHighlighter.Comments.BlockComments[i], LLineText) = LLineLength - LCommentLength + 1 then
-      begin
-        LCommentIndex := i + 1;
-        Break;
-      end;
+      if LLineLength >= LCommentLength then
+        if Pos(FHighlighter.Comments.BlockComments[i], LLineText) = LLineLength - LCommentLength + 1 then
+        begin
+          LCommentIndex := i;
+          Break;
+        end;
       Inc(i, 2);
     end;
 

@@ -1474,7 +1474,7 @@ begin
   begin
     InitializeCurrentLine;
 
-    LCaretX := DisplayCaretX;
+    LCaretX := APoint.Char + 1;
     while not GetEndOfLine and (LCaretX > GetTokenPosition + GetTokenLength) do
       Next;
 
@@ -8751,7 +8751,7 @@ var
     LHighlighterAttribute: TBCEditorHighlighterAttribute;
     LScrolledXBy: Integer;
     LTokenText: string;
-    LTokenPosition, LTokenLength: Integer;
+    LTokenPosition, LRealTokenPosition, LTokenLength: Integer;
     LStyle: TFontStyles;
     LKeyword, LWordAtSelection, LSelectedText: string;
     LAddedMultiByteFillerChars: Boolean;
@@ -8791,7 +8791,7 @@ var
         LStyle := LHighlighterAttribute.Style;
 
         if Assigned(FOnCustomTokenAttribute) then
-          FOnCustomTokenAttribute(Self, LTokenText, LCurrentLine, LTokenPosition, LForegroundColor,
+          FOnCustomTokenAttribute(Self, LTokenText, LCurrentLine, LRealTokenPosition, LForegroundColor,
             LBackgroundColor, LStyle);
 
         LIsCustomBackgroundColor := False;
@@ -8800,9 +8800,9 @@ var
         if FMatchingPair.Enabled and not FSyncEdit.Active then
           if FCurrentMatchingPair <> trNotFound then
           begin
-            if (LTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
+            if (LRealTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) and
               (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
-              (LTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
+              (LRealTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) and
               (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
             begin
               if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
@@ -9032,6 +9032,7 @@ var
         while not FHighlighter.GetEndOfLine do
         begin
           LTokenPosition := FHighlighter.GetTokenPosition;
+          LRealTokenPosition := LTokenPosition;
           FHighlighter.GetToken(LTokenText);
           LTokenLength := FHighlighter.GetTokenLength;
 

@@ -11124,7 +11124,7 @@ begin
     i := 0;
     LCommentIndex := -2;
     LLineText := FLines[LStartLine];
-    LSpaceCount := LeftSpaceCount(LLineText, True);
+    LSpaceCount := LeftSpaceCount(LLineText, False);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := Trim(LLineText);
 
@@ -11144,13 +11144,13 @@ begin
     if LCommentIndex <> -2 then
     begin
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
-      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1 + LSpaceCount, LStartLine),
-        GetTextPosition(Length(LComment) + 1 + LSpaceCount, LStartLine), LComment, FSelection.ActiveMode);
+      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1, LStartLine),
+        GetTextPosition(Length(LComment) + 1, LStartLine), LComment, FSelection.ActiveMode);
       LLineText := Copy(LLineText, Length(LComment) + 1, Length(LLineText));
 
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex + 1];
-      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(Length(LLineText) - Length(LComment), LStartLine),
-        GetTextPosition(Length(LLineText), LStartLine), LComment, FSelection.ActiveMode);
+      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(Length(LLineText) - Length(LComment) + 1, LStartLine),
+        GetTextPosition(Length(LLineText) + 1, LStartLine), LComment, FSelection.ActiveMode);
       LLineText := Copy(LLineText, 1, Length(LLineText) - Length(LComment));
     end;
 
@@ -11169,7 +11169,7 @@ begin
 
     Inc(LCommentIndex);
     LLineText := FLines[LEndLine];
-    LSpaceCount := LeftSpaceCount(LLineText, True);
+    LSpaceCount := LeftSpaceCount(LLineText, False);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := Trim(LLineText);
 
@@ -13029,7 +13029,7 @@ begin
       i := 0;
       LCommentIndex := -1;
       LLineText := FLines[LLine];
-      LSpaceCount := LeftSpaceCount(LLineText, True);
+      LSpaceCount := LeftSpaceCount(LLineText, False);
       LSpaces := Copy(LLineText, 1, LSpaceCount);
       LLineText := Trim(LLineText);
 

@@ -11156,8 +11156,8 @@ begin
     begin
       LDeleteComment := True;
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
-      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1, LStartLine),
-        GetTextPosition(Length(LComment) + 1, LStartLine), LComment, FSelection.ActiveMode);
+      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(LSpaceCount + 1, LStartLine),
+        GetTextPosition(LSpaceCount + Length(LComment) + 1, LStartLine), LComment, FSelection.ActiveMode);
       LLineText := Copy(LLineText, Length(LComment) + 1, Length(LLineText));
     end;
 
@@ -11185,8 +11185,8 @@ begin
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex - 2];
       if Pos(LComment, LLineText) = Length(LLineText) - Length(LComment) + 1 then
       begin
-        FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(Length(LLineText) - Length(LComment) + 1, LEndLine),
-          GetTextPosition(Length(LLineText) + 1, LEndLine), LComment, FSelection.ActiveMode);
+        FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(LSpaceCount + Length(LLineText) - Length(LComment) + 1, LEndLine),
+          GetTextPosition(LSpaceCount + Length(LLineText) + 1, LEndLine), LComment, FSelection.ActiveMode);
         LLineText := Copy(LLineText, 1, Length(LLineText) - Length(LComment));
       end;
     end;

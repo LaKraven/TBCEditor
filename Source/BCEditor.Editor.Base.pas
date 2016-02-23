@@ -11103,6 +11103,7 @@ var
   LLineText: string;
   LTextCaretPosition, LSelectionBeginPosition, LSelectionEndPosition: TBCEditorTextPosition;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
+  LDeleteComment: Boolean;
 begin
   LLength := Length(FHighlighter.Comments.BlockComments);
 
@@ -11150,17 +11151,14 @@ begin
 
     FUndoList.BeginBlock;
 
+    LDeleteComment := False;
     if LCommentIndex <> -2 then
     begin
+      LDeleteComment := True;
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
       FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(1, LStartLine),
         GetTextPosition(Length(LComment) + 1, LStartLine), LComment, FSelection.ActiveMode);
       LLineText := Copy(LLineText, Length(LComment) + 1, Length(LLineText));
-
-      LComment := FHighlighter.Comments.BlockComments[LCommentIndex + 1];
-      FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(Length(LLineText) - Length(LComment) + 1, LStartLine),
-        GetTextPosition(Length(LLineText) + 1, LStartLine), LComment, FSelection.ActiveMode);
-      LLineText := Copy(LLineText, 1, Length(LLineText) - Length(LComment));
     end;
 
     Inc(LCommentIndex, 2);
@@ -11181,6 +11179,17 @@ begin
     LSpaceCount := LeftSpaceCount(LLineText, False);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := Trim(LLineText);
+
+    if LDeleteComment then
+    begin
+      LComment := FHighlighter.Comments.BlockComments[LCommentIndex - 2];
+      if Pos(LComment, LLineText) = Length(LLineText) - Length(LComment) + 1 then
+      begin
+        FUndoList.AddChange(crDelete, LTextCaretPosition, GetTextPosition(Length(LLineText) - Length(LComment) + 1, LEndLine),
+          GetTextPosition(Length(LLineText) + 1, LEndLine), LComment, FSelection.ActiveMode);
+        LLineText := Copy(LLineText, 1, Length(LLineText) - Length(LComment));
+      end;
+    end;
 
     if (LCommentIndex > 0) and (LCommentIndex < LLength) then
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex]

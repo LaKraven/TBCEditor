@@ -3068,7 +3068,7 @@ procedure TBCBaseEditor.DoTabKey;
 var
   LTextCaretPosition: TBCEditorTextPosition;
   LTabText, LTextLine: string;
-  LNewCaretX: Integer;
+  LLengthAfterLine: Integer;
   LChangeScroll: Boolean;
 begin
   if SelectionAvailable and (toSelectedBlockIndent in FTabs.Options) then
@@ -3089,25 +3089,35 @@ begin
       DoChange;
     end;
 
-    if toTabsToSpaces in FTabs.Options then
+    LTextLine := FLines[LTextCaretPosition.Line];
+    LLengthAfterLine := LTextCaretPosition.Char - Length(LTextLine) + 1;
+
+    if LLengthAfterLine > 1 then
     begin
-      LNewCaretX := LTextCaretPosition.Char + FTabs.Width;
-      LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width);
+      LTextCaretPosition.Char := Length(LTextLine) + 1;
+      if toTabsToSpaces in FTabs.Options then
+        LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, LLengthAfterLine)
+      else
+      begin
+        LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LLengthAfterLine div FTabs.Width);
+        LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LLengthAfterLine mod FTabs.Width);
+      end;
     end
     else
     begin
-      LNewCaretX := LTextCaretPosition.Char + 1;
-      LTabText := BCEDITOR_TAB_CHAR;
+      if toTabsToSpaces in FTabs.Options then
+        LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width)
+      else
+        LTabText := BCEDITOR_TAB_CHAR;
     end;
 
-    LTextLine := FLines[LTextCaretPosition.Line];
     Insert(LTabText, LTextLine, LTextCaretPosition.Char);
     FLines[LTextCaretPosition.Line] := LTextLine;
 
     LChangeScroll := not (soPastEndOfLine in FScroll.Options);
     try
       FScroll.Options := FScroll.Options + [soPastEndOfLine];
-      SetTextCaretX(LNewCaretX);
+      SetTextCaretX(LTextCaretPosition.Char + Length(LTabText));
     finally
       if LChangeScroll then
         FScroll.Options := FScroll.Options - [soPastEndOfLine];
@@ -3115,8 +3125,7 @@ begin
     EnsureCursorPositionVisible;
 
     if FSelection.ActiveMode <> smColumn then
-      FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, GetTextPosition(LTextCaretPosition.Char + 1,
-        LTextCaretPosition.Line), '', FSelection.ActiveMode);
+      FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode);
   finally
     FUndoList.EndBlock;
   end;

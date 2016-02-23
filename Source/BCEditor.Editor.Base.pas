@@ -10018,15 +10018,18 @@ begin
       Dec(LRow);
       LPreviousLine := GetDisplayTextLineNumber(LRow);
     end;
-    i := 1;
-    LPLine := PChar(FLines[Result.Line - 1]);
-    if Result.Char <= Length(FLines.ExpandedStrings[Result.Line - 1]) then
-    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
+    if LIsWrapped then
     begin
-      if LPLine^ = BCEDITOR_TAB_CHAR then
-        Dec(Result.Char, FTabs.Width - 1);
-      Inc(i);
-      Inc(LPLine);
+      i := 1;
+      LPLine := PChar(FLines[Result.Line - 1]);
+      if Result.Char <= Length(FLines.ExpandedStrings[Result.Line - 1]) then
+      while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
+      begin
+        if LPLine^ = BCEDITOR_TAB_CHAR then
+          Dec(Result.Char, FTabs.Width - 1);
+        Inc(i);
+        Inc(LPLine);
+      end;
     end;
   end;
 

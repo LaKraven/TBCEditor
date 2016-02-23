@@ -11820,6 +11820,7 @@ begin
             LHelper := SelectedText;
             DoSelectedText('');
             FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, LWordPosition, LHelper, smNormal);
+            DoChange;
           end;
         end;
       ecDeleteLastWord, ecDeleteBeginningOfLine:
@@ -11846,6 +11847,7 @@ begin
             finally
               FSelection.Mode := LOldSelectionMode;
             end;
+            DoChange;
           end;
         end;
       ecDeleteLine:
@@ -11868,6 +11870,7 @@ begin
               GetTextPosition(1, LTextCaretPosition.Line + 1), LHelper, smNormal);
           end;
           TextCaretPosition := GetTextPosition(1, LTextCaretPosition.Line);
+          DoChange;
         end;
       ecMoveLineUp:
         begin

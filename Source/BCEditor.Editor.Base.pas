@@ -3111,12 +3111,17 @@ begin
         LTabText := BCEDITOR_TAB_CHAR;
     end;
 
-    Insert(LTabText, LTextLine, LTextCaretPosition.Char);
-    FLines[LTextCaretPosition.Line] := LTextLine;
+    if InsertMode then
+    begin
+      Insert(LTabText, LTextLine, LTextCaretPosition.Char);
+      FLines[LTextCaretPosition.Line] := LTextLine;
+    end;
 
     LChangeScroll := not (soPastEndOfLine in FScroll.Options);
     try
       FScroll.Options := FScroll.Options + [soPastEndOfLine];
+      if not InsertMode then
+        LTabText := StringReplace(LTabText, BCEDITOR_TAB_CHAR, StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width), [rfReplaceAll]);
       SetTextCaretX(LTextCaretPosition.Char + Length(LTabText));
     finally
       if LChangeScroll then
@@ -3125,7 +3130,12 @@ begin
     EnsureCursorPositionVisible;
 
     if FSelection.ActiveMode <> smColumn then
-      FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode);
+    begin
+      if InsertMode then
+        FUndoList.AddChange(crInsert, LTextCaretPosition, LTextCaretPosition, TextCaretPosition, '', FSelection.ActiveMode)
+      else
+        FUndoList.AddChange(crCaret, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', FSelection.ActiveMode);
+    end
   finally
     FUndoList.EndBlock;
   end;

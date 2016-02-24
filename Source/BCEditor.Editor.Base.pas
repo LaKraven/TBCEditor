@@ -11191,7 +11191,7 @@ begin
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := Trim(LLineText);
 
-    if LDeleteComment then
+    if LDeleteComment and (LLineText <> '') then
     begin
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex - 2];
       if Pos(LComment, LLineText) = Length(LLineText) - Length(LComment) + 1 then

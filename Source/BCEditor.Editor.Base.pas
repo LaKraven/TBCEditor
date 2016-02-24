@@ -6426,6 +6426,9 @@ begin
       FreeMem(LData);
   end;
 
+  if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
+    FreeCompletionProposalPopupWindow;
+
   if FCompletionProposal.Enabled and not Assigned(FCompletionProposalPopupWindow) then
   begin
     ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
@@ -6441,9 +6444,6 @@ begin
       end;
     end;
   end;
-
-  if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
-    FreeCompletionProposalPopupWindow;
 end;
 
 procedure TBCBaseEditor.KeyPressW(var AKey: Char);

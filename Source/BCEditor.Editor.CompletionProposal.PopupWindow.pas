@@ -56,6 +56,7 @@ type
     function CanResize(var AWidth, AHeight: Integer): Boolean; override;
     procedure Paint; override;
     procedure Resize; override;
+    procedure Hide; override;
     procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -119,11 +120,16 @@ begin
     FreeAndNil(FCommonData);
 {$ENDIF}
   RemoveKeyHandlers;
-
   FBitmapBuffer.Free;
   SetLength(FItemIndexArray, 0);
 
   inherited Destroy;
+end;
+
+procedure TBCEditorCompletionProposalPopupWindow.Hide;
+begin
+  RemoveKeyHandlers;
+  inherited Hide;
 end;
 
 {$IFDEF USE_ALPHASKINS}
@@ -278,17 +284,13 @@ begin
     BCEDITOR_SPACE_CHAR .. High(Char):
       begin
         if (Owner as TBCBaseEditor).IsWordBreakChar(AKey) and Assigned(OnValidate) then
-        begin
           if AKey = BCEDITOR_SPACE_CHAR then
-            OnValidate(Self, [], BCEDITOR_NONE_CHAR)
-          else
-            OnValidate(Self, [], AKey);
-        end;
-
+            OnValidate(Self, [], BCEDITOR_NONE_CHAR);
         CurrentString := FCurrentString + AKey;
-        if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) then
-          Hide;
-
+        if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) or
+          (Pos(AKey, FCompletionProposal.CloseChars) <> 0) then
+          Hide
+        else
         if Assigned(OnKeyPress) then
           OnKeyPress(Self, AKey);
       end;

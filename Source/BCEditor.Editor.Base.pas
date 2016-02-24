@@ -12357,9 +12357,11 @@ begin
             FOnContextHelp(Self, WordAtCursor);
         end;
       ecBlockComment:
-        DoBlockComment;
+        if not ReadOnly then
+          DoBlockComment;
       ecLineComment:
-        DoLineComment;
+        if not ReadOnly then
+          DoLineComment;
       ecImeStr:
         if not ReadOnly then
         begin

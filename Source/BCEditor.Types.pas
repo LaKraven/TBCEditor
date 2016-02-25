@@ -66,6 +66,8 @@ type
   TBCEditorScrollOptions = set of TBCEditorScrollOption;
 
   TBCEditorTabOption = (
+    toColumns,
+    toPreviousLineIndent,
     toSelectedBlockIndent,
     toTabsToSpaces
     );

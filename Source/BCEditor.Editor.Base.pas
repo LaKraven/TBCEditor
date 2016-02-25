@@ -3068,7 +3068,7 @@ procedure TBCBaseEditor.DoTabKey;
 var
   LTextCaretPosition: TBCEditorTextPosition;
   LTabText, LTextLine: string;
-  LLengthAfterLine: Integer;
+  LTabs, LLengthAfterLine: Integer;
   LChangeScroll: Boolean;
 begin
   if SelectionAvailable and (toSelectedBlockIndent in FTabs.Options) then
@@ -3095,21 +3095,21 @@ begin
     if LLengthAfterLine > 1 then
     begin
       LTextCaretPosition.Char := Length(LTextLine) + 1;
-      if toTabsToSpaces in FTabs.Options then
-        LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, LLengthAfterLine)
-      else
-      begin
-        LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LLengthAfterLine div FTabs.Width);
-        LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LLengthAfterLine mod FTabs.Width);
-      end;
+      LTabs := LLengthAfterLine
     end
     else
+      LTabs := FTabs.Width;
+
+    if toTabsToSpaces in FTabs.Options then
+      LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, LTabs)
+    else
     begin
-      if toTabsToSpaces in FTabs.Options then
-        LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, FTabs.Width)
-      else
-        LTabText := BCEDITOR_TAB_CHAR;
+      LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LTabs div FTabs.Width);
+      LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LTabs mod FTabs.Width);
     end;
+
+    // TODO: toColumns
+    // TODO: toPreviousLineIndent
 
     if InsertMode then
     begin

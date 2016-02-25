@@ -11283,12 +11283,12 @@ begin
             else
             begin
               SelectedText := '';
+
               if LDropAfter and (LNewCaretPosition.Line = LSelectionEndPosition.Line) then
                 Dec(LNewCaretPosition.Char, LSelectionEndPosition.Char - LSelectionBeginPosition.Char);
               if LDropAfter and (LSelectionEndPosition.Line > LSelectionBeginPosition.Line) then
                 Dec(LNewCaretPosition.Line, LSelectionEndPosition.Line - LSelectionBeginPosition.Line);
             end;
-            FUndoList.AddChange(crInsert, LSelectionBeginPosition, LSelectionBeginPosition, LSelectionEndPosition, '', FSelection.ActiveMode);
           end;
 
           LChangeScrollPastEndOfLine := not(soPastEndOfLine in FScroll.Options);
@@ -11298,23 +11298,12 @@ begin
             TextCaretPosition := LNewCaretPosition;
             SelectionBeginPosition := LNewCaretPosition;
 
-            Assert(not SelectionAvailable);
-            LockUndo;
-            try
-              SelectedText := LDragDropText;
-            finally
-              UnlockUndo;
-            end;
+            SelectedText := LDragDropText;
           finally
             if LChangeScrollPastEndOfLine then
               FScroll.Options := FScroll.Options - [soPastEndOfLine];
           end;
-          if ASource = Self then
-            FUndoList.AddChange(crDragDropInsert, LNewCaretPosition, LNewCaretPosition, SelectionEndPosition,
-              SelectedText, FSelection.ActiveMode)
-          else
-            FUndoList.AddChange(crInsert, LNewCaretPosition, LNewCaretPosition, SelectionEndPosition, SelectedText,
-              FSelection.ActiveMode);
+
           SelectionEndPosition := TextCaretPosition;
           CommandProcessor(ecSelectionGotoXY, BCEDITOR_NONE_CHAR, @LNewCaretPosition);
         finally

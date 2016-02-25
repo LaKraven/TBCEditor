@@ -5996,7 +5996,7 @@ begin
       begin
         if uoGroupUndo in FUndo.Options then
           LIsKeepGoing := LIsPasteAction and (FUndoList.LastChangeString = LLastChangeString) or
-           (LLastChangeReason = LUndoItem.ChangeReason) or
+           (LLastChangeReason = LUndoItem.ChangeReason) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber) or
            (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
         LIsPasteAction := LLastChangeReason = crPaste;
@@ -13012,7 +13012,7 @@ begin
       begin
         if uoGroupUndo in FUndo.Options then
           LKeepGoing := LPasteAction and (FRedoList.LastChangeString = LLastChangeString) or
-            (LLastChangeReason = LUndoItem.ChangeReason) or
+            (LLastChangeReason = LUndoItem.ChangeReason) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber) or
             (LUndoItem.ChangeBlockNumber <> 0) and (LUndoItem.ChangeBlockNumber = LLastChangeBlockNumber);
         LLastChangeReason := LUndoItem.ChangeReason;
         LPasteAction := LLastChangeReason = crPaste;

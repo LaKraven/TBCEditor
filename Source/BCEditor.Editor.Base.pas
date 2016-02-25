@@ -11288,6 +11288,7 @@ begin
               if LDropAfter and (LSelectionEndPosition.Line > LSelectionBeginPosition.Line) then
                 Dec(LNewCaretPosition.Line, LSelectionEndPosition.Line - LSelectionBeginPosition.Line);
             end;
+            FUndoList.AddChange(crInsert, LSelectionBeginPosition, LSelectionBeginPosition, LSelectionEndPosition, '', FSelection.ActiveMode);
           end;
 
           LChangeScrollPastEndOfLine := not(soPastEndOfLine in FScroll.Options);

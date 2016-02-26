@@ -3072,7 +3072,8 @@ var
   LCharCount, LLengthAfterLine, LPreviousLine, LPreviousLineCharCount: Integer;
   LChangeScroll: Boolean;
 begin
-  if SelectionAvailable and (toSelectedBlockIndent in FTabs.Options) then
+  if SelectionAvailable and (FSelectionBeginPosition.Line <> FSelectionEndPosition.Line) and
+    (toSelectedBlockIndent in FTabs.Options) then
   begin
     DoBlockIndent;
     Exit;
@@ -3081,13 +3082,13 @@ begin
   FUndoList.BeginBlock(1);
   try
     LTextCaretPosition := TextCaretPosition;
-
     if SelectionAvailable then
     begin
       FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText,
         FSelection.ActiveMode);
       DoSelectedText('');
       DoChange;
+      LTextCaretPosition := FSelectionBeginPosition;
     end;
 
     LTextLine := FLines[LTextCaretPosition.Line];

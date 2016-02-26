@@ -1009,9 +1009,9 @@ procedure TBCEditorStringEvent.Playback(AEditor: TBCBaseEditor);
 var
   i, j: Integer;
 begin
-  for j := 1 to RepeatCount do
-    for i := 1 to Length(Value) do
-      AEditor.CommandProcessor(ecChar, Value[i], nil);
+  for i := 1 to RepeatCount do
+    for j := 1 to Length(Value) do
+      AEditor.CommandProcessor(ecChar, Value[j], nil);
 end;
 
 procedure TBCEditorStringEvent.SaveToStream(AStream: TStream);

@@ -268,7 +268,7 @@ type
     procedure DragMinimap(Y: Integer);
     procedure DrawCursor(ACanvas: TCanvas);
     procedure FindAll(const ASearchText: string = '');
-    procedure FindWords(AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
+    procedure FindWords(const AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
     procedure FontChanged(Sender: TObject);
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
@@ -3084,7 +3084,7 @@ begin
     LTextCaretPosition := TextCaretPosition;
     if SelectionAvailable then
     begin
-      FUndoList.AddChange(crDelete, LTextCaretPosition, FSelectionBeginPosition, FSelectionEndPosition, GetSelectedText,
+      FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
         FSelection.ActiveMode);
       DoSelectedText('');
       DoChange;
@@ -3256,7 +3256,7 @@ begin
   FindWords(LKeyword, FSearch.Lines, soCaseSensitive in FSearch.Options, False);
 end;
 
-procedure TBCBaseEditor.FindWords(AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
+procedure TBCBaseEditor.FindWords(const AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
 var
   i: Integer;
   LLine: string;

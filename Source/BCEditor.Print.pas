@@ -749,17 +749,17 @@ begin
   PrintStatus(psBegin, AStartPage, FAbort);
   UpdatePages(Printer.Canvas);
 
-  for j := 1 to Copies do
+  for i := 1 to Copies do
   begin
-    i := AStartPage;
+    j := AStartPage;
     if AEndPage < 0 then
       AEndPage := FPageCount;
-    while (i <= AEndPage) and (not FAbort) do
+    while (j <= AEndPage) and (not FAbort) do
     begin
-      PrintPage(i);
-      if ((i < AEndPage) or (j < Copies)) and not FAbort then
+      PrintPage(j);
+      if ((j < AEndPage) or (i < Copies)) and not FAbort then
         Printer.NewPage;
-      i := i + 1;
+      Inc(j);
     end;
   end;
   if not FAbort then

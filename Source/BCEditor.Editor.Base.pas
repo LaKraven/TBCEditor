@@ -3067,8 +3067,9 @@ end;
 procedure TBCBaseEditor.DoTabKey;
 var
   LTextCaretPosition: TBCEditorTextPosition;
+  LDisplayCaretPosition: TBCEditorDisplayPosition;
   LTabText, LTextLine: string;
-  LTabs, LLengthAfterLine: Integer;
+  LCharCount, LLengthAfterLine, LPreviousLine, LPreviousLineCharCount: Integer;
   LChangeScroll: Boolean;
 begin
   if SelectionAvailable and (toSelectedBlockIndent in FTabs.Options) then
@@ -3090,26 +3091,45 @@ begin
     end;
 
     LTextLine := FLines[LTextCaretPosition.Line];
-    LLengthAfterLine := LTextCaretPosition.Char - Length(LTextLine) + 1;
 
-    if LLengthAfterLine > 1 then
-    begin
-      LTextCaretPosition.Char := Length(LTextLine) + 1;
-      LTabs := LLengthAfterLine
-    end
-    else
-      LTabs := FTabs.Width;
+    LDisplayCaretPosition := DisplayCaretPosition;
+    LLengthAfterLine := Max(LDisplayCaretPosition.Column - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
 
-    if toTabsToSpaces in FTabs.Options then
-      LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, LTabs)
-    else
+    LCharCount := 0;
+
+    if toColumns in FTabs.Options then
+      if (LDisplayCaretPosition.Column - 1) mod FTabs.Width <> 0 then
+        LCharCount := LLengthAfterLine - 1 + FTabs.Width - (LDisplayCaretPosition.Column - 1) mod FTabs.Width;
+
+    if LCharCount = 0 then
     begin
-      LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LTabs div FTabs.Width);
-      LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LTabs mod FTabs.Width);
+      if LLengthAfterLine > 1 then
+        LCharCount := LLengthAfterLine
+      else
+        LCharCount := FTabs.Width;
     end;
 
-    // TODO: toColumns
-    // TODO: toPreviousLineIndent
+    if toPreviousLineIndent in FTabs.Options then
+      if Trim(FLines[LTextCaretPosition.Line]) = '' then
+      begin
+        LPreviousLine := LTextCaretPosition.Line - 1;
+        while (LPreviousLine >= 0) and (FLines[LPreviousLine] = '') do
+          Dec(LPreviousLine);
+        LPreviousLineCharCount := LeftSpaceCount(FLines[LPreviousLine], True);
+        if LPreviousLineCharCount > LTextCaretPosition.Char then
+          LCharCount := LPreviousLineCharCount - LeftSpaceCount(FLines[LTextCaretPosition.Line], True)
+      end;
+
+    if LLengthAfterLine > 1 then
+      LTextCaretPosition.Char := Length(LTextLine) + 1;
+
+    if toTabsToSpaces in FTabs.Options then
+      LTabText := StringOfChar(BCEDITOR_SPACE_CHAR, LCharCount)
+    else
+    begin
+      LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LCharCount div FTabs.Width);
+      LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LCharCount mod FTabs.Width);
+    end;
 
     if InsertMode then
     begin
@@ -11668,7 +11688,7 @@ begin
                 begin
                   i := LTextCaretPosition.Char - 2;
                   LLength := GetLeadingExpandedLength(LLineText, i);
-                  while LLength > LVisualSpaceCount2 do
+                  while (i > 0) and (LLength > LVisualSpaceCount2) do
                   begin
                     Dec(i);
                     LLength := GetLeadingExpandedLength(LLineText, i);

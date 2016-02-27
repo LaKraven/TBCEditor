@@ -72,17 +72,17 @@ const
   BCEDITOR_BOOKMARK_IMAGES = 'BCEDITORBOOKMARKIMAGES';
   BCEDITOR_SYNCEDIT = 'BCEDITORSYNCEDIT';
   { Resource cursors bitmaps }
-  BCEDITOR_WHEEL_SCROLL = 'BCEDITORWHEELSCROLL';
+  BCEDITOR_MOUSE_MOVE_SCROLL = 'BCEDITORMOUSEMOVESCROLL';
   { Mouse wheel scroll cursor indexes }
+  scNone = -1;
   scNorth = 0;
-  scNorthWest = 1;
-  scWest = 2;
-  scSouthWest = 3;
+  scNorthEast = 1;
+  scEast = 2;
+  scSouthEast = 3;
   scSouth = 4;
-  scSouthEast = 5;
-  scEast = 6;
-  scNorthEast = 7;
-
+  scSouthWest = 5;
+  scWest = 6;
+  scNorthWest = 7;
 
 implementation
 

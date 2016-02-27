@@ -96,7 +96,9 @@ type
     FMouseDownY: Integer;
     FMouseOverURI: Boolean;
     FMouseWheelAccumulator: Integer;
-    FMouseWheelScrollCursors: array [0..7] of HCursor;
+    FMouseMoveScrollCursors: array [0..7] of HCursor;
+    FMouseMoveScrolling: Boolean;
+    FMouseMoveScrollingPoint: TPoint;
     FOldMouseMovePoint: TPoint;
     FOnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FOnAfterBookmarkPlaced: TNotifyEvent;
@@ -206,7 +208,8 @@ type
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineIndentChars(ALine: Integer): Integer;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
-    function GetMouseWheelScrollCursors(AIndex: Integer): HCURSOR;
+    function GetMouseMoveScrollCursors(AIndex: Integer): HCURSOR;
+    function GetMouseMoveScrollCursorIndex: Integer;
     function GetSelectionAvailable: Boolean;
     function GetSelectedText: string;
     function GetSearchResultCount: Integer;
@@ -304,7 +307,7 @@ type
     procedure SetLines(AValue: TBCEditorLines);
     procedure SetLineWithRightTrim(ALine: Integer; const ALineText: string);
     procedure SetModified(AValue: Boolean);
-    procedure SetMouseWheelScrollCursors(AIndex: Integer; AValue: HCURSOR);
+    procedure SetMouseMoveScrollCursors(AIndex: Integer; AValue: HCURSOR);
     procedure SetOptions(AValue: TBCEditorOptions);
     procedure SetTextCaretPosition(AValue: TBCEditorTextPosition);
     procedure SetRightMargin(const AValue: TBCEditorRightMargin);
@@ -434,6 +437,7 @@ type
     procedure PaintGuides(AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMinimapIndicator(AClipRect: TRect);
+    procedure PaintMouseMoveScrollPoint;
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
     procedure PaintSearchResults;
@@ -599,7 +603,7 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
-    property MouseWheelScrollCursors[AIndex: Integer]: HCURSOR read GetMouseWheelScrollCursors write SetMouseWheelScrollCursors;
+    property MouseMoveScrollCursors[AIndex: Integer]: HCURSOR read GetMouseMoveScrollCursors write SetMouseMoveScrollCursors;
     property OnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FOnAfterBookmarkPanelPaint write FOnAfterBookmarkPanelPaint;
     property OnAfterBookmarkPlaced: TNotifyEvent read FOnAfterBookmarkPlaced write FOnAfterBookmarkPlaced;
     property OnAfterClearBookmark: TNotifyEvent read FOnAfterClearBookmark write FOnAfterClearBookmark;
@@ -869,7 +873,7 @@ begin
   FHighlighter := TBCEditorHighlighter.Create(Self);
   { Mouse wheel scroll cursors }
   for i := 0 to 7 do
-    FMouseWheelScrollCursors[i] := LoadCursor(HInstance, PChar(BCEDITOR_WHEEL_SCROLL + IntToStr(i)));
+    FMouseMoveScrollCursors[i] := LoadCursor(HInstance, PChar(BCEDITOR_MOUSE_MOVE_SCROLL + IntToStr(i)));
 end;
 
 destructor TBCBaseEditor.Destroy;
@@ -1602,16 +1606,60 @@ begin
   end;
 end;
 
-function TBCBaseEditor.GetMouseWheelScrollCursors(AIndex: Integer): HCURSOR;
+function TBCBaseEditor.GetMouseMoveScrollCursors(AIndex: Integer): HCURSOR;
 begin
   Result := 0;
-  if (AIndex >= Low(FMouseWheelScrollCursors)) and (AIndex <= High(FMouseWheelScrollCursors)) then
-    Result := FMouseWheelScrollCursors[AIndex];
+  if (AIndex >= Low(FMouseMoveScrollCursors)) and (AIndex <= High(FMouseMoveScrollCursors)) then
+    Result := FMouseMoveScrollCursors[AIndex];
 end;
 
 function TBCBaseEditor.GetTextCaretY: Integer;
 begin
   Result := GetDisplayTextLineNumber(DisplayCaretY) - 1;
+end;
+
+function TBCBaseEditor.GetMouseMoveScrollCursorIndex: Integer;
+var
+  LCursorPoint: TPoint;
+  LLeftX, LRightX, LTopY, LBottomY: Integer;
+begin
+  Result := scNone;
+
+  Winapi.Windows.GetCursorPos(LCursorPoint);
+  LCursorPoint := ScreenToClient(LCursorPoint);
+
+  LLeftX := FMouseMoveScrollingPoint.X - FScroll.Indicator.Width;
+  LRightX := FMouseMoveScrollingPoint.X + 4;
+  LTopY := FMouseMoveScrollingPoint.Y - FScroll.Indicator.Height;
+  LBottomY := FMouseMoveScrollingPoint.Y + 4;
+
+  if LCursorPoint.Y < LTopY then
+  begin
+    if LCursorPoint.X < LLeftX then
+      Exit(scNorthWest)
+    else
+    if (LCursorPoint.X >= LLeftX) and (LCursorPoint.X <= LRightX) then
+      Exit(scNorth)
+    else
+      Exit(scNorthEast)
+  end;
+
+  if LCursorPoint.Y > LBottomY then
+  begin
+    if LCursorPoint.X < LLeftX then
+      Exit(scSouthWest)
+    else
+    if (LCursorPoint.X >= LLeftX) and (LCursorPoint.X <= LRightX) then
+      Exit(scSouth)
+    else
+      Exit(scSouthEast)
+  end;
+
+  if LCursorPoint.X < LLeftX then
+    Exit(scWest);
+
+  if LCursorPoint.X > LRightX then
+    Exit(scEast);
 end;
 
 function TBCBaseEditor.GetSelectionAvailable: Boolean;
@@ -4469,10 +4517,10 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.SetMouseWheelScrollCursors(AIndex: Integer; AValue: HCURSOR);
+procedure TBCBaseEditor.SetMouseMoveScrollCursors(AIndex: Integer; AValue: HCURSOR);
 begin
-  if (AIndex >= Low(FMouseWheelScrollCursors)) and (AIndex <= High(FMouseWheelScrollCursors)) then
-    FMouseWheelScrollCursors[AIndex] := AValue;
+  if (AIndex >= Low(FMouseMoveScrollCursors)) and (AIndex <= High(FMouseMoveScrollCursors)) then
+    FMouseMoveScrollCursors[AIndex] := AValue;
 end;
 
 procedure TBCBaseEditor.SetOptions(AValue: TBCEditorOptions);
@@ -6851,6 +6899,15 @@ begin
     end;
   end;
 
+  FMouseMoveScrolling := False;
+  if AButton = mbMiddle then
+  begin
+    FMouseMoveScrolling := True;
+    FMouseMoveScrollingPoint := Point(X, Y);
+    Invalidate;
+    Exit;
+  end;
+
   if AButton = mbLeft then
   begin
     MouseCapture := True;
@@ -7318,6 +7375,9 @@ begin
 
     if FRightMargin.Moving then
       PaintRightMarginMove;
+
+    if FMouseMoveScrolling and (soWheelClickMove in FScroll.Options) then
+      PaintMouseMoveScrollPoint;
   finally
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
@@ -8005,6 +8065,14 @@ begin
     Canvas.Brush.Style := bsClear;
     Canvas.Rectangle(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FMinimapIndicatorBitmap.Height));
   end;
+end;
+
+procedure TBCBaseEditor.PaintMouseMoveScrollPoint;
+var
+  LHalfWidth: Integer;
+begin
+  LHalfWidth := FScroll.Indicator.Width div 2;
+  FScroll.Indicator.Draw(Canvas, FMouseMoveScrollingPoint.X - LHalfWidth, FMouseMoveScrollingPoint.Y - LHalfWidth);
 end;
 
 procedure TBCBaseEditor.PaintRightMarginMove;
@@ -10000,6 +10068,7 @@ var
   LTextPosition: TBCEditorTextPosition;
   LNewCursor: TCursor;
   LMinimapWidth: Integer;
+  LCursorIndex: Integer;
 begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
@@ -10008,6 +10077,15 @@ begin
   if FMinimap.Align = maLeft then
     LMinimapWidth := FMinimap.GetWidth;
 
+  if FMouseMoveScrolling then
+  begin
+    LCursorIndex := GetMouseMoveScrollCursorIndex;
+    if LCursorIndex <> -1 then
+      SetCursor(FMouseMoveScrollCursors[LCursorIndex])
+    else
+      SetCursor(0)
+  end
+  else
   if (LCursorPoint.X > LMinimapWidth) and (LCursorPoint.X < LMinimapWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth) then
     SetCursor(Screen.Cursors[FLeftMargin.Cursor])
   else

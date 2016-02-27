@@ -8236,6 +8236,7 @@ end;
 procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
 var
   i: Integer;
+  LLine: string;
   LPLine: PChar;
   LLineLength: Integer;
   LCharWidth, LTextHeight: Integer;
@@ -8275,6 +8276,11 @@ begin
     LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LLeftTemp, FMinimap.GetWidth);
+
+    LLine := FLines[ALine - 1];
+    LLine := Copy(LLine, AFirstColumn, Length(LLine));
+    LPLine := PChar(LLine);
+
     while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LDisplayCharPosition <= FVisibleChars) do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then

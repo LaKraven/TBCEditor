@@ -96,6 +96,7 @@ type
     FMouseDownY: Integer;
     FMouseOverURI: Boolean;
     FMouseWheelAccumulator: Integer;
+    FMouseWheelScrollCursors: array [0..7] of HCursor;
     FOldMouseMovePoint: TPoint;
     FOnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FOnAfterBookmarkPlaced: TNotifyEvent;
@@ -205,6 +206,7 @@ type
     function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
     function GetLineIndentChars(ALine: Integer): Integer;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
+    function GetMouseWheelScrollCursors(AIndex: Integer): HCURSOR;
     function GetSelectionAvailable: Boolean;
     function GetSelectedText: string;
     function GetSearchResultCount: Integer;
@@ -302,6 +304,7 @@ type
     procedure SetLines(AValue: TBCEditorLines);
     procedure SetLineWithRightTrim(ALine: Integer; const ALineText: string);
     procedure SetModified(AValue: Boolean);
+    procedure SetMouseWheelScrollCursors(AIndex: Integer; AValue: HCURSOR);
     procedure SetOptions(AValue: TBCEditorOptions);
     procedure SetTextCaretPosition(AValue: TBCEditorTextPosition);
     procedure SetRightMargin(const AValue: TBCEditorRightMargin);
@@ -596,6 +599,7 @@ type
     property MatchingPair: TBCEditorMatchingPair read FMatchingPair write FMatchingPair;
     property Minimap: TBCEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FModified write SetModified;
+    property MouseWheelScrollCursors[AIndex: Integer]: HCURSOR read GetMouseWheelScrollCursors write SetMouseWheelScrollCursors;
     property OnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent read FOnAfterBookmarkPanelPaint write FOnAfterBookmarkPanelPaint;
     property OnAfterBookmarkPlaced: TNotifyEvent read FOnAfterBookmarkPlaced write FOnAfterBookmarkPlaced;
     property OnAfterClearBookmark: TNotifyEvent read FOnAfterClearBookmark write FOnAfterClearBookmark;
@@ -707,6 +711,8 @@ end;
 { TBCBaseEditor }
 
 constructor TBCBaseEditor.Create(AOwner: TComponent);
+var
+  i: Integer;
 begin
   inherited Create(AOwner);
 
@@ -861,6 +867,9 @@ begin
   FTextOffset := GetTextOffset;
   { Highlighter }
   FHighlighter := TBCEditorHighlighter.Create(Self);
+  { Mouse wheel scroll cursors }
+  for i := 0 to 7 do
+    FMouseWheelScrollCursors[i] := LoadCursor(HInstance, PChar(BCEDITOR_WHEEL_SCROLL + IntToStr(i)));
 end;
 
 destructor TBCBaseEditor.Destroy;
@@ -1591,6 +1600,13 @@ begin
       end;
     end;
   end;
+end;
+
+function TBCBaseEditor.GetMouseWheelScrollCursors(AIndex: Integer): HCURSOR;
+begin
+  Result := 0;
+  if (AIndex >= Low(FMouseWheelScrollCursors)) and (AIndex <= High(FMouseWheelScrollCursors)) then
+    Result := FMouseWheelScrollCursors[AIndex];
 end;
 
 function TBCBaseEditor.GetTextCaretY: Integer;
@@ -4451,6 +4467,12 @@ begin
       InvalidateLeftMargin;
     end;
   end;
+end;
+
+procedure TBCBaseEditor.SetMouseWheelScrollCursors(AIndex: Integer; AValue: HCURSOR);
+begin
+  if (AIndex >= Low(FMouseWheelScrollCursors)) and (AIndex <= High(FMouseWheelScrollCursors)) then
+    FMouseWheelScrollCursors[AIndex] := AValue;
 end;
 
 procedure TBCBaseEditor.SetOptions(AValue: TBCEditorOptions);
@@ -7641,7 +7663,7 @@ var
       if ABookmark.ImageIndex in [0 .. 8] then
       begin
         if not Assigned(FInternalBookmarkImage) then
-          FInternalBookmarkImage := TBCEditorInternalImage.Create(HINSTANCE, 'BCEDITORBOOKMARKIMAGES', 9);
+          FInternalBookmarkImage := TBCEditorInternalImage.Create(HINSTANCE, BCEDITOR_BOOKMARK_IMAGES, 9);
         if ALeftMarginOffset = 0 then
           FInternalBookmarkImage.Draw(Canvas, ABookmark.ImageIndex,
             AClipRect.Left + FLeftMargin.Bookmarks.Panel.LeftMargin + ALeftMarginOffset,

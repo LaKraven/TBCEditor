@@ -57,7 +57,7 @@ type
 implementation
 
 uses
-  Vcl.Menus, Vcl.Graphics;
+  Vcl.Menus, Vcl.Graphics, BCEditor.Consts;
 
 { TBCEditorSyncEdit }
 
@@ -73,7 +73,7 @@ begin
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
   FColors := TBCEditorSyncEditColors.Create;
-  FActivator := TBCEditorGlyph.Create(HINSTANCE, 'BCEDITORSYNCEDIT', clFuchsia);
+  FActivator := TBCEditorGlyph.Create(HINSTANCE, BCEDITOR_SYNCEDIT, clFuchsia);
 end;
 
 destructor TBCEditorSyncEdit.Destroy;

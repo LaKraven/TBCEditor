@@ -49,7 +49,7 @@ const
   { Highlighter attribute elements }
   BCEDITOR_ATTRIBUTE_ELEMENT_COMMENT = 'Comment';
   BCEDITOR_ATTRIBUTE_ELEMENT_STRING = 'String';
-  { Colors }
+  { Default colors }
   clSelectionColor = $00A56D53;
   clSearchHighlighter = $0078AAFF;
   clActiveLineBackground = $00E6FAFF;
@@ -67,6 +67,22 @@ const
   clSyncEditBackground = $00FCFDCD;
   { Undo }
   BCEDITOR_UNDO_BLOCK_NUMBER_START = 10;
+  { Resource file bitmaps }
+  BCEDITOR_ACTIVE_LINE = 'BCEDITORACTIVELINE';
+  BCEDITOR_BOOKMARK_IMAGES = 'BCEDITORBOOKMARKIMAGES';
+  BCEDITOR_SYNCEDIT = 'BCEDITORSYNCEDIT';
+  { Resource cursors bitmaps }
+  BCEDITOR_WHEEL_SCROLL = 'BCEDITORWHEELSCROLL';
+  { Mouse wheel scroll cursor indexes }
+  scNorth = 0;
+  scNorthWest = 1;
+  scWest = 2;
+  scSouthWest = 3;
+  scSouth = 4;
+  scSouthEast = 5;
+  scEast = 6;
+  scNorthEast = 7;
+
 
 implementation
 

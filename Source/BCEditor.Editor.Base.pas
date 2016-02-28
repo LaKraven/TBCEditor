@@ -276,6 +276,7 @@ type
     procedure FindAll(const ASearchText: string = '');
     procedure FindWords(const AWord: string; AList: TList; ACaseSensitive: Boolean; AWholeWordsOnly: Boolean);
     procedure FontChanged(Sender: TObject);
+    procedure GetMinimapLeftRight(var ALeft: Integer; var ARight: Integer);
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
     procedure MinimapChanged(Sender: TObject);
@@ -3437,6 +3438,30 @@ procedure TBCBaseEditor.FontChanged(Sender: TObject);
 begin
   RecalculateCharExtent;
   SizeOrFontChanged(True);
+end;
+
+procedure TBCBaseEditor.GetMinimapLeftRight(var ALeft: Integer; var ARight: Integer);
+begin
+  if FMinimap.Align = maRight then
+  begin
+    ALeft := ClientRect.Width - FMinimap.GetWidth;
+    ARight := ClientRect.Width;
+  end
+  else
+  begin
+    ALeft := 0;
+    ARight := FMinimap.GetWidth;
+  end;
+  if FSearch.Map.Align = saRight then
+  begin
+    Dec(ALeft, FSearch.Map.GetWidth);
+    Dec(ARight, FSearch.Map.GetWidth);
+  end
+  else
+  begin
+    Inc(ALeft, FSearch.Map.GetWidth);
+    Inc(ARight, FSearch.Map.GetWidth);
+  end;
 end;
 
 procedure TBCBaseEditor.LinesChanging(Sender: TObject);
@@ -6923,26 +6948,7 @@ begin
 
   if not FMinimap.Dragging and FMinimap.Visible then
   begin
-    if FMinimap.Align = maRight then
-    begin
-      LMinimapLeft := ClientRect.Width - FMinimap.GetWidth;
-      LMinimapRight := ClientRect.Width;
-    end
-    else
-    begin
-      LMinimapLeft := 0;
-      LMinimapRight := FMinimap.GetWidth;
-    end;
-    if FSearch.Map.Align = saRight then
-    begin
-      Dec(LMinimapLeft, FSearch.Map.GetWidth);
-      Dec(LMinimapRight, FSearch.Map.GetWidth);
-    end
-    else
-    begin
-      Inc(LMinimapLeft, FSearch.Map.GetWidth);
-      Inc(LMinimapRight, FSearch.Map.GetWidth);
-    end;
+    GetMinimapLeftRight(LMinimapLeft, LMinimapRight);
 
     if (X > LMinimapLeft) and (X < LMinimapRight) then
     begin
@@ -7100,6 +7106,7 @@ var
   LPositionText: string;
   LLine: Integer;
   LWidth: Integer;
+  LMinimapLeft, LMinimapRight: Integer;
   LTextCaretPosition: TBCEditorTextPosition;
 begin
   if FMouseMoveScrolling then
@@ -7109,8 +7116,9 @@ begin
   end;
 
   if FMinimap.Visible then
-    if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
-      (FMinimap.Align = maLeft) and (X < FMinimap.GetWidth) then
+  begin
+    GetMinimapLeftRight(LMinimapLeft, LMinimapRight);
+    if (X > LMinimapLeft) and (X < LMinimapRight) then
       if FMinimap.Clicked then
       begin
         if FMinimap.Dragging then
@@ -7120,6 +7128,7 @@ begin
             FMinimap.Dragging := True;
         Exit;
       end;
+  end;
 
   if FMinimap.Clicked then
     Exit;
@@ -7788,13 +7797,19 @@ begin
             if FMinimap.Align = maRight then
             begin
               if AMinimap then
-                X := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth + X
+                X := ClientRect.Width - FMinimap.GetWidth + X
               else
                 X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
+              if FSearch.Map.Align = saRight then
+                Dec(X, FSearch.Map.GetWidth);
             end
             else
             if not AMinimap then
+            begin
               X := FMinimap.GetWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
+              if FSearch.Map.Align = saLeft then
+                Inc(X, FSearch.Map.GetWidth);
+            end;
 
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
               (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) and
@@ -8735,9 +8750,13 @@ var
     if AMinimap then
     begin
       if FMinimap.Align = maRight then
-        Result := ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth
+        Result := ClientRect.Width - FMinimap.GetWidth
       else
         Result := 0;
+      if FSearch.Map.Align = saRight then
+        Dec(Result, FSearch.Map.GetWidth)
+      else
+        Inc(Result, FSearch.Map.GetWidth);
     end
     else
       Result := FTextOffset;
@@ -10219,6 +10238,7 @@ var
   LNewCursor: TCursor;
   LWidth: Integer;
   LCursorIndex: Integer;
+  LMinimapLeft, LMinimapRight: Integer;
 begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
@@ -10228,6 +10248,8 @@ begin
     Inc(LWidth, FMinimap.GetWidth);
   if FSearch.Map.Align = saLeft then
     Inc(LWidth, FSearch.Map.GetWidth);
+
+  GetMinimapLeftRight(LMinimapLeft, LMinimapRight);
 
   if FMouseMoveScrolling then
   begin
@@ -10241,9 +10263,7 @@ begin
   if (LCursorPoint.X > LWidth) and (LCursorPoint.X < LWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth) then
     SetCursor(Screen.Cursors[FLeftMargin.Cursor])
   else
-  if FMinimap.Visible and (
-    (FMinimap.Align = maRight) and (LCursorPoint.X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
-    (FMinimap.Align = maLeft) and (LCursorPoint.X <= FMinimap.GetWidth) ) then
+  if FMinimap.Visible and (LCursorPoint.X > LMinimapLeft) and (LCursorPoint.X < LMinimapRight) then
     SetCursor(Screen.Cursors[FMinimap.Cursor])
   else
   if FSearch.Map.Visible and (
@@ -12981,16 +13001,8 @@ var
   LRectLeft, LRectRight: Integer;
 begin
   FMinimapBufferBmp.Height := 0;
-  if FMinimap.Align = maRight then
-  begin
-    LRectLeft := ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth;
-    LRectRight := ClientWidth - FSearch.Map.GetWidth;
-  end
-  else
-  begin
-    LRectLeft := 0;
-    LRectRight := FMinimap.GetWidth;
-  end;
+
+  GetMinimapLeftRight(LRectLeft, LRectRight);
 
   LInvalidationRect := Rect(LRectLeft, 0, LRectRight, ClientHeight);
   InvalidateRect(LInvalidationRect);

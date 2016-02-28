@@ -2870,17 +2870,6 @@ begin
     FScrollTimer.Enabled := False;
     Exit;
   end;
-  LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-  if FMinimap.Align = maLeft then
-    Inc(LScrollBoundsLeft, FMinimap.GetWidth);
-  LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
-
-  LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
-
-  DeflateMinimapRect(LScrollBounds);
-
-  if BorderStyle = bsNone then
-    InflateRect(LScrollBounds, -2, -2);
 
   if FMouseMoveScrolling then
   begin
@@ -2911,6 +2900,18 @@ begin
   end
   else
   begin
+    LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    if FMinimap.Align = maLeft then
+      Inc(LScrollBoundsLeft, FMinimap.GetWidth);
+    LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
+
+    LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
+
+    DeflateMinimapRect(LScrollBounds);
+
+    if BorderStyle = bsNone then
+      InflateRect(LScrollBounds, -2, -2);
+
     if X < LScrollBounds.Left then
       FScrollDeltaX := (X - LScrollBounds.Left) div FCharWidth - 1
     else

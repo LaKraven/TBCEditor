@@ -2863,40 +2863,65 @@ procedure TBCBaseEditor.ComputeScroll(X, Y: Integer);
 var
   LScrollBounds: TRect;
   LScrollBoundsLeft, LScrollBoundsRight: Integer;
+  LCursorIndex: Integer;
 begin
-  if not MouseCapture and not Dragging then
+  if not MouseCapture and not Dragging and not FMouseMoveScrolling then
   begin
     FScrollTimer.Enabled := False;
     Exit;
   end;
 
-  LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-  if FMinimap.Align = maLeft then
-    Inc(LScrollBoundsLeft, FMinimap.GetWidth);
-  LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
+  if FMouseMoveScrolling then
+  begin
+    LCursorIndex := GetMouseMoveScrollCursorIndex;
+    case LCursorIndex of
+      scNorthWest, scWest, scSouthWest:
+        FScrollDeltaX := (X - FMouseMoveScrollingPoint.X) div FCharWidth - 1;
+      scNorthEast, scEast, scSouthEast:
+        FScrollDeltaX := (X - FMouseMoveScrollingPoint.X) div FCharWidth + 1;
+    else
+      FScrollDeltaX := 0;
+    end;
 
-  LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
-
-  DeflateMinimapRect(LScrollBounds);
-
-  if BorderStyle = bsNone then
-    InflateRect(LScrollBounds, -2, -2);
-
-  if X < LScrollBounds.Left then
-    FScrollDeltaX := (X - LScrollBounds.Left) div FCharWidth - 1
+    case LCursorIndex of
+      scNorthWest, scNorth, scNorthEast:
+        FScrollDeltaY := (Y - FMouseMoveScrollingPoint.Y) div FLineHeight - 1;
+      scSouthWest, scSouth, scSouthEast:
+        FScrollDeltaY := (Y - FMouseMoveScrollingPoint.Y) div FLineHeight + 1;
+    else
+      FScrollDeltaY := 0;
+    end;
+  end
   else
-  if X >= LScrollBounds.Right then
-    FScrollDeltaX := (X - LScrollBounds.Right) div FCharWidth + 1
-  else
-    FScrollDeltaX := 0;
+  begin
+    LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    if FMinimap.Align = maLeft then
+      Inc(LScrollBoundsLeft, FMinimap.GetWidth);
+    LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
 
-  if Y < LScrollBounds.Top then
-    FScrollDeltaY := (Y - LScrollBounds.Top) div FLineHeight - 1
-  else
-  if Y >= LScrollBounds.Bottom then
-    FScrollDeltaY := (Y - LScrollBounds.Bottom) div FLineHeight + 1
-  else
-    FScrollDeltaY := 0;
+    LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
+
+    DeflateMinimapRect(LScrollBounds);
+
+    if BorderStyle = bsNone then
+      InflateRect(LScrollBounds, -2, -2);
+
+    if X < LScrollBounds.Left then
+      FScrollDeltaX := (X - LScrollBounds.Left) div FCharWidth - 1
+    else
+    if X >= LScrollBounds.Right then
+      FScrollDeltaX := (X - LScrollBounds.Right) div FCharWidth + 1
+    else
+      FScrollDeltaX := 0;
+
+    if Y < LScrollBounds.Top then
+      FScrollDeltaY := (Y - LScrollBounds.Top) div FLineHeight - 1
+    else
+    if Y >= LScrollBounds.Bottom then
+      FScrollDeltaY := (Y - LScrollBounds.Bottom) div FLineHeight + 1
+    else
+      FScrollDeltaY := 0;
+  end;
 
   FScrollTimer.Enabled := (FScrollDeltaX <> 0) or (FScrollDeltaY <> 0);
 end;
@@ -4187,38 +4212,42 @@ var
   LDisplayPosition: TBCEditorDisplayPosition;
   LTextPosition: TBCEditorTextPosition;
 begin
-  Winapi.Windows.GetCursorPos(LCursorPoint);
-  LCursorPoint := ScreenToClient(LCursorPoint);
-  LDisplayPosition := PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y);
-  LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, FLineNumbersCount);
-  if FScrollDeltaX <> 0 then
-  begin
-    LeftChar := LeftChar + FScrollDeltaX;
-    X := LeftChar;
-    LDisplayPosition.Column := X;
-  end;
-  if FScrollDeltaY <> 0 then
-  begin
-    if GetKeyState(VK_SHIFT) < 0 then
-      TopLine := TopLine + FScrollDeltaY * VisibleLines
-    else
-      TopLine := TopLine + FScrollDeltaY;
-    Y := TopLine;
-    if FScrollDeltaY > 0 then
-      Inc(Y, VisibleLines - 1);
-    LDisplayPosition.Row := MinMax(Y, 1, FLineNumbersCount);
-  end;
-  LTextPosition := DisplayToTextPosition(LDisplayPosition);
-  if (DisplayCaretX <> LTextPosition.Char) or (GetTextCaretY <> LTextPosition.Line) then
-  begin
-    IncPaintLock;
-    try
-      TextCaretPosition := LTextPosition;
-      if MouseCapture then
-        SetSelectionEndPosition(TextCaretPosition);
-    finally
-      DecPaintLock;
+  IncPaintLock;
+  try
+    Winapi.Windows.GetCursorPos(LCursorPoint);
+    LCursorPoint := ScreenToClient(LCursorPoint);
+    LDisplayPosition := PixelsToRowColumn(LCursorPoint.X, LCursorPoint.Y);
+    LDisplayPosition.Row := MinMax(LDisplayPosition.Row, 1, FLineNumbersCount);
+    if FScrollDeltaX <> 0 then
+    begin
+      LeftChar := LeftChar + FScrollDeltaX;
+      X := LeftChar;
+      LDisplayPosition.Column := X;
     end;
+    if FScrollDeltaY <> 0 then
+    begin
+      if GetKeyState(VK_SHIFT) < 0 then
+        TopLine := TopLine + FScrollDeltaY * VisibleLines
+      else
+        TopLine := TopLine + FScrollDeltaY;
+      Y := TopLine;
+      if FScrollDeltaY > 0 then
+        Inc(Y, VisibleLines - 1);
+      LDisplayPosition.Row := MinMax(Y, 1, FLineNumbersCount);
+    end;
+    if not FMouseMoveScrolling then
+    begin
+      LTextPosition := DisplayToTextPosition(LDisplayPosition);
+      if (DisplayCaretX <> LTextPosition.Char) or (GetTextCaretY <> LTextPosition.Line) then
+      begin
+        TextCaretPosition := LTextPosition;
+        if MouseCapture then
+          SetSelectionEndPosition(TextCaretPosition);
+      end;
+    end;
+  finally
+    DecPaintLock;
+    Invalidate;
   end;
   ComputeScroll(LCursorPoint.X, LCursorPoint.Y);
 end;
@@ -6987,6 +7016,12 @@ var
   LMinimapWidth: Integer;
   LTextCaretPosition: TBCEditorTextPosition;
 begin
+  if FMouseMoveScrolling then
+  begin
+    ComputeScroll(X, Y);
+    Exit;
+  end;
+
   if FMinimap.Visible then
     if (FMinimap.Align = maRight) and (X > ClientRect.Width - FMinimap.GetWidth - FSearch.Map.GetWidth) or
       (FMinimap.Align = maLeft) and (X < FMinimap.GetWidth) then
@@ -7227,6 +7262,8 @@ var
   LSelectionAvailable: Boolean;
   LMinimapLeft, LSearchMapLeft, LTextLinesLeft: Integer;
 begin
+  if PaintLock <> 0 then
+    Exit;
   if FHighlighter.Loading then
     Exit;
 
@@ -10520,10 +10557,7 @@ begin
           if LActionReplace = raReplaceAll then
           begin
             if not LIsReplaceAll or LIsPrompt then
-            begin
               LIsReplaceAll := True;
-              IncPaintLock;
-            end;
             LIsPrompt := False;
             if not LIsEndUndoBlock then
               BeginUndoBlock;

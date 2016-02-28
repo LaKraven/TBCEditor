@@ -4442,8 +4442,6 @@ end;
 procedure TBCBaseEditor.SetLeftChar(AValue: Integer);
 var
   LMaxLineWidth: Integer;
-  LDelta: Integer;
-  LTextAreaRect: TRect;
   LWrapAtColumn: Integer;
 begin
   LWrapAtColumn := GetWrapAtColumn;
@@ -4472,19 +4470,8 @@ begin
   AValue := MinMax(AValue, 1, LMaxLineWidth);
   if FLeftChar <> AValue then
   begin
-    LDelta := FLeftChar - AValue;
     FLeftChar := AValue;
     FTextOffset := GetTextOffset;
-    if Abs(LDelta) < FVisibleChars then
-    begin
-      LTextAreaRect := ClientRect;
-      if FLeftMargin.Visible then
-        LTextAreaRect.Left := LTextAreaRect.Left + FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-      DeflateMinimapRect(LTextAreaRect);
-      ScrollWindow(Handle, LDelta * FCharWidth, 0, @LTextAreaRect, @LTextAreaRect);
-    end
-    else
-      InvalidateLines(-1, -1);
     if ((soAutoSizeMaxWidth in FScroll.Options) or (soPastEndOfLine in FScroll.Options)) and
       (FScroll.MaxWidth < LeftChar + FVisibleChars) then
       FScroll.MaxWidth := LeftChar + FVisibleChars - 1
@@ -4729,8 +4716,6 @@ end;
 
 procedure TBCBaseEditor.SetTopLine(AValue: Integer);
 var
-  LDelta: Integer;
-  LClientRect: TRect;
   LDisplayLineCount: Integer;
 begin
   LDisplayLineCount := FLineNumbersCount;
@@ -4746,16 +4731,9 @@ begin
   AValue := Max(AValue, 1);
   if TopLine <> AValue then
   begin
-    LDelta := TopLine - AValue;
     FTopLine := AValue;
     if FMinimap.Visible and not FMinimap.Dragging then
       FMinimap.TopLine := Max(FTopLine - Abs(Trunc((FMinimap.VisibleLines - FVisibleLines) * (FTopLine / Max(LDisplayLineCount - FVisibleLines, 1)))), 1);
-    LClientRect := ClientRect;
-    DeflateMinimapRect(LClientRect);
-    if Abs(LDelta) < FVisibleLines then
-      ScrollWindow(Handle, 0, FLineHeight * LDelta, @LClientRect, @LClientRect)
-    else
-      Invalidate;
     UpdateScrollBars;
   end;
 end;
@@ -7357,6 +7335,9 @@ begin
     if FSyncEdit.Enabled and FSyncEdit.Active then
       PaintSyncItems;
 
+    if FMouseMoveScrolling and (soWheelClickMove in FScroll.Options) then
+      PaintMouseMoveScrollPoint;
+
     { Minimap }
     if FMinimap.Visible then
       if (FMinimap.Align = maRight) and (LClipRect.Right > LMinimapLeft) or
@@ -7418,9 +7399,6 @@ begin
 
     if FRightMargin.Moving then
       PaintRightMarginMove;
-
-    if FMouseMoveScrolling and (soWheelClickMove in FScroll.Options) then
-      PaintMouseMoveScrollPoint;
   finally
     FLastTopLine := FTopLine;
     FLastLineNumberCount := FLineNumbersCount;
@@ -12807,7 +12785,7 @@ procedure TBCBaseEditor.InvalidateLine(ALine: Integer);
 var
   LInvalidationRect: TRect;
 begin
-  if (not HandleAllocated) or (ALine < 1) or (ALine > FLines.Count) or (not Visible) then
+  if (not HandleAllocated) or (ALine < 1) or (ALine > FLines.Count) or (not Visible) or FMouseMoveScrolling then
     Exit;
 
   if FWordWrap.Enabled then
@@ -12833,6 +12811,9 @@ procedure TBCBaseEditor.InvalidateLines(AFirstLine, ALastLine: Integer);
 var
   LInvalidationRect: TRect;
 begin
+  if FMouseMoveScrolling then
+    Exit;
+
   if Visible and HandleAllocated then
   begin
     if (AFirstLine = -1) and (ALastLine = -1) then

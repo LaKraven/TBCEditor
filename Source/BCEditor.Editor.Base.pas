@@ -221,17 +221,18 @@ type
     function GetTextOffset: Integer;
     function GetWordAtCursor: string;
     function GetWordAtMouse: string;
-    function GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
+    function GetWordAtTextPosition(ATextPosition: TBCEditorTextPosition): string;
     function GetWrapAtColumn: Integer;
     function IsKeywordAtCaretPosition(APOpenKeyWord: PBoolean = nil; AHighlightAfterToken: Boolean = True): Boolean;
     function IsKeywordAtCaretPositionOrAfter(ACaretPosition: TBCEditorTextPosition): Boolean;
     function IsWordSelected: Boolean;
     function LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
+    function NextSelectedWordPosition: Boolean;
     function NextWordPosition: TBCEditorTextPosition; overload;
     function NextWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
     function OpenClipboard: Boolean;
     function PreviousWordPosition: TBCEditorTextPosition; overload;
-    function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition; overload;
+    function PreviousWordPosition(const ATextPosition: TBCEditorTextPosition; APreviousLine: Boolean = False): TBCEditorTextPosition; overload;
     function RescanHighlighterRangesFrom(AIndex: Integer): Integer;
     function RowColumnToCharIndex(ATextPosition: TBCEditorTextPosition): Integer;
     function SearchText(const ASearchText: string; AChanged: Boolean = False): Integer;
@@ -283,7 +284,6 @@ type
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; ASelectionCommand: Boolean);
-    procedure NextSelectedWordPosition;
     procedure OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
     procedure PreviousSelectedWordPosition;
     procedure RefreshFind;
@@ -2016,14 +2016,14 @@ function TBCBaseEditor.GetTextOffset: Integer;
 begin
   Result := FLeftMargin.GetWidth + FCodeFolding.GetWidth - (LeftChar - 1) * FCharWidth;
   if FMinimap.Align = maLeft then
-    Result := Result + FMinimap.GetWidth;
+    Inc(Result, FMinimap.GetWidth);
   if FSearch.Map.Align = saLeft then
-    Result := Result + FSearch.Map.GetWidth;
+    Inc(Result, FSearch.Map.GetWidth);
 end;
 
 function TBCBaseEditor.GetWordAtCursor: string;
 begin
-  Result := GetWordAtRowColumn(TextCaretPosition);
+  Result := GetWordAtTextPosition(TextCaretPosition);
 end;
 
 function TBCBaseEditor.GetWordAtMouse: string;
@@ -2032,10 +2032,10 @@ var
 begin
   Result := '';
   if GetPositionOfMouse(LTextPosition) then
-    Result := GetWordAtRowColumn(LTextPosition);
+    Result := GetWordAtTextPosition(LTextPosition);
 end;
 
-function TBCBaseEditor.GetWordAtRowColumn(ATextPosition: TBCEditorTextPosition): string;
+function TBCBaseEditor.GetWordAtTextPosition(ATextPosition: TBCEditorTextPosition): string;
 var
   LTextLine: string;
   LLength, LStop: Integer;
@@ -2130,12 +2130,12 @@ begin
   if Assigned(FHighlighter) then
   begin
     LTextPosition := TextCaretPosition;
-    LWordAtCursor := GetWordAtRowColumn(LTextPosition);
+    LWordAtCursor := GetWordAtTextPosition(LTextPosition);
     LWordAtOneBeforeCursor := '';
     if AHighlightAfterToken then
     begin
       Dec(LTextPosition.Char);
-      LWordAtOneBeforeCursor := GetWordAtRowColumn(LTextPosition);
+      LWordAtOneBeforeCursor := GetWordAtTextPosition(LTextPosition);
     end;
     if (LWordAtCursor <> '') or (LWordAtOneBeforeCursor <> '') then
     for i := 0 to Length(FHighlighter.CodeFoldingRegions) - 1 do
@@ -2429,9 +2429,10 @@ begin
   Result := PreviousWordPosition(TextCaretPosition);
 end;
 
-function TBCBaseEditor.PreviousWordPosition(const ATextPosition: TBCEditorTextPosition): TBCEditorTextPosition;
+function TBCBaseEditor.PreviousWordPosition(const ATextPosition: TBCEditorTextPosition; APreviousLine: Boolean = False): TBCEditorTextPosition;
 var
   LLine: string;
+  LChar: Integer;
 begin
   Result := ATextPosition;
 
@@ -2446,7 +2447,7 @@ begin
       begin
         Dec(Result.Line);
         Result.Char := Length(FLines[Result.Line]) + 1;
-        Result := PreviousWordPosition(Result);
+        Result := PreviousWordPosition(Result, True);
       end
       else
       if not SelectionAvailable then
@@ -2455,8 +2456,13 @@ begin
     else
     begin
       if Result.Char > 1 then
-        if not IsWordBreakChar(LLine[Result.Char - 1]) then
+      begin
+        LChar := Result.Char;
+        if not APreviousLine then
+          Dec(LChar);
+        if not IsWordBreakChar(LLine[LChar]) then
           Dec(Result.Char);
+      end;
 
       if IsWordBreakChar(LLine[Result.Char]) then
       begin
@@ -3602,18 +3608,31 @@ begin
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationLineChar, ASelectionCommand);
 end;
 
-procedure TBCBaseEditor.NextSelectedWordPosition;
+function TBCBaseEditor.NextSelectedWordPosition: Boolean;
 var
   LSelectedText: string;
-  LTextCaretPosition, LNextCaretPosition: TBCEditorTextPosition;
+  LPreviousTextCaretPosition, LTextCaretPosition: TBCEditorTextPosition;
 begin
+  Result := False;
+
   if not SelectionAvailable then
     Exit;
   LSelectedText := SelectedText;
-  LTextCaretPosition := TextCaretPosition;
 
-  LNextCaretPosition := NextWordPosition;
-   // TODO
+  LTextCaretPosition := NextWordPosition;
+  while LSelectedText <> GetWordAtTextPosition(LTextCaretPosition) do
+  begin
+    LPreviousTextCaretPosition := LTextCaretPosition;
+    LTextCaretPosition := NextWordPosition(LTextCaretPosition);
+    if (LTextCaretPosition.Line = LPreviousTextCaretPosition.Line) and (LTextCaretPosition.Char = LPreviousTextCaretPosition.Char) then
+      Exit;
+  end;
+
+  TextCaretPosition := LTextCaretPosition;
+  SelectionBeginPosition := LTextCaretPosition;
+  SelectionEndPosition := GetTextPosition(LTextCaretPosition.Char + Length(LSelectedText), LTextCaretPosition.Line);
+
+  Result := True;
 end;
 
 procedure TBCBaseEditor.OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
@@ -3632,13 +3651,28 @@ end;
 procedure TBCBaseEditor.PreviousSelectedWordPosition;
 var
   LSelectedText: string;
-  LTextCaretPosition: TBCEditorTextPosition;
+  LPreviousTextCaretPosition, LTextCaretPosition: TBCEditorTextPosition;
+  LLength: Integer;
 begin
   if not SelectionAvailable then
     Exit;
   LSelectedText := SelectedText;
+  LLength := Length(LSelectedText);
+
   LTextCaretPosition := PreviousWordPosition;
-   // TODO
+  Dec(LTextCaretPosition.Char, LLength);
+  while LSelectedText <> GetWordAtTextPosition(LTextCaretPosition) do
+  begin
+    LPreviousTextCaretPosition := LTextCaretPosition;
+    LTextCaretPosition := PreviousWordPosition(LTextCaretPosition);
+    if (LTextCaretPosition.Line = LPreviousTextCaretPosition.Line) and (LTextCaretPosition.Char = LPreviousTextCaretPosition.Char) then
+      Exit;
+    Dec(LTextCaretPosition.Char, LLength);
+  end;
+
+  TextCaretPosition := LTextCaretPosition;
+  SelectionBeginPosition := LTextCaretPosition;
+  SelectionEndPosition := GetTextPosition(LTextCaretPosition.Char + Length(LSelectedText), LTextCaretPosition.Line);
 end;
 
 procedure TBCBaseEditor.SetLineWithRightTrim(ALine: Integer; const ALineText: string);
@@ -6908,7 +6942,7 @@ begin
 
   if FSearch.Map.Visible then
     if (FSearch.Map.Align = saRight) and (X > ClientRect.Width - FSearch.Map.GetWidth) or
-      (FSearch.Map.Align = saLeft) and (X < FSearch.Map.GetWidth) then
+      (FSearch.Map.Align = saLeft) and (X <= FSearch.Map.GetWidth) then
     begin
       DoOnSearchMapClick(AButton, X, Y);
       Exit;
@@ -7506,7 +7540,7 @@ begin
     { Search map }
     if FSearch.Map.Visible then
       if (FSearch.Map.Align = saRight) and (LClipRect.Right > ClientRect.Width - FSearch.Map.GetWidth) or
-         (FSearch.Map.Align = saLeft) and (LClipRect.Left < FSearch.Map.GetWidth) then
+         (FSearch.Map.Align = saLeft) and (LClipRect.Left <= FSearch.Map.GetWidth) then
       begin
         DrawRect := LClipRect;
         if FSearch.Map.Align = saRight then
@@ -9068,7 +9102,7 @@ var
       ASelectedText := Copy(FLines[FSelectionBeginPosition.Line], LSelectionBeginChar,
         LSelectionEndChar - LSelectionBeginChar);
 
-      Result := GetWordAtRowColumn(LTempTextPosition);
+      Result := GetWordAtTextPosition(LTempTextPosition);
     end;
 
     procedure PrepareToken;
@@ -10426,8 +10460,8 @@ begin
   Result := False;
   if Trim(FSearch.SearchText) = '' then
   begin
-    NextSelectedWordPosition;
-    SelectionEndPosition := SelectionBeginPosition;
+    if not NextSelectedWordPosition then
+      SelectionEndPosition := SelectionBeginPosition;
     FSearchEngine.Clear;
     Exit;
   end;
@@ -10489,7 +10523,7 @@ end;
 
 function TBCBaseEditor.GetWordAtPixels(X, Y: Integer): string;
 begin
-  Result := GetWordAtRowColumn(DisplayToTextPosition(PixelsToRowColumn(X, Y)));
+  Result := GetWordAtTextPosition(DisplayToTextPosition(PixelsToRowColumn(X, Y)));
 end;
 
 function TBCBaseEditor.IsBookmark(ABookmark: Integer): Boolean;

@@ -216,6 +216,7 @@ type
     function GetSelectionBeginPosition: TBCEditorTextPosition;
     function GetSelectionEndPosition: TBCEditorTextPosition;
     function GetText: string;
+    function GetTextBetween(ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition): string;
     function GetTextCaretY: Integer;
     function GetTextOffset: Integer;
     function GetWordAtCursor: string;
@@ -281,7 +282,9 @@ type
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; ASelectionCommand: Boolean);
+    procedure NextSelectedWordPosition;
     procedure OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
+    procedure PreviousSelectedWordPosition;
     procedure RefreshFind;
     procedure RightMarginChanged(Sender: TObject);
     procedure ScrollChanged(Sender: TObject);
@@ -322,6 +325,7 @@ type
     procedure SetSyncEdit(const AValue: TBCEditorSyncEdit);
     procedure SetTabs(const AValue: TBCEditorTabs);
     procedure SetText(const AValue: string);
+    procedure SetTextBetween(ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition; const AValue: string);
     procedure SetTopLine(AValue: Integer);
     procedure SetUndo(const AValue: TBCEditorUndo);
     procedure SetWordBlock(ATextPosition: TBCEditorTextPosition);
@@ -657,6 +661,7 @@ type
     property Tabs: TBCEditorTabs read FTabs write SetTabs;
     property TabStop default True;
     property Text: string read GetText write SetText;
+    property TextBetween[ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition]: string read GetTextBetween write SetTextBetween;
     property TopLine: Integer read FTopLine write SetTopLine;
     property Undo: TBCEditorUndo read FUndo write SetUndo;
     property UndoList: TBCEditorUndoList read FUndoList;
@@ -1860,6 +1865,18 @@ end;
 function TBCBaseEditor.GetText: string;
 begin
   Result := FLines.Text;
+end;
+
+function TBCBaseEditor.GetTextBetween(ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition): string;
+var
+  LSelectionMode: TBCEditorSelectionMode;
+begin
+  LSelectionMode := FSelection.Mode;
+  FSelection.Mode := smNormal;
+  FSelectionBeginPosition := ATextBeginPosition;
+  FSelectionEndPosition := ATextEndPosition;
+  Result := SelectedText;
+  FSelection.Mode := LSelectionMode;
 end;
 
 procedure TBCBaseEditor.CreateLineNumbersCache(AResetCache: Boolean = False);
@@ -3549,6 +3566,20 @@ begin
   MoveCaretAndSelection(FSelectionBeginPosition, LDestinationLineChar, ASelectionCommand);
 end;
 
+procedure TBCBaseEditor.NextSelectedWordPosition;
+var
+  LSelectedText: string;
+  LTextCaretPosition, LNextCaretPosition: TBCEditorTextPosition;
+begin
+  if not SelectionAvailable then
+    Exit;
+  LSelectedText := SelectedText;
+  LTextCaretPosition := TextCaretPosition;
+
+  LNextCaretPosition := NextWordPosition;
+   // TODO
+end;
+
 procedure TBCBaseEditor.OpenLink(AURI: string; ARangeType: TBCEditorRangeType);
 begin
   case TBCEditorRangeType(ARangeType) of
@@ -3560,6 +3591,18 @@ begin
   end;
 
   ShellExecute(0, nil, PChar(AURI), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TBCBaseEditor.PreviousSelectedWordPosition;
+var
+  LSelectedText: string;
+  LTextCaretPosition: TBCEditorTextPosition;
+begin
+  if not SelectionAvailable then
+    Exit;
+  LSelectedText := SelectedText;
+  LTextCaretPosition := PreviousWordPosition;
+   // TODO
 end;
 
 procedure TBCBaseEditor.SetLineWithRightTrim(ALine: Integer; const ALineText: string);
@@ -4712,6 +4755,22 @@ begin
   EndUndoBlock;
   DecPaintLock;
   DoChange;
+end;
+
+procedure TBCBaseEditor.SetTextBetween(ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition; const AValue: string);
+  var
+  LSelectionMode: TBCEditorSelectionMode;
+begin
+  LSelectionMode := FSelection.Mode;
+  FSelection.Mode := smNormal;
+  FUndoList.BeginBlock;
+  FUndoList.AddChange(crCaret, TextCaretPosition, FSelectionBeginPosition, FSelectionBeginPosition, '',
+    FSelection.ActiveMode);
+  FSelectionBeginPosition := ATextBeginPosition;
+  FSelectionEndPosition := ATextEndPosition;
+  SelectedText := AValue;
+  FUndoList.EndBlock;
+  FSelection.Mode := LSelectionMode;
 end;
 
 procedure TBCBaseEditor.SetTopLine(AValue: Integer);
@@ -10258,7 +10317,10 @@ function TBCBaseEditor.FindPrevious: Boolean;
 begin
   Result := False;
   if Trim(FSearch.SearchText) = '' then
+  begin
+    PreviousSelectedWordPosition;
     Exit;
+  end;
   FSearch.Options := FSearch.Options + [soBackwards];
   if SearchText(FSearch.SearchText) = 0 then
   begin
@@ -10276,6 +10338,7 @@ begin
   Result := False;
   if Trim(FSearch.SearchText) = '' then
   begin
+    NextSelectedWordPosition;
     SelectionEndPosition := SelectionBeginPosition;
     FSearchEngine.Clear;
     Exit;
@@ -10293,16 +10356,8 @@ begin
         DoSearchStringNotFoundDialog;
     end
     else
-    if soShowSearchMatchNotFound in FSearch.Options then
-    begin
-      if DoSearchMatchNotFoundWraparoundDialog then
-      begin
-        CaretZero;
-        Result := FindNext;
-      end
-    end
-    else
-    if soWrapAround in FSearch.Options then
+    if (soShowSearchMatchNotFound in FSearch.Options) and DoSearchMatchNotFoundWraparoundDialog or
+      (soWrapAround in FSearch.Options) then
     begin
       CaretZero;
       Result := FindNext;

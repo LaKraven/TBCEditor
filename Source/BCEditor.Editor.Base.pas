@@ -2870,9 +2870,26 @@ begin
     FScrollTimer.Enabled := False;
     Exit;
   end;
+  LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  if FMinimap.Align = maLeft then
+    Inc(LScrollBoundsLeft, FMinimap.GetWidth);
+  LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
+
+  LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
+
+  DeflateMinimapRect(LScrollBounds);
+
+  if BorderStyle = bsNone then
+    InflateRect(LScrollBounds, -2, -2);
 
   if FMouseMoveScrolling then
   begin
+    if (X < ClientRect.Left) or (X > ClientRect.Right) or (Y < ClientRect.Top) or (Y > ClientRect.Bottom) then
+    begin
+      FScrollTimer.Enabled := False;
+      Exit;
+    end;
+
     LCursorIndex := GetMouseMoveScrollCursorIndex;
     case LCursorIndex of
       scNorthWest, scWest, scSouthWest:
@@ -2894,18 +2911,6 @@ begin
   end
   else
   begin
-    LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
-    if FMinimap.Align = maLeft then
-      Inc(LScrollBoundsLeft, FMinimap.GetWidth);
-    LScrollBoundsRight := LScrollBoundsLeft + FVisibleChars * FCharWidth + 4;
-
-    LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FVisibleLines * FLineHeight);
-
-    DeflateMinimapRect(LScrollBounds);
-
-    if BorderStyle = bsNone then
-      InflateRect(LScrollBounds, -2, -2);
-
     if X < LScrollBounds.Left then
       FScrollDeltaX := (X - LScrollBounds.Left) div FCharWidth - 1
     else
@@ -5532,7 +5537,7 @@ begin
             GetScrollInfo(Handle, SB_VERT, LScrollInfo);
 
             LScrollHintPoint := ClientToScreen(Point(ClientWidth - LScrollHintRect.Right - 4, ((LScrollHintRect.Bottom - LScrollHintRect.Top) shr 1) +
-              Round((LScrollInfo.nTrackPos / LScrollInfo.nMax) * (ClientHeight - (LScrollButtonHeight * 2 ))) - 2));
+              Round((LScrollInfo.nTrackPos / LScrollInfo.nMax) * (ClientHeight - LScrollButtonHeight * 2)) - 2));
           end
           else
             LScrollHintPoint := ClientToScreen(Point(ClientWidth - LScrollHintRect.Right - 4, 4));

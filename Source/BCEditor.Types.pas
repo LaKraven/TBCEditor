@@ -288,6 +288,7 @@ type
   TBCEditorMinimapOptions = set of TBCEditorMinimapOption;
 
   TBCEditorMinimapAlign = (maLeft, maRight);
+  TBCEditorSearchMapAlign = (saLeft, saRight);
 
   TBCEditorUndoOption = (
     uoGroupUndo

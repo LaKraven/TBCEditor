@@ -20,7 +20,7 @@ type
     procedure SetColor(const AValue: TColor);
     procedure SetEndOfLine(const AValue: TBCEditorSpecialCharsEndOfLine);
     procedure SetOnChange(const AValue: TNotifyEvent);
-    procedure SetOptions(const AValue: TBCEditorSpecialCharsOptions);
+    procedure SetOptions(AValue: TBCEditorSpecialCharsOptions);
     procedure SetSelection(const AValue: TBCEditorSpecialCharsSelection);
     procedure SetStyle(const AValue: TBCEditorSpecialCharsStyle);
     procedure SetVisible(const AValue: Boolean);
@@ -126,10 +126,14 @@ begin
   end;
 end;
 
-procedure TBCEditorSpecialChars.SetOptions(const AValue: TBCEditorSpecialCharsOptions);
+procedure TBCEditorSpecialChars.SetOptions(AValue: TBCEditorSpecialCharsOptions);
 begin
   if FOptions <> AValue then
   begin
+    if scoTextColor in AValue then
+      AValue := AValue - [scoMiddleColor];
+    if scoMiddleColor in AValue then
+      AValue := AValue - [scoTextColor];
     FOptions := AValue;
     DoChange;
   end;

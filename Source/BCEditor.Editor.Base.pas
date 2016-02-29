@@ -7451,6 +7451,7 @@ begin
     if LClipRect.Left < LTextLinesLeft then
     begin
       DrawRect := LClipRect;
+      DrawRect.Left := 0;
       if FMinimap.Align = maLeft then
         Inc(DrawRect.Left, FMinimap.GetWidth);
       if FSearch.Map.Align = saLeft then

@@ -32,7 +32,7 @@ type
     property Color: TColor read FColor write SetColor default clBlack;
     property EndOfLine: TBCEditorSpecialCharsEndOfLine read FEndOfLine write SetEndOfLine;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
-    property Options: TBCEditorSpecialCharsOptions read FOptions write SetOptions default [scoUseTextColor];
+    property Options: TBCEditorSpecialCharsOptions read FOptions write SetOptions default [scoMiddleColor];
     property Selection: TBCEditorSpecialCharsSelection read FSelection write SetSelection;
     property Style: TBCEditorSpecialCharsStyle read FStyle write SetStyle;
     property Visible: Boolean read FVisible write SetVisible default False;
@@ -50,7 +50,7 @@ begin
   FEndOfLine := TBCEditorSpecialCharsEndOfLine.Create;
   FSelection := TBCEditorSpecialCharsSelection.Create;
   FVisible := False;
-  FOptions := [scoUseTextColor];
+  FOptions := [scoMiddleColor];
 end;
 
 destructor TBCEditorSpecialChars.Destroy;

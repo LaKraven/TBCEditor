@@ -256,7 +256,8 @@ type
   );
 
   TBCEditorSpecialCharsOption = (
-    scoUseTextColor
+    scoTextColor,
+    scoMiddleColor
   );
   TBCEditorSpecialCharsOptions = set of TBCEditorSpecialCharsOption;
   TBCEditorSpecialCharsStyle = (scsDot, scsSolid);

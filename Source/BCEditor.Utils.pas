@@ -8,6 +8,7 @@ uses
 function DeleteWhitespace(const AText: string): string;
 function GetTabConvertProc(ATabWidth: Integer): TBCEditorTabConvertProc;
 function MessageDialog(const AMessage: string; ADlgType: TMsgDlgType; AButtons: TMsgDlgButtons): Integer;
+function MiddleColor(AColor1, AColor2: TColor): TColor;
 function MinMax(AValue, AMinValue, AMaxValue: Integer): Integer;
 function TextWidth(ACanvas: TCanvas; const AText: string): Integer;
 function TextHeight(ACanvas: TCanvas; const AText: string): Integer;
@@ -18,6 +19,26 @@ implementation
 
 uses
   Vcl.Forms, Vcl.Dialogs, System.SysUtils, System.Character;
+
+function MiddleColor(AColor1, AColor2: TColor): TColor;
+var
+  LRed, LGreen, LBlue: Byte;
+  LRed1, LGreen1, LBlue1: Byte;
+  LRed2, LGreen2, LBlue2: Byte;
+begin
+  LRed1 := GetRValue(AColor1);
+  LRed2 := GetRValue(AColor2);
+  LGreen1 := GetRValue(AColor1);
+  LGreen2 := GetRValue(AColor2);
+  LBlue1 := GetRValue(AColor1);
+  LBlue2 := GetRValue(AColor2);
+
+  LRed := (LRed1 + LRed2) div 2;
+  LGreen := (LGreen1 + LGreen2) div 2;
+  LBlue := (LBlue1 + LBlue2) div 2;
+
+  Result := RGB(LRed, LGreen, LBlue);
+end;
 
 procedure FreeList(var AList: TList);
 begin

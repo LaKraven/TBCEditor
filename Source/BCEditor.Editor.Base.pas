@@ -8452,7 +8452,10 @@ begin
     LDisplayCharPosition := 1;
     LCharWidth := FCharWidth;
 
-    if scoUseTextColor in FSpecialChars.Options then
+    if scoMiddleColor in FSpecialChars.Options then
+      Canvas.Pen.Color := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
+    else
+    if scoTextColor in FSpecialChars.Options then
       Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
     else
       Canvas.Pen.Color := FSpecialChars.Color;
@@ -8530,7 +8533,10 @@ begin
     if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and
       (LLineLength - AFirstColumn < FVisibleChars) then
     begin
-      if scoUseTextColor in FSpecialChars.Options then
+      if scoMiddleColor in FSpecialChars.Options then
+        Canvas.Pen.Color := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
+      else
+      if scoTextColor in FSpecialChars.Options then
         Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
       else
         Canvas.Pen.Color := FSpecialChars.EndOfLine.Color;

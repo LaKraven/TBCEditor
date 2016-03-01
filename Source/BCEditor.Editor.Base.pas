@@ -205,8 +205,7 @@ type
     function GetHookedCommandHandlersCount: Integer;
     function GetTextCaretPosition: TBCEditorTextPosition;
     function GetLeadingExpandedLength(const AStr: string; ABorder: Integer = 0): Integer;
-    function GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
-    function GetLineIndentChars(ALine: Integer): Integer;
+    function GetLineIndentLevel(ALine: Integer): Integer;
     function GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
     function GetMouseMoveScrollCursors(AIndex: Integer): HCURSOR;
     function GetMouseMoveScrollCursorIndex: Integer;
@@ -819,15 +818,16 @@ begin
   { Right edge }
   FRightMargin := TBCEditorRightMargin.Create;
   FRightMargin.OnChange := RightMarginChanged;
-  { Text }
+  { Tabs }
   TabStop := True;
+  FTabs := TBCEditorTabs.Create;
+  FTabs.OnChange := TabsChanged;
+  { Text }
   FInsertMode := True;
   FKeyboardHandler := TBCEditorKeyboardHandler.Create;
   FKeyCommands := TBCEditorKeyCommands.Create(Self);
   SetDefaultKeyCommands;
   FWantReturns := True;
-  FTabs := TBCEditorTabs.Create;
-  FTabs.OnChange := TabsChanged;
   FLeftChar := 1;
   FTopLine := 1;
   FDisplayCaretX := 1;
@@ -1335,38 +1335,29 @@ begin
   end;
 end;
 
-function TBCBaseEditor.GetLeftSpacing(ACharCount: Integer; AWantTabs: Boolean): string;
-begin
-  if AWantTabs and not (toTabsToSpaces in FTabs.Options) and (ACharCount >= FTabs.Width) then
-    Result := StringOfChar(BCEDITOR_TAB_CHAR, ACharCount div FTabs.Width) +
-      StringOfChar(BCEDITOR_SPACE_CHAR, ACharCount mod FTabs.Width)
-  else
-    Result := StringOfChar(BCEDITOR_SPACE_CHAR, ACharCount);
-end;
-
-function TBCBaseEditor.GetLineIndentChars(ALine: Integer): Integer;
+function TBCBaseEditor.GetLineIndentLevel(ALine: Integer): Integer;
 var
-  LPLine: PChar;
+  LPLineStart, LPLine: PChar;
 begin
   Result := 0;
   if ALine >= FLines.Count then
     Exit;
-  LPLine := PChar(FLines[ALine]);
-  repeat
+  LPLineStart := PChar(FLines[ALine]);
+  LPLine := LPLineStart;
+  while (LPLine^ <> BCEDITOR_NONE_CHAR) and ((LPLine^ = BCEDITOR_TAB_CHAR) or (LPLine^ = BCEDITOR_SPACE_CHAR)) do
+  begin
     if LPLine^ = BCEDITOR_TAB_CHAR then
-      while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LPLine^ = BCEDITOR_TAB_CHAR) do
-      begin
-        Inc(LPLine);
+    begin
+      if toColumns in FTabs.Options then
+        Inc(Result, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+      else
         Inc(Result, FTabs.Width);
-      end
+    end
     else
-    if LPLine^ = BCEDITOR_SPACE_CHAR then
-      while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LPLine^ = BCEDITOR_SPACE_CHAR) do
-      begin
-        Inc(LPLine);
-        Inc(Result);
-      end
-  until (LPLine^ <> BCEDITOR_TAB_CHAR) and (LPLine^ <> BCEDITOR_SPACE_CHAR);
+      Inc(Result);
+
+    Inc(LPLine);
+  end;
 end;
 
 function TBCBaseEditor.GetMatchingToken(APoint: TBCEditorTextPosition; var AMatch: TBCEditorMatchingPairMatch): TBCEditorMatchingTokenResult;
@@ -2292,16 +2283,22 @@ end;
 
 function TBCBaseEditor.LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
 var
-  LPLine: PChar;
+  LPLineStart, LPLine: PChar;
 begin
-  LPLine := PChar(ALine);
+  LPLineStart := PChar(ALine);
+  LPLine := LPLineStart;
   if Assigned(LPLine) and (eoAutoIndent in FOptions) then
   begin
     Result := 0;
     while (LPLine^ > BCEDITOR_NONE_CHAR) and (LPLine^ <= BCEDITOR_SPACE_CHAR) do
     begin
       if (LPLine^ = BCEDITOR_TAB_CHAR) and AWantTabs then
-        Inc(Result, FTabs.Width)
+      begin
+        if toColumns in FTabs.Options then
+          Inc(Result, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+        else
+          Inc(Result, FTabs.Width)
+      end
       else
         Inc(Result);
       Inc(LPLine);
@@ -3226,19 +3223,19 @@ begin
     LDisplayCaretPosition := DisplayCaretPosition;
     LLengthAfterLine := Max(LDisplayCaretPosition.Column - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
 
-    LCharCount := 0;
+//    LCharCount := 0;
 
-    if toColumns in FTabs.Options then
-      if (LDisplayCaretPosition.Column - 1) mod FTabs.Width <> 0 then
-        LCharCount := LLengthAfterLine - 1 + FTabs.Width - (LDisplayCaretPosition.Column - 1) mod FTabs.Width;
+    //if toColumns in FTabs.Options then
+    //  if (LDisplayCaretPosition.Column - 1) mod FTabs.Width <> 0 then
+    //    LCharCount := LLengthAfterLine - 1 + FTabs.Width - (LDisplayCaretPosition.Column - 1) mod FTabs.Width;
 
-    if LCharCount = 0 then
-    begin
+    //if LCharCount = 0 then
+    //begin
       if LLengthAfterLine > 1 then
         LCharCount := LLengthAfterLine
       else
         LCharCount := FTabs.Width;
-    end;
+    //end;
 
     if toPreviousLineIndent in FTabs.Options then
       if Trim(FLines[LTextCaretPosition.Line]) = '' then
@@ -3259,7 +3256,7 @@ begin
     else
     begin
       LTabText := StringOfChar(BCEDITOR_TAB_CHAR, LCharCount div FTabs.Width);
-      LTabText := LTabText + StringOfChar(BCEDITOR_SPACE_CHAR, LCharCount mod FTabs.Width);
+      LTabText := LTabText + StringOfChar(BCEDITOR_TAB_CHAR, LCharCount mod FTabs.Width);
     end;
 
     if InsertMode then
@@ -3959,7 +3956,7 @@ var
                         else
                           LFoldRanges := FAllCodeFoldingRanges;
 
-                        LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(LLine - 1), LFoldCount,
+                        LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentLevel(LLine - 1), LFoldCount,
                           LRegionItem, LLine);
                         { open keyword found }
                         LOpenTokenFoldRangeList.Add(LCodeFoldingRange);
@@ -4118,7 +4115,7 @@ var
                 else
                   LFoldRanges := FAllCodeFoldingRanges;
 
-                LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentChars(LLine - 1), LFoldCount,
+                LCodeFoldingRange := LFoldRanges.Add(FAllCodeFoldingRanges, LLine, GetLineIndentLevel(LLine - 1), LFoldCount,
                   LRegionItem, LLine);
                 { open keyword found }
                 LOpenTokenFoldRangeList.Add(LCodeFoldingRange);
@@ -5047,6 +5044,7 @@ end;
 procedure TBCBaseEditor.TabsChanged(Sender: TObject);
 begin
   FLines.TabWidth := FTabs.Width;
+  FLines.Columns := toColumns in FTabs.Options;
   Invalidate;
   if FWordWrap.Enabled then
   begin
@@ -7824,7 +7822,7 @@ begin
         begin
           if not LCodeFoldingRange.RegionItem.ShowGuideLine then
             Continue;
-          X := GetLineIndentChars(LCodeFoldingRange.ToLine - 1);
+          X := GetLineIndentLevel(LCodeFoldingRange.ToLine - 1);
           X := X * FTextDrawer.CharWidth;
 
           if (X - LScrolledXBy > 0) and not AMinimap or AMinimap and (X > 0) then
@@ -8432,6 +8430,7 @@ var
   LCharRect: TRect;
   LPilcrow: string;
   LWidth: Integer;
+  LPenColor: TColor;
 begin
   if FSpecialChars.Visible then
   begin
@@ -8442,7 +8441,12 @@ begin
     while LDisplayCharPosition < AFirstColumn do
     begin
       if LPLine^ = BCEDITOR_TAB_CHAR then
-        Inc(LDisplayCharPosition, FTabs.Width)
+      begin
+        if toColumns in FTabs.Options then
+          Inc(LDisplayCharPosition, FTabs.Width - LDisplayCharPosition mod FTabs.Width)
+        else
+          Inc(LDisplayCharPosition, FTabs.Width)
+      end
       else
         Inc(LDisplayCharPosition);
 
@@ -8453,12 +8457,14 @@ begin
     LCharWidth := FCharWidth;
 
     if scoMiddleColor in FSpecialChars.Options then
-      Canvas.Pen.Color := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
+      LPenColor := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
     else
     if scoTextColor in FSpecialChars.Options then
-      Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
+      LPenColor := FHighlighter.MainRules.Attribute.Foreground
     else
-      Canvas.Pen.Color := FSpecialChars.Color;
+      LPenColor := FSpecialChars.Color;
+
+    Canvas.Pen.Color := LPenColor;
 
     LTextHeight := Max(FLineHeight - 8, 0) shr 4;
     with ALineRect do
@@ -8495,7 +8501,10 @@ begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom;
           Left := LLeftTemp + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
-          Right := Left + FTabs.Width * LCharWidth - 6;
+          if toColumns in FTabs.Options then
+            Right := Left + (FTabs.Width - (LDisplayCharPosition - 1) mod FTabs.Width) * LCharWidth - 6
+          else
+            Right := Left + FTabs.Width * LCharWidth - 6;
         end;
         with Canvas do
         begin
@@ -8530,95 +8539,86 @@ begin
       Inc(LPLine);
     end;
 
-    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and
-      (LLineLength - AFirstColumn < FVisibleChars) then
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn < FVisibleChars) then
+    with Canvas do
     begin
-      if scoMiddleColor in FSpecialChars.Options then
-        Canvas.Pen.Color := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
+      Pen.Color := LPenColor;
+      LCharRect.Top := ALineRect.Top;
+      if FSpecialChars.EndOfLine.Style = eolPilcrow then
+        LCharRect.Bottom := ALineRect.Bottom
       else
-      if scoTextColor in FSpecialChars.Options then
-        Canvas.Pen.Color := FHighlighter.MainRules.Attribute.Foreground
-      else
-        Canvas.Pen.Color := FSpecialChars.EndOfLine.Color;
-      with Canvas do
+        LCharRect.Bottom := ALineRect.Bottom - 3;
+      LCharRect.Left := LLeftTemp + (LDisplayCharPosition - 1) * LCharWidth;
+      if FSpecialChars.EndOfLine.Style = eolEnter then
+        LCharRect.Left := LCharRect.Left + 4;
+      if FSpecialChars.EndOfLine.Style = eolPilcrow then
       begin
-        LCharRect.Top := ALineRect.Top;
-        if FSpecialChars.EndOfLine.Style = eolPilcrow then
-          LCharRect.Bottom := ALineRect.Bottom
-        else
-          LCharRect.Bottom := ALineRect.Bottom - 3;
-        LCharRect.Left := LLeftTemp + (LDisplayCharPosition - 1) * LCharWidth;
-        if FSpecialChars.EndOfLine.Style = eolEnter then
-          LCharRect.Left := LCharRect.Left + 4;
+        LCharRect.Left := LCharRect.Left + 2;
+        LCharRect.Right := LCharRect.Left + LCharWidth
+      end
+      else
+        LCharRect.Right := LCharRect.Left + FTabs.Width * LCharWidth - 3;
+
+      LWidth := 0;
+      if FMinimap.Align = maLeft then
+        Inc(LWidth, FMinimap.GetWidth);
+      if FSearch.Map.Align = saLeft then
+        Inc(LWidth, FSearch.Map.GetWidth);
+
+      if LCharRect.Left > FLeftMargin.GetWidth + FCodeFolding.GetWidth + LWidth then
+      begin
         if FSpecialChars.EndOfLine.Style = eolPilcrow then
         begin
-          LCharRect.Left := LCharRect.Left + 2;
-          LCharRect.Right := LCharRect.Left + LCharWidth
+          if IsTextPositionInSelection(GetTextPosition(LDisplayCharPosition, ALine - 1)) then
+            FTextDrawer.BackgroundColor := FSelection.Colors.Background
+          else
+          if GetTextCaretY = ALine - 1 then
+            FTextDrawer.BackgroundColor := FActiveLine.Color
+          else
+            FTextDrawer.BackgroundColor := FBackgroundColor;
+          FTextDrawer.ForegroundColor := Canvas.Pen.Color;
+          FTextDrawer.Style := [];
+          LPilcrow := Char($00B6);
+          FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, ETO_OPAQUE or ETO_CLIPPED, LCharRect, PChar(LPilcrow), 1);
         end
         else
-          LCharRect.Right := LCharRect.Left + FTabs.Width * LCharWidth - 3;
-
-        LWidth := 0;
-        if FMinimap.Align = maLeft then
-          Inc(LWidth, FMinimap.GetWidth);
-        if FSearch.Map.Align = saLeft then
-          Inc(LWidth, FSearch.Map.GetWidth);
-
-        if LCharRect.Left > FLeftMargin.GetWidth + FCodeFolding.GetWidth + LWidth then
+        if FSpecialChars.EndOfLine.Style = eolArrow then
         begin
-          if FSpecialChars.EndOfLine.Style = eolPilcrow then
+          Y := LCharRect.Top + 2;
+          if FSpecialChars.Style = scsDot then
           begin
-            if IsTextPositionInSelection(GetTextPosition(LDisplayCharPosition, ALine - 1)) then
-              FTextDrawer.BackgroundColor := FSelection.Colors.Background
-            else
-            if GetTextCaretY = ALine - 1 then
-              FTextDrawer.BackgroundColor := FActiveLine.Color
-            else
-              FTextDrawer.BackgroundColor := FBackgroundColor;
-            FTextDrawer.ForegroundColor := Canvas.Pen.Color;
-            FTextDrawer.Style := [];
-            LPilcrow := Char($00B6);
-            FTextDrawer.ExtTextOut(LCharRect.Left, LCharRect.Top, ETO_OPAQUE or ETO_CLIPPED, LCharRect, PChar(LPilcrow), 1);
-          end
-          else
-          if FSpecialChars.EndOfLine.Style = eolArrow then
-          begin
-            Y := LCharRect.Top + 2;
-            if FSpecialChars.Style = scsDot then
-            begin
-              while Y < LCharRect.Bottom do
-              begin
-                MoveTo(LCharRect.Left + 6, Y);
-                LineTo(LCharRect.Left + 6, Y + 1);
-                Inc(Y, 2);
-              end;
-            end;
-            { Solid }
-            if FSpecialChars.Style = scsSolid then
+            while Y < LCharRect.Bottom do
             begin
               MoveTo(LCharRect.Left + 6, Y);
-              Y := LCharRect.Bottom;
               LineTo(LCharRect.Left + 6, Y + 1);
+              Inc(Y, 2);
             end;
-            MoveTo(LCharRect.Left + 6, Y);
-            LineTo(LCharRect.Left + 3, Y - 3);
-            MoveTo(LCharRect.Left + 6, Y);
-            LineTo(LCharRect.Left + 9, Y - 3);
-          end
-          else
-          begin
-            Y := LCharRect.Top + FLineHeight div 2 - 1;
-            MoveTo(LCharRect.Left, Y);
-            LineTo(LCharRect.Left + 11, Y);
-            MoveTo(LCharRect.Left + 1, Y - 1);
-            LineTo(LCharRect.Left + 1, Y + 2);
-            MoveTo(LCharRect.Left + 2, Y - 2);
-            LineTo(LCharRect.Left + 2, Y + 3);
-            MoveTo(LCharRect.Left + 3, Y - 3);
-            LineTo(LCharRect.Left + 3, Y + 4);
-            MoveTo(LCharRect.Left + 10, Y - 3);
-            LineTo(LCharRect.Left + 10, Y);
           end;
+          { Solid }
+          if FSpecialChars.Style = scsSolid then
+          begin
+            MoveTo(LCharRect.Left + 6, Y);
+            Y := LCharRect.Bottom;
+            LineTo(LCharRect.Left + 6, Y + 1);
+          end;
+          MoveTo(LCharRect.Left + 6, Y);
+          LineTo(LCharRect.Left + 3, Y - 3);
+          MoveTo(LCharRect.Left + 6, Y);
+          LineTo(LCharRect.Left + 9, Y - 3);
+        end
+        else
+        begin
+          Y := LCharRect.Top + FLineHeight div 2 - 1;
+          MoveTo(LCharRect.Left, Y);
+          LineTo(LCharRect.Left + 11, Y);
+          MoveTo(LCharRect.Left + 1, Y - 1);
+          LineTo(LCharRect.Left + 1, Y + 2);
+          MoveTo(LCharRect.Left + 2, Y - 2);
+          LineTo(LCharRect.Left + 2, Y + 3);
+          MoveTo(LCharRect.Left + 3, Y - 3);
+          LineTo(LCharRect.Left + 3, Y + 4);
+          MoveTo(LCharRect.Left + 10, Y - 3);
+          LineTo(LCharRect.Left + 10, Y);
         end;
       end;
     end;
@@ -10050,7 +10050,7 @@ var
                 LTempString := StringOfChar(BCEDITOR_SPACE_CHAR, LLength)
               else
                 LTempString := StringOfChar(BCEDITOR_TAB_CHAR, LLength div FTabs.Width) +
-                  StringOfChar(BCEDITOR_SPACE_CHAR, LLength mod FTabs.Width);
+                  StringOfChar(BCEDITOR_TAB_CHAR, LLength mod FTabs.Width);
               LTempString := LTempString + LStr;
             end
             else
@@ -10353,10 +10353,9 @@ end;
 
 function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDisplayPosition): TBCEditorTextPosition;
 var
-  LTextLine: string;
-  i, LLength, LChar, LPreviousLine, LRow: Integer;
+  i, LChar, LPreviousLine, LRow: Integer;
   LIsWrapped: Boolean;
-  LPLine: PChar;
+  LPLineStart, LPLine: PChar;
 begin
   Result := TBCEditorTextPosition(ADisplayPosition);
   Result.Line := GetDisplayTextLineNumber(Result.Line);
@@ -10382,7 +10381,7 @@ begin
       while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Char) do
       begin
         if LPLine^ = BCEDITOR_TAB_CHAR then
-          Dec(Result.Char, FTabs.Width - 1);
+          Dec(Result.Char, FTabs.Width - 1); // TODO: Columns?
         Inc(i);
         Inc(LPLine);
       end;
@@ -10393,26 +10392,31 @@ begin
 
   if not LIsWrapped then
   begin
-    LTextLine := FLines[Result.Line];
-    LLength := Length(LTextLine);
-    LChar := 0;
-    i := 0;
-
+    LPLineStart := PChar(FLines[Result.Line]);
+    LPLine := LPLineStart;
+    LChar := 1;
+    i := 1;
     while LChar < Result.Char do
     begin
-      Inc(i);
-      if (i <= LLength) and (LTextLine[i] = BCEDITOR_TAB_CHAR) then
-        Inc(LChar, FTabs.Width)
-      else
-      if i <= LLength then
+      if LPLine^ <> BCEDITOR_NONE_CHAR then
       begin
-        if Ord(LTextLine[i]) < 128 then
+        if (LPLine^ = BCEDITOR_TAB_CHAR) then
+        begin
+          if toColumns in FTabs.Options then
+            Inc(LChar, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+          else
+            Inc(LChar, FTabs.Width)
+        end
+        else
+        if Ord(LPLine^) < 128 then
           Inc(LChar)
         else
-          Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+          Inc(LChar, FTextDrawer.GetCharCount(LPLine));
+        Inc(LPLine);
       end
       else
         Inc(LChar);
+      Inc(i);
     end;
     Result.Char := i;
   end;
@@ -10930,10 +10934,9 @@ end;
 function TBCBaseEditor.TextToDisplayPosition(const ATextPosition: TBCEditorTextPosition; ARealWidth: Boolean = True): TBCEditorDisplayPosition;
 var
   i: Integer;
-  LTextLine: string;
-  LLength, LChar: Integer;
+  LChar: Integer;
   LIsWrapped: Boolean;
-  LPLine: PChar;
+  LPLineStart, LPLine: PChar;
 
   function GetWrapLineLength(ARow: Integer): Integer;
   begin
@@ -10956,6 +10959,7 @@ begin
     if Result.Column <= Length(FLines[ATextPosition.Line]) then
     while (LPLine^ <> BCEDITOR_NONE_CHAR) and (i < Result.Column) do
     begin
+      // TODO: Columns?
       if LPLine^ = BCEDITOR_TAB_CHAR then
         Inc(Result.Column, FTabs.Width - 1);
       Inc(i);
@@ -10976,25 +10980,38 @@ begin
 
   if not LIsWrapped then
   begin
-    LTextLine := FLines[ATextPosition.Line];
-    LLength := Length(LTextLine);
-    LChar := 0;
-    for i := 1 to ATextPosition.Char - 1 do
+    LPLineStart := PChar(FLines[ATextPosition.Line]);
+    LPLine := LPLineStart;
+    LChar := 1;
+    i := 1;
+    while i < ATextPosition.Char do
     begin
-      if (i <= LLength) and (LTextLine[i] = BCEDITOR_TAB_CHAR) then
-        Inc(LChar, FTabs.Width)
-      else
-      if ARealWidth and (i <= LLength) and (LTextLine[i] <> BCEDITOR_SPACE_CHAR) and (LTextLine[i] <> '') then
+      if LPLine^ <> BCEDITOR_NONE_CHAR then
       begin
-        if Ord(LTextLine[i]) < 128 then
-          Inc(LChar)
+        if LPLine^ = BCEDITOR_TAB_CHAR then
+        begin
+          if toColumns in FTabs.Options then
+            Inc(LChar, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+          else
+            Inc(LChar, FTabs.Width)
+        end
         else
-          Inc(LChar, FTextDrawer.GetCharCount(@LTextLine[i]))
+        if ARealWidth and (LPLine^ <> BCEDITOR_SPACE_CHAR) and (LPLine^ <> '') then
+        begin
+          if Ord(LPLine^) < 128 then
+            Inc(LChar)
+          else
+            Inc(LChar, FTextDrawer.GetCharCount(LPLine))
+        end
+        else
+          Inc(LChar);
+        Inc(LPLine);
       end
       else
         Inc(LChar);
+      Inc(i);
     end;
-    Result.Column := LChar + 1;
+    Result.Column := LChar;
   end;
 end;
 
@@ -12322,7 +12339,7 @@ begin
                   if LSpaceCount1 > 0 then
                   begin
                     if toTabsToSpaces in FTabs.Options then
-                      LSpaceBuffer := GetLeftSpacing(LSpaceCount2, False)
+                      LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount2)
                     else
                       LSpaceBuffer := Copy(LLineText, 1, LSpaceCount1);
                   end;
@@ -12409,7 +12426,7 @@ begin
                   if LSpaceCount1 > 0 then
                   begin
                     if toTabsToSpaces in FTabs.Options then
-                      LSpaceBuffer := GetLeftSpacing(LSpaceCount2, False)
+                      LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount2)
                     else
                       LSpaceBuffer := Copy(Lines[LBackCounterLine], 1, LSpaceCount1);
 
@@ -12466,7 +12483,7 @@ begin
                 if LSpaceCount1 > 0 then
                 begin
                   if toTabsToSpaces in FTabs.Options then
-                    LSpaceBuffer := GetLeftSpacing(LSpaceCount2, False)
+                    LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LSpaceCount2)
                   else
                     LSpaceBuffer := Copy(Lines[LBackCounterLine], 1, LSpaceCount1);
 
@@ -12520,7 +12537,7 @@ begin
               else
               if AllWhiteUpToCaret(LLineText, LLength) then
                 LSpaceBuffer := StringOfChar(BCEDITOR_TAB_CHAR, (LTextCaretPosition.Char - LLength - Ord(FInsertMode)) div FTabs.Width) +
-                  StringOfChar(BCEDITOR_SPACE_CHAR, (LTextCaretPosition.Char - LLength - Ord(FInsertMode)) mod FTabs.Width)
+                  StringOfChar(BCEDITOR_TAB_CHAR, (LTextCaretPosition.Char - LLength - Ord(FInsertMode)) mod FTabs.Width)
               else
                 LSpaceBuffer := StringOfChar(BCEDITOR_SPACE_CHAR, LTextCaretPosition.Char - LLength - Ord(FInsertMode));
               LSpaceCount1 := Length(LSpaceBuffer);

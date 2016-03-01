@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.Math, System.Classes, Vcl.Graphics, System.UITypes, BCEditor.Consts, BCEditor.Types;
 
 function DeleteWhitespace(const AText: string): string;
-function GetTabConvertProc(ATabWidth: Integer): TBCEditorTabConvertProc;
+function GetTabConvertProc(AColumns: Boolean): TBCEditorTabConvertProc;
 function MessageDialog(const AMessage: string; ADlgType: TMsgDlgType; AButtons: TMsgDlgButtons): Integer;
 function MiddleColor(AColor1, AColor2: TColor): TColor;
 function MinMax(AValue, AMinValue, AMaxValue: Integer): Integer;
@@ -117,27 +117,51 @@ end;
 
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean): string;
 var
-  PSource: PChar;
+  PLine: PChar;
 begin
   AHasTabs := False;
   Result := '';
-  PSource := PChar(ALine);
-  while PSource^ <> BCEDITOR_NONE_CHAR do
+  PLine := PChar(ALine);
+  while PLine^ <> BCEDITOR_NONE_CHAR do
   begin
-    if PSource^ = BCEDITOR_TAB_CHAR then
+    if PLine^ = BCEDITOR_TAB_CHAR then
     begin
       AHasTabs := True;
       Result := Result + StringOfChar(BCEDITOR_SPACE_CHAR, ATabWidth);
     end
     else
-      Result := Result + PSource^;
-    Inc(PSource);
+      Result := Result + PLine^;
+    Inc(PLine);
   end;
 end;
 
-function GetTabConvertProc(ATabWidth: Integer): TBCEditorTabConvertProc;
+function ConvertColumnTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean): string;
+var
+  LPLineStart, LPLine: PChar;
 begin
-  Result := TBCEditorTabConvertProc(@ConvertTabs);
+  AHasTabs := False;
+  Result := '';
+  LPLineStart := PChar(ALine);
+  LPLine := LPLineStart;
+  while LPLine^ <> BCEDITOR_NONE_CHAR do
+  begin
+    if LPLine^ = BCEDITOR_TAB_CHAR then
+    begin
+      AHasTabs := True;
+      Result := Result + StringOfChar(BCEDITOR_SPACE_CHAR, ATabWidth - (LPLine - LPLineStart) mod ATabWidth);
+    end
+    else
+      Result := Result + LPLine^;
+    Inc(LPLine);
+  end;
+end;
+
+function GetTabConvertProc(AColumns: Boolean): TBCEditorTabConvertProc;
+begin
+  if AColumns then
+    Result := TBCEditorTabConvertProc(@ConvertColumnTabs)
+  else
+    Result := TBCEditorTabConvertProc(@ConvertTabs);
 end;
 
 function TextWidth(ACanvas: TCanvas; const AText: string): Integer;

@@ -1,6 +1,6 @@
 Version 1.4. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
-<b>Note!</b> Current trunk is not always a working version. Use the latest <a href="https://github.com/bonecode/TBCEditor/releases">release</a>. 
+<b>Note!</b> Current trunk should never be considered as a stable version. Use the latest <a href="https://github.com/bonecode/TBCEditor/releases">release</a> version instead. 
 
 <h3>Description</h3>
 

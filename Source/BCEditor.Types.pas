@@ -148,8 +148,7 @@ type
     cpoAutoInvoke,
     cpoCaseSensitive,
     cpoFiltered,
-    cpoParseItemsFromText,
-    cpoResizeable
+    cpoParseItemsFromText
   );
   TBCEditorCompletionProposalOptions = set of TBCEditorCompletionProposalOption;
 
@@ -309,6 +308,8 @@ type
 
   TBCEditorCodeFoldingMarkStyle = (msSquare, msCircle);
   TBCEditorCodeFoldingChanges = (fcEnabled, fcRefresh, fcRescan);
+
+  TLineSpacingRule = (lsSingle, lsOneAndHalf, lsDouble, lsSpecified);
 
   TBCEditorCodeFoldingChangeEvent = procedure(Event: TBCEditorCodeFoldingChanges) of object;
 

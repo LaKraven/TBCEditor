@@ -137,18 +137,17 @@ end;
 
 function ConvertColumnTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean): string;
 var
-  LPLineStart, LPLine: PChar;
+  LPLine: PChar;
 begin
   AHasTabs := False;
   Result := '';
-  LPLineStart := PChar(ALine);
-  LPLine := LPLineStart;
+  LPLine := PChar(ALine);
   while LPLine^ <> BCEDITOR_NONE_CHAR do
   begin
     if LPLine^ = BCEDITOR_TAB_CHAR then
     begin
       AHasTabs := True;
-      Result := Result + StringOfChar(BCEDITOR_SPACE_CHAR, ATabWidth - (LPLine - LPLineStart) mod ATabWidth);
+      Result := Result + StringOfChar(BCEDITOR_SPACE_CHAR, ATabWidth - Length(Result) mod ATabWidth);
     end
     else
       Result := Result + LPLine^;

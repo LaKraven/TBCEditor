@@ -1337,19 +1337,18 @@ end;
 
 function TBCBaseEditor.GetLineIndentLevel(ALine: Integer): Integer;
 var
-  LPLineStart, LPLine: PChar;
+  LPLine: PChar;
 begin
   Result := 0;
   if ALine >= FLines.Count then
     Exit;
-  LPLineStart := PChar(FLines[ALine]);
-  LPLine := LPLineStart;
+  LPLine := PChar(FLines[ALine]);
   while (LPLine^ <> BCEDITOR_NONE_CHAR) and ((LPLine^ = BCEDITOR_TAB_CHAR) or (LPLine^ = BCEDITOR_SPACE_CHAR)) do
   begin
     if LPLine^ = BCEDITOR_TAB_CHAR then
     begin
       if toColumns in FTabs.Options then
-        Inc(Result, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+        Inc(Result, FTabs.Width - Result mod FTabs.Width)
       else
         Inc(Result, FTabs.Width);
     end
@@ -2283,10 +2282,9 @@ end;
 
 function TBCBaseEditor.LeftSpaceCount(const ALine: string; AWantTabs: Boolean = False): Integer;
 var
-  LPLineStart, LPLine: PChar;
+  LPLine: PChar;
 begin
-  LPLineStart := PChar(ALine);
-  LPLine := LPLineStart;
+  LPLine := PChar(ALine);
   if Assigned(LPLine) and (eoAutoIndent in FOptions) then
   begin
     Result := 0;
@@ -2295,7 +2293,7 @@ begin
       if (LPLine^ = BCEDITOR_TAB_CHAR) and AWantTabs then
       begin
         if toColumns in FTabs.Options then
-          Inc(Result, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+          Inc(Result, FTabs.Width - Result mod FTabs.Width)
         else
           Inc(Result, FTabs.Width)
       end
@@ -3221,21 +3219,12 @@ begin
     LTextLine := FLines[LTextCaretPosition.Line];
 
     LDisplayCaretPosition := DisplayCaretPosition;
-    LLengthAfterLine := Max(LDisplayCaretPosition.Column - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
+    LLengthAfterLine := Max(LDisplayCaretPosition.Column - 1 - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
 
-//    LCharCount := 0;
-
-    //if toColumns in FTabs.Options then
-    //  if (LDisplayCaretPosition.Column - 1) mod FTabs.Width <> 0 then
-    //    LCharCount := LLengthAfterLine - 1 + FTabs.Width - (LDisplayCaretPosition.Column - 1) mod FTabs.Width;
-
-    //if LCharCount = 0 then
-    //begin
-      if LLengthAfterLine > 1 then
-        LCharCount := LLengthAfterLine
-      else
-        LCharCount := FTabs.Width;
-    //end;
+    if LLengthAfterLine > 1 then
+      LCharCount := LLengthAfterLine
+    else
+      LCharCount := FTabs.Width;
 
     if toPreviousLineIndent in FTabs.Options then
       if Trim(FLines[LTextCaretPosition.Line]) = '' then
@@ -8443,7 +8432,7 @@ begin
       if LPLine^ = BCEDITOR_TAB_CHAR then
       begin
         if toColumns in FTabs.Options then
-          Inc(LDisplayCharPosition, FTabs.Width - LDisplayCharPosition mod FTabs.Width)
+          Inc(LDisplayCharPosition, FTabs.Width - (LDisplayCharPosition - 1) mod FTabs.Width)
         else
           Inc(LDisplayCharPosition, FTabs.Width)
       end
@@ -10355,7 +10344,7 @@ function TBCBaseEditor.DisplayToTextPosition(const ADisplayPosition: TBCEditorDi
 var
   i, LChar, LPreviousLine, LRow: Integer;
   LIsWrapped: Boolean;
-  LPLineStart, LPLine: PChar;
+  LPLine: PChar;
 begin
   Result := TBCEditorTextPosition(ADisplayPosition);
   Result.Line := GetDisplayTextLineNumber(Result.Line);
@@ -10392,8 +10381,7 @@ begin
 
   if not LIsWrapped then
   begin
-    LPLineStart := PChar(FLines[Result.Line]);
-    LPLine := LPLineStart;
+    LPLine := PChar(FLines[Result.Line]);
     LChar := 1;
     i := 1;
     while LChar < Result.Char do
@@ -10403,7 +10391,7 @@ begin
         if (LPLine^ = BCEDITOR_TAB_CHAR) then
         begin
           if toColumns in FTabs.Options then
-            Inc(LChar, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+            Inc(LChar, FTabs.Width - (LChar - 1) mod FTabs.Width)
           else
             Inc(LChar, FTabs.Width)
         end
@@ -10936,7 +10924,7 @@ var
   i: Integer;
   LChar: Integer;
   LIsWrapped: Boolean;
-  LPLineStart, LPLine: PChar;
+  LPLine: PChar;
 
   function GetWrapLineLength(ARow: Integer): Integer;
   begin
@@ -10980,8 +10968,7 @@ begin
 
   if not LIsWrapped then
   begin
-    LPLineStart := PChar(FLines[ATextPosition.Line]);
-    LPLine := LPLineStart;
+    LPLine := PChar(FLines[ATextPosition.Line]);
     LChar := 1;
     i := 1;
     while i < ATextPosition.Char do
@@ -10991,7 +10978,7 @@ begin
         if LPLine^ = BCEDITOR_TAB_CHAR then
         begin
           if toColumns in FTabs.Options then
-            Inc(LChar, FTabs.Width - (LPLine - LPLineStart) mod FTabs.Width)
+            Inc(LChar, FTabs.Width - (LChar - 1) mod FTabs.Width)
           else
             Inc(LChar, FTabs.Width)
         end

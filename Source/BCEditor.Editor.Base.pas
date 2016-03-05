@@ -454,8 +454,7 @@ type
     procedure ScanCodeFoldingRanges; virtual;
     procedure ScanMatchingPair;
     procedure SetAlwaysShowCaret(const AValue: Boolean);
-    procedure SetDisplayCaretPosition(const AValue: TBCEditorDisplayPosition); overload;
-    procedure SetDisplayCaretPosition(ACallEnsureCursorPositionVisible: Boolean; AValue: TBCEditorDisplayPosition); overload;
+    procedure SetDisplayCaretPosition(AValue: TBCEditorDisplayPosition);
     procedure SetName(const AValue: TComponentName); override;
     procedure SetReadOnly(AValue: Boolean); virtual;
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
@@ -2879,7 +2878,8 @@ begin
   if FWordWrap.Enabled then
     if FWordWrapLineLengths[LCaretNearestPosition.Row] <> 0 then
       LCaretNearestPosition.Column := MinMax(LCaretNearestPosition.Column, 1, FWordWrapLineLengths[LCaretNearestPosition.Row] + 1);
-  SetDisplayCaretPosition(True, LCaretNearestPosition);
+
+  TextCaretPosition := DisplayToTextPosition(LCaretNearestPosition);
 end;
 
 procedure TBCBaseEditor.ComputeScroll(X, Y: Integer);
@@ -4659,7 +4659,7 @@ end;
 
 procedure TBCBaseEditor.SetTextCaretPosition(AValue: TBCEditorTextPosition);
 begin
-  SetDisplayCaretPosition(True, TextToDisplayPosition(AValue));
+  SetDisplayCaretPosition(TextToDisplayPosition(AValue));
 end;
 
 procedure TBCBaseEditor.SetRightMargin(const AValue: TBCEditorRightMargin);
@@ -9755,21 +9755,7 @@ begin
   end;
 end;
 
-procedure TBCBaseEditor.SetDisplayCaretPosition(const AValue: TBCEditorDisplayPosition);
-begin
-  IncPaintLock;
-  try
-    SetDisplayCaretPosition(True, AValue);
-    if SelectionAvailable then
-      InvalidateSelection;
-    FSelectionBeginPosition := TextCaretPosition;
-    FSelectionEndPosition := FSelectionBeginPosition;
-  finally
-    DecPaintLock;
-  end;
-end;
-
-procedure TBCBaseEditor.SetDisplayCaretPosition(ACallEnsureCursorPositionVisible: Boolean; AValue: TBCEditorDisplayPosition);
+procedure TBCBaseEditor.SetDisplayCaretPosition(AValue: TBCEditorDisplayPosition);
 var
   LMaxX: Integer;
 begin
@@ -9807,10 +9793,14 @@ begin
       end;
       FDisplayCaretY := AValue.Row;
     end;
-    if ACallEnsureCursorPositionVisible then
-      EnsureCursorPositionVisible;
+    EnsureCursorPositionVisible;
     Include(FStateFlags, sfCaretChanged);
     Include(FStateFlags, sfScrollbarChanged);
+
+    if SelectionAvailable then
+      InvalidateSelection;
+    FSelectionBeginPosition := TextCaretPosition;
+    FSelectionEndPosition := FSelectionBeginPosition;
   finally
     DecPaintLock;
   end;
@@ -10391,7 +10381,7 @@ begin
     begin
       if LPLine^ <> BCEDITOR_NONE_CHAR then
       begin
-        if (LPLine^ = BCEDITOR_TAB_CHAR) then
+        if LPLine^ = BCEDITOR_TAB_CHAR then
         begin
           if toColumns in FTabs.Options then
             Inc(LChar, FTabs.Width - (LChar - 1) mod FTabs.Width)

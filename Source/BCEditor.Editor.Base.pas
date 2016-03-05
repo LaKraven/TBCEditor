@@ -3218,7 +3218,7 @@ begin
     LTextLine := FLines[LTextCaretPosition.Line];
 
     LDisplayCaretPosition := DisplayCaretPosition;
-    LLengthAfterLine := Max(LDisplayCaretPosition.Column - 1 - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
+    LLengthAfterLine := Max(LDisplayCaretPosition.Column - FLines.ExpandedStringLengths[LTextCaretPosition.Line], 1);
 
     if LLengthAfterLine > 1 then
       LCharCount := LLengthAfterLine

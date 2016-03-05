@@ -8424,6 +8424,10 @@ begin
   begin
     LPLine := PChar(FLines[ALine - 1]);
 
+    LLineLength := Length(FLines[ALine - 1]);
+    if LLineLength - AFirstColumn < 0 then
+      Exit;
+
     LDisplayCharPosition := 1;
     while LDisplayCharPosition < AFirstColumn do
     begin
@@ -8527,9 +8531,7 @@ begin
       Inc(LPLine);
     end;
 
-    LLineLength := Length(FLines[ALine - 1]);
-    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn > 0) and
-      (LLineLength - AFirstColumn < FVisibleChars) then
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn < FVisibleChars) then
     with Canvas do
     begin
       Pen.Color := LPenColor;

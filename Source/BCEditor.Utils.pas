@@ -83,14 +83,14 @@ end;
 function MessageDialog(const AMessage: string; ADlgType: TMsgDlgType; AButtons: TMsgDlgButtons): Integer;
 begin
   with CreateMessageDialog(AMessage, ADlgType, AButtons) do
-    try
-      HelpContext := 0;
-      HelpFile := '';
-      Position := poMainFormCenter;
-      Result := ShowModal;
-    finally
-      Free;
-    end;
+  try
+    HelpContext := 0;
+    HelpFile := '';
+    Position := poMainFormCenter;
+    Result := ShowModal;
+  finally
+    Free;
+  end;
 end;
 
 function MinMax(AValue, AMinValue, AMaxValue: Integer): Integer;

@@ -2878,7 +2878,6 @@ begin
   if FWordWrap.Enabled then
     if FWordWrapLineLengths[LCaretNearestPosition.Row] <> 0 then
       LCaretNearestPosition.Column := MinMax(LCaretNearestPosition.Column, 1, FWordWrapLineLengths[LCaretNearestPosition.Row] + 1);
-
   TextCaretPosition := DisplayToTextPosition(LCaretNearestPosition);
 end;
 
@@ -9796,11 +9795,6 @@ begin
     EnsureCursorPositionVisible;
     Include(FStateFlags, sfCaretChanged);
     Include(FStateFlags, sfScrollbarChanged);
-
-    if SelectionAvailable then
-      InvalidateSelection;
-    FSelectionBeginPosition := TextCaretPosition;
-    FSelectionEndPosition := FSelectionBeginPosition;
   finally
     DecPaintLock;
   end;

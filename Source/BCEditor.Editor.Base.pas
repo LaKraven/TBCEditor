@@ -13372,7 +13372,7 @@ begin
       LLineText := FLines[LLine];
       LSpaceCount := LeftSpaceCount(LLineText, False);
       LSpaces := Copy(LLineText, 1, LSpaceCount);
-      LLineText := Trim(LLineText);
+      LLineText := TrimLeft(LLineText);
 
       if LLineText <> '' then
       while i < LLength do

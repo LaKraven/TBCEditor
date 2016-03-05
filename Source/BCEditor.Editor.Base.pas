@@ -8415,7 +8415,7 @@ var
   LPLine: PChar;
   LLineLength: Integer;
   LCharWidth, LTextHeight: Integer;
-  LDisplayCharPosition, X, Y, LLeftTemp: Integer;
+  LDisplayCharPosition, X, Y, LLeftMargin: Integer;
   LCharRect: TRect;
   LPilcrow: string;
   LWidth: Integer;
@@ -8459,15 +8459,11 @@ begin
     with ALineRect do
       X := Top + (Bottom - Top) shr 1 - 1;
 
-    LLeftTemp := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+    LLeftMargin := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
-      Inc(LLeftTemp, FMinimap.GetWidth);
+      Inc(LLeftMargin, FMinimap.GetWidth);
     if FSearch.Map.Align = saLeft then
-      Inc(LLeftTemp, FSearch.Map.GetWidth);
-
-    LLine := FLines[ALine - 1];
-    LLine := Copy(LLine, AFirstColumn, Length(LLine));
-    LPLine := PChar(LLine);
+      Inc(LLeftMargin, FSearch.Map.GetWidth);
 
     while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LDisplayCharPosition <= FVisibleChars) do
     begin
@@ -8477,7 +8473,7 @@ begin
         begin
           Top := X - LTextHeight;
           Bottom := X + 2 + LTextHeight;
-          Left := LLeftTemp + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
+          Left := LLeftMargin + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
           Right := Left + 2;
         end;
         with Canvas, LCharRect do
@@ -8489,7 +8485,7 @@ begin
         begin
           Top := ALineRect.Top;
           Bottom := ALineRect.Bottom;
-          Left := LLeftTemp + LDisplayCharPosition * LCharWidth - LCharWidth div 2 - 1;
+          Left := LLeftMargin + (LDisplayCharPosition - 1) * LCharWidth + LCharWidth div 2 + 1;
           if toColumns in FTabs.Options then
             Right := Left + (FTabs.Width - (LDisplayCharPosition - 1) mod FTabs.Width) * LCharWidth - 6
           else
@@ -8499,29 +8495,34 @@ begin
         begin
           Y := (ALineRect.Bottom - ALineRect.Top) shr 1;
           i := 0;
+          { Line }
           if FSpecialChars.Style = scsDot then
           begin
-            i := LCharRect.Left;
+            i := LCharRect.Left - 2;
             while i < LCharRect.Right do
             begin
               MoveTo(i, LCharRect.Top + Y);
               LineTo(i + 1, LCharRect.Top + Y);
               Inc(i, 2);
             end;
-          end;
+          end
+          else
           if FSpecialChars.Style = scsSolid then
           begin
-            MoveTo(LCharRect.Left, LCharRect.Top + Y);
-            LineTo(LCharRect.Right, LCharRect.Top + Y);
-            i := LCharRect.Right;
+            MoveTo(LCharRect.Left - 2, LCharRect.Top + Y);
+            LineTo(LCharRect.Right + 1, LCharRect.Top + Y);
+            i := LCharRect.Right + 1;
           end;
-
+          { Arrow }
           MoveTo(i, LCharRect.Top + Y);
           LineTo(i - (Y shr 1), LCharRect.Top + Y - (Y shr 1));
           MoveTo(i, LCharRect.Top + Y);
           LineTo(i - (Y shr 1), LCharRect.Top + Y + (Y shr 1));
         end;
-        Inc(LDisplayCharPosition, FTabs.Width);
+        if toColumns in FTabs.Options then
+          Inc(LDisplayCharPosition, FTabs.Width - (LDisplayCharPosition - 1) mod FTabs.Width)
+        else
+          Inc(LDisplayCharPosition, FTabs.Width);
       end
       else
         Inc(LDisplayCharPosition, Length(LPLine^));
@@ -8537,7 +8538,7 @@ begin
         LCharRect.Bottom := ALineRect.Bottom
       else
         LCharRect.Bottom := ALineRect.Bottom - 3;
-      LCharRect.Left := LLeftTemp + (LDisplayCharPosition - 1) * LCharWidth;
+      LCharRect.Left := LLeftMargin + (LDisplayCharPosition - 1) * LCharWidth;
       if FSpecialChars.EndOfLine.Style = eolEnter then
         LCharRect.Left := LCharRect.Left + 4;
       if FSpecialChars.EndOfLine.Style = eolPilcrow then

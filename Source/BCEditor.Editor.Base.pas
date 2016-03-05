@@ -8411,7 +8411,6 @@ end;
 procedure TBCBaseEditor.PaintSpecialChars(ALine, AFirstColumn: Integer; ALineRect: TRect);
 var
   i: Integer;
-  LLine: string;
   LPLine: PChar;
   LLineLength: Integer;
   LCharWidth, LTextHeight: Integer;
@@ -8424,7 +8423,6 @@ begin
   if FSpecialChars.Visible then
   begin
     LPLine := PChar(FLines[ALine - 1]);
-    LLineLength := Length(FLines[ALine - 1]);
 
     LDisplayCharPosition := 1;
     while LDisplayCharPosition < AFirstColumn do
@@ -8529,7 +8527,9 @@ begin
       Inc(LPLine);
     end;
 
-    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn < FVisibleChars) then
+    LLineLength := Length(FLines[ALine - 1]);
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn > 0) and
+      (LLineLength - AFirstColumn < FVisibleChars) then
     with Canvas do
     begin
       Pen.Color := LPenColor;

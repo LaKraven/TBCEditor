@@ -9078,6 +9078,7 @@ var
 
   procedure PaintLines;
   var
+    i: Integer;
     LFirstColumn, LLastColumn: Integer;
     LCurrentLineText, LFromLineText, LToLineText, LTempLineText: string;
     LCurrentRow: Integer;
@@ -9096,6 +9097,7 @@ var
     LTextPosition: TBCEditorTextPosition;
     LPreviousFirstColumn: Integer;
     LTextCaretY: Integer;
+    LWrappedRowCount: Integer;
 
     function GetWordAtSelection(var ASelectedText: string): string;
     var
@@ -9293,7 +9295,15 @@ var
 
       if FWordWrap.Enabled then
         if FWordWrapLineLengths[LDisplayLine] <> 0 then
-          LLastColumn := FWordWrapLineLengths[LDisplayLine];
+        begin
+          if LCurrentRow < TopLine then
+            for i := LCurrentRow to LDisplayLine - 1 do
+              LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
+          //LLastColumn := FWordWrapLineLengths[LDisplayLine];
+          LLastColumn := LFirstColumn + FVisibleChars;
+        end;
+
+      LWrappedRowCount := 0;
 
       while LCurrentRow = LCurrentLine do
       begin
@@ -9357,8 +9367,10 @@ var
         if LCurrentLine - 1 = 0 then
           FHighlighter.ResetCurrentRange
         else
+        if LWrappedRowCount = 0 then
           FHighlighter.SetCurrentRange(Lines.Ranges[LCurrentLine - 2]);
-        FHighlighter.SetCurrentLine(LCurrentLineText);
+        if LWrappedRowCount = 0 then
+          FHighlighter.SetCurrentLine(LCurrentLineText);
         LTokenHelper.Length := 0;
 
         while not FHighlighter.GetEndOfLine do
@@ -9384,6 +9396,7 @@ var
                 PrepareToken;
               if LTokenPosition + LTokenLength >= LLastColumn then
               begin
+                Inc(LWrappedRowCount);
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
                 LLastColumn := LFirstColumn + FVisibleChars;
                 if LTokenPosition + LTokenLength - LPreviousFirstColumn < FVisibleChars then
@@ -9411,6 +9424,8 @@ var
           FOnAfterLinePaint(Self, Canvas, LLineRect, LCurrentLine, AMinimap);
         Inc(LDisplayLine);
         LCurrentRow := GetDisplayTextLineNumber(LDisplayLine);
+        if LWrappedRowCount > FVisibleLines then
+          Break;
       end;
     end;
     LIsCurrentLine := False;

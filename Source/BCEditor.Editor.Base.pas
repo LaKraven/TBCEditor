@@ -3153,7 +3153,15 @@ begin
     begin
       FSyncEdit.MoveBeginPositionChar(LDifference);
       FSyncEdit.MoveEndPositionChar(LDifference);
-      SetTextCaretX(TextCaretPosition.Char + LDifference);
+      LTextCaretPosition.Char := LTextCaretPosition.Char + LDifference;
+      //SetTextCaretX(TextCaretPosition.Char + LDifference);
+    end;
+
+    if (LTextBeginPosition.Line = FSyncEdit.EditBeginPosition.Line) and
+      (LTextBeginPosition.Char > FSyncEdit.EditBeginPosition.Char) then
+    begin
+      Inc(LTextBeginPosition.Char, LDifference);
+      PBCEditorTextPosition(FSyncEdit.SyncItems.Items[i])^.Char := LTextBeginPosition.Char;
     end;
 
     LTextEndPosition := LTextBeginPosition;
@@ -3166,10 +3174,10 @@ begin
     LTextEndPosition.Char := LTextEndPosition.Char + Length(LEditText);
 
     FUndoList.AddChange(crInsert, LTextCaretPosition, LTextBeginPosition, LTextEndPosition, LOldText, FSelection.ActiveMode);
-
+    FLines.BeginUpdate;
     FLines[LTextBeginPosition.Line] := Copy(FLines[LTextBeginPosition.Line], 1, LTextBeginPosition.Char - 1) + LEditText +
       Copy(FLines[LTextBeginPosition.Line], LTextBeginPosition.Char + FSyncEdit.EditWidth, Length(FLines[LTextBeginPosition.Line]));
-
+    FLines.EndUpdate;
     j := i + 1;
     if j < FSyncEdit.SyncItems.Count then
     begin
@@ -3186,6 +3194,7 @@ begin
     end;
   end;
   FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
+  TextCaretPosition := LTextCaretPosition;
 end;
 
 procedure TBCBaseEditor.DoTabKey;
@@ -9121,39 +9130,35 @@ var
 
         if FMatchingPair.Enabled and not FSyncEdit.Active then
           if FCurrentMatchingPair <> trNotFound then
-          begin
             if (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
                (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
-            if (LRealTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or // and
-             // (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
-              (LRealTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) then //and
-              //(LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
-            begin
-              if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
+              if (LRealTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or
+                (LRealTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) then
               begin
-                LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
-                if LIsCustomBackgroundColor then
+                if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                 begin
-                  if LForegroundColor = FMatchingPair.Colors.Matched then
-                    LForegroundColor := BackgroundColor;
-                  LBackgroundColor := FMatchingPair.Colors.Matched;
-                end;
-                LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
-              end
-              else
-              if mpoHighlightUnmatched in FMatchingPair.Options then
-              begin
-                LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
-                if LIsCustomBackgroundColor then
+                  LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                  if LIsCustomBackgroundColor then
+                  begin
+                    if LForegroundColor = FMatchingPair.Colors.Matched then
+                      LForegroundColor := BackgroundColor;
+                    LBackgroundColor := FMatchingPair.Colors.Matched;
+                  end;
+                  LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
+                end
+                else
+                if mpoHighlightUnmatched in FMatchingPair.Options then
                 begin
-                  if LForegroundColor = FMatchingPair.Colors.Unmatched then
-                    LForegroundColor := BackgroundColor;
-                  LBackgroundColor := FMatchingPair.Colors.Unmatched;
+                  LIsCustomBackgroundColor := mpoUseMatchedColor in FMatchingPair.Options;
+                  if LIsCustomBackgroundColor then
+                  begin
+                    if LForegroundColor = FMatchingPair.Colors.Unmatched then
+                      LForegroundColor := BackgroundColor;
+                    LBackgroundColor := FMatchingPair.Colors.Unmatched;
+                  end;
+                  LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
                 end;
-                LMatchingPairUnderline := mpoUnderline in FMatchingPair.Options;
               end;
-            end;
-          end;
 
         if FSyncEdit.BlockSelected and LIsSyncEditBlock then
           LBackgroundColor := FSyncEdit.Colors.Background;

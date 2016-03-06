@@ -8504,11 +8504,14 @@ begin
         with Canvas do
         begin
           Y := (ALineRect.Bottom - ALineRect.Top) shr 1;
-          i := 0;
           { Line }
           if FSpecialChars.Style = scsDot then
           begin
             i := LCharRect.Left - 2;
+            if (LDisplayCharPosition - 1) mod FTabs.Width = 0 then
+              Inc(i);
+            if Odd(FTabs.Width) then
+              Inc(i);
             while i < LCharRect.Right do
             begin
               MoveTo(i, LCharRect.Top + Y);
@@ -8521,9 +8524,9 @@ begin
           begin
             MoveTo(LCharRect.Left - 2, LCharRect.Top + Y);
             LineTo(LCharRect.Right + 1, LCharRect.Top + Y);
-            i := LCharRect.Right + 1;
           end;
           { Arrow }
+          i := LCharRect.Right + 1;
           MoveTo(i, LCharRect.Top + Y);
           LineTo(i - (Y shr 1), LCharRect.Top + Y - (Y shr 1));
           MoveTo(i, LCharRect.Top + Y);

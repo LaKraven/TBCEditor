@@ -2051,7 +2051,8 @@ end;
 
 function TBCBaseEditor.GetWrapAtColumn: Integer;
 begin
-  Result := 0;
+  Result := FVisibleChars;
+  if FWordWrap.Enabled then
   case FWordWrap.Style of
     wwsClientWidth:
       Result := FVisibleChars;

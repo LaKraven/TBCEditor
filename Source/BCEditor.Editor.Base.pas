@@ -8427,6 +8427,7 @@ var
   LPilcrow: string;
   LWidth: Integer;
   LPenColor: TColor;
+  LVisibleChars: Integer;
 begin
   if FSpecialChars.Visible then
   begin
@@ -8475,7 +8476,9 @@ begin
     if FSearch.Map.Align = saLeft then
       Inc(LLeftMargin, FSearch.Map.GetWidth);
 
-    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LDisplayCharPosition <= FVisibleChars) do
+    LVisibleChars := GetWrapAtColumn;
+
+    while (LPLine^ <> BCEDITOR_NONE_CHAR) and (LDisplayCharPosition <= LVisibleChars) do
     begin
       if LPLine^ = BCEDITOR_SPACE_CHAR then
       begin
@@ -8542,7 +8545,7 @@ begin
       Inc(LPLine);
     end;
 
-    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn < FVisibleChars) then
+    if FSpecialChars.EndOfLine.Visible and (ALine <> FLineNumbersCount) and (LLineLength - AFirstColumn < LVisibleChars) then
     with Canvas do
     begin
       Pen.Color := LPenColor;
@@ -8702,6 +8705,7 @@ var
   LCustomBackgroundColor: TColor;
   LFirstChar, LLastChar: Integer;
   LBookmarkOnCurrentLine: Boolean;
+  LVisibleChars: Integer;
 
   function IsBookmarkOnCurrentLine: Boolean;
   var
@@ -8845,7 +8849,7 @@ var
       if AMinimap then
         ATokenLength := Min(ATokenLength, LLastChar)
       else
-        ATokenLength := Min(ATokenLength, FVisibleChars);
+        ATokenLength := Min(ATokenLength, LVisibleChars);
       LText := RemoveMultiByteFillerChars(AToken, AFirst, ATokenLength);
       while AToken[AFirst] = BCEDITOR_FILLER_CHAR do
       begin
@@ -9201,7 +9205,7 @@ var
 
     if Assigned(FHighlighter) then
     begin
-      LTokenHelper.MaxLength := Max(128, FVisibleChars);
+      LTokenHelper.MaxLength := Max(128, LVisibleChars);
       SetLength(LTokenHelper.Text, LTokenHelper.MaxLength);
     end;
 
@@ -9299,8 +9303,7 @@ var
           if LCurrentRow < TopLine then
             for i := LCurrentRow to LDisplayLine - 1 do
               LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
-          //LLastColumn := FWordWrapLineLengths[LDisplayLine];
-          LLastColumn := LFirstColumn + FVisibleChars;
+          LLastColumn := LFirstColumn + LVisibleChars;
         end;
 
       LWrappedRowCount := 0;
@@ -9390,16 +9393,19 @@ var
 
           if LTokenPosition + LTokenLength >= LFirstColumn then
           begin
-            if FWordWrap.Enabled then
-            begin
-              if LTokenLength > LLastColumn then
+           if FWordWrap.Enabled then
+           begin
+              if LTokenLength >= LLastColumn then
+              begin
+                LTokenText := Copy(LTokenText, LFirstColumn, LLastColumn - LFirstColumn);
                 PrepareToken;
+              end;
               if LTokenPosition + LTokenLength >= LLastColumn then
               begin
                 Inc(LWrappedRowCount);
                 LFirstColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
-                LLastColumn := LFirstColumn + FVisibleChars;
-                if LTokenPosition + LTokenLength - LPreviousFirstColumn < FVisibleChars then
+                LLastColumn := LFirstColumn + LVisibleChars;
+                if LTokenPosition + LTokenLength - LPreviousFirstColumn < LVisibleChars then
                   PrepareToken;
                 Break;
               end;
@@ -9435,6 +9441,8 @@ begin
   LFirstLine := AFirstRow;
   LLastLine := ALastRow;
 
+  LVisibleChars := GetWrapAtColumn;
+
   if AMinimap then
   begin
     LFirstChar := 1;
@@ -9445,12 +9453,12 @@ begin
     if FWordWrap.Enabled then
     begin
       LFirstChar := 1;
-      LLastChar := FVisibleChars + 1
+      LLastChar := LVisibleChars + 1
     end
     else
     begin
       LFirstChar := FLeftChar;
-      LLastChar := FLeftChar + FVisibleChars + 1;
+      LLastChar := FLeftChar + LVisibleChars + 1;
     end;
   end;
 
@@ -9785,7 +9793,7 @@ end;
 
 procedure TBCBaseEditor.SetDisplayCaretPosition(AValue: TBCEditorDisplayPosition);
 var
-  LMaxX: Integer;
+  LMaxX, LVisibleChars: Integer;
 begin
   LMaxX := FScroll.MaxWidth + 1;
 
@@ -10971,14 +10979,20 @@ begin
     end;
 
     if FVisibleChars > 0 then
-    while Result.Column - 1 > GetWrapLineLength(Result.Row) do
     begin
-      LIsWrapped := True;
-      if FWordWrapLineLengths[Result.Row] <> 0  then
-        Dec(Result.Column, FWordWrapLineLengths[Result.Row])
+      if Result.Row >= Length(FWordWrapLineLengths) then
+        LIsWrapped := True
       else
-        Result.Column := 1;
-      Inc(Result.Row);
+      while Result.Column - 1 > GetWrapLineLength(Result.Row) do
+      begin
+        LIsWrapped := True;
+
+        if FWordWrapLineLengths[Result.Row] <> 0  then
+          Dec(Result.Column, FWordWrapLineLengths[Result.Row])
+        else
+          Result.Column := 1;
+        Inc(Result.Row);
+      end;
     end;
   end;
 

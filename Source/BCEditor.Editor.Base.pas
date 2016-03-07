@@ -9793,7 +9793,7 @@ end;
 
 procedure TBCBaseEditor.SetDisplayCaretPosition(AValue: TBCEditorDisplayPosition);
 var
-  LMaxX, LVisibleChars: Integer;
+  LMaxX: Integer;
 begin
   LMaxX := FScroll.MaxWidth + 1;
 
@@ -12660,12 +12660,18 @@ begin
         end;
       ecCut:
         if not ReadOnly and SelectionAvailable then
+        begin
           DoCutToClipboard;
+          DoChange;
+        end;
       ecCopy:
         CopyToClipboard;
       ecPaste:
         if not ReadOnly then
+        begin
           DoPasteFromClipboard;
+          DoChange;
+        end;
       ecScrollUp, ecScrollDown:
         begin
           LCaretRow := DisplayCaretY;

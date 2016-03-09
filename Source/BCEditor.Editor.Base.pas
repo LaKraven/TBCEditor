@@ -11508,7 +11508,7 @@ begin
     LLineText := FLines[LStartLine];
     LSpaceCount := LeftSpaceCount(LLineText, False);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
-    LLineText := Trim(LLineText);
+    LLineText := TrimLeft(LLineText);
 
     if LLineText <> '' then
     while i < LLength - 1 do
@@ -11550,7 +11550,7 @@ begin
     LLineText := FLines[LEndLine];
     LSpaceCount := LeftSpaceCount(LLineText, False);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
-    LLineText := Trim(LLineText);
+    LLineText := TrimLeft(LLineText);
 
     if LDeleteComment and (LLineText <> '') then
     begin
@@ -12106,7 +12106,7 @@ begin
               LHelper := Copy(LLineText, LTextCaretPosition.Char, LCounter);
               Delete(LLineText, LTextCaretPosition.Char, LCounter);
               SetLineWithRightTrim(LTextCaretPosition.Line, LLineText);
-              FUndoList.AddChange(crDelete, LTextCaretPosition, TextCaretPosition, LTextCaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crDelete, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, LHelper, smNormal);
             end
             else
             begin

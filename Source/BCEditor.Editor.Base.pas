@@ -9297,10 +9297,16 @@ var
       if FWordWrap.Enabled then
         if FWordWrapLineLengths[LDisplayLine] <> 0 then
         begin
-          if LCurrentRow < TopLine then
-            for i := LCurrentRow to LDisplayLine - 1 do
+          i := LDisplayLine - 1;
+          if i > 0 then
+          begin
+            while FWordWrapLineLengths[i] <> 0 do
+            begin
               LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
-          LLastColumn := LFirstColumn + LVisibleChars;
+              Dec(i);
+            end;
+            LLastColumn := LFirstColumn + LVisibleChars;
+          end;
         end;
 
       LWrappedRowCount := 0;

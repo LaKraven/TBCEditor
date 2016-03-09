@@ -9300,12 +9300,12 @@ var
           i := LDisplayLine - 1;
           if i > 0 then
           begin
-            while FWordWrapLineLengths[i] <> 0 do
+            while (i > 0) and (GetDisplayTextLineNumber(i) = LCurrentLine) do
             begin
               LFirstColumn := LFirstColumn + FWordWrapLineLengths[i];
               Dec(i);
             end;
-            LLastColumn := LFirstColumn + LVisibleChars;
+            LLastColumn := LFirstColumn + FWordWrapLineLengths[LDisplayLine];
           end;
         end;
 

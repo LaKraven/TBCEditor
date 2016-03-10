@@ -3224,7 +3224,6 @@ begin
       FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, SelectionEndPosition, GetSelectedText,
         FSelection.ActiveMode);
       DoSelectedText('');
-      DoChange;
       LTextCaretPosition := FSelectionBeginPosition;
     end;
 
@@ -4822,7 +4821,6 @@ begin
   SelectedText := AValue;
   EndUndoBlock;
   DecPaintLock;
-  DoChange;
 end;
 
 procedure TBCBaseEditor.SetTextBetween(ATextBeginPosition: TBCEditorTextPosition; ATextEndPosition: TBCEditorTextPosition; const AValue: string);
@@ -6079,6 +6077,8 @@ end;
 
 procedure TBCBaseEditor.DoChange;
 begin
+  FUndoList.Changed := False;
+  FRedoList.Changed := False;
   if Assigned(FOnChange) then
     FOnChange(Self);
 end;
@@ -6460,10 +6460,8 @@ begin
       FOnProcessCommand(Self, ACommand, AChar, AData);
   end
   else
-  begin
-    if Assigned(FOnProcessUserCommand) then
-      FOnProcessUserCommand(Self, ACommand, AChar, AData);
-  end;
+  if Assigned(FOnProcessUserCommand) then
+    FOnProcessUserCommand(Self, ACommand, AChar, AData);
 end;
 
 procedure TBCBaseEditor.DoSearchStringNotFoundDialog;
@@ -9870,7 +9868,7 @@ begin
     FSelection.ActiveMode);
 
   DoSelectedText(AChangeString);
-  DoChange;
+
   if AChangeString <> '' then
     FUndoList.AddChange(crInsert, LBlockStartPosition, LBlockStartPosition, SelectionEndPosition, '', smNormal);
   FUndoList.EndBlock;
@@ -10795,7 +10793,6 @@ begin
       EndUndoBlock;
     if CanFocus then
       SetFocus;
-    DoChange;
   end;
 end;
 
@@ -11350,6 +11347,7 @@ var
 begin
   { first the program event handler gets a chance to process the command }
   DoOnProcessCommand(ACommand, AChar, AData);
+
   if ACommand <> ecNone then
   begin
     { notify hooked command handlers before the command is executed inside of the class }
@@ -11394,6 +11392,9 @@ begin
     NotifyHookedCommandHandlers(True, ACommand, AChar, AData);
   end;
   DoOnCommandProcessed(ACommand, AChar, AData);
+
+  if FUndoList.Changed or FRedoList.Changed then
+    DoChange;
 end;
 
 procedure TBCBaseEditor.CopyToClipboard;
@@ -11435,7 +11436,6 @@ end;
 procedure TBCBaseEditor.CutToClipboard;
 begin
   CommandProcessor(ecCut, BCEDITOR_NONE_CHAR, nil);
-  DoChange;
 end;
 
 procedure TBCBaseEditor.DeleteLines(const ALineNumber: Integer; const ACount: Integer);
@@ -11469,7 +11469,6 @@ begin
   end
   else
     Text := BCEditor.Utils.DeleteWhitespace(Text);
-  DoChange;
 end;
 
 procedure TBCBaseEditor.DoBlockComment;
@@ -11994,7 +11993,6 @@ begin
                 if eoTrimTrailingSpaces in Options then
                   LLineText := TrimRight(LLineText);
                 FLines[LCaretNewPosition.Line] := FLines[LCaretNewPosition.Line] + LLineText;
-                DoChange;
 
                 LHelper := BCEDITOR_CARRIAGE_RETURN + BCEDITOR_LINEFEED;
 
@@ -12077,7 +12075,6 @@ begin
                   SetTextCaretX(i + 1);
                 end;
                 FLines[LTextCaretPosition.Line] := LLineText;
-                DoChange;
                 FStateFlags := FStateFlags + [sfCaretChanged];
               end
               else
@@ -12092,7 +12089,6 @@ begin
 
                 Delete(LLineText, LTextCaretPosition.Char - i, i);
                 FLines[LTextCaretPosition.Line] := LLineText;
-                DoChange;
 
                 SetTextCaretX(LTextCaretPosition.Char - i);
               end;
@@ -12141,7 +12137,7 @@ begin
                 FLines[LTextCaretPosition.Line - 1] := LLineText + LSpaceBuffer + FLines[LTextCaretPosition.Line];
                 FLines.Attributes[LTextCaretPosition.Line - 1].LineState := lsModified;
                 FLines.Delete(LTextCaretPosition.Line);
-                DoChange;
+
                 FUndoList.EndBlock;
               end;
             end;
@@ -12190,7 +12186,6 @@ begin
             LHelper := SelectedText;
             DoSelectedText('');
             FUndoList.AddChange(crDelete, LTextCaretPosition, SelectionBeginPosition, LWordPosition, LHelper, smNormal);
-            DoChange;
           end;
         end;
       ecDeleteLastWord, ecDeleteBeginningOfLine:
@@ -12217,7 +12212,6 @@ begin
             finally
               FSelection.Mode := LOldSelectionMode;
             end;
-            DoChange;
           end;
         end;
       ecDeleteLine:
@@ -12240,7 +12234,6 @@ begin
               GetTextPosition(1, LTextCaretPosition.Line + 1), LHelper, smNormal);
           end;
           TextCaretPosition := GetTextPosition(1, LTextCaretPosition.Line);
-          DoChange;
         end;
       ecMoveLineUp:
         begin
@@ -12527,7 +12520,6 @@ begin
             SelectionEndPosition := LTextCaretPosition;
             EnsureCursorPositionVisible;
           finally
-            DoChange;
             UndoList.EndBlock;
           end;
         end;
@@ -12639,7 +12631,6 @@ begin
           end;
           if FSyncEdit.Active then
             DoSyncEdit;
-          DoChange;
         end;
       ecUpperCase, ecLowerCase, ecAlternatingCase, ecSentenceCase, ecTitleCase, ecUpperCaseBlock, ecLowerCaseBlock,
         ecAlternatingCaseBlock:
@@ -12667,18 +12658,12 @@ begin
         end;
       ecCut:
         if not ReadOnly and SelectionAvailable then
-        begin
           DoCutToClipboard;
-          DoChange;
-        end;
       ecCopy:
         CopyToClipboard;
       ecPaste:
         if not ReadOnly then
-        begin
           DoPasteFromClipboard;
-          DoChange;
-        end;
       ecScrollUp, ecScrollDown:
         begin
           LCaretRow := DisplayCaretY;
@@ -13213,7 +13198,6 @@ end;
 procedure TBCBaseEditor.PasteFromClipboard;
 begin
   CommandProcessor(ecPaste, BCEDITOR_NONE_CHAR, nil);
-  DoChange;
 end;
 
 procedure TBCBaseEditor.DoPasteFromClipboard;

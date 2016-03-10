@@ -11,6 +11,7 @@ type
     FBlockCount: Integer;
     FBlockNumber: Integer;
     FChangeBlockNumber: Integer;
+    FChanged: Boolean;
     FInsideRedo: Boolean;
     FInsideUndoBlock: Boolean;
     FInsideUndoBlockCount: Integer;
@@ -44,6 +45,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property BlockCount: Integer read FBlockCount;
     property CanUndo: Boolean read GetCanUndo;
+    property Changed: Boolean read FChanged write FChanged;
     property InsideRedo: Boolean read FInsideRedo write FInsideRedo default False;
     property InsideUndoBlock: Boolean read FInsideUndoBlock write FInsideUndoBlock default False;
     property ItemCount: Integer read GetItemCount;
@@ -106,6 +108,7 @@ var
 begin
   if FLockCount = 0 then
   begin
+    FChanged := AReason in [crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent];
     LNewItem := TBCEditorUndoItem.Create;
     with LNewItem do
     begin

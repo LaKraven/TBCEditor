@@ -2803,6 +2803,9 @@ var
   i, j, LLength: Integer;
   LCodeFoldingRange: TBCEditorCodeFoldingRange;
 begin
+  if not FCodeFolding.Visible then
+    Exit;
+
   LLength := FLines.Count + 1;
   SetLength(FCodeFoldingTreeLine, 0); { empty }
   SetLength(FCodeFoldingTreeLine, LLength); { max }

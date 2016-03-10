@@ -60,7 +60,7 @@ implementation
 { TBCEditorUndoList }
 
 const
-  CHANGE_REASONS = [crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent];
+  MODIFYING_CHANGE_REASONS = [crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent];
 
 constructor TBCEditorUndoList.Create;
 begin
@@ -114,7 +114,7 @@ var
 begin
   if FLockCount = 0 then
   begin
-    FChanged := AReason in CHANGE_REASONS;
+    FChanged := AReason in MODIFYING_CHANGE_REASONS;
     if FChanged then
       Inc(FChangeCount);
     LNewItem := TBCEditorUndoItem.Create;
@@ -211,7 +211,7 @@ begin
   begin
     Result := FItems[i];
     FItems.Delete(i);
-    if Result.ChangeReason in CHANGE_REASONS then
+    if Result.ChangeReason in MODIFYING_CHANGE_REASONS then
       Dec(FChangeCount);
   end;
 end;

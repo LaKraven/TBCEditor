@@ -5066,9 +5066,6 @@ begin
 
   if not FUndoList.InsideRedo and Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crGroupBreak) then
     FRedoList.Clear;
-
-  if not Assigned(LUndoItem) then
-    FModified := False;
 end;
 
 procedure TBCBaseEditor.UpdateFoldRanges(ACurrentLine, ALineCount: Integer);

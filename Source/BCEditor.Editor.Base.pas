@@ -5121,7 +5121,7 @@ end;
 
 procedure TBCBaseEditor.UpdateModifiedStatus;
 begin
-  Modified := UndoList.ItemCount > 0;
+  Modified := UndoList.ChangeCount > 0;
 end;
 
 procedure TBCBaseEditor.UpdateScrollBars;

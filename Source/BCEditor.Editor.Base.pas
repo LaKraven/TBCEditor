@@ -5061,8 +5061,7 @@ begin
   if Sender = FUndoList then
     LUndoItem := FUndoList.PeekItem;
 
-  if Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crCaret) then
-    UpdateModifiedStatus;
+ UpdateModifiedStatus;
 
   if not FUndoList.InsideRedo and Assigned(LUndoItem) and (LUndoItem.ChangeReason <> crGroupBreak) then
     FRedoList.Clear;

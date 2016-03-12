@@ -2155,7 +2155,7 @@ var
   LLineText: string;
   LFoldRegion: TBCEditorCodeFoldingRegion;
   LFoldRegionItem: TBCEditorCodeFoldingRegionItem;
-  LKeyWordPtr, LBookmarkTextPtr, LTextPtr: PChar;
+  LKeyWordPtr, LBookmarkTextPtr, LTextPtr, LLinePtr: PChar;
 
   procedure SkipEmptySpace;
   begin
@@ -2183,16 +2183,20 @@ begin
     Exit;
 
   LLineText := FLines.GetLineText(ACaretPosition.Line);
-  LTextPtr := PChar(LLineText);
-  Inc(LTextPtr, ACaretPosition.Char - 1);
-  while not IsWordBreakChar(LTextPtr^) and (ACaretPosition.Char > 0) do
-  begin
-    Dec(LTextPtr);
-    Dec(ACaretPosition.Char);
-  end;
-  LLineText := Copy(LLineText, ACaretPosition.Char, Length(LLineText));
+  LLinePtr := PChar(LLineText);
 
-  if Trim(LLineText) = '' then
+  Inc(LLinePtr, ACaretPosition.Char - 2);
+  if not IsWordBreakChar(LLinePtr^) then
+  begin
+    while not IsWordBreakChar(LLinePtr^) and (ACaretPosition.Char > 0) do
+    begin
+      Dec(LLinePtr);
+      Dec(ACaretPosition.Char);
+    end;
+    Inc(LLinePtr);
+  end;
+
+  if LLinePtr^ = BCEDITOR_NONE_CHAR then
     Exit;
 
   if Assigned(FHighlighter) then
@@ -2202,7 +2206,7 @@ begin
     for j := 0 to LFoldRegion.Count - 1 do
     begin
       LFoldRegionItem := LFoldRegion.Items[j];
-      LTextPtr := PChar(LLineText);
+      LTextPtr := LLinePtr; //PChar(LLineText);
       while LTextPtr^ <> BCEDITOR_NONE_CHAR do
       begin
         SkipEmptySpace;

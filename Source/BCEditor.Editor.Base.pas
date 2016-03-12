@@ -2206,7 +2206,7 @@ begin
     for j := 0 to LFoldRegion.Count - 1 do
     begin
       LFoldRegionItem := LFoldRegion.Items[j];
-      LTextPtr := LLinePtr; //PChar(LLineText);
+      LTextPtr := LLinePtr;
       while LTextPtr^ <> BCEDITOR_NONE_CHAR do
       begin
         SkipEmptySpace;
@@ -12322,10 +12322,9 @@ begin
             if SelectionAvailable then
             begin
               SetSelectedTextEmpty;
-              if LTextCaretPosition.Line > FLines.Count then
-                LTextCaretPosition.Line := FLines.Count - 1;
+              LTextCaretPosition := TextCaretPosition;
             end;
-            LTextCaretPosition := TextCaretPosition;
+
             LLineText := FLines[LTextCaretPosition.Line];
             LLength := Length(LLineText);
 
@@ -12343,12 +12342,12 @@ begin
                     if toTabsToSpaces in FTabs.Options then
                     begin
                       LSpaceCount1 := 1;
-                      LSpaceCount2 := GetLeadingExpandedLength(LLineText);
+                      LSpaceCount2 := Min(GetLeadingExpandedLength(LLineText), DisplayCaretX - 1);
                     end
                     else
                     begin
-                      LSpaceCount1 := LeftSpaceCount(LLineText);
-                      LSpaceCount2 := LeftSpaceCount(LLineText, True);
+                      LSpaceCount1 := Min(LeftSpaceCount(LLineText), LTextCaretPosition.Char - 1);
+                      LSpaceCount2 := Min(LeftSpaceCount(LLineText, True), LTextCaretPosition.Char - 1);
                     end
                   else
                     LSpaceCount1 := 0;

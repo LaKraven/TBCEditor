@@ -3075,15 +3075,43 @@ end;
 
 procedure TBCBaseEditor.DoEndKey(ASelection: Boolean);
 var
-  LCaretY: Integer;
+  LLineText: string;
+  LTextCaretPosition: TBCEditorTextPosition;
+  LEndOfLineCaretPosition: TBCEditorTextPosition;
+  LPLine: PChar;
+  LChar: Integer;
 begin
-  LCaretY := GetTextCaretY;
-  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(Length(FLines[LCaretY]) + 1, LCaretY), ASelection);
+  LTextCaretPosition := TextCaretPosition;
+  LLineText := FLines[LTextCaretPosition.Line];
+  LEndOfLineCaretPosition := GetTextPosition(Length(LLineText) + 1, LTextCaretPosition.Line);
+  LPLine := PChar(LLineText);
+  Inc(LPLine, LEndOfLineCaretPosition.Char - 2);
+  LChar := LEndOfLineCaretPosition.Char;
+  while (LPLine^ > BCEDITOR_NONE_CHAR) and (LPLine^ <= BCEDITOR_SPACE_CHAR) do
+  begin
+    Dec(LChar);
+    Dec(LPLine);
+  end;
+  if LTextCaretPosition.Char < LChar then
+    LEndOfLineCaretPosition.Char := LChar;
+
+  MoveCaretAndSelection(LTextCaretPosition, LEndOfLineCaretPosition, ASelection);
 end;
 
 procedure TBCBaseEditor.DoHomeKey(ASelection: Boolean);
+var
+  LLineText: string;
+  LTextCaretPosition: TBCEditorTextPosition;
+  LSpaceCount: Integer;
 begin
-  MoveCaretAndSelection(TextCaretPosition, GetTextPosition(1, GetTextCaretY), ASelection);
+  LTextCaretPosition := TextCaretPosition;
+  LLineText := FLines[LTextCaretPosition.Line];
+  LSpaceCount := LeftSpaceCount(LLineText) + 1;
+
+  if LTextCaretPosition.Char <= LSpaceCount then
+    LSpaceCount := 1;
+
+  MoveCaretAndSelection(LTextCaretPosition, GetTextPosition(LSpaceCount, GetTextCaretY), ASelection);
 end;
 
 procedure TBCBaseEditor.DoShiftTabKey;
@@ -12342,7 +12370,7 @@ begin
                     if toTabsToSpaces in FTabs.Options then
                     begin
                       LSpaceCount1 := 1;
-                      LSpaceCount2 := Min(GetLeadingExpandedLength(LLineText), DisplayCaretX - 1);
+                      LSpaceCount2 := Min(GetLeadingExpandedLength(LLineText), LTextCaretPosition.Char - 1);
                     end
                     else
                     begin

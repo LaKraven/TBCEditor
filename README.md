@@ -11,9 +11,9 @@ A syntax highlighting edit control for RAD Studio (Delphi/C++ Builder) with code
 * <a href="https://github.com/ahausladen/JsonDataObjects">Json Data Objects</a> (included)
 * Delphi versions XE4, XE5, XE6, XE7, XE8, and Seattle are supported 
 * Delphi XE7: Update 1 required
-* C++ Builder XE7, XE8, and Seattle are supported
+* C++ Builder versions XE7, XE8, and Seattle are supported
 
-Note! Do not offer me older versions to support. I don't have time to keep up with those.
+<b>Note!</b> Do not offer me older versions to support. I don't have time to keep up with those.
 
 <h3>Conditional compilation</h3>
 

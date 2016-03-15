@@ -12137,11 +12137,11 @@ begin
             LLength := Length(LLineText);
             if LTextCaretPosition.Char <= LLength then
             begin
-              LCounter := 1;
-              LHelper := Copy(LLineText, LTextCaretPosition.Char, LCounter);
-              Delete(LLineText, LTextCaretPosition.Char, LCounter);
+              LHelper := Copy(LLineText, LTextCaretPosition.Char, 1);
+              Delete(LLineText, LTextCaretPosition.Char, 1);
               SetLineWithRightTrim(LTextCaretPosition.Line, LLineText);
-              FUndoList.AddChange(crDelete, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, LHelper, smNormal);
+              FUndoList.AddChange(crDelete, LTextCaretPosition, LTextCaretPosition,
+                GetTextPosition(LTextCaretPosition.Char + 1, LTextCaretPosition.Line), LHelper, smNormal);
             end
             else
             begin

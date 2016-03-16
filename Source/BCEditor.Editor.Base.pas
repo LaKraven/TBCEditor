@@ -12458,7 +12458,7 @@ begin
                     DisplayCaretX := 1;
                 end;
 
-                FUndoList.AddChange(crLineBreak, LTextCaretPosition,
+                FUndoList.AddChange(crInsert, LTextCaretPosition,
                   GetTextPosition(Length(FLines[LTextCaretPosition.Line]) + 1, LTextCaretPosition.Line),
                   GetTextPosition(1, LTextCaretPosition.Line + 1), '', smNormal);
               end;

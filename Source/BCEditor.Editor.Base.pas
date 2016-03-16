@@ -7856,16 +7856,13 @@ begin
                 X := ClientRect.Width - FMinimap.GetWidth + X
               else
                 X := FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
-              if FSearch.Map.Align = saRight then
-                Dec(X, FSearch.Map.GetWidth);
             end
             else
             if not AMinimap then
-            begin
               X := FMinimap.GetWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth + X - LScrolledXBy;
-              if FSearch.Map.Align = saLeft then
-                Inc(X, FSearch.Map.GetWidth);
-            end;
+
+            if FSearch.Map.Align = saLeft then
+              Inc(X, FSearch.Map.GetWidth);
 
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
               (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) and

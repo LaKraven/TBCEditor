@@ -694,9 +694,6 @@ type
 var
   GScrollHintWindow: THintWindow;
   GRightMarginHintWindow: THintWindow;
-  GClipboardFormatBCEditor: Cardinal;
-  GClipboardFormatBorland: Cardinal;
-  GClipboardFormatMSDev: Cardinal;
 
 function GetScrollHint: THintWindow;
 begin
@@ -6145,78 +6142,10 @@ begin
 end;
 
 procedure TBCBaseEditor.DoCopyToClipboard(const AText: string);
-var
-  LGlobalMem: HGLOBAL;
-  LBytePointer: PByte;
-  LTextLength: Integer;
-  LSmType: Byte;
 begin
   if AText = '' then
     Exit;
   SetClipboardText(AText);
-
-  LTextLength := Length(AText);
-
-  if not OpenClipboard then
-    Exit;
-  try
-    { Copy it in custom format to know what kind of block it is. That effects how it is pasted in. }
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(TBCEditorSelectionMode) + LTextLength + 1);
-    if LGlobalMem <> 0 then
-    begin
-      LBytePointer := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LBytePointer) then
-        begin
-          PBCEditorSelectionMode(LBytePointer)^ := FSelection.ActiveMode;
-          Inc(LBytePointer, SizeOf(TBCEditorSelectionMode));
-          Move(PAnsiChar(AnsiString(AText))^, LBytePointer^, LTextLength + 1);
-          SetClipboardData(GClipboardFormatBCEditor, LGlobalMem);
-        end;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end;
-    end;
-
-    if FSelection.Mode = smColumn then
-    begin
-      { Borland-IDE }
-      LSmType := $02;
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-      if LGlobalMem <> 0 then
-      begin
-        LBytePointer := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LBytePointer) then
-          begin
-            Move(LSmType, LBytePointer^, SizeOf(LSmType));
-            SetClipboardData(GClipboardFormatBorland, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end;
-      end;
-
-      { Microsoft VisualStudio }
-      LSmType := $02;
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, SizeOf(LSmType));
-      if LGlobalMem <> 0 then
-      begin
-        LBytePointer := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LBytePointer) then
-          begin
-            Move(LSmType, LBytePointer^, SizeOf(LSmType));
-            SetClipboardData(GClipboardFormatMSDev, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end;
-      end;
-    end;
-  finally
-    Clipboard.Close;
-  end;
 end;
 
 procedure TBCBaseEditor.DoExecuteCompletionProposal;
@@ -13252,57 +13181,10 @@ var
   LStartPositionOfBlock: TBCEditorTextPosition;
   LEndPositionOfBlock: TBCEditorTextPosition;
   LPasteMode: TBCEditorSelectionMode;
-  LGlobalMem: HGLOBAL;
-  LFirstByteOfMemoryBlock: PByte;
   LLength: Integer;
 begin
   LTextCaretPosition := TextCaretPosition;
   LPasteMode := FSelection.Mode;
-
-  if not OpenClipboard then
-    Exit;
-  try
-    if not CanPaste then
-      Exit;
-
-    if Clipboard.HasFormat(GClipboardFormatBCEditor) then
-    begin
-      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBCEditor);
-      if LGlobalMem <> 0 then
-      begin
-        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LFirstByteOfMemoryBlock) then
-            LPasteMode := PBCEditorSelectionMode(LFirstByteOfMemoryBlock)^;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end
-      end;
-    end
-    else
-    if Clipboard.HasFormat(GClipboardFormatBorland) then
-    begin
-      LGlobalMem := Clipboard.GetAsHandle(GClipboardFormatBorland);
-      if LGlobalMem <> 0 then
-      begin
-        LFirstByteOfMemoryBlock := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LFirstByteOfMemoryBlock) then
-            if LFirstByteOfMemoryBlock^ = $02 then
-              LPasteMode := smColumn
-            else
-              LPasteMode := smNormal;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end
-      end;
-    end
-    else
-    if Clipboard.HasFormat(GClipboardFormatMSDev) then
-      LPasteMode := smColumn;
-  finally
-    Clipboard.Close;
-  end;
 
   FUndoList.BeginBlock;
 
@@ -14065,9 +13947,6 @@ initialization
   {$IFDEF USE_VCL_STYLES}
   TCustomStyleEngine.RegisterStyleHook(TBCBaseEditor, TBCEditorStyleHook);
   {$ENDIF}
-  GClipboardFormatBCEditor := RegisterClipboardFormat(BCEDITOR_CLIPBOARD_FORMAT_BCEDITOR);
-  GClipboardFormatBorland := RegisterClipboardFormat(BCEDITOR_CLIPBOARD_FORMAT_BORLAND);
-  GClipboardFormatMSDev := RegisterClipboardFormat(BCEDITOR_CLIPBOARD_FORMAT_MSDEV);
 
 finalization
 

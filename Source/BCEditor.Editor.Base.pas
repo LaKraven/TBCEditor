@@ -91,6 +91,8 @@ type
     FMinimapClickOffsetY: Integer;
     FMinimapIndicatorBlendFunction: TBlendFunction;
     FMinimapIndicatorBitmap: Vcl.Graphics.TBitmap;
+    FMinimapShadowBlendFunction: TBlendFunction;
+    FMinimapShadowBitmap: Vcl.Graphics.TBitmap;
     FModified: Boolean;
     FMouseDownX: Integer;
     FMouseDownY: Integer;
@@ -443,6 +445,7 @@ type
     procedure PaintGuides(AFirstRow, ALastRow: Integer; AMinimap: Boolean);
     procedure PaintLeftMargin(const AClipRect: TRect; AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMinimapIndicator(AClipRect: TRect);
+    procedure PaintMinimapShadow(AClipRect: TRect);
     procedure PaintMouseMoveScrollPoint;
     procedure PaintRightMarginMove;
     procedure PaintSearchMap(AClipRect: TRect);
@@ -862,6 +865,11 @@ begin
   FMinimapIndicatorBlendFunction.BlendFlags := 0;
   FMinimapIndicatorBlendFunction.AlphaFormat := 0;
   FMinimapIndicatorBitmap := Vcl.Graphics.TBitmap.Create;
+  FMinimapShadowBlendFunction.BlendOp := AC_SRC_OVER;
+  FMinimapShadowBlendFunction.BlendFlags := 0;
+  FMinimapShadowBlendFunction.AlphaFormat := AC_SRC_ALPHA;
+  FMinimapShadowBitmap := Vcl.Graphics.TBitmap.Create;
+  FMinimapShadowBitmap.PixelFormat := pf32Bit;
   FMinimap := TBCEditorMinimap.Create;
   FMinimap.OnChange := MinimapChanged;
   { Active line }
@@ -922,6 +930,7 @@ begin
   FLeftMargin.Free;
   FLeftMargin := nil; { notification has a check }
   FMinimapIndicatorBitmap.Free;
+  FMinimapShadowBitmap.Free;
   FMinimap.Free;
   FWordWrap.Free;
   FTextDrawer.Free;
@@ -7521,6 +7530,8 @@ begin
           PaintGuides(LLine1, LLine2, True);
         if ioUseBlending in FMinimap.Indicator.Options then
           PaintMinimapIndicator(DrawRect);
+        if FMinimap.Shadow.Visible then
+          PaintMinimapShadow(DrawRect);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
@@ -8239,6 +8250,48 @@ begin
     Canvas.Brush.Style := bsClear;
     Canvas.Rectangle(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FMinimapIndicatorBitmap.Height));
   end;
+end;
+
+procedure TBCBaseEditor.PaintMinimapShadow(AClipRect: TRect);
+var
+  LRow, LColumn: Integer;
+  LPixel: PBCEditorQuadColor;
+  LAlpha: Single;
+  LAlphaArray: array of Single;
+  LAlphaByteArray: array of Byte;
+begin
+  FMinimapShadowBlendFunction.SourceConstantAlpha := FMinimap.Shadow.AlphaBlending;
+  FMinimapShadowBitmap.Height := 0;
+  FMinimapShadowBitmap.Canvas.Brush.Color := FMinimap.Shadow.Color;
+  FMinimapShadowBitmap.Width := FMinimap.Shadow.Width;
+  FMinimapShadowBitmap.Height := AClipRect.Height;
+
+  SetLength(LAlphaArray, FMinimapShadowBitmap.Width);
+  SetLength(LAlphaByteArray, FMinimapShadowBitmap.Width);
+
+  for LColumn := 0 to FMinimapShadowBitmap.Width - 1 do
+  begin
+    LAlphaArray[LColumn] := LColumn / FMinimapShadowBitmap.Width;
+    LAlphaByteArray[LColumn] := Min(Round(Power(LAlphaArray[LColumn], 4) * 255.0), 255);
+  end;
+
+  for LRow := 0 to FMinimapShadowBitmap.Height - 1 do
+  begin
+    LPixel := FMinimapShadowBitmap.Scanline[LRow];
+    for LColumn := 0 to FMinimapShadowBitmap.Width - 1 do
+    begin
+      LAlpha := LAlphaArray[LColumn];
+      LPixel.Alpha := LAlphaByteArray[LColumn];
+      LPixel.Red := Round(LPixel.Red * LAlpha);
+      LPixel.Green := Round(LPixel.Green * LAlpha);
+      LPixel.Blue := Round(LPixel.Blue * LAlpha);
+      Inc(LPixel);
+    end;
+  end;
+
+  AlphaBlend(Canvas.Handle, AClipRect.Left - FMinimapShadowBitmap.Width, 0, FMinimapShadowBitmap.Width,
+    FMinimapShadowBitmap.Height, FMinimapShadowBitmap.Canvas.Handle, 0, 0, FMinimapShadowBitmap.Width,
+    FMinimapShadowBitmap.Height, FMinimapShadowBlendFunction);
 end;
 
 procedure TBCBaseEditor.PaintMouseMoveScrollPoint;

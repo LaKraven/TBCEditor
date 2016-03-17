@@ -10609,6 +10609,7 @@ var
   LIsEndUndoBlock: Boolean;
   LActionReplace: TBCEditorReplaceAction;
   LResultOffset: Integer;
+  LPaintLocked: Boolean;
 
   function InValidSearchRange(First, Last: Integer): Boolean;
   begin
@@ -10680,11 +10681,11 @@ begin
     LCurrentTextPosition := LStartTextPosition;
 
   LReplaceLength := 0;
-
-  IncPaintLock;
-
+  LPaintLocked := False;
   if LIsReplaceAll and not LIsPrompt then
   begin
+    IncPaintLock;
+    LPaintLocked := True;
     BeginUndoBlock;
     LIsEndUndoBlock := True;
   end
@@ -10783,7 +10784,8 @@ begin
   finally
     FCodeFoldingLock := False;
     InitCodeFolding;
-    DecPaintLock;
+    if LPaintLocked then
+      DecPaintLock;
     if LIsEndUndoBlock then
       EndUndoBlock;
     if CanFocus then

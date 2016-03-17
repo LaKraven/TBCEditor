@@ -10680,9 +10680,11 @@ begin
     LCurrentTextPosition := LStartTextPosition;
 
   LReplaceLength := 0;
+
+  IncPaintLock;
+
   if LIsReplaceAll and not LIsPrompt then
   begin
-    IncPaintLock;
     BeginUndoBlock;
     LIsEndUndoBlock := True;
   end
@@ -10781,8 +10783,7 @@ begin
   finally
     FCodeFoldingLock := False;
     InitCodeFolding;
-    if LIsReplaceAll and not LIsPrompt then
-      DecPaintLock;
+    DecPaintLock;
     if LIsEndUndoBlock then
       EndUndoBlock;
     if CanFocus then

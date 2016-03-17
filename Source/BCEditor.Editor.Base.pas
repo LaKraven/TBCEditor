@@ -95,10 +95,11 @@ type
     FMouseDownX: Integer;
     FMouseDownY: Integer;
     FMouseOverURI: Boolean;
-    FMouseWheelAccumulator: Integer;
     FMouseMoveScrollCursors: array [0..7] of HCursor;
     FMouseMoveScrolling: Boolean;
     FMouseMoveScrollingPoint: TPoint;
+    FMouseMoveScrollTimer: TTimer;
+    FMouseWheelAccumulator: Integer;
     FOldMouseMovePoint: TPoint;
     FOnAfterBookmarkPanelPaint: TBCEditorBookmarkPanelPaintEvent;
     FOnAfterBookmarkPlaced: TNotifyEvent;
@@ -280,6 +281,7 @@ type
     procedure InitCodeFolding;
     procedure LinesChanging(Sender: TObject);
     procedure MinimapChanged(Sender: TObject);
+    procedure MouseMoveScrollTimerHandler(Sender: TObject);
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition; ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; ASelectionCommand: Boolean);
@@ -840,6 +842,11 @@ begin
   FScrollTimer.Enabled := False;
   FScrollTimer.Interval := 100;
   FScrollTimer.OnTimer := ScrollTimerHandler;
+  { Scroll }
+  FMouseMoveScrollTimer := TTimer.Create(Self);
+  FMouseMoveScrollTimer.Enabled := False;
+  FMouseMoveScrollTimer.Interval := 100;
+  FMouseMoveScrollTimer.OnTimer := MouseMoveScrollTimerHandler;
   { Completion proposal }
   FCompletionProposal := TBCEditorCompletionProposal.Create(Self);
   FCompletionProposalTimer := TTimer.Create(Self);
@@ -2895,17 +2902,11 @@ var
   LScrollBoundsLeft, LScrollBoundsRight: Integer;
   LCursorIndex: Integer;
 begin
-  if not MouseCapture and not Dragging and not FMouseMoveScrolling then
-  begin
-    FScrollTimer.Enabled := False;
-    Exit;
-  end;
-
   if FMouseMoveScrolling then
   begin
     if (X < ClientRect.Left) or (X > ClientRect.Right) or (Y < ClientRect.Top) or (Y > ClientRect.Bottom) then
     begin
-      FScrollTimer.Enabled := False;
+      FMouseMoveScrollTimer.Enabled := False;
       Exit;
     end;
 
@@ -2927,9 +2928,17 @@ begin
     else
       FScrollDeltaY := 0;
     end;
+
+    FMouseMoveScrollTimer.Enabled := (FScrollDeltaX <> 0) or (FScrollDeltaY <> 0);
   end
   else
   begin
+    if not MouseCapture and not Dragging then
+    begin
+      FScrollTimer.Enabled := False;
+      Exit;
+    end;
+
     LScrollBoundsLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
     if FMinimap.Align = maLeft then
       Inc(LScrollBoundsLeft, FMinimap.GetWidth);
@@ -2959,9 +2968,9 @@ begin
       FScrollDeltaY := (Y - LScrollBounds.Bottom) div FLineHeight + 1
     else
       FScrollDeltaY := 0;
-  end;
 
-  FScrollTimer.Enabled := (FScrollDeltaX <> 0) or (FScrollDeltaY <> 0);
+    FScrollTimer.Enabled := (FScrollDeltaX <> 0) or (FScrollDeltaY <> 0);
+  end;
 end;
 
 procedure TBCBaseEditor.DeflateMinimapRect(var ARect: TRect);
@@ -3508,6 +3517,30 @@ procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
 begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
+end;
+
+procedure TBCBaseEditor.MouseMoveScrollTimerHandler(Sender: TObject);
+var
+  LCursorPoint: TPoint;
+begin
+  IncPaintLock;
+  try
+    Winapi.Windows.GetCursorPos(LCursorPoint);
+    LCursorPoint := ScreenToClient(LCursorPoint);
+    if FScrollDeltaX <> 0 then
+      LeftChar := LeftChar + FScrollDeltaX;
+    if FScrollDeltaY <> 0 then
+    begin
+      if GetKeyState(VK_SHIFT) < 0 then
+        TopLine := TopLine + FScrollDeltaY * VisibleLines
+      else
+        TopLine := TopLine + FScrollDeltaY;
+    end;
+  finally
+    DecPaintLock;
+    Invalidate;
+  end;
+  ComputeScroll(LCursorPoint.X, LCursorPoint.Y);
 end;
 
 procedure TBCBaseEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TBCEditorTextPosition;
@@ -7075,11 +7108,17 @@ begin
     end;
   end;
 
-  FMouseMoveScrolling := False;
-  if AButton = mbMiddle then
+  if (AButton = mbMiddle) and not FMouseMoveScrolling then
   begin
     FMouseMoveScrolling := True;
     FMouseMoveScrollingPoint := Point(X, Y);
+    Invalidate;
+    Exit;
+  end
+  else
+  if FMouseMoveScrolling then
+  begin
+    FMouseMoveScrolling := False;
     Invalidate;
     Exit;
   end;
@@ -7374,6 +7413,8 @@ begin
       Invalidate;
       Exit;
     end;
+
+  FMouseMoveScrollTimer.Enabled := False;
 
   FScrollTimer.Enabled := False;
   if (AButton = mbRight) and (AShift = [ssRight]) and Assigned(PopupMenu) then

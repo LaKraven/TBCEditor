@@ -8259,6 +8259,7 @@ var
   LAlpha: Single;
   LAlphaArray: array of Single;
   LAlphaByteArray: array of Byte;
+  LLeft: Integer;
 begin
   FMinimapShadowBlendFunction.SourceConstantAlpha := FMinimap.Shadow.AlphaBlending;
   FMinimapShadowBitmap.Height := 0;
@@ -8271,7 +8272,10 @@ begin
 
   for LColumn := 0 to FMinimapShadowBitmap.Width - 1 do
   begin
-    LAlphaArray[LColumn] := LColumn / FMinimapShadowBitmap.Width;
+    if FMinimap.Align = maLeft then
+      LAlphaArray[LColumn] := (FMinimapShadowBitmap.Width - LColumn) / FMinimapShadowBitmap.Width
+    else
+      LAlphaArray[LColumn] := LColumn / FMinimapShadowBitmap.Width;
     LAlphaByteArray[LColumn] := Min(Round(Power(LAlphaArray[LColumn], 4) * 255.0), 255);
   end;
 
@@ -8289,7 +8293,12 @@ begin
     end;
   end;
 
-  AlphaBlend(Canvas.Handle, AClipRect.Left - FMinimapShadowBitmap.Width, 0, FMinimapShadowBitmap.Width,
+  if FMinimap.Align = maLeft then
+    LLeft := AClipRect.Right
+  else
+    LLeft := AClipRect.Left - FMinimapShadowBitmap.Width;
+
+  AlphaBlend(Canvas.Handle, LLeft, 0, FMinimapShadowBitmap.Width,
     FMinimapShadowBitmap.Height, FMinimapShadowBitmap.Canvas.Handle, 0, 0, FMinimapShadowBitmap.Width,
     FMinimapShadowBitmap.Height, FMinimapShadowBlendFunction);
 end;

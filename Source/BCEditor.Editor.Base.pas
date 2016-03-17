@@ -9291,10 +9291,9 @@ var
             LCurrentLineText := Copy(LFromLineText, 1, Length(LFoldRange.RegionItem.OpenToken) +
               Pos(LFoldRange.RegionItem.OpenToken, AnsiUpperCase(LFromLineText)) - 1);
 
-          LCurrentLineText := LCurrentLineText + '..';
           if LFoldRange.RegionItem.CloseToken <> '' then
             if Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LToLineText)) <> 0 then
-              LCurrentLineText := LCurrentLineText + TrimLeft(LToLineText);
+              LCurrentLineText := LCurrentLineText + '..' + TrimLeft(LToLineText);
 
           if LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line then
           begin

@@ -11806,6 +11806,7 @@ var
   LChar: Char;
   LPChar: PChar;
   LFoldRange: TBCEditorCodeFoldingRange;
+  LChangeReason: TBCEditorChangeReason;
 
   function SaveTrimmedWhitespace(const S: string; APosition: Integer): string;
   var
@@ -12440,6 +12441,7 @@ begin
                   Attributes[LTextCaretPosition.Line + 1].LineState := lsModified;
                 end;
 
+                LChangeReason := crInsert;
                 if ACommand = ecLineBreak then
                 begin
                   if LSpaceCount1 > 0 then
@@ -12456,9 +12458,10 @@ begin
                     DisplayCaretX := LSpaceCount2 + 1
                   else
                     DisplayCaretX := 1;
-                end;
 
-                FUndoList.AddChange(crInsert, LTextCaretPosition,
+                  LChangeReason := crLineBreak;
+                end;
+                FUndoList.AddChange(LChangeReason, LTextCaretPosition,
                   GetTextPosition(Length(FLines[LTextCaretPosition.Line]) + 1, LTextCaretPosition.Line),
                   GetTextPosition(1, LTextCaretPosition.Line + 1), '', smNormal);
               end;

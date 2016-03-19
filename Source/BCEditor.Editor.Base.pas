@@ -12446,10 +12446,7 @@ begin
                     smNormal);
 
                   with FLines do
-                  begin
-                    //Attributes[LTextCaretPosition.Line].LineState := lsModified;
                     Attributes[LTextCaretPosition.Line + 1].LineState := lsModified;
-                  end;
 
                   DisplayCaretY := DisplayCaretY + 1;
                 end;
@@ -12470,10 +12467,7 @@ begin
                   LTextCaretPosition, GetTextPosition(1, LTextCaretPosition.Line + 1), '', smNormal);
 
                 with FLines do
-                begin
-                  //Attributes[LTextCaretPosition.Line].LineState := lsModified;
                   Attributes[LTextCaretPosition.Line + 1].LineState := lsModified;
-                end;
 
                 DisplayCaretY := FDisplayCaretY + 1;
                 DisplayCaretX := LSpaceCount1 + 1
@@ -12491,10 +12485,8 @@ begin
               FUndoList.AddChange(crLineBreak, LTextCaretPosition, LTextCaretPosition, LTextCaretPosition, '', smNormal);
 
               with FLines do
-              begin
-                //Attributes[LTextCaretPosition.Line].LineState := lsModified;
                 Attributes[LTextCaretPosition.Line].LineState := lsModified;
-              end;
+
               DisplayCaretY := FDisplayCaretY + 1;
             end;
             DoTrimTrailingSpaces(LTextCaretPosition.Line);

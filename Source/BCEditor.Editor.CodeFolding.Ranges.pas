@@ -239,7 +239,7 @@ end;
 
 function TBCEditorCodeFoldingRange.Collapsable: Boolean;
 begin
-  Result := FFromLine <> FToLine;
+  Result := (FFromLine <> FToLine) or RegionItem.TokenEndIsPreviousLine and (FFromLine = FToLine);
 end;
 
 constructor TBCEditorCodeFoldingRange.Create;

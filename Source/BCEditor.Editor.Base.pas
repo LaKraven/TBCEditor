@@ -2778,6 +2778,7 @@ end;
 procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
 begin
   ClearMatchingPair;
+  RescanCodeFoldingRanges;
   FResetLineNumbersCache := True;
   with AFoldRange do
   begin
@@ -3938,6 +3939,22 @@ var
     i, j, LIndexDecrease: Integer;
     LCodeFoldingRange, LCodeFoldingRangeLast: TBCEditorCodeFoldingRange;
     LRegionItem: TBCEditorCodeFoldingRegionItem;
+
+    procedure SetCodeFoldingRangeToLine;
+    var
+      i: Integer;
+    begin
+      if LCodeFoldingRange.RegionItem.TokenEndIsPreviousLine then
+      begin
+        i := LLine - 1;
+        while (i > 0) and (FLines[i - 1] = '') do
+          Dec(i);
+        LCodeFoldingRange.ToLine := i
+      end
+      else
+        LCodeFoldingRange.ToLine := LLine;
+    end;
+
   begin
     Result := False;
     if LOpenTokenSkipFoldRangeList.Count <> 0 then
@@ -3977,10 +3994,7 @@ var
                   LTextPtr := LBookmarkTextPtr;
                   Exit(True);
                 end;
-              if LCodeFoldingRange.RegionItem.TokenEndIsPreviousLine then
-                LCodeFoldingRange.ToLine := LLine - 1 { 0-based }
-              else
-                LCodeFoldingRange.ToLine := LLine;
+              SetCodeFoldingRangeToLine;
               { Check if any shared close }
               if LOpenTokenFoldRangeList.Count > 0 then
               begin
@@ -3990,10 +4004,7 @@ var
                     (LCodeFoldingRange.RegionItem.OpenToken <> LCodeFoldingRangeLast.RegionItem.OpenToken) and
                     (LCodeFoldingRange.RegionItem.CloseToken = LCodeFoldingRangeLast.RegionItem.CloseToken) then
                   begin
-                    if LCodeFoldingRange.RegionItem.TokenEndIsPreviousLine then
-                      LCodeFoldingRange.ToLine := LLine - 1 { 0-based }
-                    else
-                      LCodeFoldingRange.ToLine := LLine;
+                    SetCodeFoldingRangeToLine;
                     LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
                     Dec(LFoldCount);
                   end;

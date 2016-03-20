@@ -2719,67 +2719,38 @@ var
   LNewFoldRange: TBCEditorCodeFoldingRange;
   LIsKeyWord, LOpenKeyWord: Boolean;
   LLine: Integer;
-
-  function HighlightIndentGuide: Boolean;
-  var
-    LLine: Integer;
-  begin
-    Result := False;
-
-    LLine := GetTextCaretY + 1;
-
-    if LIsKeyWord and LOpenKeyWord then
-      FHighlightedFoldRange := CodeFoldingRangeForLine(LLine)
-    else
-    if LIsKeyWord and not LOpenKeyWord then
-      FHighlightedFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
-
-    if Assigned(FHighlightedFoldRange) then
-      Exit(True);
-  end;
-
 begin
   LIsKeyWord := IsKeywordAtCaretPosition(@LOpenKeyWord, mpoHighlightAfterToken in FMatchingPair.Options);
 
-  if not Assigned(FHighlightedFoldRange) then
-  begin
-    if HighlightIndentGuide then
-      with FHighlightedFoldRange do
-        InvalidateLines(FromLine, ToLine);
-  end
+  LNewFoldRange := nil;
+
+  LLine := GetTextCaretY + 1;
+
+  if LIsKeyWord and LOpenKeyWord then
+    LNewFoldRange := CodeFoldingRangeForLine(LLine)
   else
+  if LIsKeyWord and not LOpenKeyWord then
+    LNewFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
+
+  if LNewFoldRange <> FHighlightedFoldRange then
   begin
-    LNewFoldRange := nil;
+    if Assigned(FHighlightedFoldRange) then
+    with FHighlightedFoldRange do
+      InvalidateLines(FromLine, ToLine);
 
-    LLine := GetTextCaretY + 1;
+    FHighlightedFoldRange := LNewFoldRange;
 
-    if LIsKeyWord and LOpenKeyWord then
-      LNewFoldRange := CodeFoldingRangeForLine(LLine)
-    else
-    if LIsKeyWord and not LOpenKeyWord then
-      LNewFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
-
-    if LNewFoldRange <> FHighlightedFoldRange then
-    begin
-      if Assigned(FHighlightedFoldRange) then
+    if Assigned(FHighlightedFoldRange) then
       with FHighlightedFoldRange do
         InvalidateLines(FromLine, ToLine);
-
-      FHighlightedFoldRange := nil;
-      HighlightIndentGuide;
-
-      if Assigned(FHighlightedFoldRange) then
-        with FHighlightedFoldRange do
-          InvalidateLines(FromLine, ToLine);
-    end;
   end;
 end;
 
 procedure TBCBaseEditor.CodeFoldingCollapse(AFoldRange: TBCEditorCodeFoldingRange);
 begin
   ClearMatchingPair;
-  RescanCodeFoldingRanges;
   FResetLineNumbersCache := True;
+
   with AFoldRange do
   begin
     Collapsed := True;
@@ -6361,6 +6332,9 @@ begin
 
   if FCodeFolding.Visible and LCodeFoldingRegion and (Lines.Count > 0) then
   begin
+    FResetLineNumbersCache := True;
+    RescanCodeFoldingRanges;
+
     LLine := GetDisplayTextLineNumber(PixelsToRowColumn(X, Y).Row);
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LLine);
 

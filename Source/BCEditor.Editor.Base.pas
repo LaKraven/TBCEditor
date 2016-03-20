@@ -91,6 +91,8 @@ type
     FMinimapClickOffsetY: Integer;
     FMinimapIndicatorBlendFunction: TBlendFunction;
     FMinimapIndicatorBitmap: Vcl.Graphics.TBitmap;
+    FMinimapShadowAlphaArray: array of Single;
+    FMinimapShadowAlphaByteArray: array of Byte;
     FMinimapShadowBlendFunction: TBlendFunction;
     FMinimapShadowBitmap: Vcl.Graphics.TBitmap;
     FModified: Boolean;
@@ -3493,9 +3495,32 @@ begin
 end;
 
 procedure TBCBaseEditor.MinimapChanged(Sender: TObject);
+var
+  i: Integer;
 begin
   FMinimapBufferBmp.Height := 0;
   SizeOrFontChanged(True);
+
+  if FMinimap.Shadow.Visible then
+  begin
+    FMinimapShadowBlendFunction.SourceConstantAlpha := FMinimap.Shadow.AlphaBlending;
+    FMinimapShadowBitmap.Canvas.Brush.Color := FMinimap.Shadow.Color;
+    FMinimapShadowBitmap.Width := FMinimap.Shadow.Width;
+
+    SetLength(FMinimapShadowAlphaArray, FMinimapShadowBitmap.Width);
+    SetLength(FMinimapShadowAlphaByteArray, FMinimapShadowBitmap.Width);
+
+    for i := 0 to FMinimapShadowBitmap.Width - 1 do
+    begin
+      if FMinimap.Align = maLeft then
+        FMinimapShadowAlphaArray[i] := (FMinimapShadowBitmap.Width - i) / FMinimapShadowBitmap.Width
+      else
+        FMinimapShadowAlphaArray[i] := i / FMinimapShadowBitmap.Width;
+      FMinimapShadowAlphaByteArray[i] := Min(Round(Power(FMinimapShadowAlphaArray[i], 4) * 255.0), 255);
+    end;
+  end;
+
+  Invalidate;
 end;
 
 procedure TBCBaseEditor.MouseMoveScrollTimerHandler(Sender: TObject);
@@ -7446,6 +7471,10 @@ begin
       PaintTextLines(DrawRect, LLine1, LLine2, False);
       if FCodeFolding.Visible and (cfoShowIndentGuides in CodeFolding.Options) then
         PaintGuides(LLine1, LLine2, False);
+
+      if Minimap.Visible and FMinimap.Shadow.Visible and
+        ((FMinimap.Align = maRight) or (FMinimap.Align = maLeft) and not FLeftMargin.Visible and not FCodeFolding.Visible) then
+        PaintMinimapShadow(DrawRect);
     end;
 
     if FCaret.NonBlinking.Enabled then
@@ -7466,6 +7495,9 @@ begin
       begin
         DrawRect.Right := DrawRect.Left + FLeftMargin.GetWidth;
         PaintLeftMargin(DrawRect, LLine1, LLine2, LLine3);
+
+        if Minimap.Visible and FMinimap.Shadow.Visible and (FMinimap.Align = maLeft) then
+          PaintMinimapShadow(DrawRect);
       end;
 
       { Code folding }
@@ -7474,6 +7506,8 @@ begin
         Inc(DrawRect.Left, FLeftMargin.GetWidth);
         DrawRect.Right := DrawRect.Left + FCodeFolding.GetWidth;
         PaintCodeFolding(DrawRect, LLine1, LLine2);
+        if Minimap.Visible and FMinimap.Shadow.Visible and (FMinimap.Align = maLeft) and not FLeftMargin.Visible then
+          PaintMinimapShadow(DrawRect);
       end;
     end;
 
@@ -7535,8 +7569,6 @@ begin
           PaintGuides(LLine1, LLine2, True);
         if ioUseBlending in FMinimap.Indicator.Options then
           PaintMinimapIndicator(DrawRect);
-        if FMinimap.Shadow.Visible then
-          PaintMinimapShadow(DrawRect);
 
         FMinimapBufferBmp.Width := DrawRect.Width;
         FMinimapBufferBmp.Height := DrawRect.Height;
@@ -8262,35 +8294,18 @@ var
   LRow, LColumn: Integer;
   LPixel: PBCEditorQuadColor;
   LAlpha: Single;
-  LAlphaArray: array of Single;
-  LAlphaByteArray: array of Byte;
   LLeft: Integer;
 begin
-  FMinimapShadowBlendFunction.SourceConstantAlpha := FMinimap.Shadow.AlphaBlending;
   FMinimapShadowBitmap.Height := 0;
-  FMinimapShadowBitmap.Canvas.Brush.Color := FMinimap.Shadow.Color;
-  FMinimapShadowBitmap.Width := FMinimap.Shadow.Width;
   FMinimapShadowBitmap.Height := AClipRect.Height;
-
-  SetLength(LAlphaArray, FMinimapShadowBitmap.Width);
-  SetLength(LAlphaByteArray, FMinimapShadowBitmap.Width);
-
-  for LColumn := 0 to FMinimapShadowBitmap.Width - 1 do
-  begin
-    if FMinimap.Align = maLeft then
-      LAlphaArray[LColumn] := (FMinimapShadowBitmap.Width - LColumn) / FMinimapShadowBitmap.Width
-    else
-      LAlphaArray[LColumn] := LColumn / FMinimapShadowBitmap.Width;
-    LAlphaByteArray[LColumn] := Min(Round(Power(LAlphaArray[LColumn], 4) * 255.0), 255);
-  end;
 
   for LRow := 0 to FMinimapShadowBitmap.Height - 1 do
   begin
     LPixel := FMinimapShadowBitmap.Scanline[LRow];
     for LColumn := 0 to FMinimapShadowBitmap.Width - 1 do
     begin
-      LAlpha := LAlphaArray[LColumn];
-      LPixel.Alpha := LAlphaByteArray[LColumn];
+      LAlpha := FMinimapShadowAlphaArray[LColumn];
+      LPixel.Alpha := FMinimapShadowAlphaByteArray[LColumn];
       LPixel.Red := Round(LPixel.Red * LAlpha);
       LPixel.Green := Round(LPixel.Green * LAlpha);
       LPixel.Blue := Round(LPixel.Blue * LAlpha);
@@ -8299,9 +8314,9 @@ begin
   end;
 
   if FMinimap.Align = maLeft then
-    LLeft := AClipRect.Right
+    LLeft := AClipRect.Left
   else
-    LLeft := AClipRect.Left - FMinimapShadowBitmap.Width;
+    LLeft := AClipRect.Right - FMinimapShadowBitmap.Width;
 
   AlphaBlend(Canvas.Handle, LLeft, 0, FMinimapShadowBitmap.Width,
     FMinimapShadowBitmap.Height, FMinimapShadowBitmap.Canvas.Handle, 0, 0, FMinimapShadowBitmap.Width,

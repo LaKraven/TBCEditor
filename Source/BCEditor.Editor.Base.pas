@@ -6269,12 +6269,32 @@ begin
 end;
 
 procedure TBCBaseEditor.DoOnCommandProcessed(ACommand: TBCEditorCommand; AChar: Char; AData: pointer);
+var
+  LTextCaretPosition: TBCEditorTextPosition;
+
+  function IsPreviousFoldTokenEndPreviousLine(const ALine: Integer): Boolean;
+  var
+    i: Integer;
+  begin
+    i := ALine;
+    while (i > 0) and not Assigned(FCodeFoldingRangeToLine[i]) do
+    begin
+      if Assigned(FCodeFoldingRangeFromLine[i]) then
+        Exit(False);
+      Dec(i);
+    end;
+    Result := Assigned(FCodeFoldingRangeToLine[i]) and FCodeFoldingRangeToLine[i].RegionItem.TokenEndIsPreviousLine
+  end;
+
 begin
   if FCodeFolding.Visible then
+  begin
+    LTextCaretPosition := TextCaretPosition;
     if FRescanCodeFolding or
       ((ACommand = ecChar) or (ACommand = ecBackspace) or (ACommand = ecDeleteChar) or (ACommand = ecLineBreak)) and
       IsKeywordAtCaretPositionOrAfter(TextCaretPosition) or (ACommand = ecUndo) or (ACommand = ecRedo) then
       RescanCodeFoldingRanges;
+  end;
 
   if FMatchingPair.Enabled and not FSyncEdit.Active then
   case ACommand of
@@ -6293,6 +6313,10 @@ begin
 
   if Assigned(FOnCommandProcessed) then
     FOnCommandProcessed(Self, ACommand, AChar, AData);
+
+  if FCodeFolding.Visible then
+    if ((ACommand = ecChar) or (ACommand = ecLineBreak)) and IsPreviousFoldTokenEndPreviousLine(LTextCaretPosition.Line) then
+      RescanCodeFoldingRanges;
 end;
 
 procedure TBCBaseEditor.DoOnLeftMarginClick(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
@@ -6332,9 +6356,6 @@ begin
 
   if FCodeFolding.Visible and LCodeFoldingRegion and (Lines.Count > 0) then
   begin
-    FResetLineNumbersCache := True;
-    RescanCodeFoldingRanges;
-
     LLine := GetDisplayTextLineNumber(PixelsToRowColumn(X, Y).Row);
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LLine);
 

@@ -1,4 +1,6 @@
-Version 1.5.1. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
+![image](https://cloud.githubusercontent.com/assets/11475177/13923967/396856d2-ef8b-11e5-89f9-1b79c4ea9fdd.png)
+
+Version 1.5.2. Use the Issues page to report bugs or send them directly to lasse@bonecode.com.
 
 <b>Note!</b> Current trunk should never be considered as a stable version. Use the latest <a href="https://github.com/bonecode/TBCEditor/releases">release</a> version instead. 
 
@@ -38,12 +40,12 @@ Note! LoadFromStream does not support multi-highlighters (for example HTML with 
 
 <h3>Demo</h3>
 
-TBCEditor Control Demo v. 1.5. 
+TBCEditor Control Demo v. 1.5.2. 
 
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo32.zip">32-bit Windows</a>
   * <a href="http://www.bonecode.com/downloads/BCEditorComponentDemo64.zip">64-bit Windows</a>
 
-The latest update: 20.03.2016 22:12, UTC+02:00
+The latest update: 21.03.2016 17:33, UTC+02:00
 
 Demo source build requires <a href="http://www.alphaskins.com/">AlphaSkins</a> and <a href="http://www.ehlib.com/">EhLib</a>. 
 <h3>Documentation</h3>

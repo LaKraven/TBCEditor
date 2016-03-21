@@ -24,7 +24,7 @@ USE_VCL_STYLES | Use VCL styles. A set of graphical details that define the look
 
 <h3>Usage example</h3>
 
-```
+```objectpascal
   with Editor do 
   begin
     Highlighter.LoadFromFile('JSON.json');

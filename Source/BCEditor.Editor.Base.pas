@@ -9214,10 +9214,10 @@ var
 
         if FMatchingPair.Enabled and not FSyncEdit.Active then
           if FCurrentMatchingPair <> trNotFound then
-            if (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) or
-               (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) then
-              if (LRealTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or
-                (LRealTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) then
+            if (LCurrentLine - 1 = FCurrentMatchingPairMatch.OpenTokenPos.Line) and
+               (LRealTokenPosition = FCurrentMatchingPairMatch.OpenTokenPos.Char - 1) or
+               (LCurrentLine - 1 = FCurrentMatchingPairMatch.CloseTokenPos.Line) and
+               (LRealTokenPosition = FCurrentMatchingPairMatch.CloseTokenPos.Char - 1) then
               begin
                 if (FCurrentMatchingPair = trOpenAndCloseTokenFound) or (FCurrentMatchingPair = trCloseAndOpenTokenFound) then
                 begin
